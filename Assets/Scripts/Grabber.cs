@@ -30,11 +30,16 @@ public class Grabber : MonoBehaviour
     public InputField path;
     string Name;
 
-    public void Download(string departement)
+    public void Download()
     {
-        var URL = url.text;
-        if (departement == "Cantal") StartCoroutine(cantal(URL.TrimEnd('/')));
-        else if (departement == "Gironde") StartCoroutine(gironde(URL));
+        if (!System.Uri.TryCreate(url.text, System.UriKind.Absolute, out var URL))
+        {
+            progress.text = "<color=red>URL non valide</color>";
+            progress.gameObject.SetActive(true);
+            return;
+        }
+        if (URL.Host == "archives.cantal.fr") StartCoroutine(cantal(URL.AbsolutePath.TrimEnd('/')));
+        else if (URL.Host == "archives.gironde.fr") StartCoroutine(gironde(URL.AbsolutePath));
     }
 
     IEnumerator cantal(string url)
