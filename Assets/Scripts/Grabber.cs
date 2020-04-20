@@ -10,7 +10,7 @@ using UnityEngine.UI;
 
 /*
  Sample URLs:
- - Cantal: http://archives.cantal.fr/accounts/mnesys_ad15/datas/medias/Etat civil et registres paroissiaux/Saint-Remy-de-Salers/BMS 1706-1790/AD015_5Mi387_01331_jpg_
+ - Cantal: http://archives.cantal.fr/ark:/16075/a011324371641xzvnaS/1/183
  - Gironde: https://archives.gironde.fr/ark:/25651/vta9239124a2e2ba619/daogrp/0/8
 */
 
@@ -38,13 +38,27 @@ public class Grabber : MonoBehaviour
             progress.gameObject.SetActive(true);
             return;
         }
-        if (URL.Host == "archives.cantal.fr") StartCoroutine(cantal("https://" + URL.Host + URL.AbsolutePath.TrimEnd('/')));
+        if (URL.Host == "archives.cantal.fr") StartCoroutine(cantal("http://" + URL.Host + URL.AbsolutePath.TrimEnd('/')));
         else if (URL.Host == "archives.gironde.fr") StartCoroutine(gironde("https://" + URL.Host + URL.AbsolutePath));
     }
 
     IEnumerator cantal(string url)
     {
-        var data = UnityWebRequest.Get(url + "/p.xml");
+        var ark = UnityWebRequest.Get(url);
+        yield return ark.SendWebRequest();
+        var arkResp = ark.downloadHandler.text
+            .Replace("\t", "").Replace("\r", "").Replace("\n", "")
+            .Split(new string[] { "\"flashVars\", \"" }, System.StringSplitOptions.RemoveEmptyEntries)[1]
+            .Split(new string[] { "\"" }, System.StringSplitOptions.RemoveEmptyEntries)[0];
+        var args = arkResp.Split('&').Select(q => q.Split('=')).ToDictionary(q => q.FirstOrDefault(), q => q.Skip(1).FirstOrDefault());
+
+        var pages = UnityWebRequest.Get(args["__server_name"] + args["playlist"]);
+        yield return pages.SendWebRequest();
+        var pagesResp = new XML(pages.downloadHandler.text);
+        var page = pagesResp.RootElement.GetItem("g").GetItems("i").ElementAtOrDefault(int.TryParse(Path.GetFileName(url), out var pageIndex) ? pageIndex - 1 : 0);
+        var pageURL = "http://archives.cantal.fr/accounts/mnesys_ad15/datas/medias/" + page.GetItem("a").Value.Replace(".", "_") + "_";
+
+        var data = UnityWebRequest.Get(pageURL + "/p.xml");
         yield return data.SendWebRequest();
         var dataResp = new XML(data.downloadHandler.text);
         var betterLayer = dataResp.RootElement.GetItems("layer").OrderByDescending(l => l.Attribute("w")).FirstOrDefault();
@@ -60,7 +74,7 @@ public class Grabber : MonoBehaviour
         {
             for (int x = 0; x < xTiles; x++)
             {
-                var tile = UnityWebRequestTexture.GetTexture($"{url}/{index}_{x + (y * xTiles)}.jpg");
+                var tile = UnityWebRequestTexture.GetTexture($"{pageURL}/{index}_{x + (y * xTiles)}.jpg");
                 progress.text = ((x + (y * xTiles)) / (float)(xTiles * yTiles) * 100F).ToString("0") + "%";
                 tile.SendWebRequest();
                 while (!tile.isDone) yield return new WaitForEndOfFrame();
@@ -74,7 +88,7 @@ public class Grabber : MonoBehaviour
         preview.texture = tex;
         preview.GetComponent<AspectRatioFitter>().aspectRatio = w / (float)h;
         previewGO.SetActive(true);
-        Name = Path.GetFileName(url);
+        Name = Path.GetFileName(pageURL);
         exportGO.SetActive(true);
     }
 
