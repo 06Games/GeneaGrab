@@ -18,6 +18,7 @@ public class Grabber : MonoBehaviour
 {
     [Header("Grab")]
     public InputField url;
+    public Button grab;
     public Text progress;
 
     [Header("Preview")]
@@ -44,7 +45,9 @@ public class Grabber : MonoBehaviour
         {
             progress.text = "<color=red>URL non reconnue</color>";
             progress.gameObject.SetActive(true);
+            return;
         }
+        grab.interactable = false;
     }
 
     IEnumerator cantal(string url)
@@ -95,6 +98,7 @@ public class Grabber : MonoBehaviour
         previewGO.SetActive(true);
         Name = Path.GetFileName(pageURL);
         exportGO.SetActive(true);
+        grab.interactable = true;
     }
 
     IEnumerator gironde(string url)
@@ -151,6 +155,7 @@ public class Grabber : MonoBehaviour
         previewGO.SetActive(true);
         Name = pagesResp.GetCategory("batch").Value<string>("title") + "_" + pageIndex;
         exportGO.SetActive(true);
+        grab.interactable = true;
     }
 
     public void Export() => File.WriteAllBytes(path.text + "/" + Name + ".jpg", tex.EncodeToJPG());
