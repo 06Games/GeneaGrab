@@ -40,6 +40,11 @@ public class Grabber : MonoBehaviour
         }
         if (URL.Host == "archives.cantal.fr") StartCoroutine(cantal("http://" + URL.Host + URL.AbsolutePath.TrimEnd('/')));
         else if (URL.Host == "archives.gironde.fr") StartCoroutine(gironde("https://" + URL.Host + URL.AbsolutePath));
+        else
+        {
+            progress.text = "<color=red>URL non reconnue</color>";
+            progress.gameObject.SetActive(true);
+        }
     }
 
     IEnumerator cantal(string url)
