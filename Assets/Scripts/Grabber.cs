@@ -158,5 +158,14 @@ public class Grabber : MonoBehaviour
         grab.interactable = true;
     }
 
-    public void Export() => File.WriteAllBytes(path.text + "/" + Name + ".jpg", tex.EncodeToJPG());
+    void FormatName()
+    {
+        foreach (var Char in Path.GetInvalidFileNameChars())
+            Name = Name.Replace(Char, '_');
+    }
+    public void Export()
+    {
+        FormatName();
+        File.WriteAllBytes(path.text + "/" + Name + ".jpg", tex.EncodeToJPG());
+    }
 }
