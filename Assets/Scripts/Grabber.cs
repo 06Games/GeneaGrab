@@ -41,6 +41,7 @@ public class Grabber : MonoBehaviour
         }
         if (URL.Host == "archives.cantal.fr") StartCoroutine(cantal("http://" + URL.Host + URL.AbsolutePath.TrimEnd('/')));
         else if (URL.Host == "archives.gironde.fr") StartCoroutine(gironde("https://" + URL.Host + URL.AbsolutePath));
+        else if (URL.Host== "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives")) StartCoroutine(geneanet(URL.Query));
         else
         {
             progress.text = "<color=red>URL non reconnue</color>";
@@ -154,6 +155,53 @@ public class Grabber : MonoBehaviour
         preview.GetComponent<AspectRatioFitter>().aspectRatio = w / (float)h;
         previewGO.SetActive(true);
         Name = pagesResp.GetCategory("batch").Value<string>("title") + "_" + pageIndex;
+        exportGO.SetActive(true);
+        grab.interactable = true;
+    }
+
+    IEnumerator geneanet(string query)
+    {
+        previewGO.SetActive(false);
+        exportGO.SetActive(false);
+        var queries = query.Substring(query.StartsWith("?") ? 1 : 0).Split('&').Select(q => q.Split('=')).ToDictionary(q => q.FirstOrDefault(), q => q.Skip(1).FirstOrDefault());
+
+        var pages = UnityWebRequest.Get($"https://www.geneanet.org/archives/registres/api/?idcollection={queries["idcollection"]}");
+        yield return pages.SendWebRequest();
+        var pagesResp = new JSON($"{{results: {pages.downloadHandler.text}}}");
+        var page = pagesResp.jToken.Value<JArray>("results").FirstOrDefault(p => p.Value<string>("page") == (queries.TryGetValue("page", out var _p) ? _p : "1"));
+        var chemin_image = System.Uri.EscapeDataString($"doc/{page.Value<string>("chemin_image")}");
+
+        var data = UnityWebRequest.Get($"https://www.geneanet.org/zoomify/?path={chemin_image}/ImageProperties.xml");
+        yield return data.SendWebRequest();
+        var dataResp = new XML($"<r>{data.downloadHandler.text}</r>");
+        var layer = dataResp.RootElement.GetItem("IMAGE_PROPERTIES");
+        var index = 4;
+
+        int.TryParse(layer.Attribute("TILESIZE"), out var tileSize);
+        var xTiles = int.TryParse(layer.Attribute("WIDTH"), out var w) ? Mathf.CeilToInt(w / (float)tileSize) : 0;
+        var yTiles = int.TryParse(layer.Attribute("HEIGHT"), out var h) ? Mathf.CeilToInt(h / (float)tileSize) : 0;
+
+        tex = new Texture2D(w, h);
+        progress.gameObject.SetActive(true);
+        for (int y = 0; y < yTiles; y++)
+        {
+            for (int x = 0; x < xTiles; x++)
+            {
+                var tile = UnityWebRequestTexture.GetTexture($"https://www.geneanet.org/zoomify/?path={chemin_image}/TileGroup0/{index}-{x}-{y}.jpg");
+                progress.text = ((x + (y * xTiles)) / (float)(xTiles * yTiles) * 100F).ToString("0") + "%";
+                tile.SendWebRequest();
+                while (!tile.isDone) yield return new WaitForEndOfFrame();
+                var tileResp = DownloadHandlerTexture.GetContent(tile);
+                tex.SetPixels(x * tileSize, h - (y * tileSize) - tileResp.height, tileResp.width, tileResp.height, tileResp.GetPixels());
+            }
+        }
+
+        progress.gameObject.SetActive(false);
+        tex.Apply();
+        preview.texture = tex;
+        preview.GetComponent<AspectRatioFitter>().aspectRatio = w / (float)h;
+        previewGO.SetActive(true);
+        Name = $"{queries["idcollection"]} - p{page.Value<string>("page")}";
         exportGO.SetActive(true);
         grab.interactable = true;
     }
