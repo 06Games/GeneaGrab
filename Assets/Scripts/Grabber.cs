@@ -41,7 +41,7 @@ public class Grabber : MonoBehaviour
         }
         if (URL.Host == "archives.cantal.fr") StartCoroutine(cantal("http://" + URL.Host + URL.AbsolutePath.TrimEnd('/')));
         else if (URL.Host == "archives.gironde.fr") StartCoroutine(gironde("https://" + URL.Host + URL.AbsolutePath));
-        else if (URL.Host== "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives")) StartCoroutine(geneanet(URL.Query));
+        else if (URL.Host == "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives")) StartCoroutine(geneanet(URL.Query));
         else
         {
             progress.text = "<color=red>URL non reconnue</color>";
@@ -127,11 +127,11 @@ public class Grabber : MonoBehaviour
         yield return data.SendWebRequest();
         var dataResp = new XML($"<r>{data.downloadHandler.text}</r>");
         var layer = dataResp.RootElement.GetItem("IMAGE_PROPERTIES");
-        var index = 4;
 
         int.TryParse(layer.Attribute("TILESIZE"), out var tileSize);
         var xTiles = int.TryParse(layer.Attribute("WIDTH"), out var w) ? Mathf.CeilToInt(w / (float)tileSize) : 0;
         var yTiles = int.TryParse(layer.Attribute("HEIGHT"), out var h) ? Mathf.CeilToInt(h / (float)tileSize) : 0;
+        var index = ZoomifyImgIndex(w, h, tileSize);
 
         tex = new Texture2D(w, h);
         progress.gameObject.SetActive(true);
@@ -175,11 +175,11 @@ public class Grabber : MonoBehaviour
         yield return data.SendWebRequest();
         var dataResp = new XML($"<r>{data.downloadHandler.text}</r>");
         var layer = dataResp.RootElement.GetItem("IMAGE_PROPERTIES");
-        var index = 4;
 
         int.TryParse(layer.Attribute("TILESIZE"), out var tileSize);
         var xTiles = int.TryParse(layer.Attribute("WIDTH"), out var w) ? Mathf.CeilToInt(w / (float)tileSize) : 0;
         var yTiles = int.TryParse(layer.Attribute("HEIGHT"), out var h) ? Mathf.CeilToInt(h / (float)tileSize) : 0;
+        var index = ZoomifyImgIndex(w, h, tileSize);
 
         tex = new Texture2D(w, h);
         progress.gameObject.SetActive(true);
@@ -191,8 +191,12 @@ public class Grabber : MonoBehaviour
                 progress.text = ((x + (y * xTiles)) / (float)(xTiles * yTiles) * 100F).ToString("0") + "%";
                 tile.SendWebRequest();
                 while (!tile.isDone) yield return new WaitForEndOfFrame();
-                var tileResp = DownloadHandlerTexture.GetContent(tile);
-                tex.SetPixels(x * tileSize, h - (y * tileSize) - tileResp.height, tileResp.width, tileResp.height, tileResp.GetPixels());
+                try
+                {
+                    var tileResp = DownloadHandlerTexture.GetContent(tile);
+                    tex.SetPixels(x * tileSize, h - (y * tileSize) - tileResp.height, tileResp.width, tileResp.height, tileResp.GetPixels());
+                }
+                catch (System.Exception e) { Debug.LogError(tile.url + "\n" + e); }
             }
         }
 
@@ -204,6 +208,18 @@ public class Grabber : MonoBehaviour
         Name = $"{queries["idcollection"]} - p{page.Value<string>("page")}";
         exportGO.SetActive(true);
         grab.interactable = true;
+    }
+    /// <summary>
+    /// Retourne le zoomlevel maximum
+    /// Chaque zoomlevel multiplie la taille de l'image par deux. Le zoomlevel 0 correspond à l'image entière contenue dans une seule tile
+    /// On a donc la formule suivante, où size = max(originalWidth, originalHeight) et numTilesAtThisZoomLevel = max(width in tiles, height in tiles) at this zoomlevel :
+    /// size / 2^(maxZoomLevel - zoomlevel) = numTilesAtThisZoomLevel * tileSize
+    /// On sait que pour zoomlevel=0, numTilesAtThisZoomLevel=1
+    /// On peut donc résoudre l'équation, et trouver maxZoomLevel :
+    /// </summary>
+    int ZoomifyImgIndex(int w, int h, int tileSize)
+    {
+        return Mathf.CeilToInt(Mathf.Log(Mathf.Max(w, h) / tileSize) / Mathf.Log(2));
     }
 
     void FormatName()
