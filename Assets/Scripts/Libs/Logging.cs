@@ -3,7 +3,7 @@ using UnityEngine;
 
 public static class Logging
 {
-    public static System.Action<LogType, string> NewMessage;
+    public static System.Action<LogType, string> NewMessage { get; set; }
 
     static FileInfo logFile;
     static string logs = "";

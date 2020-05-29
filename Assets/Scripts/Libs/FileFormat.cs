@@ -158,7 +158,7 @@ namespace FileFormat
             {
                 string v = Value;
                 if (v == null) return default;
-                else try { return Tools.StringExtensions.ParseTo<T>(v); } catch { return default; }
+                else try { return (T)System.Convert.ChangeType(v, typeof(T)); } catch { return default; }
             }
             public string Value
             {
@@ -238,68 +238,6 @@ namespace FileFormat
             public bool Exist { get { return node != null; } }
 
             public override string ToString() { return node.OuterXml; }
-        }
-    }
-
-    public class Binary
-    {
-        string chain = "";
-        public Binary(byte[] data)
-        {
-            string binary = string.Join("", data.Select(byt => System.Convert.ToString(byt, 2).PadLeft(8, '0')));
-            string onlyNumbers = System.Text.RegularExpressions.Regex.Replace(binary, "[0-9]", "");
-            if (string.IsNullOrEmpty(onlyNumbers)) chain = binary;
-            else throw new System.ArgumentException("The specified string is not binary");
-        }
-        Binary(string data) { chain = data; }
-        public static Binary Parse(string data) { return new Binary(data.Replace(" ", "")); }
-
-        public override string ToString()
-        {
-            string str = "";
-            for (var i = 0; i < chain.Length; i += 8)
-            {
-                if (i < 8) str = chain.Substring(i, Mathf.Min(8, chain.Length - i));
-                else str = string.Join(" ", str, chain.Substring(i, Mathf.Min(8, chain.Length - i)));
-            }
-            return str;
-        }
-        public string Decode() { return Decode(Encoding.UTF8); }
-        public string Decode(Encoding encoding)
-        {
-            System.Collections.Generic.List<byte> byteList = new System.Collections.Generic.List<byte>();
-
-            for (int i = 0; i < chain.Length; i += 8)
-            {
-                byteList.Add(System.Convert.ToByte(chain.Substring(i, 8), 2));
-            }
-            return encoding.GetString(byteList.ToArray());
-        }
-    }
-
-    public static class Generic
-    {
-        public static string CalculateMD5(string filename)
-        {
-            using (var md5 = System.Security.Cryptography.MD5.Create())
-            {
-                using (var stream = File.OpenRead(filename))
-                {
-                    var hash = md5.ComputeHash(stream);
-                    return System.BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
-            }
-        }
-        public static string CalculateMD5(this FileInfo file)
-        {
-            using (var md5 = System.Security.Cryptography.MD5.Create())
-            {
-                using (var stream = file.OpenRead())
-                {
-                    var hash = md5.ComputeHash(stream);
-                    return System.BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
-            }
         }
     }
 }

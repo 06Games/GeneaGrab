@@ -78,25 +78,7 @@ public class Grabber : MonoBehaviour
         var xTiles = int.TryParse(betterLayer.Attribute("w"), out var w) ? Mathf.CeilToInt(w / (float)tileSize) : 0;
         var yTiles = int.TryParse(betterLayer.Attribute("h"), out var h) ? Mathf.CeilToInt(h / (float)tileSize) : 0;
 
-        tex = new Texture2D(w, h);
-        progress.gameObject.SetActive(true);
-        for (int y = 0; y < yTiles; y++)
-        {
-            for (int x = 0; x < xTiles; x++)
-            {
-                var tile = UnityWebRequestTexture.GetTexture($"{pageURL}/{index}_{x + (y * xTiles)}.jpg");
-                progress.text = ((x + (y * xTiles)) / (float)(xTiles * yTiles) * 100F).ToString("0") + "%";
-                tile.SendWebRequest();
-                while (!tile.isDone) yield return new WaitForEndOfFrame();
-                try
-                {
-                    var tileResp = DownloadHandlerTexture.GetContent(tile);
-                    tex.SetPixels(x * tileSize, h - (y * tileSize) - tileResp.height, tileResp.width, tileResp.height, tileResp.GetPixels());
-                }
-                catch (System.Exception e) { Debug.LogError(tile.url + "\n" + e); }
-            }
-        }
-
+        yield return GetTiles(w, h, xTiles, yTiles, tileSize, (x, y) => $"{pageURL}/{index}_{x + (y * xTiles)}.jpg");
         SetVariables(Path.GetFileName(pageURL), w, h);
     }
 
@@ -152,13 +134,19 @@ public class Grabber : MonoBehaviour
         // Chaque zoomlevel multiplie la taille de l'image par deux. Le zoomlevel 0 correspond à l'image entière contenue dans une seule tile.
         var index = Mathf.CeilToInt(Mathf.Log(Mathf.Max(w, h) / tileSize) / Mathf.Log(2));
 
+        yield return GetTiles(w, h, xTiles, yTiles, tileSize, (x, y) => $"{baseURL}/TileGroup0/{index}-{x}-{y}.jpg");
+        SetVariables(name, w, h);
+    }
+
+    IEnumerator GetTiles(int w, int h, int xTiles, int yTiles, int tileSize, System.Func<int, int, string> url)
+    {
         tex = new Texture2D(w, h);
         progress.gameObject.SetActive(true);
         for (int y = 0; y < yTiles; y++)
         {
             for (int x = 0; x < xTiles; x++)
             {
-                var tile = UnityWebRequestTexture.GetTexture($"{baseURL}/TileGroup0/{index}-{x}-{y}.jpg");
+                var tile = UnityWebRequestTexture.GetTexture(url(x, y));
                 tile.SetRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0");
                 progress.text = ((x + (y * xTiles)) / (float)(xTiles * yTiles) * 100F).ToString("0") + "%";
                 tile.SendWebRequest();
@@ -171,7 +159,6 @@ public class Grabber : MonoBehaviour
                 catch (System.Exception e) { Debug.LogError(tile.url + "\n" + e); }
             }
         }
-        SetVariables(name, w, h);
     }
     void SetVariables(string name, int w, int h)
     {
