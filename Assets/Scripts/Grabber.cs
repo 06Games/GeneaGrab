@@ -58,8 +58,8 @@ public class Grabber : MonoBehaviour
         yield return ark.SendWebRequest();
         var arkResp = ark.downloadHandler.text
             .Replace("\t", "").Replace("\r", "").Replace("\n", "")
-            .Split(new [] { "\"flashVars\", \"" }, System.StringSplitOptions.RemoveEmptyEntries)[1]
-            .Split(new [] { "\"" }, System.StringSplitOptions.RemoveEmptyEntries)[0];
+            .Split(new[] { "\"flashVars\", \"" }, System.StringSplitOptions.RemoveEmptyEntries)[1]
+            .Split(new[] { "\"" }, System.StringSplitOptions.RemoveEmptyEntries)[0];
         var args = arkResp.Split('&').Select(q => q.Split('=')).ToDictionary(q => q.FirstOrDefault(), q => q.Skip(1).FirstOrDefault());
 
         var pages = UnityWebRequest.Get(args["__server_name"] + args["playlist"]);
@@ -92,8 +92,8 @@ public class Grabber : MonoBehaviour
         yield return getBin.SendWebRequest();
         var binResp = getBin.downloadHandler.text
             .Replace("\t", "").Replace("\r", "").Replace("\n", "")
-            .Split(new [] { "<script type=\"text/javascript\">//<![CDATA[var binocle;require(['binocle'], function(Binocle) {binocle = new Binocle(" }, System.StringSplitOptions.RemoveEmptyEntries)[1]
-            .Split(new [] { ");});//]]></script>" }, System.StringSplitOptions.RemoveEmptyEntries)[0];
+            .Split(new[] { "<script type=\"text/javascript\">//<![CDATA[var binocle;require(['binocle'], function(Binocle) {binocle = new Binocle(" }, System.StringSplitOptions.RemoveEmptyEntries)[1]
+            .Split(new[] { ");});//]]></script>" }, System.StringSplitOptions.RemoveEmptyEntries)[0];
 
         var bin = new JSON(binResp).Value<string>("source");
         var pages = UnityWebRequest.Get(bin);

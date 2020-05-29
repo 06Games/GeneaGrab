@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using UnityEngine;
 
@@ -28,8 +27,8 @@ namespace FileFormat
         public bool ContainsValues { get { if (jToken == null) return false; else return jToken.HasValues; } }
 
         public IEnumerable<T> Values<T>() { if (jToken == null) return default; else return jToken.Values<T>(); }
-        public T Value<T>(string value) { if (jToken == null) return default; else return jToken.Value<T>(value); }
-        public bool ValueExist(string value) { if (jToken == null) return false; else return jToken.Value<string>(value) != null; }
+        public T Value<T>(string key) { if (jToken == null) return default; else return jToken.Value<T>(key); }
+        public bool ValueExist(string key) { if (jToken == null) return false; else return jToken.Value<string>(key) != null; }
 
         public override string ToString() { return jToken.ToString(); }
     }
@@ -79,7 +78,7 @@ namespace FileFormat
 
         public class XML
         {
-            System.Xml.XmlDocument xmlDoc;
+            readonly System.Xml.XmlDocument xmlDoc;
             public XML() { xmlDoc = new System.Xml.XmlDocument(); }
             public XML(System.Xml.XmlDocument xml) { if (xml == null) xmlDoc = new System.Xml.XmlDocument(); else xmlDoc = xml; }
             public XML(string plainText)
@@ -116,7 +115,7 @@ namespace FileFormat
                 get
                 {
                     if (xmlDoc.DocumentElement != null) return new RootElement(xmlDoc.DocumentElement);
-                    else throw new System.Exception("There is no Root Element ! Create one with CreateRootElement() function");
+                    else throw new System.InvalidOperationException("There is no Root Element ! Create one with CreateRootElement() function");
                 }
             }
         }
@@ -163,7 +162,7 @@ namespace FileFormat
             public string Value
             {
                 get { if (node == null) return null; else return node.InnerText; }
-                set { if (node == null) throw new System.Exception("This item does not exist! Can not set a value!\nCheck Item.Exist before calling this function."); else node.InnerText = value; }
+                set { if (node == null) throw new System.InvalidOperationException("This item does not exist! Can not set a value!\nCheck if item exists before calling this function."); else node.InnerText = value; }
             }
             public void Remove() { node.ParentNode.RemoveChild(node); }
         }
@@ -229,7 +228,7 @@ namespace FileFormat
 
             public Item CreateItem(string key)
             {
-                if (node == null) throw new System.Exception("This item does not exist! Can not create a child!\nCheck Item.Exist before calling this function.");
+                if (node == null) throw new System.InvalidOperationException("This item does not exist! Can not create a child!\nCheck if item exists before calling this function.");
                 System.Xml.XmlNode xmlNode = node.OwnerDocument.CreateElement(key);
                 node.AppendChild(xmlNode);
                 return new Item(xmlNode);
