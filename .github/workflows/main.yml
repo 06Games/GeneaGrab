@@ -1,0 +1,44 @@
+name: Build project
+
+on:
+  pull_request: {}
+  push: { branches: [master] }
+
+env:
+  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+
+jobs:
+  buildForSomePlatforms:
+    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          - 2019.3.3f1
+        targetPlatform:
+          - StandaloneWindows64 # Build a Windows 64-bit standalone.
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v2
+        with:
+          lfs: true
+      - name: Get cached libraries
+        uses: actions/cache@v1.1.0
+        with:
+          path: Library
+          key: Library-${{ matrix.targetPlatform }}
+          restore-keys: |
+            Library-
+      - name: Build
+        uses: webbertakken/unity-builder@v0.11
+        with:
+          unityVersion: ${{ matrix.unityVersion }}
+          targetPlatform: ${{ matrix.targetPlatform }}
+      - name: Upload build
+        uses: actions/upload-artifact@v1
+        with:
+          name: GeneaGrab-${{ matrix.targetPlatform }}
+          path: build
