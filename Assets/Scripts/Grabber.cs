@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -12,7 +13,7 @@ using UnityEngine.UI;
  Sample URLs:
  - Cantal: http://archives.cantal.fr/ark:/16075/a011324371641xzvnaS/1/183
  - Gironde: https://archives.gironde.fr/ark:/25651/vta9239124a2e2ba619/daogrp/0/8
- - Geneanet: https://www.geneanet.org/archives/registres/view/?idcollection=17580&page=2
+ - Geneanet: https://www.geneanet.org/archives/registres/view/?idcollection=17580&page=2 or https://www.geneanet.org/archives/registres/view/17580/2 or https://www.geneanet.org/archives/registres/view/17580
 */
 
 public class Grabber : MonoBehaviour
@@ -42,7 +43,7 @@ public class Grabber : MonoBehaviour
         }
         if (URL.Host == "archives.cantal.fr") StartCoroutine(cantal("http://" + URL.Host + URL.AbsolutePath.TrimEnd('/')));
         else if (URL.Host == "archives.gironde.fr") StartCoroutine(gironde("https://" + URL.Host + URL.AbsolutePath));
-        else if (URL.Host == "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives")) StartCoroutine(geneanet(URL.Query));
+        else if (URL.Host == "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives")) StartCoroutine(geneanet(url.text));
         else
         {
             progress.text = "<color=red>URL non reconnue</color>";
@@ -81,7 +82,6 @@ public class Grabber : MonoBehaviour
         yield return GetTiles(w, h, xTiles, yTiles, tileSize, (x, y) => $"{pageURL}/{index}_{x + (y * xTiles)}.jpg");
         SetVariables(Path.GetFileName(pageURL), w, h);
     }
-
     IEnumerator gironde(string url)
     {
         previewGO.SetActive(false);
@@ -103,19 +103,22 @@ public class Grabber : MonoBehaviour
         var page = pagesResp.jToken.Value<JArray>("items").ElementAtOrDefault(int.TryParse(Path.GetFileName(url), out var pageIndex) ? pageIndex - 1 : 0).Value<string>("source");
         yield return Zoomify($"https://archives.gironde.fr/cgi-bin/iipsrv.fcgi?zoomify={page}/", pagesResp.GetCategory("batch").Value<string>("title") + "_" + pageIndex);
     }
-
-    IEnumerator geneanet(string query)
+    IEnumerator geneanet(string url)
     {
         previewGO.SetActive(false);
         exportGO.SetActive(false);
-        var queries = query.Substring(query.StartsWith("?") ? 1 : 0).Split('&').Select(q => q.Split('=')).ToDictionary(q => q.FirstOrDefault(), q => q.Skip(1).FirstOrDefault());
 
-        var pages = UnityWebRequest.Get($"https://www.geneanet.org/archives/registres/api/?idcollection={queries["idcollection"]}");
+        var regex = Regex.Match(url, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
+        var collectionID = regex.Groups["col"]?.Value;
+        if (string.IsNullOrEmpty(collectionID)) { grab.interactable = true; yield break; }
+        var pageID = regex.Groups["page"].Success ? regex.Groups["page"].Value : "1";
+
+        var pages = UnityWebRequest.Get($"https://www.geneanet.org/archives/registres/api/?idcollection={collectionID}");
         yield return pages.SendWebRequest();
         var pagesResp = new JSON($"{{results: {pages.downloadHandler.text}}}");
-        var page = pagesResp.jToken.Value<JArray>("results").FirstOrDefault(p => p.Value<string>("page") == (queries.TryGetValue("page", out var _p) ? _p : "1"));
+        var page = pagesResp.jToken.Value<JArray>("results").FirstOrDefault(p => p.Value<string>("page") == pageID);
         var chemin_image = System.Uri.EscapeDataString($"doc/{page.Value<string>("chemin_image")}");
-        yield return Zoomify($"https://www.geneanet.org/zoomify/?path={chemin_image}/", $"{queries["idcollection"]} - p{page.Value<string>("page")}");
+        yield return Zoomify($"https://www.geneanet.org/zoomify/?path={chemin_image}/", $"{collectionID} - p{pageID}");
     }
 
     IEnumerator Zoomify(string baseURL, string name)
@@ -172,14 +175,9 @@ public class Grabber : MonoBehaviour
         grab.interactable = true;
     }
 
-    void FormatName()
-    {
-        foreach (var Char in Path.GetInvalidFileNameChars())
-            Name = Name.Replace(Char, '_');
-    }
     public void Export()
     {
-        FormatName();
-        File.WriteAllBytes(path.text + "/" + Name + ".jpg", tex.EncodeToJPG());
+        foreach (var Char in Path.GetInvalidFileNameChars()) Name = Name.Replace(Char, '_'); //Remove invalid chars
+        File.WriteAllBytes(path.text + "/" + Name + ".jpg", tex.EncodeToJPG()); //Save file
     }
 }
