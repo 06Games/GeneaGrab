@@ -13,7 +13,7 @@ using UnityEngine.UI;
  Sample URLs:
  - Cantal: http://archives.cantal.fr/ark:/16075/a011324371641xzvnaS/1/183
  - Gironde: https://archives.gironde.fr/ark:/25651/vta9239124a2e2ba619/daogrp/0/8
- - Geneanet: https://www.geneanet.org/archives/registres/view/?idcollection=17580&page=2 or https://www.geneanet.org/archives/registres/view/17580/2 or https://www.geneanet.org/archives/registres/view/17580
+ - Geneanet: https://www.geneanet.org/archives/registres/view/?idcollection=17580&page=2 or https://www.geneanet.org/archives/registres/view/?idcollection=17580 or https://www.geneanet.org/archives/registres/view/17580/2 or https://www.geneanet.org/archives/registres/view/17580
 */
 
 public class Grabber : MonoBehaviour
