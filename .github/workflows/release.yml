@@ -39,8 +39,9 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: GeneaGrab
       - name: Zip
-        run: zip -r build.zip build
+        run: zip -r build.zip build/GeneaGrab
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -59,5 +60,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build.zip
-          asset_name: GeneaGrab-${{ matrix.targetPlatform }}
+          asset_name: GeneaGrab-${{ matrix.targetPlatform }}.zip
           asset_content_type: application/zip

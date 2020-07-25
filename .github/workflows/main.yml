@@ -37,6 +37,7 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
+          buildName: GeneaGrab
       - name: Upload build
         uses: actions/upload-artifact@v1
         with:
