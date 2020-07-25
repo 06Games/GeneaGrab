@@ -1,8 +1,10 @@
-﻿name: Build project
+﻿name: Create release
 
 on:
-  pull_request: {}
-  push: { branches: [master] }
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*
 
 env:
   UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -37,8 +39,25 @@ jobs:
         with:
           unityVersion: ${{ matrix.unityVersion }}
           targetPlatform: ${{ matrix.targetPlatform }}
-      - name: Upload build
-        uses: actions/upload-artifact@v1
+      - name: Zip
+        run: zip -r build.zip build
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: GeneaGrab-${{ matrix.targetPlatform }}
-          path: build
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: true
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build.zip
+          asset_name: GeneaGrab-${{ matrix.targetPlatform }}
+          asset_content_type: application/zip
