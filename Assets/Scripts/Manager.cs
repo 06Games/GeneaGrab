@@ -152,9 +152,9 @@ public class Manager : MonoBehaviour
         {
             var name = infos.Name;
             foreach (var Char in Path.GetInvalidFileNameChars()) name = name.Replace(Char, '_'); //Remove invalid chars
-            var dir = $"{Config.Path}/Geneanet/{name}";
+            var dir = $"{Config.Path}/{Plateforme.GetInfos().Plateforme}";
             if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-            File.WriteAllBytes($"{dir}/p{infos.Page}.jpg", infos.CurrentPage.Image.EncodeToJPG()); //Save file
+            File.WriteAllBytes($"{dir}/{name} - p{infos.Page}.jpg", infos.CurrentPage.Image.EncodeToJPG()); //Save file
             RefreshView();
         }));
     }

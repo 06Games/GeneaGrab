@@ -39,7 +39,7 @@ namespace Plateformes
         }
 
         public IEnumerator GetTile(int zoom, System.Action<Infos> onComplete) => GetTiles(zoom, onComplete, false);
-            public IEnumerator GetTiles(int zoom, System.Action<Infos> onComplete, bool progress)
+        public IEnumerator GetTiles(int zoom, System.Action<Infos> onComplete, bool progress)
         {
             var current = Informations.CurrentPage;
             var chemin_image = System.Uri.EscapeDataString($"doc/{Informations.CurrentPage.URL}");
@@ -66,7 +66,7 @@ namespace Plateformes
                     var minI = (x + (y * data.Item1.x * yFactor)) * xFactor;
                     if (current.Zoom[minI] > zoomIndex) continue;
 
-                    if(progress) Manager.SetProgress((x + (y * data.Item1.x)) / (float)(data.Item1.x * data.Item1.y));
+                    if (progress) Manager.SetProgress((x + (y * data.Item1.x)) / (float)(data.Item1.x * data.Item1.y));
                     yield return Grabber.GetTile(current.Args, data.Item2, new Vector2Int(x, y), $"{baseURL}TileGroup0/{zoomIndex}-{x}-{y}.jpg", current.Image, (tex) =>
                     {
                         if (Manager.wantedZoom != zoom) return;
