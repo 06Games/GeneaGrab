@@ -23,6 +23,7 @@ namespace Plateformes
             if (string.IsNullOrEmpty(Informations.ID)) { Informations.Error = true; onComplete(Informations); yield break; }
 
             var pages = UnityWebRequest.Get($"https://www.geneanet.org/archives/registres/api/?idcollection={Informations.ID}");
+            pages.redirectLimit = 0;
             pages.SendWebRequest();
             while (!pages.isDone)
             {
