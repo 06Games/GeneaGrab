@@ -19,10 +19,10 @@ namespace Plateformes
         public IEnumerator Infos(System.Action<Infos> onComplete)
         {
             var regex = Regex.Match(Informations.URL, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
-            var collectionID = Informations.Name = Informations.ID = regex.Groups["col"]?.Value;
-            if (string.IsNullOrEmpty(collectionID)) { Informations.Error = true; onComplete(Informations); yield break; }
+            Informations.ID = regex.Groups["col"]?.Value;
+            if (string.IsNullOrEmpty(Informations.ID)) { Informations.Error = true; onComplete(Informations); yield break; }
 
-            var pages = UnityWebRequest.Get($"https://www.geneanet.org/archives/registres/api/?idcollection={collectionID}");
+            var pages = UnityWebRequest.Get($"https://www.geneanet.org/archives/registres/api/?idcollection={Informations.ID}");
             pages.SendWebRequest();
             while (!pages.isDone)
             {
@@ -31,8 +31,13 @@ namespace Plateformes
             }
             if (pages.isHttpError || pages.isNetworkError) { Informations.Error = true; onComplete(Informations); yield break; }
 
-            Informations.URL = $"https://www.geneanet.org/archives/registres/view/{collectionID}";
-            Informations.Page = int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var page) ? page : 1;
+            Informations.URL = $"https://www.geneanet.org/archives/registres/view/{Informations.ID}";
+            var page = UnityWebRequest.Get(Informations.URL);
+            yield return page.SendWebRequest();
+            var infos = Regex.Match(page.downloadHandler.text, "<h3>(?<location>.*)\\(.*\\| (?<dates>.*)<\\/h3>\\n.*<div class=\"note\">\\n\\s*.*- (?<note>.*)\\n");
+            Informations.Name = $"{infos.Groups["location"]} ({infos.Groups["dates"]}) - {infos.Groups["note"]} - {Informations.ID}";
+
+            Informations.Page = int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p) ? _p : 1;
             Informations.Pages = new JSON($"{{results: {pages.downloadHandler.text}}}").jToken.Value<JArray>("results")
                 .Select(p => new Page() { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
             onComplete(Informations);
