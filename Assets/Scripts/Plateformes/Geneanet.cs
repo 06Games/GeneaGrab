@@ -85,6 +85,6 @@ namespace Plateformes
             if (progress) Manager.SetProgress(1);
         }
 
-        public IEnumerator Download(System.Action<Infos> onComplete) => GetTiles(4, onComplete, true);
+        public IEnumerator Download(System.Action<Infos> onComplete) => GetTiles(Grabber.CalculateIndex(Informations.CurrentPage.Args), onComplete, true);
     }
 }
