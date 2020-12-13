@@ -16,6 +16,7 @@ public class Infos
 
     public string Plateforme { get; set; }
     public string URL { get; set; }
+    public System.Uri Uri { get => System.Uri.TryCreate(URL, System.UriKind.Absolute, out var uri) ? uri : null; }
     public string ID { get; set; }
     public string Name { get; set; }
 
