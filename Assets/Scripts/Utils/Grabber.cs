@@ -22,7 +22,7 @@ public static class Grabber
         var dataResp = new XML($"<r>{data.downloadHandler.text}</r>");
         var layer = dataResp.RootElement.GetItem("IMAGE_PROPERTIES");
 
-        onComplete(new Args()
+        onComplete(new Args
         {
             tileSize = int.TryParse(layer.Attribute("TILESIZE"), out var tileSize) ? tileSize : 0,
             w = int.TryParse(layer.Attribute("WIDTH"), out var w) ? w : 0,

@@ -58,7 +58,7 @@ public class Preview : MonoBehaviour, IScrollHandler
         }
     }
 
-    float lastDelta = 0;
+    float lastDelta;
     void LateUpdate()
     {
         if (lastDelta != 0 && Input.mouseScrollDelta.y == 0) onZoomChanged?.Invoke(_scale);

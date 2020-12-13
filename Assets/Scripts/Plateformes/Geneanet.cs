@@ -12,7 +12,7 @@ namespace Plateformes
     {
         Infos Informations;
         public ref Infos GetInfos() => ref Informations;
-        public Geneanet(System.Uri URL) { Informations = new Infos() { URL = URL.OriginalString, Plateforme = "Geneanet" }; }
+        public Geneanet(System.Uri URL) { Informations = new Infos { URL = URL.OriginalString, Plateforme = "Geneanet" }; }
 
         public static bool CheckURL(System.Uri URL) => URL.Host == "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives");
 
@@ -40,7 +40,7 @@ namespace Plateformes
 
             Informations.Page = int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p) ? _p : 1;
             Informations.Pages = new JSON($"{{results: {pages.downloadHandler.text}}}").jToken.Value<JArray>("results")
-                .Select(p => new Page() { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
+                .Select(p => new Page { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
             onComplete(Informations);
         }
 

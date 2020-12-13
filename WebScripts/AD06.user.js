@@ -1,9 +1,12 @@
 // ==UserScript==
-// @name     AD06
-// @version  1
-// @grant    none
-// @include  http://www.basesdocumentaires-cg06.fr/archives/*
-// @require  https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
+// @name         AD06
+// @icon         https://github.com/06Games/GeneaGrab/raw/master/Assets/Images/Icon.png
+// @version      1
+// @grant        none
+// @include      http://www.basesdocumentaires-cg06.fr/archives/*
+// @require      https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
+// @updateURL    https://github.com/06Games/GeneaGrab/raw/master/WebScripts/AD06.user.js
+// @downloadURL  https://github.com/06Games/GeneaGrab/raw/master/WebScripts/AD06.user.js
 // ==/UserScript==
 
 

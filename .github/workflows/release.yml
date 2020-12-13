@@ -7,21 +7,13 @@ on:
       - 'v*' # Push events to matching v*
 
 env:
-  UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-  UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-  UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+  UNITY_VERSION: 2019.3.3f1
 
 jobs:
   build:
-    name: Build for ${{ matrix.targetPlatform }} on version ${{ matrix.unityVersion }}
+    name: Build
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        unityVersion:
-          - 2019.3.3f1
-        targetPlatform:
-          - StandaloneWindows64 # Build a Windows 64-bit standalone.
     steps:
       - name: Clone repo
         uses: actions/checkout@v2
@@ -37,9 +29,10 @@ jobs:
       - name: Build
         uses: webbertakken/unity-builder@v0.11
         with:
-          unityVersion: ${{ matrix.unityVersion }}
-          targetPlatform: ${{ matrix.targetPlatform }}
+          unityVersion: ${{ env.UNITY_VERSION }}
+          targetPlatform: StandaloneWindows64 # Build a Windows 64-bit standalone.
           buildName: GeneaGrab
+
       - name: Zip
         run: zip -r build.zip build/GeneaGrab
       - name: Create Release
@@ -60,5 +53,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: build.zip
-          asset_name: GeneaGrab-${{ matrix.targetPlatform }}.zip
+          asset_name: GeneaGrab-Windows.zip
           asset_content_type: application/zip

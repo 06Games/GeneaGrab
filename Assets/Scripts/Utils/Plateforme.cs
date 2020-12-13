@@ -37,9 +37,9 @@ public class Page
 {
     public int Number { get; set; }
     public string URL { get; set; }
-    [XmlIgnore] public UnityEngine.Texture2D Image { get; set; } = null;
+    [XmlIgnore] public UnityEngine.Texture2D Image { get; set; }
 
-    public int[] Zoom { get; set; } = null;
+    public int[] Zoom { get; set; }
     public UnityEngine.Vector2Int Tiles { get; set; }
     public Grabber.Args Args { get; set; }
 }
