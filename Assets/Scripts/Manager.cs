@@ -33,7 +33,8 @@ public class Manager : MonoBehaviour
 
     [Header("Infos")]
     public InputField URL;
-    public InputField Page;
+    public Slider PageSlider;
+    public InputField PageNumber;
 
     [Header("Preview")]
     public ScrollRect PreviewRect;
@@ -112,18 +113,26 @@ public class Manager : MonoBehaviour
         {
             if (infos.Error) { StartCoroutine(Error("Une erreur inattendue est survenu")); return; }
             URL.text = infos.URL;
-            Page.text = infos.Page.ToString();
+            PageNumber.text = infos.Page.ToString();
+            PageSlider.maxValue = infos.Pages.Length;
+            PageSlider.value = infos.Page;
             Name.text = $"<b>{infos.Plateforme}:</b> {infos.Name}";
             RefreshView();
             SetProgress(1);
         }));
     }
 
+    public void PageSliderChanged()
+    {
+        PageNumber.text = PageSlider.value.ToString();
+        ChangePage();
+    }
     public void ChangePage()
     {
-        if (int.TryParse(Page.text, out var p))
+        if (int.TryParse(PageNumber.text, out var p))
         {
             Plateforme.GetInfos().Page = p;
+            PageSlider.value = p;
             PreviewController.Reset();
             UnityThread.executeInLateUpdate(RefreshView);
         }
