@@ -13,7 +13,7 @@ namespace Plateformes
     {
         Infos Informations;
         public ref Infos GetInfos() => ref Informations;
-        public AD06(System.Uri URL) { Informations = new Infos() { URL = URL.OriginalString, Plateforme = "AD06" }; }
+        public AD06(System.Uri URL) { Informations = new Infos { URL = URL.OriginalString, Plateforme = "AD06" }; }
 
         public static bool CheckURL(System.Uri URL) => URL.Host == "www.basesdocumentaires-cg06.fr" && URL.AbsolutePath.StartsWith("/archives/ImageZoomViewerEC.php");
 

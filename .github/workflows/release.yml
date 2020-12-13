@@ -27,7 +27,7 @@ jobs:
           restore-keys: |
             Library-
       - name: Build
-        uses: webbertakken/unity-builder@v0.11
+        uses: webbertakken/unity-builder@v2.0-aplha-5
         with:
           unityVersion: ${{ env.UNITY_VERSION }}
           targetPlatform: StandaloneWindows64 # Build a Windows 64-bit standalone.

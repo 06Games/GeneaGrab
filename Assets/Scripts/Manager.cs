@@ -50,6 +50,7 @@ public class Manager : MonoBehaviour
     string ConfigPath => $"{Application.persistentDataPath}/config.xml";
     private void Start()
     {
+        UnityThread.initUnityThread();
         instance = this;
         PreviewController = Renderer.GetComponent<Preview>();
         PreviewController.onZoomChanged += RefreshView;
@@ -133,7 +134,6 @@ public class Manager : MonoBehaviour
     public void RefreshView(Vector3 scale)
     {
         if (Plateforme == null) return;
-        //Debug.Log(RectRelativeTo(PreviewController._thisTransform, PreviewRect.transform));
         if (previewLoading != null) StopCoroutine(previewLoading);
         wantedZoom = (int)scale.x;
         previewLoading = StartCoroutine(Plateforme.GetTile(wantedZoom, (infos) =>
