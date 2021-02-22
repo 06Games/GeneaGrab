@@ -5,7 +5,7 @@
 // @grant        unsafeWindow
 // @include      https://www.geneanet.org/archives/registres/view/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
-// @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
+// @require      https://gist.github.com/raw/2625891/waitForKeyElements.js
 // @updateURL    https://github.com/06Games/GeneaGrab/raw/master/WebScripts/Geneanet.user.js
 // @downloadURL  https://github.com/06Games/GeneaGrab/raw/master/WebScripts/Geneanet.user.js
 // ==/UserScript==
