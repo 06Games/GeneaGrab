@@ -9,15 +9,16 @@
 // @updateURL    https://github.com/06Games/GeneaGrab/raw/master/WebScripts/Geneanet.user.js
 // @downloadURL  https://github.com/06Games/GeneaGrab/raw/master/WebScripts/Geneanet.user.js
 // ==/UserScript==
+/*global waitForKeyElements*/
 
-$(document).ready(marqueursLink);
-waitForKeyElements("#viewer-marqueurs-liste", function(jNode) { marqueursLink(); });
-               
 function marqueursLink(){
   var i = 0;
-  $('#viewer-marqueurs-liste .voir > a').each(function(){
+  $("#viewer-marqueurs-liste .voir > a").each(function(){
     $(this).attr("href", $(this).attr("href").replace("?idcollection=", "").replace("&page=", "/").replace("&idmarqueur=", "?idmarqueur="));
     i++;
   });
   console.log(i.toString() + " marqueurs updated");
 }
+
+$(document).ready(marqueursLink);
+waitForKeyElements("#viewer-marqueurs-liste", function(jNode) { marqueursLink(); });
