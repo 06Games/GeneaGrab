@@ -1,0 +1,151 @@
+﻿using SixLabors.ImageSharp;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Threading.Tasks;
+using Windows.Storage.Streams;
+using Windows.UI.Core;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml.Navigation;
+
+namespace GeneaGrab.Views
+{
+    // geneagrab:registry?url=https://www.geneanet.org/archives/registres/view/17000/10
+    public sealed partial class Registry : Page, INotifyPropertyChanged
+    {
+        public Registry() => InitializeComponent();
+
+        public static RegistryInfo Info { get; set; }
+        async protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            if (await LoadRegistry(e.Parameter))
+            {
+                RefreshView();
+
+                Pages.Clear();
+                foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
+                _ = Task.Run(async () =>
+                {
+                    for (int i = 0; i < Pages.Count; i++)
+                    {
+                        var page = Pages[i];
+                        var img = await Info.Provider.API.GetTile(Info.RegistryID, page.Page, 0);
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+                        {
+                            page.Thumbnail = img.Image.ToImageSource();
+                            Pages[i] = page;
+                        });
+                    }
+                }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
+
+                await Info.Provider.API.GetTile(Info.RegistryID, Info.Page, 1);
+                RefreshView();
+            }
+            else await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+            {
+                if (Frame.CanGoBack) Frame.GoBack();
+                else Frame.Navigate(typeof(MainPage));
+            });
+        }
+
+        public ObservableCollection<PageList> Pages = new ObservableCollection<PageList>();
+        public async Task<bool> LoadRegistry(object Parameter)
+        {
+            if (Parameter is RegistryInfo) Info = Parameter as RegistryInfo;
+            else if (Parameter is Dictionary<string, string>)
+            {
+                var param = Parameter as Dictionary<string, string>;
+                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await Data.Providers["Geneanet"].API.Infos(uri);
+            }
+            else if (Parameter is Uri) Info = await Data.Providers["Geneanet"].API.Infos(Parameter as Uri);
+            return Info != null;
+        }
+
+        private async void ChangePage(object sender, ItemClickEventArgs e) => await ChangePage(e.ClickedItem as PageList);
+        public async Task ChangePage(PageList page)
+        {
+            Info.PageNumber = page.Number;
+            await Info.Provider.API.GetTile(Info.RegistryID, page.Page, 1);
+            RefreshView();
+        }
+        public void RefreshView()
+        {
+            Info_Location.Text = Info.Location.ToString();
+            Info_Registry.Text = Info.Registry.ToString();
+            Info_RegistryID.Text = Info.Registry.ID;
+
+            image.Source = Info.Page.Image.ToImageSource();
+            PageList.SelectedIndex = Info.Page.Number - 1;
+            OnPropertyChanged(nameof(image));
+            MainPage.SaveData();
+        }
+
+        private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download();
+        async Task<Windows.Storage.StorageFile> Download()
+        {
+            var page = await Info.Provider.API.Download(Info.RegistryID, Info.Page);
+
+            Windows.Storage.StorageFolder folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath("Registries", Info.Provider.ID, Info.Registry.ID);
+            Windows.Storage.StorageFile file = await folder.CreateFileAsync($"p{Info.Page.Number}.jpg", Windows.Storage.CreationCollisionOption.ReplaceExisting);
+            await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync());
+            RefreshView();
+            return file;
+        }
+        private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e) => System.Diagnostics.Process.Start("explorer.exe", $"/select, \"{(await Download()).Path}\"");
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    public class PageList
+    {
+        public int Number { get; set; }
+        public BitmapImage Thumbnail { get; set; }
+        public RPage Page { get; set; }
+    }
+}
+
+public static class Extensions
+{
+    public static BitmapImage ToImageSource(this SixLabors.ImageSharp.Image image)
+    {
+        var img = new BitmapImage();
+        if (image is null) return img;
+        InMemoryRandomAccessStream ms = new InMemoryRandomAccessStream();
+        image.Save(ms.AsStreamForWrite(), new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder());
+        ms.Seek(0);
+        img.SetSource(ms);
+        return img;
+    }
+
+    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Windows.Storage.StorageFolder folder, string name)
+    {
+        if (folder is null || string.IsNullOrWhiteSpace(name)) return folder;
+        else return await folder.CreateFolderAsync(name.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
+    }
+    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Task<Windows.Storage.StorageFolder> folder, string name) => await (await folder).CreateFolder(name);
+    public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, string path) => await CreateFolderPath(folder, path.Split(Path.DirectorySeparatorChar));
+    public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, params string[] path)
+    {
+        Windows.Storage.StorageFolder f = folder;
+        foreach (var dir in path) f = await CreateFolder(f, dir);
+        return f;
+    }
+
+    public static async Task<Windows.Storage.StorageFile> WriteFile(this Windows.Storage.StorageFolder folder, string filename, string content)
+    {
+        var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
+        File.WriteAllText(file.Path, content);
+        return file;
+    }
+    public static async Task<string> ReadFile(this Windows.Storage.StorageFolder folder, string filename)
+    {
+        var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
+        return File.ReadAllText(file.Path);
+    }
+}

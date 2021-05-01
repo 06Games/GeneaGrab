@@ -1,0 +1,50 @@
+﻿<Page
+    x:Class="GeneaGrab.Views.Registry"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:GeneaGrab.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Style="{StaticResource PageStyle}"
+    mc:Ignorable="d">
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" MinWidth="230" MaxWidth="320" />
+        </Grid.ColumnDefinitions>
+
+        <Image x:Name="image" />
+        <ListView x:Name="PageList" Padding="15" Grid.Row="1" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" Height="200" ItemClick="ChangePage" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsStackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="local:PageList">
+                    <StackPanel>
+                        <Image Source="{x:Bind Thumbnail}" MaxHeight="125" MaxWidth="125" />
+                        <TextBlock Text="{x:Bind Number}" Margin="12,6,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <StackPanel Grid.Column="1" Grid.RowSpan="2" BorderThickness="1,0,0,0" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
+            <StackPanel Padding="15" Spacing="15" HorizontalAlignment="Center">
+                <StackPanel>
+                    <TextBlock x:Name="Info_Location" Style="{ThemeResource BaseTextBlockStyle}" Text="City (District)" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="Info_Registry" Style="{ThemeResource BodyTextBlockStyle}" Text="Type (From - To)" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="Info_RegistryID" Style="{ThemeResource CaptionTextBlockStyle}" Text="Document number" TextWrapping="WrapWholeWords" />
+                </StackPanel>
+
+                <Button Width="200" Content="Download" Click="Download" />
+                <Button Width="200" Content="Open folder" Click="OpenFolder" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</Page>
