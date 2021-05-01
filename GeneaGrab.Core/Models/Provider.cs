@@ -18,10 +18,10 @@ namespace GeneaGrab
     public class Provider : IEquatable<Provider>
     {
         public Provider(ProviderAPI api) => API = api;
-        public Provider(ProviderAPI api, string id, string name)
+        public Provider(ProviderAPI api, string id)
         {
             ID = id;
-            Name = name;
+            Name = Data.Translate($"Provider/{ID}", ID);
             Icon = $"/Assets/Providers/{ID}.png";
             API = api;
         }

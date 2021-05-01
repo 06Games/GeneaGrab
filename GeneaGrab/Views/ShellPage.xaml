@@ -26,7 +26,7 @@
             <winui:NavigationViewItem x:Uid="Shell_Registry" helpers:NavHelper.NavigateTo="views:Registry" IsEnabled="{x:Bind IsRegistryLoaded, Mode=OneWay}" />
         </winui:NavigationView.MenuItems>
         <winui:NavigationView.AutoSuggestBox>
-            <AutoSuggestBox PlaceholderText="Registre" MaxWidth="400" Width="300" MinWidth="200" TextChanged="RegistrySearch_TextChanged" SuggestionChosen="RegistrySearch_SuggestionChosen"/>
+            <AutoSuggestBox PlaceholderText="Registry" x:Uid="/Core/Registry.Name" MaxWidth="400" Width="300" MinWidth="200" TextChanged="RegistrySearch_TextChanged" SuggestionChosen="RegistrySearch_SuggestionChosen"/>
         </winui:NavigationView.AutoSuggestBox>
         <Grid>
             <Frame x:Name="shellFrame" />

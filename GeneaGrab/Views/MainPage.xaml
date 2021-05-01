@@ -28,7 +28,7 @@
                             </Ellipse>
 
                             <TextBlock Grid.Column="1" Text="{x:Bind Name}" Margin="12,6,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
-                            <TextBlock  Grid.Column="1" Grid.Row="1" Text="{x:Bind RegisterCount}" Margin="12,0,0,6" Style="{ThemeResource BodyTextBlockStyle}"/>
+                            <TextBlock Grid.Column="1" Grid.Row="1" Text="{x:Bind RegisterCount}" Margin="12,0,0,6" Style="{ThemeResource BodyTextBlockStyle}"/>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>

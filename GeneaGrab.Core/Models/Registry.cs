@@ -62,7 +62,11 @@ namespace GeneaGrab
         {
             get
             {
-                var name = Types.Any() ? string.Join(", ", Types.Select(t => Enum.GetName(typeof(Type), t))) : ""; //Type
+                var name = Types.Any() ? string.Join(", ", Types.Select(t =>
+                {
+                    var type = Enum.GetName(typeof(Type), t);
+                    return Data.Translate($"Registry/Type/{type}", type);
+                })) : ""; //Type
 
                 //Dates
                 const string Date = "dd/MM/yyyy";

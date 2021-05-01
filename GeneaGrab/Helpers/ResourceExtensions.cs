@@ -1,17 +1,18 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-using Windows.ApplicationModel.Resources;
+﻿using Windows.ApplicationModel.Resources;
 
 namespace GeneaGrab.Helpers
 {
+    public enum Resource { Res, Core }
     internal static class ResourceExtensions
     {
-        private static ResourceLoader _resLoader = new ResourceLoader();
+        private static ResourceLoader res = new ResourceLoader("Resources");
+        private static ResourceLoader core = new ResourceLoader("Core");
 
-        public static string GetLocalized(this string resourceKey)
+        public static string GetLocalized(this string resourceKey) => res.GetString(resourceKey);
+        public static string GetLocalized(Resource view, string resourceKey)
         {
-            return _resLoader.GetString(resourceKey);
+            ResourceLoader loader = view == Resource.Core ? core : res;
+            return loader.GetString(resourceKey);
         }
     }
 }

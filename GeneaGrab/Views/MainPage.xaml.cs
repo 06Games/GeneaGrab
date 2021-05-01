@@ -10,7 +10,7 @@ namespace GeneaGrab.Views
     {
         public MainPage() => InitializeComponent();
 
-        public ObservableCollection<Provider> Providers => new ObservableCollection<Provider>(Data.Providers.Values);
+        public ObservableCollection<Provider> Providers { get; } = new ObservableCollection<Provider>(Data.Providers.Values);
         private void ProvidersList_ItemClick(object sender, ItemClickEventArgs e)
         {
             var Provider = e.ClickedItem as Provider;

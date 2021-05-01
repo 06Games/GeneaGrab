@@ -22,6 +22,8 @@ namespace GeneaGrab
 
     public static class Data
     {
+        public static System.Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
+
         private static ReadOnlyDictionary<string, Provider> _providers;
         public static ReadOnlyDictionary<string, Provider> Providers
         {
@@ -30,9 +32,9 @@ namespace GeneaGrab
                 if (_providers != null) return _providers;
 
                 var providers = new List<Provider>();
-                providers.Add(new Provider(new Geneanet(), "Geneanet", "Geneanet") { URL = "https://www.geneanet.org/" });
+                providers.Add(new Provider(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" });
                 //TODO: Add the others
-                //dic.Add(new Provider(null, "AD06", "Archives départementales des Alpes-Maritimes"));
+                //dic.Add(new Provider(null, "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" });
                 return _providers = new ReadOnlyDictionary<string, Provider>(providers.ToDictionary(k => k.ID, v => v));
             }
         }

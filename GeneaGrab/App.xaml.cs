@@ -27,6 +27,7 @@ namespace GeneaGrab
 
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
+            Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
             if (!args.PrelaunchActivated)
             {
                 await ActivationService.ActivateAsync(args);
