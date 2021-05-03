@@ -1,4 +1,5 @@
 ﻿using GeneaGrab.Services;
+using SixLabors.ImageSharp;
 using System;
 using System.IO;
 using Windows.ApplicationModel.Activation;
@@ -29,9 +30,16 @@ namespace GeneaGrab
             Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
             Data.GetImage = async (registry, page) =>
             {
-                var folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath("Registries", registry.ProviderID, registry.ID);
+                var folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
                 var file = await folder.TryGetItemAsync($"p{page.Number}.jpg") as Windows.Storage.StorageFile;
-                return file is null ? null : await SixLabors.ImageSharp.Image.LoadAsync(await file.OpenStreamForWriteAsync());
+                return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync());
+            };
+            Data.SaveImage = async (registry, page) =>
+            {
+                Windows.Storage.StorageFolder folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
+                Windows.Storage.StorageFile file = await folder.CreateFileAsync($"p{page.Number}.jpg", Windows.Storage.CreationCollisionOption.ReplaceExisting);
+                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync()); } catch { }
+                return file.Path;
             };
 
             if (!args.PrelaunchActivated) await ActivationService.ActivateAsync(args);

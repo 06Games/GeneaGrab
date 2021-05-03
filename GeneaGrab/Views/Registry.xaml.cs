@@ -65,10 +65,19 @@ namespace GeneaGrab.Views
             else if (Parameter is Dictionary<string, string>)
             {
                 var param = Parameter as Dictionary<string, string>;
-                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await Data.Providers["Geneanet"].API.Infos(uri);
+                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await TryGetFromProviders(uri);
+
+
             }
-            else if (Parameter is Uri) Info = await Data.Providers["Geneanet"].API.Infos(Parameter as Uri);
+            else if (Parameter is Uri) Info = await TryGetFromProviders(Parameter as Uri);
             else inRam = true;
+
+            async Task<RegistryInfo> TryGetFromProviders(Uri uri)
+            {
+                foreach (var provider in Data.Providers.Values)
+                    if (provider.API.CheckURL(uri)) return await provider.API.Infos(uri);
+                return null;
+            }
 
             return (Info != null, inRam);
         }
@@ -93,17 +102,13 @@ namespace GeneaGrab.Views
         }
 
         private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download();
-        async Task<Windows.Storage.StorageFile> Download()
+        async Task<string> Download()
         {
             var page = await Info.Provider.API.Download(Info.RegistryID, Info.Page);
-
-            Windows.Storage.StorageFolder folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath("Registries", Info.Provider.ID, Info.Registry.ID);
-            Windows.Storage.StorageFile file = await folder.CreateFileAsync($"p{Info.Page.Number}.jpg", Windows.Storage.CreationCollisionOption.ReplaceExisting);
-            await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync());
             RefreshView();
-            return file;
+            return await Data.SaveImage(Info.Registry, page);
         }
-        private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e) => System.Diagnostics.Process.Start("explorer.exe", $"/select, \"{(await Download()).Path}\"");
+        private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e) => System.Diagnostics.Process.Start("explorer.exe", $"/select, \"{await Download()}\"");
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -136,7 +141,7 @@ public static class Extensions
         if (folder is null || string.IsNullOrWhiteSpace(name)) return folder;
         else return await folder.CreateFolderAsync(name.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
     }
-    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Task<Windows.Storage.StorageFolder> folder, string name) => await (await folder).CreateFolder(name);
+    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Task<Windows.Storage.StorageFolder> folder, string name) => await CreateFolder(await folder, name);
     public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, string path) => await CreateFolderPath(folder, path.Split(Path.DirectorySeparatorChar));
     public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, params string[] path)
     {
@@ -145,12 +150,15 @@ public static class Extensions
         return f;
     }
 
+    public static async Task<Windows.Storage.StorageFile> WriteFile(this Task<Windows.Storage.StorageFolder> folder, string filename, string content) => await WriteFile(await folder, filename, content);
     public static async Task<Windows.Storage.StorageFile> WriteFile(this Windows.Storage.StorageFolder folder, string filename, string content)
     {
         var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
         File.WriteAllText(file.Path, content);
         return file;
     }
+
+    public static async Task<string> ReadFile(this Task<Windows.Storage.StorageFolder> folder, string filename) => await ReadFile(await folder, filename);
     public static async Task<string> ReadFile(this Windows.Storage.StorageFolder folder, string filename)
     {
         var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);

@@ -38,58 +38,44 @@ namespace GeneaGrab.Providers
             Location.District = notes.location;
             Registry.LocationID = Location.ID = Location.ToString();
 
-            Registry.From = ParseDate(infos.Groups["from"].Value);
-            Registry.To = ParseDate(infos.Groups["to"].Value);
+            Registry.From = Data.ParseDate(infos.Groups["from"].Value);
+            Registry.To = Data.ParseDate(infos.Groups["to"].Value);
             Registry.Pages = JObject.Parse($"{{results: {pages}}}").Value<JArray>("results").Select(p => new RPage { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p);
 
-            AddOrUpdate(Data.Locations, Location.ID, Location);
-            AddOrUpdate(Data.Registries, Registry.ID, Registry);
+            Data.AddOrUpdate(Data.Locations, Location.ID, Location);
+            Data.AddOrUpdate(Data.Registries, Registry.ID, Registry);
             return new RegistryInfo { ProviderID = "Geneanet", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
-        }
-
-        public static void AddOrUpdate<T>(Dictionary<string, T> dic, string key, T obj)
-        {
-            if (dic.ContainsKey(key)) dic[key] = obj;
-            else dic.Add(key, obj);
-        }
-        public static DateTime? ParseDate(string date)
-        {
-            var culture = new System.Globalization.CultureInfo("fr-FR");
-            var style = System.Globalization.DateTimeStyles.AssumeLocal;
-
-            if (DateTime.TryParse(date, culture, style, out var d)) return d;
-            else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return d;
-            return null;
         }
         public static (List<Registry.Type> types, string location, string notes) TryParseNotes(string notes)
         {
             var types = new List<Registry.Type>();
             var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - ((?<betterType>.*?)\\.|-|).*)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/1
             var global = (typesMatch.Groups["globalType"] ?? typesMatch.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
-            foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(','))
+            foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(',')) 
+                if (TryGetType(t.Trim(' '), out var type)) types.Add(type);
+
+            bool TryGetType(string type, out Registry.Type t)
             {
-                var _type = GetType(t.Trim(' ').ToLowerInvariant());
-                if (_type != Registry.Type.Unknown) types.Add(_type);
+                var civilStatus = global.Contains("état civil");
+                if (type.Contains("naissances")) t = civilStatus ? Registry.Type.Birth : Registry.Type.BirthTable;
+                else if (type.Contains("baptemes")) t = Registry.Type.Baptism;
+                else if (type.Contains("promesses de mariage")) t = Registry.Type.Banns;
+                else if (type.Contains("mariages")) t = civilStatus ? Registry.Type.Marriage : Registry.Type.MarriageTable;
+                else if (type.Contains("décès")) t = civilStatus ? Registry.Type.Death : Registry.Type.DeathTable;
+                else if (type.Contains("sépultures") || type.Contains("inhumation")) t = Registry.Type.Burial;
 
-                Registry.Type GetType(string type)
+                else if (type.Contains("recensements")) t = Registry.Type.Census;
+                else if (type.Contains("archives notariales")) t = Registry.Type.Notarial;
+                else if (type.Contains("registres matricules")) t = Registry.Type.Military;
+
+                else if (type.Contains("autres") || type.Contains("archives privées")) t = Registry.Type.Other;
+                else
                 {
-                    var civilStatus = global.Contains("état civil");
-                    if (type.Contains("naissances")) return civilStatus ? Registry.Type.Birth : Registry.Type.BirthTable;
-                    if (type.Contains("baptemes")) return Registry.Type.Baptism;
-                    if (type.Contains("promesses de mariage")) return Registry.Type.Banns;
-                    if (type.Contains("mariages")) return civilStatus ? Registry.Type.Marriage : Registry.Type.MarriageTable;
-                    if (type.Contains("décès")) return civilStatus ? Registry.Type.Death : Registry.Type.DeathTable;
-                    if (type.Contains("sépultures") || type.Contains("inhumation")) return Registry.Type.Burial;
-
-                    if (type.Contains("recensements")) return Registry.Type.Census;
-                    if (type.Contains("archives notariales")) return Registry.Type.Notarial;
-                    if (type.Contains("registres matricules")) return Registry.Type.Military;
-
-                    if (type.Contains("autres") || type.Contains("archives privées")) return Registry.Type.Other;
-
-                    return Registry.Type.Unknown;
+                    t = Registry.Type.Unknown;
+                    return false;
                 }
+                return true;
             }
 
             var location = Regex.Match(notes, ".*Paroisse de (?<location>.*)\\.|-|<.*").Groups["location"]?.Value;
@@ -101,15 +87,7 @@ namespace GeneaGrab.Providers
         public async Task<RPage> GetTile(string RegistryID, RPage page, int zoom) => await GetTiles(RegistryID, page, zoom, false);
         public async Task<RPage> GetTiles(string RegistryID, RPage current, double zoom, bool progress)
         {
-            if (zoom <= current.Zoom)
-            {
-                if (current.Image is null)
-                {
-                    current.Image = await Data.GetImage(Data.Registries[RegistryID], current);
-                    if (current.Image != null) return current;
-                }
-                else return current;
-            }
+            if (await Data.TryGetImageFromDrive(RegistryID, current, zoom)) return current;
 
             var chemin_image = Uri.EscapeDataString($"doc/{current.URL}");
             var baseURL = $"https://www.geneanet.org/zoomify/?path={chemin_image}/";
@@ -136,6 +114,7 @@ namespace GeneaGrab.Providers
             foreach (var tile in tasks) current.Image = current.Image.MergeTile(tile.Key.Result, tile.Value);
 
             Data.Registries[RegistryID].Pages[current.Number - 1] = current;
+            await Data.SaveImage(Data.Registries[RegistryID], current);
             return current;
         }
 

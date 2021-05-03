@@ -1,7 +1,9 @@
 ﻿using GeneaGrab.Providers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GeneaGrab
 {
@@ -22,8 +24,9 @@ namespace GeneaGrab
 
     public static class Data
     {
-        public static System.Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
-        public static System.Func<Registry, RPage, System.Threading.Tasks.Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p) => null;
+        public static Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
+        public static Func<Registry, RPage, Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p) => null;
+        public static Func<Registry, RPage, Task<string>> SaveImage { get; set; } = (r, p) => null;
 
         private static ReadOnlyDictionary<string, Provider> _providers;
         public static ReadOnlyDictionary<string, Provider> Providers
@@ -34,12 +37,38 @@ namespace GeneaGrab
 
                 var providers = new List<Provider>();
                 providers.Add(new Provider(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" });
+                providers.Add(new Provider(new AD06(), "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" });
                 //TODO: Add the others
-                //dic.Add(new Provider(null, "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" });
                 return _providers = new ReadOnlyDictionary<string, Provider>(providers.ToDictionary(k => k.ID, v => v));
             }
         }
         public static Dictionary<string, Location> Locations { get; } = new Dictionary<string, Location>();
         public static Dictionary<string, Registry> Registries { get; } = new Dictionary<string, Registry>();
+
+
+
+        public static void AddOrUpdate<T>(Dictionary<string, T> dic, string key, T obj)
+        {
+            if (dic.ContainsKey(key)) dic[key] = obj;
+            else dic.Add(key, obj);
+        }
+        public static DateTime? ParseDate(string date)
+        {
+            var culture = new System.Globalization.CultureInfo("fr-FR");
+            var style = System.Globalization.DateTimeStyles.AssumeLocal;
+
+            if (DateTime.TryParse(date, culture, style, out var d)) return d;
+            else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return d;
+            return null;
+        }
+        public static async Task<bool> TryGetImageFromDrive(string RegistryID, RPage current, double zoom)
+        {
+            if (zoom > current.Zoom) return false;
+            if (current.Image != null) return true;
+
+            current.Image = await GetImage(Registries[RegistryID], current);
+            if (current.Image != null) return true;
+            else return false;
+        }
     }
 }
