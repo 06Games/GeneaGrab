@@ -23,6 +23,7 @@ namespace GeneaGrab
     public static class Data
     {
         public static System.Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
+        public static System.Func<Registry, RPage, System.Threading.Tasks.Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p) => null;
 
         private static ReadOnlyDictionary<string, Provider> _providers;
         public static ReadOnlyDictionary<string, Provider> Providers

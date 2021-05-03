@@ -1,12 +1,9 @@
-﻿using System;
+﻿using GeneaGrab.Activation;
+using GeneaGrab.Core.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
-using GeneaGrab.Activation;
-using GeneaGrab.Core.Helpers;
-using GeneaGrab.Services;
-
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;

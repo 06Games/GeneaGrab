@@ -1,9 +1,6 @@
-﻿using System;
+﻿using GeneaGrab.Services;
+using System;
 using System.Threading.Tasks;
-
-using GeneaGrab.Core.Helpers;
-using GeneaGrab.Services;
-
 using Windows.ApplicationModel.Activation;
 
 namespace GeneaGrab.Activation

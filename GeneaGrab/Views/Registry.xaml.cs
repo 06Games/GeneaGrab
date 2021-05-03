@@ -22,25 +22,29 @@ namespace GeneaGrab.Views
         async protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if (await LoadRegistry(e.Parameter))
+            var loadR = await LoadRegistry(e.Parameter);
+            if (loadR.success)
             {
                 RefreshView();
 
-                Pages.Clear();
-                foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
-                _ = Task.Run(async () =>
+                if (!loadR.inRam)
                 {
-                    for (int i = 0; i < Pages.Count; i++)
+                    Pages.Clear();
+                    foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
+                    _ = Task.Run(async () =>
                     {
-                        var page = Pages[i];
-                        var img = await Info.Provider.API.GetTile(Info.RegistryID, page.Page, 0);
-                        await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+                        for (int i = 0; i < Pages.Count; i++)
                         {
-                            page.Thumbnail = img.Image.ToImageSource();
-                            Pages[i] = page;
-                        });
-                    }
-                }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
+                            var page = Pages[i];
+                            var img = await Info.Provider.API.GetTile(Info.RegistryID, page.Page, 0);
+                            await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+                            {
+                                page.Thumbnail = img.Image.ToImageSource();
+                                Pages[i] = page;
+                            });
+                        }
+                    }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
+                }
 
                 await Info.Provider.API.GetTile(Info.RegistryID, Info.Page, 1);
                 RefreshView();
@@ -53,8 +57,10 @@ namespace GeneaGrab.Views
         }
 
         public ObservableCollection<PageList> Pages = new ObservableCollection<PageList>();
-        public async Task<bool> LoadRegistry(object Parameter)
+        public async Task<(bool success, bool inRam)> LoadRegistry(object Parameter)
         {
+            var inRam = false;
+
             if (Parameter is RegistryInfo) Info = Parameter as RegistryInfo;
             else if (Parameter is Dictionary<string, string>)
             {
@@ -62,7 +68,9 @@ namespace GeneaGrab.Views
                 if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await Data.Providers["Geneanet"].API.Infos(uri);
             }
             else if (Parameter is Uri) Info = await Data.Providers["Geneanet"].API.Infos(Parameter as Uri);
-            return Info != null;
+            else inRam = true;
+
+            return (Info != null, inRam);
         }
 
         private async void ChangePage(object sender, ItemClickEventArgs e) => await ChangePage(e.ClickedItem as PageList);

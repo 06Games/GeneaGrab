@@ -1,7 +1,6 @@
-﻿using System;
-
-using GeneaGrab.Services;
-
+﻿using GeneaGrab.Services;
+using System;
+using System.IO;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 
@@ -28,10 +27,15 @@ namespace GeneaGrab
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
-            if (!args.PrelaunchActivated)
+            Data.GetImage = async (registry, page) =>
             {
-                await ActivationService.ActivateAsync(args);
-            }
+                var folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath("Registries", registry.ProviderID, registry.ID);
+                var file = await folder.TryGetItemAsync($"p{page.Number}.jpg") as Windows.Storage.StorageFile;
+                return file is null ? null : await SixLabors.ImageSharp.Image.LoadAsync(await file.OpenStreamForWriteAsync());
+            };
+
+            if (!args.PrelaunchActivated) await ActivationService.ActivateAsync(args);
+
             await Views.MainPage.LoadData();
         }
 

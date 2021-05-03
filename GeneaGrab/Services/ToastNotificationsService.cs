@@ -1,8 +1,6 @@
-﻿using System;
+﻿using GeneaGrab.Activation;
+using System;
 using System.Threading.Tasks;
-
-using GeneaGrab.Activation;
-
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Notifications;
 

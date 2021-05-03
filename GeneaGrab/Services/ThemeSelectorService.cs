@@ -1,8 +1,6 @@
-﻿using System;
+﻿using GeneaGrab.Helpers;
+using System;
 using System.Threading.Tasks;
-
-using GeneaGrab.Helpers;
-
 using Windows.ApplicationModel.Core;
 using Windows.Storage;
 using Windows.UI.Core;

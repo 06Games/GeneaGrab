@@ -112,7 +112,11 @@ namespace GeneaGrab
         [JsonIgnore] public SixLabors.ImageSharp.Image Image { get; set; }
 
         //public int[] Zoom { get; set; } //Remove? Image layers instead?
-        public SixLabors.ImageSharp.Point Tiles { get; set; }
-        public Grabber.Args Args { get; set; }
+        public int Zoom { get; set; } = -1;
+        public int MaxZoom { get; set; } = -1;
+        public int Width { get; set; }
+        public int Height { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public int? TileSize { get; set; }
     }
 }

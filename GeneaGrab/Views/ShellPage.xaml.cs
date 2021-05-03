@@ -175,7 +175,7 @@ namespace GeneaGrab.Views
             if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => r.Name);
 
             var registries = GetRegistries(r => r.URL).ToList() ?? new List<Result>();
-            if(!registries.Any()) foreach (var provider in Data.Providers) if (provider.Value.API.CheckURL(uri)) registries.Add(new Result { Text = $"Online Match: {provider.Key}", Value = uri });
+            if (!registries.Any()) foreach (var provider in Data.Providers) if (provider.Value.API.CheckURL(uri)) registries.Add(new Result { Text = $"Online Match: {provider.Key}", Value = uri });
             return registries;
         }
         class Result
@@ -187,7 +187,7 @@ namespace GeneaGrab.Views
         private void RegistrySearch_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {
             var result = args.SelectedItem as Result;
-            if(result != null) NavigationService.Navigate(typeof(Registry), result.Value);
+            if (result != null) NavigationService.Navigate(typeof(Registry), result.Value);
             sender.Text = string.Empty;
         }
     }
