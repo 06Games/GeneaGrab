@@ -30,15 +30,23 @@ namespace GeneaGrab
             Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
             Data.GetImage = async (registry, page) =>
             {
-                var folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
-                var file = await folder.TryGetItemAsync($"p{page.Number}.jpg") as Windows.Storage.StorageFile;
-                return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync());
+                try
+                {
+                    var folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
+                    var file = await folder.TryGetItemAsync($"p{page.Number}.jpg") as Windows.Storage.StorageFile;
+                    return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync());
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine(e);
+                    return null;
+                }
             };
             Data.SaveImage = async (registry, page) =>
             {
                 Windows.Storage.StorageFolder folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
                 Windows.Storage.StorageFile file = await folder.CreateFileAsync($"p{page.Number}.jpg", Windows.Storage.CreationCollisionOption.ReplaceExisting);
-                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync()); } catch { }
+                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync()); } catch (Exception e) { System.Diagnostics.Debug.WriteLine(e); }
                 return file.Path;
             };
 

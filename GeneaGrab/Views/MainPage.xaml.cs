@@ -26,19 +26,20 @@ namespace GeneaGrab.Views
             var queryOptions = new QueryOptions
             {
                 FolderDepth = FolderDepth.Deep,
-                IndexerOption = IndexerOption.UseIndexerWhenAvailable
+                IndexerOption = IndexerOption.UseIndexerWhenAvailable,
+                ApplicationSearchFilter = "Registry.json"
             };
 
-            queryOptions.ApplicationSearchFilter = "Locations.json";
-            foreach (var loc in await dataFolder.CreateFileQueryWithOptions(queryOptions).GetFilesAsync())
-                foreach (var kv in JsonConvert.DeserializeObject<List<KeyValuePair<string, Location>>>(await (await loc.GetParentAsync()).ReadFile(loc.Name)))
-                    Data.Locations.Add(kv.Key, kv.Value);
-
-            queryOptions.ApplicationSearchFilter = "Registry.json";
-            foreach (var reg in await dataFolder.CreateFileQueryWithOptions(queryOptions).GetFilesAsync())
+            foreach (var provider in Data.Providers)
             {
-                var kv = JsonConvert.DeserializeObject<KeyValuePair<string, GeneaGrab.Registry>>(await (await reg.GetParentAsync()).ReadFile(reg.Name));
-                Data.Registries.Add(kv.Key, kv.Value);
+                var folder = await dataFolder.CreateFolder(provider.Key);
+                var _l = await folder.ReadFile("Locations.json");
+                foreach (var loc in JsonConvert.DeserializeObject<Dictionary<string, Location>>(_l)) provider.Value.Locations.Add(loc.Key, loc.Value);
+                foreach (var reg in await folder.CreateFileQueryWithOptions(queryOptions).GetFilesAsync())
+                {
+                    var kv = JsonConvert.DeserializeObject<KeyValuePair<string, GeneaGrab.Registry>>(await (await reg.GetParentAsync()).ReadFile(reg.Name));
+                    provider.Value.Registries.Add(kv.Key, kv.Value);
+                }
             }
         }
 
@@ -47,10 +48,12 @@ namespace GeneaGrab.Views
         public static async Task SaveDataAsync()
         {
             var dataFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
-            foreach (var providers in Data.Providers)
-                await dataFolder.CreateFolder(providers.Key).WriteFile("Locations.json", JsonConvert.SerializeObject(Data.Locations.Where(l => l.Value.ProviderID == providers.Key), Formatting.Indented));
-            foreach (var registry in Data.Registries)
-                await dataFolder.CreateFolderPath(registry.Value.ProviderID, registry.Value.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+            foreach (var provider in Data.Providers)
+            {
+                var folder = await dataFolder.CreateFolder(provider.Key);
+                await folder.WriteFile("Locations.json", JsonConvert.SerializeObject(provider.Value.Locations, Formatting.Indented));
+                foreach(var registry in provider.Value.Registries) await folder.CreateFolderPath(registry.Value.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+            }
         }
     }
 }

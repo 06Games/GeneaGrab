@@ -11,8 +11,8 @@ namespace GeneaGrab
     {
         bool CheckURL(Uri URL);
         Task<RegistryInfo> Infos(Uri URL);
-        Task<RPage> GetTile(string RegistryID, RPage page, int zoom);
-        Task<RPage> Download(string RegistryID, RPage page);
+        Task<RPage> GetTile(Registry Registry, RPage page, int zoom);
+        Task<RPage> Download(Registry Registry, RPage page);
     }
     /// <summary>Data on the registry provider</summary>
     public class Provider : IEquatable<Provider>
@@ -34,12 +34,13 @@ namespace GeneaGrab
 
         public string Icon { get; set; }
 
-        [JsonIgnore] public IEnumerable<Location> Locations => Data.Locations.Values.Where(l => l.ProviderID == ID);
+        public Dictionary<string, Location> Locations { get; } = new Dictionary<string, Location>();
+        public Dictionary<string, Registry> Registries { get; } = new Dictionary<string, Registry>();
         public string RegisterCount
         {
             get
             {
-                var count = Data.Registries.Values.Count(r => r.ProviderID == ID);
+                var count = Registries.Count;
                 if (count == 0) return "Aucun registre";
                 else if (count == 1) return "1 registre";
                 else return $"{count} registres";

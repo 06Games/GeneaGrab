@@ -38,8 +38,8 @@ namespace GeneaGrab.Providers
             Registry.Types = GetTypes(query["TYPEACTE"]);
             if (!int.TryParse(query["page"], out var _p)) _p = 1;
 
-            Data.AddOrUpdate(Data.Locations, Location.ID, Location);
-            Data.AddOrUpdate(Data.Registries, Registry.ID, Registry);
+            Data.AddOrUpdate(Data.Providers["AD06"].Locations, Location.ID, Location);
+            Data.AddOrUpdate(Data.Providers["AD06"].Registries, Registry.ID, Registry);
             return new RegistryInfo { ProviderID = "AD06", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
         }
         public List<Registry.Type> GetTypes(string TYPEACTE)
@@ -69,11 +69,11 @@ namespace GeneaGrab.Providers
             return types;
         }
 
-        public async Task<RPage> GetTile(string RegistryID, RPage page, int zoom) => await GetTiles(RegistryID, page, zoom, false);
-        public async Task<RPage> Download(string RegistryID, RPage page) => await GetTiles(RegistryID, page, Grabber.CalculateIndex(page), true);
-        public async Task<RPage> GetTiles(string RegistryID, RPage current, double zoom, bool progress) //The zoom parameter isn't really supported
+        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => await GetTiles(Registry, page, zoom, false);
+        public async Task<RPage> Download(Registry Registry, RPage page) => await GetTiles(Registry, page, Grabber.CalculateIndex(page), true);
+        public async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, bool progress) //The zoom parameter isn't really supported
         {
-            if (await Data.TryGetImageFromDrive(RegistryID, current, zoom)) return current;
+            if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
             var client = new WebClient();
             string link = null;
@@ -87,8 +87,8 @@ namespace GeneaGrab.Providers
             current.Image = Image.Load(await client.OpenReadTaskAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}")));
             current.Zoom = 1;
 
-            Data.Registries[RegistryID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Data.Registries[RegistryID], current);
+            Data.Providers["AD06"].Registries[Registry.ID].Pages[current.Number - 1] = current;
+            await Data.SaveImage(Registry, current);
             return current;
         }
 

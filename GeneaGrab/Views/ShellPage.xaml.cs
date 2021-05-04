@@ -170,7 +170,7 @@ namespace GeneaGrab.Views
         IEnumerable<Result> Search(string query)
         {
             IEnumerable<Result> GetRegistries(Func<GeneaGrab.Registry, string> contains)
-                => Data.Registries.Values.Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false).Select(r => new Result { Text = r.Name, Value = new RegistryInfo(r) });
+                => Data.Providers.Values.SelectMany(p => p.Registries.Values).Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false).Select(r => new Result { Text = r.Name, Value = new RegistryInfo(r) });
 
             if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => r.Name);
 

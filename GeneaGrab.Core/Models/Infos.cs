@@ -15,9 +15,9 @@ namespace GeneaGrab
         public string ProviderID;
         public Provider Provider => Data.Providers[ProviderID];
         public string LocationID;
-        public Location Location => Data.Locations[LocationID];
+        public Location Location => Provider.Locations[LocationID];
         public string RegistryID;
-        public Registry Registry => Data.Registries[RegistryID];
+        public Registry Registry => Provider.Registries[RegistryID];
         public int PageNumber;
         public RPage Page => Registry.Pages.ElementAtOrDefault(PageNumber - 1) ?? Registry.Pages.FirstOrDefault();
     }
@@ -42,8 +42,6 @@ namespace GeneaGrab
                 return _providers = new ReadOnlyDictionary<string, Provider>(providers.ToDictionary(k => k.ID, v => v));
             }
         }
-        public static Dictionary<string, Location> Locations { get; } = new Dictionary<string, Location>();
-        public static Dictionary<string, Registry> Registries { get; } = new Dictionary<string, Registry>();
 
 
 
@@ -61,12 +59,12 @@ namespace GeneaGrab
             else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return d;
             return null;
         }
-        public static async Task<bool> TryGetImageFromDrive(string RegistryID, RPage current, double zoom)
+        public static async Task<bool> TryGetImageFromDrive(Registry registry, RPage current, double zoom)
         {
             if (zoom > current.Zoom) return false;
             if (current.Image != null) return true;
 
-            current.Image = await GetImage(Registries[RegistryID], current);
+            current.Image = await GetImage(registry, current);
             if (current.Image != null) return true;
             else return false;
         }

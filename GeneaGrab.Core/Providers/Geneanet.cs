@@ -43,8 +43,8 @@ namespace GeneaGrab.Providers
             Registry.Pages = JObject.Parse($"{{results: {pages}}}").Value<JArray>("results").Select(p => new RPage { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p);
 
-            Data.AddOrUpdate(Data.Locations, Location.ID, Location);
-            Data.AddOrUpdate(Data.Registries, Registry.ID, Registry);
+            Data.AddOrUpdate(Data.Providers["Geneanet"].Locations, Location.ID, Location);
+            Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
             return new RegistryInfo { ProviderID = "Geneanet", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
         }
         public static (List<Registry.Type> types, string location, string notes) TryParseNotes(string notes)
@@ -53,7 +53,7 @@ namespace GeneaGrab.Providers
             var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - ((?<betterType>.*?)\\.|-|).*)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/1
             var global = (typesMatch.Groups["globalType"] ?? typesMatch.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
             foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(',')) 
-                if (TryGetType(t.Trim(' '), out var type)) types.Add(type);
+                if (TryGetType(t.Trim(' ').ToLowerInvariant(), out var type)) types.Add(type);
 
             bool TryGetType(string type, out Registry.Type t)
             {
@@ -84,10 +84,10 @@ namespace GeneaGrab.Providers
             return (types, location, note ?? notes);
         }
 
-        public async Task<RPage> GetTile(string RegistryID, RPage page, int zoom) => await GetTiles(RegistryID, page, zoom, false);
-        public async Task<RPage> GetTiles(string RegistryID, RPage current, double zoom, bool progress)
+        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => await GetTiles(Registry, page, zoom, false);
+        public async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, bool progress)
         {
-            if (await Data.TryGetImageFromDrive(RegistryID, current, zoom)) return current;
+            if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
             var chemin_image = Uri.EscapeDataString($"doc/{current.URL}");
             var baseURL = $"https://www.geneanet.org/zoomify/?path={chemin_image}/";
@@ -113,11 +113,11 @@ namespace GeneaGrab.Providers
             await Task.WhenAll(tasks.Keys);
             foreach (var tile in tasks) current.Image = current.Image.MergeTile(tile.Key.Result, tile.Value);
 
-            Data.Registries[RegistryID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Data.Registries[RegistryID], current);
+            Data.Providers["Geneanet"].Registries[Registry.ID].Pages[current.Number - 1] = current;
+            await Data.SaveImage(Registry, current);
             return current;
         }
 
-        public async Task<RPage> Download(string RegistryID, RPage page) => await GetTiles(RegistryID, page, Grabber.CalculateIndex(page), true);
+        public async Task<RPage> Download(Registry Registry, RPage page) => await GetTiles(Registry, page, Grabber.CalculateIndex(page), true);
     }
 }

@@ -18,7 +18,8 @@ namespace GeneaGrab
         public string District { get; set; }
         public override string ToString() => string.IsNullOrEmpty(District) ? Name : $"{Name} ({District})";
 
-        [JsonIgnore] public IEnumerable<Registry> Registers => Data.Registries.Values.Where(r => r.LocationID == ID);
+        [JsonIgnore] public Provider Provider => Data.Providers[ProviderID];
+        [JsonIgnore] public IEnumerable<Registry> Registers => Provider.Registries.Values.Where(r => r.LocationID == ID);
 
 
         public bool Equals(Location other) => this == other;

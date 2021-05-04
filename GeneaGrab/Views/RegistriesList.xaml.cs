@@ -39,7 +39,7 @@ namespace GeneaGrab.Views
             if (provider is null) return;
 
             _items.Clear();
-            foreach (var location in provider.Locations) _items.Add(location);
+            foreach (var location in provider.Locations.Values) _items.Add(location);
         }
 
         private void RegisterList_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs e)

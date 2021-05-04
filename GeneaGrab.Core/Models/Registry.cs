@@ -14,8 +14,10 @@ namespace GeneaGrab
             LocationID = location.ID;
             ProviderID = location.ProviderID;
         }
-        public string LocationID { get; set; }
         public string ProviderID { get; set; }
+        [JsonIgnore] public Provider Provider => Data.Providers[ProviderID];
+        public string LocationID { get; set; }
+        [JsonIgnore] public Location Location => Provider.Locations[LocationID];
 
         public string ID { get; set; }
         public string URL { get; set; }
