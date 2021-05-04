@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Threading.Tasks;
-using Windows.Storage.Streams;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
@@ -22,12 +20,12 @@ namespace GeneaGrab.Views
         async protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            var loadR = await LoadRegistry(e.Parameter);
-            if (loadR.success)
+            var (success, inRam) = await LoadRegistry(e.Parameter);
+            if (success)
             {
                 RefreshView();
 
-                if (!loadR.inRam)
+                if (!inRam)
                 {
                     Pages.Clear();
                     foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
@@ -98,7 +96,7 @@ namespace GeneaGrab.Views
             image.Source = Info.Page.Image.ToImageSource();
             PageList.SelectedIndex = Info.Page.Number - 1;
             OnPropertyChanged(nameof(image));
-            MainPage.SaveData();
+            App.SaveData();
         }
 
         private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download();
@@ -120,48 +118,5 @@ namespace GeneaGrab.Views
         public int Number { get; set; }
         public BitmapImage Thumbnail { get; set; }
         public RPage Page { get; set; }
-    }
-}
-
-public static class Extensions
-{
-    public static BitmapImage ToImageSource(this SixLabors.ImageSharp.Image image)
-    {
-        var img = new BitmapImage();
-        if (image is null) return img;
-        InMemoryRandomAccessStream ms = new InMemoryRandomAccessStream();
-        image.Save(ms.AsStreamForWrite(), new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder());
-        ms.Seek(0);
-        img.SetSource(ms);
-        return img;
-    }
-
-    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Windows.Storage.StorageFolder folder, string name)
-    {
-        if (folder is null || string.IsNullOrWhiteSpace(name)) return folder;
-        else return await folder.CreateFolderAsync(name.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
-    }
-    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Task<Windows.Storage.StorageFolder> folder, string name) => await CreateFolder(await folder, name);
-    public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, string path) => await CreateFolderPath(folder, path.Split(Path.DirectorySeparatorChar));
-    public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, params string[] path)
-    {
-        Windows.Storage.StorageFolder f = folder;
-        foreach (var dir in path) f = await CreateFolder(f, dir);
-        return f;
-    }
-
-    public static async Task<Windows.Storage.StorageFile> WriteFile(this Task<Windows.Storage.StorageFolder> folder, string filename, string content) => await WriteFile(await folder, filename, content);
-    public static async Task<Windows.Storage.StorageFile> WriteFile(this Windows.Storage.StorageFolder folder, string filename, string content)
-    {
-        var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
-        File.WriteAllText(file.Path, content);
-        return file;
-    }
-
-    public static async Task<string> ReadFile(this Task<Windows.Storage.StorageFolder> folder, string filename) => await ReadFile(await folder, filename);
-    public static async Task<string> ReadFile(this Windows.Storage.StorageFolder folder, string filename)
-    {
-        var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
-        return File.ReadAllText(file.Path);
     }
 }
