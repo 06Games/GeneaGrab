@@ -122,39 +122,39 @@
     <comment>Application display name</comment>
   </data>
   <data name="AppDescription" xml:space="preserve">
-    <value>Downloading from the departmental archives has never been easier!</value>
+    <value>Télécharger depuis les archives départementales n'a jamais été aussi facile !</value>
     <comment>Application description</comment>
   </data>
   <data name="Shell_Main.Content" xml:space="preserve">
-    <value>List</value>
+    <value>Liste</value>
     <comment>Navigation view item name for Main</comment>
   </data>
   <data name="Settings_Theme.Text" xml:space="preserve">
-    <value>Theme</value>
+    <value>Thème</value>
     <comment>Choose theme text for Settings</comment>
   </data>
   <data name="Settings_Theme_Dark.Content" xml:space="preserve">
-    <value>Dark</value>
+    <value>Sombre</value>
     <comment>Dark theme text for Settings</comment>
   </data>
   <data name="Settings_Theme_Default.Content" xml:space="preserve">
-    <value>Windows default</value>
+    <value>Système</value>
     <comment>Windows default theme text for Settings</comment>
   </data>
   <data name="Settings_Theme_Light.Content" xml:space="preserve">
-    <value>Light</value>
+    <value>Clair</value>
     <comment>Light theme text for Settings</comment>
   </data>
   <data name="Settings_About.Text" xml:space="preserve">
-    <value>About this application</value>
+    <value>À propos de cette application</value>
     <comment>About this application title for Settings</comment>
   </data>
   <data name="Settings_AboutDescription.Text" xml:space="preserve">
-    <value>Downloading from the departmental archives has never been easier!</value>
+    <value>Télécharger depuis les archives départementales n'a jamais été aussi facile !</value>
     <comment>About this application description for Settings</comment>
   </data>
   <data name="Settings_PrivacyTermsLink.Content" xml:space="preserve">
-    <value>Source code</value>
+    <value>Code source</value>
     <comment>Privacy Statement link content for Settings</comment>
   </data>
   <data name="Settings_PrivacyTermsLink.NavigateUri" xml:space="preserve">
@@ -162,11 +162,11 @@
     <comment>Here is your Privacy Statement url for Settings</comment>
   </data>
   <data name="Settings_Personalization.Text" xml:space="preserve">
-    <value>Personalization</value>
+    <value>Personnalisation</value>
     <comment>Personalization text for Settings</comment>
   </data>
   <data name="Shell_Registry.Content" xml:space="preserve">
-    <value>Registry</value>
+    <value>Registre</value>
     <comment>Navigation view item name for Registry</comment>
   </data>
 </root>

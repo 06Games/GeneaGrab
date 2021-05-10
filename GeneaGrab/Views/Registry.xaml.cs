@@ -11,7 +11,6 @@ using Windows.UI.Xaml.Navigation;
 
 namespace GeneaGrab.Views
 {
-    // geneagrab:registry?url=https://www.geneanet.org/archives/registres/view/17000/10
     public sealed partial class Registry : Page, INotifyPropertyChanged
     {
         public Registry() => InitializeComponent();
@@ -24,26 +23,24 @@ namespace GeneaGrab.Views
             if (success)
             {
                 RefreshView();
+                if (inRam) return;
 
-                if (!inRam)
+                Pages.Clear();
+                foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
+                _ = Task.Run(async () =>
                 {
-                    Pages.Clear();
-                    foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
-                    _ = Task.Run(async () =>
+                    for (int i = 0; i < Pages.Count; i++)
                     {
-                        for (int i = 0; i < Pages.Count; i++)
+                        var page = Pages[i];
+                        var img = await Info.Provider.API.GetTile(Info.Registry, page.Page, i == Info.PageNumber - 1 ? 1 : 0);
+                        await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                         {
-                            var page = Pages[i];
-                            var img = await Info.Provider.API.GetTile(Info.Registry, page.Page, i == Info.PageNumber - 1 ? 1 : 0);
-                            await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
-                            {
-                                page.Thumbnail = img.Image.ToImageSource();
-                                Pages[i] = page;
-                                if (i == Info.PageNumber - 1) RefreshView();
-                            });
-                        }
-                    }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
-                }
+                            page.Thumbnail = img.Image.ToImageSource();
+                            Pages[i] = page;
+                            if (i == Info.PageNumber - 1) RefreshView();
+                        });
+                    }
+                }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
             }
             else await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
@@ -62,8 +59,6 @@ namespace GeneaGrab.Views
             {
                 var param = Parameter as Dictionary<string, string>;
                 if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await TryGetFromProviders(uri);
-
-
             }
             else if (Parameter is Uri) Info = await TryGetFromProviders(Parameter as Uri);
             else inRam = true;

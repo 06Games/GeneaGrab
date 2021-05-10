@@ -35,6 +35,8 @@ namespace GeneaGrab.Views
             set { Set(ref _isRegistryLoaded, value); }
         }
 
+        private string RegistryText => ResourceExtensions.GetLocalized(Resource.Core, "Registry/Name");
+
         public WinUI.NavigationViewItem Selected
         {
             get { return _selected; }

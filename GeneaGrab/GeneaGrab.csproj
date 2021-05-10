@@ -231,6 +231,7 @@
   <ItemGroup>
     <None Include=".editorconfig" />
     <None Include="GeneaGrab_TemporaryKey.pfx" />
+    <PRIResource Include="Strings\fr-fr\Resources.resw" />
     <PRIResource Include="Strings\fr-fr\Core.resw" />
     <PRIResource Include="Strings\en-us\Core.resw" />
   </ItemGroup>

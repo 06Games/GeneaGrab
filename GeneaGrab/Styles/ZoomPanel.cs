@@ -12,7 +12,7 @@ namespace GeneaGrab.Views
     {
         public ZoomPanel() => Background = new SolidColorBrush(Windows.UI.Colors.Transparent); //Allows interaction with the element
 
-        private UIElement child = null;
+        private UIElement child;
         /// <summary>The user has moved the child</summary>
         public event System.Action<double, double> PositionChanged;
         /// <summary>The user has changed the zoom</summary>
