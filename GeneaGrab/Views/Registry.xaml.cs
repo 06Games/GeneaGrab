@@ -34,18 +34,16 @@ namespace GeneaGrab.Views
                         for (int i = 0; i < Pages.Count; i++)
                         {
                             var page = Pages[i];
-                            var img = await Info.Provider.API.GetTile(Info.Registry, page.Page, 0);
+                            var img = await Info.Provider.API.GetTile(Info.Registry, page.Page, i == Info.PageNumber - 1 ? 1 : 0);
                             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                             {
                                 page.Thumbnail = img.Image.ToImageSource();
                                 Pages[i] = page;
+                                if (i == Info.PageNumber - 1) RefreshView();
                             });
                         }
                     }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
                 }
-
-                await Info.Provider.API.GetTile(Info.Registry, Info.Page, 1);
-                RefreshView();
             }
             else await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
@@ -89,12 +87,12 @@ namespace GeneaGrab.Views
         }
         public void RefreshView()
         {
-            Info_Location.Text = Info.Location.ToString();
-            Info_Registry.Text = Info.Registry.ToString();
-            Info_RegistryID.Text = Info.Registry.ID;
+            Info_Location.Text = Info.Location?.ToString() ?? "";
+            Info_Registry.Text = Info.Registry?.ToString() ?? "";
+            Info_RegistryID.Text = Info.Registry?.ID ?? "";
 
-            image.Source = Info.Page.Image.ToImageSource();
-            PageList.SelectedIndex = Info.Page.Number - 1;
+            image.Source = Info.Page?.Image?.ToImageSource();
+            PageList.SelectedIndex = Info.Page?.Number - 1 ?? 0;
             imagePanel.Reset();
             OnPropertyChanged(nameof(image));
             App.SaveData();
@@ -107,7 +105,13 @@ namespace GeneaGrab.Views
             RefreshView();
             return await Data.SaveImage(Info.Registry, page);
         }
-        private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e) => System.Diagnostics.Process.Start("explorer.exe", $"/select, \"{await Download()}\"");
+        private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var page = await App.GetFile(Info.Registry, Info.Page);
+            var options = new Windows.System.FolderLauncherOptions();
+            options.ItemsToSelect.Add(page);
+            await Windows.System.Launcher.LaunchFolderAsync(await page.GetParentAsync(), options);
+        }
 
 
         public event PropertyChangedEventHandler PropertyChanged;

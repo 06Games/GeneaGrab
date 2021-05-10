@@ -13,7 +13,7 @@ namespace GeneaGrab
         public string ProviderID { get; set; }
 
         public string ID { get; set; }
-        public string URL { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string URL { get; set; }
         public string Name { get; set; }
         public string District { get; set; }
         public override string ToString() => string.IsNullOrEmpty(District) ? Name : $"{Name} ({District})";

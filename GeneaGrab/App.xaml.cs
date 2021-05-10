@@ -39,8 +39,7 @@ namespace GeneaGrab
             {
                 try
                 {
-                    var folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
-                    var file = await folder.TryGetItemAsync($"p{page.Number}.jpg") as Windows.Storage.StorageFile;
+                    var file = await GetFile(registry, page, false);
                     return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync());
                 }
                 catch (Exception e)
@@ -51,8 +50,7 @@ namespace GeneaGrab
             };
             Data.SaveImage = async (registry, page) =>
             {
-                Windows.Storage.StorageFolder folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
-                Windows.Storage.StorageFile file = await folder.CreateFileAsync($"p{page.Number}.jpg", Windows.Storage.CreationCollisionOption.ReplaceExisting);
+                var file = await GetFile(registry, page, true);
                 try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync()); } catch (Exception e) { System.Diagnostics.Debug.WriteLine(e); }
                 return file.Path;
             };
@@ -94,6 +92,12 @@ namespace GeneaGrab
                 await folder.WriteFile("Locations.json", JsonConvert.SerializeObject(provider.Value.Locations, Formatting.Indented));
                 foreach (var registry in provider.Value.Registries) await folder.CreateFolderPath(registry.Value.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
             }
+        }
+
+        public static async Task<Windows.Storage.StorageFile> GetFile(Registry registry, RPage page, bool write = false)
+        {
+            Windows.Storage.StorageFolder folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
+            return write ? await folder.CreateFileAsync($"p{page.Number}.jpg", Windows.Storage.CreationCollisionOption.ReplaceExisting) : await folder.TryGetItemAsync($"p{page.Number}.jpg") as Windows.Storage.StorageFile;
         }
     }
 }
