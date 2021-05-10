@@ -150,6 +150,7 @@
     <Compile Include="Services\ToastNotificationsService.cs" />
     <Compile Include="Services\ToastNotificationsService.Samples.cs" />
     <Compile Include="Helpers\Extensions.cs" />
+    <Compile Include="Styles\ZoomPanel.cs" />
     <Compile Include="Views\RegistriesList.xaml.cs">
       <DependentUpon>RegistriesList.xaml</DependentUpon>
     </Compile>

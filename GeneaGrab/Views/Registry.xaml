@@ -17,7 +17,9 @@
             <ColumnDefinition Width="Auto" MinWidth="230" MaxWidth="320" />
         </Grid.ColumnDefinitions>
 
-        <Image x:Name="image" />
+        <local:ZoomPanel x:Name="imagePanel">
+            <Image x:Name="image" />
+        </local:ZoomPanel>
         <ListView x:Name="PageList" Padding="15" Grid.Row="1" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" Height="200" ItemClick="ChangePage" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
