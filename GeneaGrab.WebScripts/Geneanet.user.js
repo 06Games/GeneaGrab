@@ -12,29 +12,29 @@
 /*global waitForKeyElements*/
 
 if (location.pathname.startsWith("/archives/registres/view")) {
-  function marqueursLink() {
-	var i = 0;
-	$("#viewer-marqueurs-liste .voir > a").each(function () {
-	  $(this).attr("href", $(this).attr("href").replace("?idcollection=", "").replace("&page=", "/").replace("&idmarqueur=", "?idmarqueur="));
-	  i++;
+	function marqueursLink() {
+		var i = 0;
+		$("#viewer-marqueurs-liste .voir > a").each(function () {
+			$(this).attr("href", $(this).attr("href").replace("?idcollection=", "").replace("&page=", "/").replace("&idmarqueur=", "?idmarqueur="));
+			i++;
+		});
+		console.log(i.toString() + " marqueurs updated");
+	}
+
+	$(document).ready(marqueursLink);
+	waitForKeyElements("#viewer-marqueurs-liste", function (jNode) {
+		marqueursLink();
 	});
-	console.log(i.toString() + " marqueurs updated");
-  }
 
-  $(document).ready(marqueursLink);
-  waitForKeyElements("#viewer-marqueurs-liste", function (jNode) {
-	marqueursLink();
-  });
-
-  $(".contribuer").hide();
-  $("#viewer-relier")
-	.removeClass("open-popup-liaison")
-	.attr("href", "geneagrab:registry?url=" + location.href)
-	.attr("title", "Ouvrir dans GeneaGrab");
+	$(".contribuer").hide();
+	$("#viewer-relier")
+		.removeClass("open-popup-liaison")
+		.attr("href", "geneagrab:registry?url=" + location.href)
+		.attr("title", "Ouvrir dans GeneaGrab");
 } else if (location.pathname.startsWith("/fonds")) {
-  $(".ligne-resultat")
-	.filter(function () {
-	  return $(this).data("type-fonds") === "annuaire_archives";
-	})
-	.hide();
+	$(".ligne-resultat")
+		.filter(function () {
+			return $(this).data("type-fonds") === "annuaire_archives";
+		})
+		.hide();
 }
