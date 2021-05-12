@@ -18,50 +18,30 @@ namespace GeneaGrab.Core.Services
         public HttpDataService(string defaultBaseUrl = "")
         {
             client = new HttpClient();
-
-            if (!string.IsNullOrEmpty(defaultBaseUrl))
-            {
-                client.BaseAddress = new Uri($"{defaultBaseUrl}/");
-            }
-
+            if (!string.IsNullOrEmpty(defaultBaseUrl)) client.BaseAddress = new Uri($"{defaultBaseUrl}/");
             responseCache = new Dictionary<string, object>();
         }
 
         public async Task<T> GetAsync<T>(string uri, string accessToken = null, bool forceRefresh = false)
         {
-            T result = default;
-
             // The responseCache is a simple store of past responses to avoid unnecessary requests for the same resource.
             // Feel free to remove it or extend this request logic as appropraite for your app.
             if (forceRefresh || !responseCache.ContainsKey(uri))
             {
                 AddAuthorizationHeader(accessToken);
                 var json = await client.GetStringAsync(uri);
-                result = await Task.Run(() => JsonConvert.DeserializeObject<T>(json));
+                var result = await Task.Run(() => JsonConvert.DeserializeObject<T>(json));
 
-                if (responseCache.ContainsKey(uri))
-                {
-                    responseCache[uri] = result;
-                }
-                else
-                {
-                    responseCache.Add(uri, result);
-                }
+                if (responseCache.ContainsKey(uri)) responseCache[uri] = result;
+                else responseCache.Add(uri, result);
+                return result;
             }
-            else
-            {
-                result = (T)responseCache[uri];
-            }
-
-            return result;
+            else return (T)responseCache[uri];
         }
 
         public async Task<bool> PostAsync<T>(string uri, T item)
         {
-            if (item == null)
-            {
-                return false;
-            }
+            if (item == null) return false;
 
             var serializedItem = JsonConvert.SerializeObject(item);
             var buffer = Encoding.UTF8.GetBytes(serializedItem);
@@ -74,10 +54,7 @@ namespace GeneaGrab.Core.Services
 
         public async Task<bool> PostAsJsonAsync<T>(string uri, T item)
         {
-            if (item == null)
-            {
-                return false;
-            }
+            if (item == null) return false;
 
             var serializedItem = JsonConvert.SerializeObject(item);
 
@@ -88,10 +65,7 @@ namespace GeneaGrab.Core.Services
 
         public async Task<bool> PutAsync<T>(string uri, T item)
         {
-            if (item == null)
-            {
-                return false;
-            }
+            if (item == null) return false;
 
             var serializedItem = JsonConvert.SerializeObject(item);
             var buffer = Encoding.UTF8.GetBytes(serializedItem);
@@ -104,10 +78,7 @@ namespace GeneaGrab.Core.Services
 
         public async Task<bool> PutAsJsonAsync<T>(string uri, T item)
         {
-            if (item == null)
-            {
-                return false;
-            }
+            if (item == null) return false;
 
             var serializedItem = JsonConvert.SerializeObject(item);
 
@@ -119,7 +90,6 @@ namespace GeneaGrab.Core.Services
         public async Task<bool> DeleteAsync(string uri)
         {
             var response = await client.DeleteAsync(uri);
-
             return response.IsSuccessStatusCode;
         }
 

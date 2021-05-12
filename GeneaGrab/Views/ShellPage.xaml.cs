@@ -25,22 +25,22 @@ namespace GeneaGrab.Views
         private bool _isBackEnabled;
         public bool IsBackEnabled
         {
-            get { return _isBackEnabled; }
-            set { Set(ref _isBackEnabled, value); }
+            get => _isBackEnabled;
+            set => Set(ref _isBackEnabled, value);
         }
         private bool _isRegistryLoaded;
         public bool IsRegistryLoaded
         {
-            get { return _isRegistryLoaded; }
-            set { Set(ref _isRegistryLoaded, value); }
+            get => _isRegistryLoaded;
+            set => Set(ref _isRegistryLoaded, value);
         }
 
         private string RegistryText => ResourceExtensions.GetLocalized(Resource.Core, "Registry/Name");
 
         public WinUI.NavigationViewItem Selected
         {
-            get { return _selected; }
-            set { Set(ref _selected, value); }
+            get => _selected;
+            set => Set(ref _selected, value);
         }
 
         public ShellPage()
@@ -67,10 +67,7 @@ namespace GeneaGrab.Views
             await Task.CompletedTask;
         }
 
-        private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e)
-        {
-            throw e.Exception;
-        }
+        private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e) => throw e.Exception;
 
         private void Frame_Navigated(object sender, NavigationEventArgs e)
         {
@@ -84,10 +81,7 @@ namespace GeneaGrab.Views
             }
 
             var selectedItem = GetSelectedItem(navigationView.MenuItems, e.SourcePageType);
-            if (selectedItem != null)
-            {
-                Selected = selectedItem;
-            }
+            if (selectedItem != null) Selected = selectedItem;
 
         }
 
@@ -95,16 +89,9 @@ namespace GeneaGrab.Views
         {
             foreach (var item in menuItems.OfType<WinUI.NavigationViewItem>())
             {
-                if (IsMenuItemFoPageType(item, pageType))
-                {
-                    return item;
-                }
-
+                if (IsMenuItemFoPageType(item, pageType)) return item;
                 var selectedChild = GetSelectedItem(item.MenuItems, pageType);
-                if (selectedChild != null)
-                {
-                    return selectedChild;
-                }
+                if (selectedChild != null) return selectedChild;
             }
 
             return null;
@@ -118,10 +105,7 @@ namespace GeneaGrab.Views
 
         private void OnItemInvoked(WinUI.NavigationView sender, WinUI.NavigationViewItemInvokedEventArgs args)
         {
-            if (args.IsSettingsInvoked)
-            {
-                NavigationService.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
-            }
+            if (args.IsSettingsInvoked) NavigationService.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
             else if (args.InvokedItemContainer is WinUI.NavigationViewItem selectedItem)
             {
                 var pageType = selectedItem.GetValue(NavHelper.NavigateToProperty) as Type;
@@ -129,19 +113,12 @@ namespace GeneaGrab.Views
             }
         }
 
-        private void OnBackRequested(WinUI.NavigationView sender, WinUI.NavigationViewBackRequestedEventArgs args)
-        {
-            NavigationService.GoBack();
-        }
+        private void OnBackRequested(WinUI.NavigationView sender, WinUI.NavigationViewBackRequestedEventArgs args) => NavigationService.GoBack();
 
         private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key, VirtualKeyModifiers? modifiers = null)
         {
-            var keyboardAccelerator = new KeyboardAccelerator() { Key = key };
-            if (modifiers.HasValue)
-            {
-                keyboardAccelerator.Modifiers = modifiers.Value;
-            }
-
+            var keyboardAccelerator = new KeyboardAccelerator { Key = key };
+            if (modifiers.HasValue) keyboardAccelerator.Modifiers = modifiers.Value;
             keyboardAccelerator.Invoked += OnKeyboardAcceleratorInvoked;
             return keyboardAccelerator;
         }
@@ -156,11 +133,7 @@ namespace GeneaGrab.Views
 
         private void Set<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
-            if (Equals(storage, value))
-            {
-                return;
-            }
-
+            if (Equals(storage, value)) return;
             storage = value;
             OnPropertyChanged(propertyName);
         }
