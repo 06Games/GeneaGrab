@@ -21,7 +21,7 @@ namespace GeneaGrab.Providers
 
             var client = new WebClient();
             string pageBody = null;
-            await Task.Run(() => pageBody = client.DownloadString(Registry.URL));
+            await Task.Run(() => pageBody = client.DownloadString(Registry.URL)).ConfigureAwait(false);
 
             var regex = Regex.Matches(pageBody, "imagesListe\\.push\\('(?<page>.*?)'\\)");
             var pages = regex.Cast<Match>().Select(m => m.Groups["page"]?.Value).ToArray();
@@ -69,17 +69,17 @@ namespace GeneaGrab.Providers
             return types;
         }
 
-        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => await GetTiles(Registry, page, zoom, false);
-        public async Task<RPage> Download(Registry Registry, RPage page) => await GetTiles(Registry, page, Grabber.CalculateIndex(page), true);
-        public async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, bool progress) //The zoom parameter isn't really supported
+        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => GetTiles(Registry, page, zoom);
+        public Task<RPage> Download(Registry Registry, RPage page) => GetTiles(Registry, page, Grabber.CalculateIndex(page));
+        public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom) //The zoom parameter isn't really supported
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
             var client = new WebClient();
             string link = null;
-            await Task.Run(() => link = client.DownloadString(current.URL));
+            await Task.Run(() => link = client.DownloadString(current.URL)).ConfigureAwait(false);
             string url = null;
-            await Task.Run(() => url = client.DownloadString(link));
+            await Task.Run(() => url = client.DownloadString(link)).ConfigureAwait(false);
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
             if (string.IsNullOrWhiteSpace(id)) return current;
 

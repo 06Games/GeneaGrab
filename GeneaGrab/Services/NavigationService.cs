@@ -43,61 +43,42 @@ namespace GeneaGrab.Services
 
         public static bool GoBack()
         {
-            if (CanGoBack)
-            {
-                Frame.GoBack();
-                return true;
-            }
+            if (!CanGoBack) return false;
 
-            return false;
+            Frame.GoBack();
+            return true;
         }
 
         public static void GoForward() => Frame.GoForward();
 
         public static bool Navigate(Type pageType, object parameter = null, NavigationTransitionInfo infoOverride = null)
         {
-            if (pageType == null || !pageType.IsSubclassOf(typeof(Page)))
-            {
-                throw new ArgumentException($"Invalid pageType '{pageType}', please provide a valid pageType.", nameof(pageType));
-            }
+            if (pageType == null || !pageType.IsSubclassOf(typeof(Page))) throw new ArgumentException($"Invalid pageType '{pageType}', please provide a valid pageType.", nameof(pageType));
 
             // Don't open the same page multiple times
             if (Frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParamUsed)))
             {
                 var navigationResult = Frame.Navigate(pageType, parameter, infoOverride);
-                if (navigationResult)
-                {
-                    _lastParamUsed = parameter;
-                }
-
+                if (navigationResult) _lastParamUsed = parameter;
                 return navigationResult;
             }
-            else
-            {
-                return false;
-            }
+            else return false;
         }
 
-        public static bool Navigate<T>(object parameter = null, NavigationTransitionInfo infoOverride = null)
-            where T : Page
-            => Navigate(typeof(T), parameter, infoOverride);
+        public static bool Navigate<T>(object parameter = null, NavigationTransitionInfo infoOverride = null) where T : Page => Navigate(typeof(T), parameter, infoOverride);
 
         private static void RegisterFrameEvents()
         {
-            if (_frame != null)
-            {
-                _frame.Navigated += Frame_Navigated;
-                _frame.NavigationFailed += Frame_NavigationFailed;
-            }
+            if (_frame == null) return;
+            _frame.Navigated += Frame_Navigated;
+            _frame.NavigationFailed += Frame_NavigationFailed;
         }
 
         private static void UnregisterFrameEvents()
         {
-            if (_frame != null)
-            {
-                _frame.Navigated -= Frame_Navigated;
-                _frame.NavigationFailed -= Frame_NavigationFailed;
-            }
+            if (_frame == null) return;
+            _frame.Navigated -= Frame_Navigated;
+            _frame.NavigationFailed -= Frame_NavigationFailed;
         }
 
         private static void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e) => NavigationFailed?.Invoke(sender, e);

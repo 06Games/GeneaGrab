@@ -39,8 +39,8 @@ namespace GeneaGrab
             {
                 try
                 {
-                    var file = await GetFile(registry, page, false);
-                    return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync());
+                    var file = await GetFile(registry, page, false).ConfigureAwait(false);
+                    return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync().ConfigureAwait(false)).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -50,8 +50,8 @@ namespace GeneaGrab
             };
             Data.SaveImage = async (registry, page) =>
             {
-                var file = await GetFile(registry, page, true);
-                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync()); } catch (Exception e) { System.Diagnostics.Debug.WriteLine(e); }
+                var file = await GetFile(registry, page, true).ConfigureAwait(false);
+                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync().ConfigureAwait(false)).ConfigureAwait(false); } catch (Exception e) { System.Diagnostics.Debug.WriteLine(e); }
                 return file.Path;
             };
 

@@ -84,8 +84,9 @@ namespace GeneaGrab.Providers
             return (types, location, note ?? notes);
         }
 
-        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => await GetTiles(Registry, page, zoom, false);
-        public async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, bool progress)
+        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => GetTiles(Registry, page, zoom);
+        public Task<RPage> Download(Registry Registry, RPage page) => GetTiles(Registry, page, Grabber.CalculateIndex(page));
+        public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom)
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
@@ -110,14 +111,12 @@ namespace GeneaGrab.Providers
                 for (int x = 0; x < data.tiles.X; x++)
                     tasks.Add(Grabber.GetTile($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg"), (current.TileSize.Value, data.diviser, new Point(x, y)));
 
-            await Task.WhenAll(tasks.Keys);
+            await Task.WhenAll(tasks.Keys).ConfigureAwait(false);
             foreach (var tile in tasks) current.Image = current.Image.MergeTile(tile.Key.Result, tile.Value);
 
             Data.Providers["Geneanet"].Registries[Registry.ID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Registry, current);
+            await Data.SaveImage(Registry, current).ConfigureAwait(false);
             return current;
         }
-
-        public async Task<RPage> Download(Registry Registry, RPage page) => await GetTiles(Registry, page, Grabber.CalculateIndex(page), true);
     }
 }

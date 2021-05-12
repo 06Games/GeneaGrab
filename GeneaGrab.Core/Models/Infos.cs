@@ -64,7 +64,7 @@ namespace GeneaGrab
             if (zoom > current.Zoom) return false;
             if (current.Image != null) return true;
 
-            current.Image = await GetImage(registry, current);
+            current.Image = await GetImage(registry, current).ConfigureAwait(false);
             if (current.Image != null) return true;
             else return false;
         }

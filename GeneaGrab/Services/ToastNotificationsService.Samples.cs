@@ -26,7 +26,7 @@ namespace GeneaGrab.Services
                     }
                 },
 
-                Actions = new ToastActionsCustom()
+                Actions = new ToastActionsCustom
                 {
                     Buttons =
                     {

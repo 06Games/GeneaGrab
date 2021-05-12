@@ -33,10 +33,7 @@ namespace GeneaGrab.Services
             {
                 await view.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    if (Window.Current.Content is FrameworkElement frameworkElement)
-                    {
-                        frameworkElement.RequestedTheme = Theme;
-                    }
+                    if (Window.Current.Content is FrameworkElement frameworkElement) frameworkElement.RequestedTheme = Theme;
                 });
             }
         }
@@ -45,18 +42,10 @@ namespace GeneaGrab.Services
         {
             ElementTheme cacheTheme = ElementTheme.Default;
             string themeName = await ApplicationData.Current.LocalSettings.ReadAsync<string>(SettingsKey);
-
-            if (!string.IsNullOrEmpty(themeName))
-            {
-                Enum.TryParse(themeName, out cacheTheme);
-            }
-
+            if (!string.IsNullOrEmpty(themeName)) Enum.TryParse(themeName, out cacheTheme);
             return cacheTheme;
         }
 
-        private static async Task SaveThemeInSettingsAsync(ElementTheme theme)
-        {
-            await ApplicationData.Current.LocalSettings.SaveAsync(SettingsKey, theme.ToString());
-        }
+        private static Task SaveThemeInSettingsAsync(ElementTheme theme) => ApplicationData.Current.LocalSettings.SaveAsync(SettingsKey, theme.ToString());
     }
 }
