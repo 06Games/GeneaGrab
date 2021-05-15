@@ -138,7 +138,7 @@ namespace GeneaGrab.Views
             if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => r.Name);
 
             var registries = GetRegistries(r => r.URL).ToList() ?? new List<Result>();
-            if (!registries.Any()) foreach (var provider in Data.Providers) if (provider.Value.API.CheckURL(uri, out var _)) registries.Add(new Result { Text = $"Online Match: {provider.Key}", Value = uri });
+            if (!registries.Any()) foreach (var provider in Data.Providers) if (provider.Value.API.TryGetRegistryID(uri, out var _)) registries.Add(new Result { Text = $"Online Match: {provider.Key}", Value = uri });
             return registries;
         }
         class Result

@@ -52,7 +52,7 @@ namespace GeneaGrab
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             if (!args.PrelaunchActivated) await ActivationService.ActivateAsync(args);
-            await LoadData();
+            await LoadData().ConfigureAwait(false);
         }
 
         public static async Task LoadData()

@@ -10,11 +10,11 @@ namespace GeneaGrab.Providers
 {
     public class AD06 : ProviderAPI
     {
-        public bool CheckURL(Uri URL, out string id)
+        public bool TryGetRegistryID(Uri URL, out string id)
         {
             var check = URL.Host == "www.basesdocumentaires-cg06.fr" && URL.AbsolutePath.StartsWith("/archives/ImageZoomViewerEC.php");
             id = check ? System.Web.HttpUtility.ParseQueryString(URL.Query)["IDDOC"] : null;
-            return check;
+            return check && !string.IsNullOrWhiteSpace(id);
         }
 
         public async Task<RegistryInfo> Infos(Uri URL)
