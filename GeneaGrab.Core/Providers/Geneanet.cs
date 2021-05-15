@@ -87,6 +87,7 @@ namespace GeneaGrab.Providers
             return (types, location, note ?? notes);
         }
 
+        public Task<RPage> Thumbnail(Registry Registry, RPage page) => GetTiles(Registry, page, 0);
         public Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => GetTiles(Registry, page, zoom);
         public Task<RPage> Download(Registry Registry, RPage page) => GetTiles(Registry, page, Grabber.CalculateIndex(page));
         public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom)

@@ -25,8 +25,8 @@ namespace GeneaGrab
     public static class Data
     {
         public static Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
-        public static Func<Registry, RPage, Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p) => null;
-        public static Func<Registry, RPage, Task<string>> SaveImage { get; set; } = (r, p) => null;
+        public static Func<Registry, RPage, Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p) => Task.CompletedTask as Task<SixLabors.ImageSharp.Image>;
+        public static Func<Registry, RPage, Task<string>> SaveImage { get; set; } = (r, p) => Task.CompletedTask as Task<string>;
 
         private static ReadOnlyDictionary<string, Provider> _providers;
         public static ReadOnlyDictionary<string, Provider> Providers

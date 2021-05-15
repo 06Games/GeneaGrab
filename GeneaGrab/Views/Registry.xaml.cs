@@ -1,5 +1,4 @@
-﻿using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -32,7 +31,7 @@ namespace GeneaGrab.Views
                     for (int i = 0; i < Pages.Count; i++)
                     {
                         var page = Pages[i];
-                        var img = await Info.Provider.API.GetTile(Info.Registry, page.Page, i == Info.PageNumber - 1 ? 1 : 0);
+                        var img = i == Info.PageNumber - 1 ? await Info.Provider.API.GetTile(Info.Registry, page.Page, 1) : await Info.Provider.API.Thumbnail(Info.Registry, page.Page);
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                         {
                             page.Thumbnail = img.Image.ToImageSource();

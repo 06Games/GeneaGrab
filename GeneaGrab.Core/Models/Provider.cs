@@ -9,6 +9,7 @@ namespace GeneaGrab
     {
         bool CheckURL(Uri URL, out string ID);
         Task<RegistryInfo> Infos(Uri URL);
+        Task<RPage> Thumbnail(Registry Registry, RPage page);
         Task<RPage> GetTile(Registry Registry, RPage page, int zoom);
         Task<RPage> Download(Registry Registry, RPage page);
     }
