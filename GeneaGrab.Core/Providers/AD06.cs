@@ -74,9 +74,9 @@ namespace GeneaGrab.Providers
             return types;
         }
 
-        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => GetTiles(Registry, page, zoom);
-        public Task<RPage> Download(Registry Registry, RPage page) => GetTiles(Registry, page, Grabber.CalculateIndex(page));
-        public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom) //The zoom parameter isn't really supported
+        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => GetTiles(Registry, page, zoom / 100F);
+        public Task<RPage> Download(Registry Registry, RPage page) => GetTiles(Registry, page, 1);
+        public static async Task<RPage> GetTiles(Registry Registry, RPage current, float zoom)
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
@@ -86,9 +86,8 @@ namespace GeneaGrab.Providers
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
             if (string.IsNullOrWhiteSpace(id)) return current;
 
-            //We can't track the progress because we don't know the final size
-            current.Image = Image.Load(await client.OpenReadTaskAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}")));
-            current.Zoom = 1;
+            current.Image = Image.Load(await client.GetStreamAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}"))); //We can't track the progress because we don't know the final size
+            current.Zoom = (int)(zoom * 100);
 
             Data.Providers["AD06"].Registries[Registry.ID].Pages[current.Number - 1] = current;
             await Data.SaveImage(Registry, current);
