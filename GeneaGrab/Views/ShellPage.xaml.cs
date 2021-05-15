@@ -15,13 +15,11 @@ using WinUI = Microsoft.UI.Xaml.Controls;
 
 namespace GeneaGrab.Views
 {
-    // TODO WTS: Change the icons and titles for all NavigationViewItems in ShellPage.xaml.
     public sealed partial class ShellPage : Page, INotifyPropertyChanged
     {
         private readonly KeyboardAccelerator _altLeftKeyboardAccelerator = BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu);
         private readonly KeyboardAccelerator _backKeyboardAccelerator = BuildKeyboardAccelerator(VirtualKey.GoBack);
 
-        private WinUI.NavigationViewItem _selected;
         private bool _isBackEnabled;
         public bool IsBackEnabled
         {
@@ -37,6 +35,7 @@ namespace GeneaGrab.Views
 
         private string RegistryText => ResourceExtensions.GetLocalized(Resource.Core, "Registry/Name");
 
+        private WinUI.NavigationViewItem _selected;
         public WinUI.NavigationViewItem Selected
         {
             get => _selected;
@@ -68,7 +67,6 @@ namespace GeneaGrab.Views
         }
 
         private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e) => throw e.Exception;
-
         private void Frame_Navigated(object sender, NavigationEventArgs e)
         {
             IsBackEnabled = NavigationService.CanGoBack;
@@ -84,7 +82,6 @@ namespace GeneaGrab.Views
             if (selectedItem != null) Selected = selectedItem;
 
         }
-
         private WinUI.NavigationViewItem GetSelectedItem(IEnumerable<object> menuItems, Type pageType)
         {
             foreach (var item in menuItems.OfType<WinUI.NavigationViewItem>())
@@ -97,12 +94,7 @@ namespace GeneaGrab.Views
             return null;
         }
 
-        private bool IsMenuItemFoPageType(WinUI.NavigationViewItem menuItem, Type sourcePageType)
-        {
-            var pageType = menuItem.GetValue(NavHelper.NavigateToProperty) as Type;
-            return pageType == sourcePageType;
-        }
-
+        private bool IsMenuItemFoPageType(WinUI.NavigationViewItem menuItem, Type sourcePageType) => menuItem.GetValue(NavHelper.NavigateToProperty) as Type == sourcePageType;
         private void OnItemInvoked(WinUI.NavigationView sender, WinUI.NavigationViewItemInvokedEventArgs args)
         {
             if (args.IsSettingsInvoked) NavigationService.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
@@ -112,7 +104,6 @@ namespace GeneaGrab.Views
                 NavigationService.Navigate(pageType, null, args.RecommendedNavigationTransitionInfo);
             }
         }
-
         private void OnBackRequested(WinUI.NavigationView sender, WinUI.NavigationViewBackRequestedEventArgs args) => NavigationService.GoBack();
 
         private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key, VirtualKeyModifiers? modifiers = null)
@@ -122,7 +113,6 @@ namespace GeneaGrab.Views
             keyboardAccelerator.Invoked += OnKeyboardAcceleratorInvoked;
             return keyboardAccelerator;
         }
-
         private static void OnKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
         {
             var result = NavigationService.GoBack();
@@ -130,14 +120,12 @@ namespace GeneaGrab.Views
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
         private void Set<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
         {
             if (Equals(storage, value)) return;
             storage = value;
             OnPropertyChanged(propertyName);
         }
-
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
 
