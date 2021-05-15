@@ -94,7 +94,7 @@ namespace GeneaGrab
         }
         public override string ToString() => Name;
 
-        public RPage[] Pages { get; set; }
+        [JsonConverter(typeof(PagesConverter))] public RPage[] Pages { get; set; }
 
 
         public bool Equals(Registry other) => ID == other?.ID;
@@ -104,20 +104,31 @@ namespace GeneaGrab
         public override int GetHashCode() => ID.GetHashCode();
     }
     public class DateFormatConverter : Newtonsoft.Json.Converters.IsoDateTimeConverter { public DateFormatConverter(string format) => DateTimeFormat = format; }
+    public class PagesConverter : JsonConverter<RPage[]>
+    {
+        public override RPage[] ReadJson(JsonReader reader, Type objectType, RPage[] existingValue, bool hasExistingValue, JsonSerializer serializer)
+        {
+            return serializer.Deserialize<Dictionary<int, RPage>>(reader).Select(kv =>
+            {
+                kv.Value.Number = kv.Key;
+                return kv.Value;
+            }).ToArray();
+        }
+        public override void WriteJson(JsonWriter writer, RPage[] value, JsonSerializer serializer) => serializer.Serialize(writer, value.ToDictionary(k => k.Number, v => v));
+    }
 
     /// <summary>Data on the page of the registry</summary>
     public class RPage
     {
-        public int Number { get; set; }
+        [JsonIgnore] public int Number { get; set; }
         public override string ToString() => Number.ToString();
         public string URL { get; set; }
         [JsonIgnore] public SixLabors.ImageSharp.Image Image { get; set; }
 
-        //public int[] Zoom { get; set; } //Remove? Image layers instead?
         public int Zoom { get; set; } = -1;
-        public int MaxZoom { get; set; } = -1;
-        public int Width { get; set; }
-        public int Height { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore), System.ComponentModel.DefaultValue(-1)] public int MaxZoom { get; set; } = -1;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public int Width { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public int Height { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public int? TileSize { get; set; }
     }
