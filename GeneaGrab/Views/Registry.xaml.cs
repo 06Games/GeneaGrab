@@ -66,7 +66,8 @@ namespace GeneaGrab.Views
             async Task<RegistryInfo> TryGetFromProviders(Uri uri)
             {
                 foreach (var provider in Data.Providers.Values)
-                    if (provider.API.CheckURL(uri)) return await provider.API.Infos(uri);
+                    if (provider.API.CheckURL(uri, out var id))
+                        return provider.Registries.TryGetValue(id, out var registry) ? new RegistryInfo(registry) : await provider.API.Infos(uri);
                 return null;
             }
 

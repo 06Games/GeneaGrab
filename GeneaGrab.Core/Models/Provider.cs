@@ -1,7 +1,5 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace GeneaGrab
@@ -9,7 +7,7 @@ namespace GeneaGrab
     /// <summary>Interface to communicate with the registry provider</summary>
     public interface ProviderAPI
     {
-        bool CheckURL(Uri URL);
+        bool CheckURL(Uri URL, out string ID);
         Task<RegistryInfo> Infos(Uri URL);
         Task<RPage> GetTile(Registry Registry, RPage page, int zoom);
         Task<RPage> Download(Registry Registry, RPage page);

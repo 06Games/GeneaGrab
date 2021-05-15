@@ -12,7 +12,12 @@ namespace GeneaGrab.Providers
 {
     public class Geneanet : ProviderAPI
     {
-        public bool CheckURL(Uri URL) => URL.Host == "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives");
+        public bool CheckURL(Uri URL, out string id)
+        {
+            var check = URL.Host == "www.geneanet.org" && URL.AbsolutePath.StartsWith("/archives");
+            id = check ? Regex.Match(URL.OriginalString, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))").Groups["col"]?.Value : null;
+            return check;
+        }
         public async Task<RegistryInfo> Infos(Uri URL)
         {
             var Location = new Location(Data.Providers["Geneanet"]);
