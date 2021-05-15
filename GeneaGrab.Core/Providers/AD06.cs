@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -25,9 +25,8 @@ namespace GeneaGrab.Providers
             var query = System.Web.HttpUtility.ParseQueryString(new Uri(Registry.URL).Query);
             Registry.ID = query["IDDOC"];
 
-            var client = new WebClient();
-            string pageBody = null;
-            await Task.Run(() => pageBody = client.DownloadString(Registry.URL)).ConfigureAwait(false);
+            var client = new HttpClient();
+            string pageBody = await client.GetStringAsync(Registry.URL).ConfigureAwait(false);
 
             var regex = Regex.Matches(pageBody, "imagesListe\\.push\\('(?<page>.*?)'\\)");
             var pages = regex.Cast<Match>().Select(m => m.Groups["page"]?.Value).ToArray();
@@ -81,11 +80,9 @@ namespace GeneaGrab.Providers
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
-            var client = new WebClient();
-            string link = null;
-            await Task.Run(() => link = client.DownloadString(current.URL)).ConfigureAwait(false);
-            string url = null;
-            await Task.Run(() => url = client.DownloadString(link)).ConfigureAwait(false);
+            var client = new HttpClient();
+            string link = await client.GetStringAsync(current.URL).ConfigureAwait(false);
+            string url = await client.GetStringAsync(link).ConfigureAwait(false);
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
             if (string.IsNullOrWhiteSpace(id)) return current;
 

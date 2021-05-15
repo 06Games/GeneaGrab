@@ -4,7 +4,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -27,13 +27,11 @@ namespace GeneaGrab.Providers
             Registry.ID = regex.Groups["col"]?.Value;
             if (string.IsNullOrEmpty(Registry.ID)) return null;
 
-            var client = new WebClient();
-            string pages = null;
-            await Task.Run(() => pages = client.DownloadString(new Uri($"https://www.geneanet.org/archives/registres/api/?idcollection={Registry.ID}")));
+            var client = new HttpClient();
+            string pages = await client.GetStringAsync($"https://www.geneanet.org/archives/registres/api/?idcollection={Registry.ID}");
 
             Registry.URL = $"https://www.geneanet.org/archives/registres/view/{Registry.ID}";
-            string page = null;
-            await Task.Run(() => page = client.DownloadString(new Uri(Registry.URL)));
+            string page = await client.GetStringAsync(Registry.URL);
             var infos = Regex.Match(page, "<h3>(?<location>.*)\\(.*\\| (?<from>.*) - (?<to>.*)<\\/h3>\\n.*<div class=\"note\">(?<note>(\\n\\s*.*)*?)\\n\\s*<\\/div>\\n\\s*<p class=\"noteShort\">"); //https://regex101.com/r/3Ou7DP/1
             Location.Name = infos.Groups["location"].Value.Trim(' ');
 
@@ -57,7 +55,7 @@ namespace GeneaGrab.Providers
             var types = new List<Registry.Type>();
             var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - ((?<betterType>.*?)\\.|-|).*)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/1
             var global = (typesMatch.Groups["globalType"] ?? typesMatch.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
-            foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(',')) 
+            foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(','))
                 if (TryGetType(t.Trim(' ').ToLowerInvariant(), out var type)) types.Add(type);
 
             bool TryGetType(string type, out Registry.Type t)
