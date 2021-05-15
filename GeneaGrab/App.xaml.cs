@@ -1,5 +1,6 @@
 ﻿using GeneaGrab.Services;
 using Newtonsoft.Json;
+using Serilog;
 using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace GeneaGrab
         private ActivationService ActivationService => _activationService.Value;
         public App()
         {
+            Log.Logger = new LoggerConfiguration().WriteTo.File(new Serilog.Formatting.Compact.RenderedCompactJsonFormatter(), $@"{Windows.Storage.ApplicationData.Current.TemporaryFolder.Path}\Logs\{DateTime.UtcNow.ToString("yyyy-MM-dd HH-mm-ss")}.json").CreateLogger();
             Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
             Data.GetImage = async (registry, page) =>
             {
@@ -27,14 +29,14 @@ namespace GeneaGrab
                 }
                 catch (Exception e)
                 {
-                    System.Diagnostics.Debug.WriteLine(e);
+                    Log.Error(e.Message, e);
                     return null;
                 }
             };
             Data.SaveImage = async (registry, page) =>
             {
                 var file = await GetFile(registry, page, true).ConfigureAwait(false);
-                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync().ConfigureAwait(false)).ConfigureAwait(false); } catch (Exception e) { System.Diagnostics.Debug.WriteLine(e); }
+                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync().ConfigureAwait(false)).ConfigureAwait(false); } catch (Exception e) { Log.Error(e.Message, e); }
                 return file.Path;
             };
 
@@ -55,6 +57,7 @@ namespace GeneaGrab
 
         public static async Task LoadData()
         {
+            Log.Information("Loading data");
             var dataFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
             var queryOptions = new QueryOptions
             {
@@ -74,6 +77,7 @@ namespace GeneaGrab
                     provider.Value.Registries.Add(kv.Key, kv.Value);
                 }
             }
+            Log.Information("Data loaded");
         }
         public static void SaveData() => Task.Run(SaveDataAsync);
         public static async Task SaveDataAsync()
