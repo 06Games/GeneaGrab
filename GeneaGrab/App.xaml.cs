@@ -35,9 +35,17 @@ namespace GeneaGrab
             };
             Data.SaveImage = async (registry, page) =>
             {
-                var file = await GetFile(registry, page, true).ConfigureAwait(false);
-                try { await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync().ConfigureAwait(false)).ConfigureAwait(false); } catch (Exception e) { Log.Error(e.Message, e); }
-                return file.Path;
+                try
+                {
+                    var file = await GetFile(registry, page, true).ConfigureAwait(false);
+                    await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                    return file.Path;
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e.Message, e);
+                    return Path.Combine(Windows.Storage.ApplicationData.Current.LocalCacheFolder.Path, registry.ProviderID, registry.ID, $"p{page.Number}.jpg");
+                }
             };
 
             InitializeComponent();
@@ -82,13 +90,17 @@ namespace GeneaGrab
         public static void SaveData() => Task.Run(SaveDataAsync);
         public static async Task SaveDataAsync()
         {
-            var dataFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
-            foreach (var provider in Data.Providers)
+            try
             {
-                var folder = await dataFolder.CreateFolder(provider.Key);
-                await folder.WriteFile("Locations.json", JsonConvert.SerializeObject(provider.Value.Locations, Formatting.Indented));
-                foreach (var registry in provider.Value.Registries) await folder.CreateFolderPath(registry.Value.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+                var dataFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
+                foreach (var provider in Data.Providers)
+                {
+                    var folder = await dataFolder.CreateFolder(provider.Key);
+                    await folder.WriteFile("Locations.json", JsonConvert.SerializeObject(provider.Value.Locations, Formatting.Indented));
+                    foreach (var registry in provider.Value.Registries) await folder.CreateFolderPath(registry.Value.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+                }
             }
+            catch (Exception e) { Log.Error(e.Message, e); }
         }
 
         public static async Task<Windows.Storage.StorageFile> GetFile(Registry registry, RPage page, bool write = false)
