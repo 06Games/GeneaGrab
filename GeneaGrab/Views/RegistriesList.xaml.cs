@@ -39,6 +39,10 @@ namespace GeneaGrab.Views
             if (provider is null) return;
 
             _items.Clear();
+            foreach(var registry in provider.Registries.Values)
+            {
+                if (!provider.Locations.ContainsKey(registry.LocationID ?? "")) _items.Add(registry);
+            }
             foreach (var location in provider.Locations.Values) _items.Add(location);
         }
 
@@ -47,7 +51,7 @@ namespace GeneaGrab.Views
             var data = e.InvokedItem as LocationOrRegisterItem;
             var node = sender.NodeFromContainer(sender.ContainerFromItem(data));
             if (node.HasChildren) node.IsExpanded = !node.IsExpanded;
-            else if (data.Register != null) Frame.Navigate(typeof(Registry), new RegistryInfo { ProviderID = provider.ID, LocationID = data.Location.ID, RegistryID = data.Register.ID });
+            else if (data.Register != null) Frame.Navigate(typeof(Registry), new RegistryInfo { ProviderID = provider.ID, LocationID = data.Location?.ID, RegistryID = data.Register.ID });
         }
     }
 
@@ -70,6 +74,7 @@ namespace GeneaGrab.Views
             Children = new ObservableCollection<LocationOrRegisterItem>(location.Registers.Select(r => new LocationOrRegisterItem(r, location)));
         }
 
+        public static implicit operator LocationOrRegisterItem(GeneaGrab.Registry registry) => new LocationOrRegisterItem(registry, null);
         public LocationOrRegisterItem(GeneaGrab.Registry register, Location location)
         {
             Title = register.Name;

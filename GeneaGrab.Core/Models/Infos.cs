@@ -15,7 +15,7 @@ namespace GeneaGrab
         public string ProviderID;
         public Provider Provider => Data.Providers.TryGetValue(ProviderID, out var p) ? p : null;
         public string LocationID;
-        public Location Location => Provider.Locations.TryGetValue(LocationID, out var l) ? l : null;
+        public Location Location => Provider.Locations.TryGetValue(LocationID ?? "", out var l) ? l : null;
         public string RegistryID;
         public Registry Registry => Provider.Registries.TryGetValue(RegistryID, out var r) ? r : null;
         public int PageNumber = 1;
