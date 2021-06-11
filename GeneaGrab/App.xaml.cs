@@ -44,7 +44,7 @@ namespace GeneaGrab
                 catch (Exception e)
                 {
                     Log.Error(e.Message, e);
-                    return Path.Combine(Windows.Storage.ApplicationData.Current.LocalCacheFolder.Path, registry.ProviderID, registry.ID, $"p{page.Number}.jpg");
+                    return Path.Combine(Windows.Storage.ApplicationData.Current.LocalCacheFolder.Path, Extensions.GetValidFilename(registry.ProviderID), Extensions.GetValidFilename(registry.ID), $"p{page.Number}.jpg");
                 }
             };
 

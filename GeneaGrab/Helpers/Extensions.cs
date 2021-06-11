@@ -20,21 +20,21 @@ public static class Extensions
     public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Windows.Storage.StorageFolder folder, string name)
     {
         if (folder is null || string.IsNullOrWhiteSpace(name)) return folder;
-        else return await folder.CreateFolderAsync(name.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
+        else return await folder.CreateFolderAsync(GetValidFilename(name.Trim(' ')), Windows.Storage.CreationCollisionOption.OpenIfExists);
     }
     public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Task<Windows.Storage.StorageFolder> folder, string name) => await CreateFolder(await folder, name).ConfigureAwait(false);
     public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, string path) => await CreateFolderPath(folder, path.Split(Path.DirectorySeparatorChar)).ConfigureAwait(false);
     public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, params string[] path)
     {
         Windows.Storage.StorageFolder f = folder;
-        foreach (var dir in path) f = await CreateFolder(f, dir).ConfigureAwait(false);
+        foreach (var dir in path) f = await CreateFolder(f, GetValidFilename(dir)).ConfigureAwait(false);
         return f;
     }
 
     public static async Task<Windows.Storage.StorageFile> WriteFile(this Task<Windows.Storage.StorageFolder> folder, string filename, string content) => await WriteFile(await folder, filename, content).ConfigureAwait(false);
     public static async Task<Windows.Storage.StorageFile> WriteFile(this Windows.Storage.StorageFolder folder, string filename, string content)
     {
-        var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
+        var file = await folder.CreateFileAsync(GetValidFilename(filename.Trim(' ')), Windows.Storage.CreationCollisionOption.OpenIfExists);
         File.WriteAllText(file.Path, content);
         return file;
     }
@@ -42,7 +42,15 @@ public static class Extensions
     public static async Task<string> ReadFile(this Task<Windows.Storage.StorageFolder> folder, string filename) => await ReadFile(await folder, filename);
     public static async Task<string> ReadFile(this Windows.Storage.StorageFolder folder, string filename)
     {
-        var file = await folder.CreateFileAsync(filename.Trim(' '), Windows.Storage.CreationCollisionOption.OpenIfExists);
+        var file = await folder.CreateFileAsync(GetValidFilename(filename.Trim(' ')), Windows.Storage.CreationCollisionOption.OpenIfExists);
         return File.ReadAllText(file.Path);
+    }
+
+
+
+    public static string GetValidFilename(string path)
+    {
+        foreach (var _char in Path.GetInvalidFileNameChars()) path = path.Replace(_char, '_');
+        return path;
     }
 }
