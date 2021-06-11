@@ -39,9 +39,18 @@ namespace GeneaGrab.Views
             if (provider is null) return;
 
             _items.Clear();
-            foreach(var registry in provider.Registries.Values)
+            foreach (var registry in provider.Registries.Values)
             {
-                if (!provider.Locations.ContainsKey(registry.LocationID ?? "")) _items.Add(registry);
+                if (string.IsNullOrWhiteSpace(registry.LocationID)) { _items.Add(registry); continue; }
+                if (provider.Locations.ContainsKey(registry.LocationID ?? "")) continue;
+
+                var loc = _items.FirstOrDefault(i => i.Location?.ID == registry.LocationID);
+                if (loc is null)
+                {
+                    loc = new Location(provider) { ID = registry.LocationID, Name = registry.LocationID };
+                    _items.Add(loc);
+                }
+                loc.Children.Add(registry);
             }
             foreach (var location in provider.Locations.Values) _items.Add(location);
         }
