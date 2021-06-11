@@ -77,8 +77,11 @@ namespace GeneaGrab
             foreach (var provider in Data.Providers)
             {
                 var folder = await dataFolder.CreateFolder(provider.Key);
+
                 var _l = await folder.ReadFile("Locations.json");
-                foreach (var loc in JsonConvert.DeserializeObject<Dictionary<string, Location>>(_l)) provider.Value.Locations.Add(loc.Key, loc.Value);
+                try { foreach (var loc in JsonConvert.DeserializeObject<Dictionary<string, Location>>(_l)) provider.Value.Locations.Add(loc.Key, loc.Value); }
+                catch (Exception e) { Log.Error(e.Message, e); }
+
                 foreach (var reg in await folder.CreateFileQueryWithOptions(queryOptions).GetFilesAsync())
                 {
                     var kv = JsonConvert.DeserializeObject<KeyValuePair<string, Registry>>(await (await reg.GetParentAsync()).ReadFile(reg.Name));
