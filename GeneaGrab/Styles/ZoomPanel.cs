@@ -26,7 +26,11 @@ namespace GeneaGrab.Views
         public UIElement Initialize()
         {
             RightTapped += (s, e) => Reset();
-            Clip = new RectangleGeometry { Rect = new Rect(0, 0, ActualWidth, ActualHeight) }; //Prevents the child from being rendered out of the element
+
+            void SetClip() => Clip = new RectangleGeometry { Rect = new Rect(0, 0, ActualWidth, ActualHeight) }; //Prevents the child from being rendered out of the element
+            SizeChanged += (s, e) => SetClip();
+            SetClip();
+
 
             child = Children.FirstOrDefault();
             if (child is null) return null;
@@ -127,7 +131,6 @@ namespace GeneaGrab.Views
             var right = left + child.ActualSize.X * st.ScaleX;
             var minX = ActualWidth / -4;
             var maxX = ActualWidth / 4;
-
             if (left < maxX && right > minX) tt.X = X;
 
             var Y = origin.Y - start.Y + v.Y;
@@ -136,7 +139,7 @@ namespace GeneaGrab.Views
             var minY = ActualHeight / -4;
             var maxY = ActualHeight / 4;
             if (top < maxY && bottom > minY) tt.Y = Y;
-            
+
 
             PositionChanged?.Invoke(tt.X, tt.Y);
         }
