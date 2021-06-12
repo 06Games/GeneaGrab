@@ -117,13 +117,26 @@ namespace GeneaGrab.Views
         {
             if (child is null || child.PointerCaptures is null || !child.PointerCaptures.Any()) return;
 
+            var st = GetScaleTransform(child);
             var tt = GetTranslateTransform(child);
             var v = e.GetCurrentPoint(this).Position;
 
+
             var X = origin.X - start.X + v.X;
-            if (X > ActualWidth / -2 && X < ActualWidth / 2) tt.X = X;
+            var left = X - child.ActualSize.X / 2;
+            var right = left + child.ActualSize.X * st.ScaleX;
+            var minX = ActualWidth / -4;
+            var maxX = ActualWidth / 4;
+
+            if (left < maxX && right > minX) tt.X = X;
+
             var Y = origin.Y - start.Y + v.Y;
-            if (Y > ActualHeight / -2 && Y < ActualHeight / 2) tt.Y = Y;
+            var top = Y - child.ActualSize.Y / 2;
+            var bottom = top + child.ActualSize.Y * st.ScaleY;
+            var minY = ActualHeight / -4;
+            var maxY = ActualHeight / 4;
+            if (top < maxY && bottom > minY) tt.Y = Y;
+            
 
             PositionChanged?.Invoke(tt.X, tt.Y);
         }
