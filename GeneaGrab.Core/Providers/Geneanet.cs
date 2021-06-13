@@ -117,7 +117,7 @@ namespace GeneaGrab.Providers
                 for (int x = 0; x < data.tiles.X; x++)
                     tasks.Add(Grabber.GetTile($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg").ContinueWith((task) =>
                     {
-                        progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted));
+                        progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
                         return task.Result;
                     }), (current.TileSize.Value, data.diviser, new Point(x, y)));
 

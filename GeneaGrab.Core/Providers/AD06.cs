@@ -88,9 +88,9 @@ namespace GeneaGrab.Providers
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
             if (string.IsNullOrWhiteSpace(id)) return current;
 
-            progress?.Invoke(0);
+            //We can't track the progress because we don't know the final size
             current.Image = Image.Load(await client.GetStreamAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}")));
-            current.Zoom = (int)(zoom * 100); //We can't track the progress because we don't know the final size
+            current.Zoom = (int)(zoom * 100);
             progress?.Invoke(Progress.Finished);
 
             Data.Providers["AD06"].Registries[Registry.ID].Pages[current.Number - 1] = current;

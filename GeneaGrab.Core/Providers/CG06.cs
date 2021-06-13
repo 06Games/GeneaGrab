@@ -57,7 +57,6 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.UnterterminedProgress);
             var client = new HttpClient();
             await client.GetStringAsync($"http://www.basesdocumentaires-cg06.fr/ISVIEWER/ISViewerTarget.php?imagePath={page.URL}").ConfigureAwait(false); //Create the cache on server side
-            progress?.Invoke(0);
             page.Image = Image.Load(await client.GetStreamAsync($"http://www.basesdocumentaires-cg06.fr/ISVIEWER/cache/{page.URL.Replace('/', '_')}").ConfigureAwait(false)); //Request the cache content
             page.Zoom = 1;
             progress?.Invoke(Progress.Finished);

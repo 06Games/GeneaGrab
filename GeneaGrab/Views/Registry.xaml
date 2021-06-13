@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:GeneaGrab.Views"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Style="{StaticResource PageStyle}"
@@ -21,7 +22,7 @@
             <local:ZoomPanel x:Name="imagePanel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True">
                 <Image x:Name="image" />
             </local:ZoomPanel>
-            <ProgressBar x:Name="imageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" />
+            <muxc:ProgressBar x:Name="imageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Maximum="1" />
         </RelativePanel>
         <ListView x:Name="PageList" Padding="15" Grid.Row="1" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" ItemClick="ChangePage" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.ItemsPanel>
