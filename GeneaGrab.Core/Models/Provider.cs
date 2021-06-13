@@ -9,10 +9,11 @@ namespace GeneaGrab
     {
         bool TryGetRegistryID(Uri URL, out string ID);
         Task<RegistryInfo> Infos(Uri URL);
-        Task<RPage> Thumbnail(Registry Registry, RPage page);
-        Task<RPage> GetTile(Registry Registry, RPage page, int zoom);
-        Task<RPage> Download(Registry Registry, RPage page);
+        Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
+        Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress);
+        Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress);
     }
+
     /// <summary>Data on the registry provider</summary>
     public class Provider : IEquatable<Provider>
     {
@@ -52,5 +53,21 @@ namespace GeneaGrab
         public static bool operator ==(Provider one, Provider two) => one?.ID == two?.ID;
         public static bool operator !=(Provider one, Provider two) => !(one == two);
         public override int GetHashCode() => ID.GetHashCode();
+    }
+
+
+    public class Progress
+    {
+        public static readonly Progress Finished = new Progress { Value = 1, Done = true };
+        public static readonly Progress UnterterminedProgress = new Progress { Undetermined = true };
+        private Progress() { }
+
+        public static implicit operator Progress(float v) => new Progress(v);
+        public Progress(float value) => Value = value;
+
+        public static implicit operator float(Progress p) => p.Value;
+        public float Value { get; private set; }
+        public bool Done { get; private set; }
+        public bool Undetermined { get; private set; }
     }
 }

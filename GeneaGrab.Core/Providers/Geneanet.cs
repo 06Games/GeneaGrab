@@ -87,13 +87,14 @@ namespace GeneaGrab.Providers
             return (types, location, note ?? notes);
         }
 
-        public Task<RPage> Thumbnail(Registry Registry, RPage page) => GetTiles(Registry, page, 0);
-        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => GetTiles(Registry, page, zoom);
-        public Task<RPage> Download(Registry Registry, RPage page) => GetTiles(Registry, page, Grabber.CalculateIndex(page));
-        public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom)
+        public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0, progress);
+        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress) => GetTiles(Registry, page, zoom, progress);
+        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Grabber.CalculateIndex(page), progress);
+        public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, Action<Progress> progress)
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
+            progress?.Invoke(Progress.UnterterminedProgress);
             var chemin_image = Uri.EscapeDataString($"doc/{current.URL}");
             var baseURL = $"https://www.geneanet.org/zoomify/?path={chemin_image}/";
 
@@ -109,13 +110,19 @@ namespace GeneaGrab.Providers
             if (current.MaxZoom == -1) current.MaxZoom = Grabber.CalculateIndex(current);
             current.Zoom = zoom < current.MaxZoom ? (int)Math.Ceiling(zoom) : current.MaxZoom;
 
+            progress?.Invoke(0);
             if (current.Image == null) current.Image = new Image<Rgb24>(current.Width, current.Height);
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (int y = 0; y < data.tiles.Y; y++)
                 for (int x = 0; x < data.tiles.X; x++)
-                    tasks.Add(Grabber.GetTile($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg"), (current.TileSize.Value, data.diviser, new Point(x, y)));
+                    tasks.Add(Grabber.GetTile($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg").ContinueWith((task) =>
+                    {
+                        progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted));
+                        return task.Result;
+                    }), (current.TileSize.Value, data.diviser, new Point(x, y)));
 
             await Task.WhenAll(tasks.Keys).ConfigureAwait(false);
+            progress?.Invoke(Progress.Finished);
             foreach (var tile in tasks) current.Image = current.Image.MergeTile(tile.Key.Result, tile.Value);
 
             Data.Providers["Geneanet"].Registries[Registry.ID].Pages[current.Number - 1] = current;

@@ -31,7 +31,7 @@ namespace GeneaGrab.Views
                     for (int i = 0; i < Pages.Count; i++)
                     {
                         var page = Pages[i];
-                        var img = i == Info.PageNumber - 1 ? await Info.Provider.API.GetTile(Info.Registry, page.Page, 1) : await Info.Provider.API.Thumbnail(Info.Registry, page.Page);
+                        var img = i == Info.PageNumber - 1 ? await Info.Provider.API.GetTile(Info.Registry, page.Page, 1, TrackProgress) : await Info.Provider.API.Thumbnail(Info.Registry, page.Page, null);
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                         {
                             page.Thumbnail = img.Image.ToImageSource();
@@ -77,7 +77,7 @@ namespace GeneaGrab.Views
         public async Task ChangePage(PageList page)
         {
             Info.PageNumber = page.Number;
-            await Info.Provider.API.GetTile(Info.Registry, page.Page, 1);
+            await Info.Provider.API.GetTile(Info.Registry, page.Page, 1, TrackProgress);
             RefreshView();
         }
         public void RefreshView()
@@ -96,7 +96,7 @@ namespace GeneaGrab.Views
         private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download();
         async Task<string> Download()
         {
-            var page = await Info.Provider.API.Download(Info.Registry, Info.Page);
+            var page = await Info.Provider.API.Download(Info.Registry, Info.Page, TrackProgress);
             RefreshView();
             return await Data.SaveImage(Info.Registry, page);
         }
@@ -111,6 +111,13 @@ namespace GeneaGrab.Views
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+        public async void TrackProgress(Progress progress) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+        {
+            imageProgress.Visibility = progress.Done ? Windows.UI.Xaml.Visibility.Collapsed : Windows.UI.Xaml.Visibility.Visible;
+            imageProgress.IsIndeterminate = progress.Undetermined;
+            imageProgress.Value = progress.Value;
+        });
     }
 
     public class PageList

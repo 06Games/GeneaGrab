@@ -44,20 +44,23 @@ namespace GeneaGrab.Providers
         }
 
 
-        public async Task<RPage> Thumbnail(Registry Registry, RPage page)
+        public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
             await Data.TryGetImageFromDrive(Registry, page, 0);
             return page;
         }
-        public Task<RPage> Download(Registry Registry, RPage page) => GetTile(Registry, page, 1);
-        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom)
+        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
+        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress)
         {
             if (await Data.TryGetImageFromDrive(Registry, page, zoom)) return page;
 
+            progress?.Invoke(Progress.UnterterminedProgress);
             var client = new HttpClient();
             await client.GetStringAsync($"http://www.basesdocumentaires-cg06.fr/ISVIEWER/ISViewerTarget.php?imagePath={page.URL}").ConfigureAwait(false); //Create the cache on server side
+            progress?.Invoke(0);
             page.Image = Image.Load(await client.GetStreamAsync($"http://www.basesdocumentaires-cg06.fr/ISVIEWER/cache/{page.URL.Replace('/', '_')}").ConfigureAwait(false)); //Request the cache content
             page.Zoom = 1;
+            progress?.Invoke(Progress.Finished);
 
             Data.Providers["CG06"].Registries[Registry.ID].Pages[page.Number - 1] = page;
             await Data.SaveImage(Registry, page);

@@ -74,21 +74,24 @@ namespace GeneaGrab.Providers
             return types;
         }
 
-        public Task<RPage> Thumbnail(Registry Registry, RPage page) => GetTiles(Registry, page, 0.1F);
-        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom) => GetTiles(Registry, page, zoom / 100F);
-        public Task<RPage> Download(Registry Registry, RPage page) => GetTiles(Registry, page, 1);
-        public static async Task<RPage> GetTiles(Registry Registry, RPage current, float zoom)
+        public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.1F, progress);
+        public Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress) => GetTiles(Registry, page, zoom / 100F, progress);
+        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
+        public static async Task<RPage> GetTiles(Registry Registry, RPage current, float zoom, Action<Progress> progress)
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
+            progress?.Invoke(Progress.UnterterminedProgress);
             var client = new HttpClient();
             string link = await client.GetStringAsync(current.URL).ConfigureAwait(false);
             string url = await client.GetStringAsync(link).ConfigureAwait(false);
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
             if (string.IsNullOrWhiteSpace(id)) return current;
 
-            current.Image = Image.Load(await client.GetStreamAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}"))); //We can't track the progress because we don't know the final size
-            current.Zoom = (int)(zoom * 100);
+            progress?.Invoke(0);
+            current.Image = Image.Load(await client.GetStreamAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}")));
+            current.Zoom = (int)(zoom * 100); //We can't track the progress because we don't know the final size
+            progress?.Invoke(Progress.Finished);
 
             Data.Providers["AD06"].Registries[Registry.ID].Pages[current.Number - 1] = current;
             await Data.SaveImage(Registry, current);

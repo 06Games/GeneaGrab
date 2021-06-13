@@ -17,9 +17,12 @@
             <ColumnDefinition MinWidth="230" MaxWidth="260" />
         </Grid.ColumnDefinitions>
 
-        <local:ZoomPanel x:Name="imagePanel">
-            <Image x:Name="image" />
-        </local:ZoomPanel>
+        <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <local:ZoomPanel x:Name="imagePanel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True">
+                <Image x:Name="image" />
+            </local:ZoomPanel>
+            <ProgressBar x:Name="imageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" />
+        </RelativePanel>
         <ListView x:Name="PageList" Padding="15" Grid.Row="1" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" ItemClick="ChangePage" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
