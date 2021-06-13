@@ -10,17 +10,17 @@
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition MaxHeight="175" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" MinWidth="230" MaxWidth="320" />
+            <ColumnDefinition MinWidth="230" MaxWidth="260" />
         </Grid.ColumnDefinitions>
 
         <local:ZoomPanel x:Name="imagePanel">
             <Image x:Name="image" />
         </local:ZoomPanel>
-        <ListView x:Name="PageList" Padding="15" Grid.Row="1" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" Height="200" ItemClick="ChangePage" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+        <ListView x:Name="PageList" Padding="15" Grid.Row="1" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" ItemClick="ChangePage" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <ItemsStackPanel Orientation="Horizontal"/>
@@ -28,9 +28,11 @@
             </ListView.ItemsPanel>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:PageList">
-                    <StackPanel>
-                        <Image Source="{x:Bind Thumbnail}" MaxHeight="125" MaxWidth="125" />
-                        <TextBlock Text="{x:Bind Number}" Margin="12,6,0,0" Style="{ThemeResource BaseTextBlockStyle}"/>
+                    <StackPanel Width="125">
+                        <StackPanel Width="125" Height="100">
+                            <Image Source="{x:Bind Thumbnail}" MaxHeight="125" MaxWidth="125" />
+                        </StackPanel>
+                        <TextBlock Text="{x:Bind Number}" Margin="0,6,0,0" Style="{ThemeResource BaseTextBlockStyle}" HorizontalTextAlignment="Center" Width="125" />
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>
