@@ -22,7 +22,7 @@ public static class Extensions
         if (folder is null || string.IsNullOrWhiteSpace(name)) return folder;
         else return await folder.CreateFolderAsync(GetValidFilename(name.Trim(' ')), Windows.Storage.CreationCollisionOption.OpenIfExists);
     }
-    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Task<Windows.Storage.StorageFolder> folder, string name) => await CreateFolder(await folder, name).ConfigureAwait(false);
+    public static async Task<Windows.Storage.StorageFolder> CreateFolder(this Task<Windows.Storage.StorageFolder> folder, string name) => await CreateFolder(await folder.ConfigureAwait(false), name).ConfigureAwait(false);
     public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, string path) => await CreateFolderPath(folder, path.Split(Path.DirectorySeparatorChar)).ConfigureAwait(false);
     public static async Task<Windows.Storage.StorageFolder> CreateFolderPath(this Windows.Storage.StorageFolder folder, params string[] path)
     {
@@ -31,7 +31,7 @@ public static class Extensions
         return f;
     }
 
-    public static async Task<Windows.Storage.StorageFile> WriteFile(this Task<Windows.Storage.StorageFolder> folder, string filename, string content) => await WriteFile(await folder, filename, content).ConfigureAwait(false);
+    public static async Task<Windows.Storage.StorageFile> WriteFile(this Task<Windows.Storage.StorageFolder> folder, string filename, string content) => await WriteFile(await folder.ConfigureAwait(false), filename, content).ConfigureAwait(false);
     public static async Task<Windows.Storage.StorageFile> WriteFile(this Windows.Storage.StorageFolder folder, string filename, string content)
     {
         var file = await folder.CreateFileAsync(GetValidFilename(filename.Trim(' ')), Windows.Storage.CreationCollisionOption.OpenIfExists);
@@ -39,7 +39,7 @@ public static class Extensions
         return file;
     }
 
-    public static async Task<string> ReadFile(this Task<Windows.Storage.StorageFolder> folder, string filename) => await ReadFile(await folder, filename);
+    public static async Task<string> ReadFile(this Task<Windows.Storage.StorageFolder> folder, string filename) => await ReadFile(await folder.ConfigureAwait(false), filename);
     public static async Task<string> ReadFile(this Windows.Storage.StorageFolder folder, string filename)
     {
         var file = await folder.CreateFileAsync(GetValidFilename(filename.Trim(' ')), Windows.Storage.CreationCollisionOption.OpenIfExists);

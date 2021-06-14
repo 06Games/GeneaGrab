@@ -30,10 +30,10 @@ namespace GeneaGrab.Views
         public SettingsPage() => InitializeComponent();
         protected override async void OnNavigatedTo(NavigationEventArgs e) => await InitializeAsync();
 
-        private async Task InitializeAsync()
+        private Task InitializeAsync()
         {
             VersionDescription = GetVersionDescription();
-            await Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         private string GetVersionDescription()

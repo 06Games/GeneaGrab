@@ -18,7 +18,7 @@ namespace GeneaGrab.Views
         async protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            var (success, inRam) = await LoadRegistry(e.Parameter);
+            var (success, inRam) = await LoadRegistry(e.Parameter).ConfigureAwait(false);
             if (success)
             {
                 RefreshView();
@@ -57,9 +57,9 @@ namespace GeneaGrab.Views
             else if (Parameter is Dictionary<string, string>)
             {
                 var param = Parameter as Dictionary<string, string>;
-                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await TryGetFromProviders(uri);
+                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await TryGetFromProviders(uri).ConfigureAwait(false);
             }
-            else if (Parameter is Uri) Info = await TryGetFromProviders(Parameter as Uri);
+            else if (Parameter is Uri) Info = await TryGetFromProviders(Parameter as Uri).ConfigureAwait(false);
             else inRam = true;
 
             async Task<RegistryInfo> TryGetFromProviders(Uri uri)
@@ -73,7 +73,7 @@ namespace GeneaGrab.Views
             return (Info != null, inRam);
         }
 
-        private async void ChangePage(object sender, ItemClickEventArgs e) => await ChangePage(e.ClickedItem as PageList);
+        private async void ChangePage(object sender, ItemClickEventArgs e) => await ChangePage(e.ClickedItem as PageList).ConfigureAwait(false);
         public async Task ChangePage(PageList page)
         {
             Info.PageNumber = page.Number;
@@ -93,7 +93,7 @@ namespace GeneaGrab.Views
             App.SaveData();
         }
 
-        private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download();
+        private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download().ConfigureAwait(false);
         async Task<string> Download()
         {
             var page = await Info.Provider.API.Download(Info.Registry, Info.Page, TrackProgress);
