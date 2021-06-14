@@ -121,6 +121,10 @@
     <value>Alpes-Maritimes Departmental Archives</value>
     <comment>departement06.fr</comment>
   </data>
+  <data name="Provider.CG06" xml:space="preserve">
+    <value>Alpes-Maritimes Departmental Archives (CG06)</value>
+    <comment>departement06.fr</comment>
+  </data>
   <data name="Provider.Geneanet" xml:space="preserve">
     <value>Geneanet</value>
     <comment>geneanet.org</comment>
