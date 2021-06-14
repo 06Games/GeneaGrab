@@ -78,6 +78,12 @@ namespace GeneaGrab.Views
         {
             Info.PageNumber = page.Number;
             await Info.Provider.API.GetTile(Info.Registry, page.Page, 1, TrackProgress);
+            if ((page.Thumbnail is null || page.Thumbnail.PixelWidth == 0 || page.Thumbnail.PixelHeight == 0) && await Data.TryGetImageFromDrive(Info.Registry, page.Page, 0))
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+                {
+                    page.Thumbnail = page.Page.Image.ToImageSource();
+                    Pages[page.Number - 1] = page;
+                });
             RefreshView();
         }
         public void RefreshView()
