@@ -79,7 +79,7 @@ namespace GeneaGrab.Providers
         public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
         public static async Task<RPage> GetTiles(Registry Registry, RPage current, float zoom, Action<Progress> progress)
         {
-            if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
+            if (await Data.TryGetImageFromDrive(Registry, current, zoom * 100)) return current;
 
             progress?.Invoke(Progress.UnterterminedProgress);
             var client = new HttpClient();
