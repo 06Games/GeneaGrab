@@ -12,7 +12,14 @@ namespace GeneaGrab.Views
 {
     public sealed partial class Registry : Page, INotifyPropertyChanged
     {
-        public Registry() => InitializeComponent();
+        public Registry()
+        {
+            InitializeComponent();
+            PageNumber.ValueChanged += async (ns, ne) =>
+            {
+                if (ne.NewValue <= Pages.Count) await ChangePage(Pages[(int)ne.NewValue - 1]);
+            };
+        }
 
         public static RegistryInfo Info { get; set; }
         async protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -25,6 +32,7 @@ namespace GeneaGrab.Views
                 if (inRam) return;
 
                 Pages.Clear();
+                PageNumber.Maximum = Info.Registry.Pages.Length;
                 foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
                 _ = Task.Run(async () =>
                 {
@@ -88,6 +96,8 @@ namespace GeneaGrab.Views
         }
         public void RefreshView()
         {
+            PageNumber.Value = Info.PageNumber;
+            PageTotal.Text = $"/ {Info.Registry.Pages.Length}";
             SetInfo(Info_LocationCity, Info.Location?.Name);
             SetInfo(Info_LocationDistrict, Info.Location?.District);
             SetInfo(Info_RegistryType, Info.Registry?.TypeToString);

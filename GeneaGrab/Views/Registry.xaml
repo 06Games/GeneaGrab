@@ -11,7 +11,7 @@
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition MaxHeight="175" />
+            <RowDefinition MaxHeight="225" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -24,23 +24,29 @@
             </local:ZoomPanel>
             <muxc:ProgressBar x:Name="imageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Maximum="1" />
         </RelativePanel>
-        <ListView x:Name="PageList" Padding="15" Grid.Row="1" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" ItemClick="ChangePage" ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
-            <ListView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <ItemsStackPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ListView.ItemsPanel>
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="local:PageList">
-                    <StackPanel Width="125">
-                        <StackPanel Width="125" Height="100">
-                            <Image Source="{x:Bind Thumbnail}" MaxHeight="125" MaxWidth="125" />
+        <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Padding="15">
+            <muxc:NumberBox x:Name="PageNumber" PlaceholderText="Page" Minimum="1" Width="90" Height="32.5"></muxc:NumberBox>
+            <TextBlock x:Name="PageTotal" Text="/ 1" Margin="100 6.25 0 0" Height="20" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+            <ListView x:Name="PageList" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" ItemClick="ChangePage"
+                      ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                      RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Margin="0 45 0 0 ">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsStackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:PageList">
+                        <StackPanel Width="125">
+                            <StackPanel Width="125" Height="100">
+                                <Image Source="{x:Bind Thumbnail}" MaxHeight="125" MaxWidth="125" />
+                            </StackPanel>
+                            <TextBlock Text="{x:Bind Number}" Margin="0,6,0,0" Style="{ThemeResource BaseTextBlockStyle}" HorizontalTextAlignment="Center" Width="125" />
                         </StackPanel>
-                        <TextBlock Text="{x:Bind Number}" Margin="0,6,0,0" Style="{ThemeResource BaseTextBlockStyle}" HorizontalTextAlignment="Center" Width="125" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </RelativePanel>
 
         <StackPanel Grid.Column="1" Grid.RowSpan="2" BorderThickness="1,0,0,0" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
             <StackPanel Padding="15" Spacing="15" HorizontalAlignment="Center">
