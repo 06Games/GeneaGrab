@@ -42,7 +42,7 @@ namespace GeneaGrab
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0");
 
-            try { return Image.Load(await client.GetStreamAsync(url)); }
+            try { return await Image.LoadAsync(await client.GetStreamAsync(url).ConfigureAwait(false)).ConfigureAwait(false); }
             catch (HttpRequestException) { return new Image<SixLabors.ImageSharp.PixelFormats.Rgb24>(1, 1, Color.Black); }
         }
         public static Image MergeTile(this Image tex, Image tile, (int tileSize, int scale, Point pos) a) => MergeTile(tex, tile, a.tileSize, a.scale, a.pos);

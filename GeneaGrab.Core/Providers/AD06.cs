@@ -89,7 +89,7 @@ namespace GeneaGrab.Providers
             if (string.IsNullOrWhiteSpace(id)) return current;
 
             //We can't track the progress because we don't know the final size
-            current.Image = Image.Load(await client.GetStreamAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}")));
+            current.Image = await Image.LoadAsync(await client.GetStreamAsync(new Uri($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}")).ConfigureAwait(false)).ConfigureAwait(false);
             current.Zoom = (int)(zoom * 100);
             progress?.Invoke(Progress.Finished);
 
