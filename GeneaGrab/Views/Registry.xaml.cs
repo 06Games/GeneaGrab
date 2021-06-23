@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GeneaGrab.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,6 +13,9 @@ namespace GeneaGrab.Views
 {
     public sealed partial class Registry : Page, INotifyPropertyChanged
     {
+        private string DownloadText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/Download");
+        private string OpenFolderText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/OpenFolder");
+
         public Registry()
         {
             InitializeComponent();

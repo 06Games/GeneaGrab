@@ -169,4 +169,10 @@
     <value>Registre</value>
     <comment>Navigation view item name for Registry</comment>
   </data>
+  <data name="Registry.Download" xml:space="preserve">
+    <value>Télécharger</value>
+  </data>
+  <data name="Registry.OpenFolder" xml:space="preserve">
+    <value>Ouvrir le dossier</value>
+  </data>
 </root>

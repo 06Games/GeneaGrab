@@ -59,8 +59,8 @@
                     <TextBlock x:Name="Info_RegistryID" Style="{ThemeResource CaptionTextBlockStyle}" Text="Document number" TextWrapping="WrapWholeWords" Margin="0 12 0 0"  />
                 </StackPanel>
 
-                <Button Width="200" Content="Download" Click="Download" />
-                <Button Width="200" Content="Open folder" Click="OpenFolder" />
+                <Button Width="200" Content="{x:Bind DownloadText, Mode=OneWay}" Click="Download" />
+                <Button Width="200" Content="{x:Bind OpenFolderText, Mode=OneWay}" Click="OpenFolder" />
             </StackPanel>
         </StackPanel>
     </Grid>
