@@ -10,7 +10,7 @@ namespace GeneaGrab
         bool TryGetRegistryID(Uri URL, out string ID);
         Task<RegistryInfo> Infos(Uri URL);
         Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
-        Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress);
+        Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress);
         Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress);
     }
 
@@ -62,7 +62,9 @@ namespace GeneaGrab
         public static readonly Progress UnterterminedProgress = new Progress { Undetermined = true };
         private Progress() { }
 
+        public static implicit operator Progress(int v) => new Progress(v);
         public static implicit operator Progress(float v) => new Progress(v);
+        public static implicit operator Progress(decimal v) => new Progress((float)v);
         public Progress(float value) => Value = value;
 
         public static implicit operator float(Progress p) => p.Value;

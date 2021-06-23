@@ -50,6 +50,7 @@ namespace GeneaGrab.Providers
             return page;
         }
         public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
+        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
         public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress)
         {
             if (await Data.TryGetImageFromDrive(Registry, page, zoom)) return page;

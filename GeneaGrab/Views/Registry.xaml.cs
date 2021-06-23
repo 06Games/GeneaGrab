@@ -31,7 +31,7 @@ namespace GeneaGrab.Views
                     for (int i = 0; i < Pages.Count; i++)
                     {
                         var page = Pages[i];
-                        var img = i == Info.PageNumber - 1 ? await Info.Provider.API.GetTile(Info.Registry, page.Page, 1, TrackProgress) : await Info.Provider.API.Thumbnail(Info.Registry, page.Page, null);
+                        var img = i == Info.PageNumber - 1 ? await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress) : await Info.Provider.API.Thumbnail(Info.Registry, page.Page, null);
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                         {
                             page.Thumbnail = img.Image.ToImageSource();
@@ -77,7 +77,7 @@ namespace GeneaGrab.Views
         public async Task ChangePage(PageList page)
         {
             Info.PageNumber = page.Number;
-            await Info.Provider.API.GetTile(Info.Registry, page.Page, 1, TrackProgress);
+            await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress);
             if ((page.Thumbnail is null || page.Thumbnail.PixelWidth == 0 || page.Thumbnail.PixelHeight == 0) && await Data.TryGetImageFromDrive(Info.Registry, page.Page, 0))
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                 {
