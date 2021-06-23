@@ -88,9 +88,17 @@ namespace GeneaGrab.Views
         }
         public void RefreshView()
         {
-            Info_Location.Text = Info.Location?.ToString() ?? "";
-            Info_Registry.Text = Info.Registry?.ToString() ?? "";
-            Info_RegistryID.Text = Info.Registry?.ID ?? "";
+            SetInfo(Info_LocationCity, Info.Location?.Name);
+            SetInfo(Info_LocationDistrict, Info.Location?.District);
+            SetInfo(Info_RegistryType, Info.Registry?.TypeToString);
+            SetInfo(Info_RegistryDate, Info.Registry?.Dates);
+            SetInfo(Info_RegistryNotes, Info.Registry?.Notes);
+            SetInfo(Info_RegistryID, Info.Registry?.ID);
+            void SetInfo(TextBlock block, string text)
+            {
+                block.Text = text ?? "";
+                block.Visibility = string.IsNullOrWhiteSpace(text) ? Windows.UI.Xaml.Visibility.Collapsed : Windows.UI.Xaml.Visibility.Visible;
+            }
 
             image.Source = Info.Page?.Image?.ToImageSource();
             PageList.SelectedIndex = Info.Page?.Number - 1 ?? 0;

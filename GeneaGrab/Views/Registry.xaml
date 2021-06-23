@@ -45,9 +45,12 @@
         <StackPanel Grid.Column="1" Grid.RowSpan="2" BorderThickness="1,0,0,0" BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}">
             <StackPanel Padding="15" Spacing="15" HorizontalAlignment="Center">
                 <StackPanel>
-                    <TextBlock x:Name="Info_Location" Style="{ThemeResource BaseTextBlockStyle}" Text="City (District)" TextWrapping="WrapWholeWords" />
-                    <TextBlock x:Name="Info_Registry" Style="{ThemeResource BodyTextBlockStyle}" Text="Type (From - To)" TextWrapping="WrapWholeWords" />
-                    <TextBlock x:Name="Info_RegistryID" Style="{ThemeResource CaptionTextBlockStyle}" Text="Document number" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="Info_LocationCity" Style="{ThemeResource BaseTextBlockStyle}" FontSize="18" Text="City" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="Info_LocationDistrict" Style="{ThemeResource BaseTextBlockStyle}" Text="District" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="Info_RegistryType" Style="{ThemeResource BodyTextBlockStyle}" Text="Type" FontSize="18" TextWrapping="WrapWholeWords" Margin="0 12 0 0" />
+                    <TextBlock x:Name="Info_RegistryDate" Style="{ThemeResource BodyTextBlockStyle}" Text="From - To" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="Info_RegistryNotes" Style="{ThemeResource CaptionTextBlockStyle}" Text="Notes" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Name="Info_RegistryID" Style="{ThemeResource CaptionTextBlockStyle}" Text="Document number" TextWrapping="WrapWholeWords" Margin="0 12 0 0"  />
                 </StackPanel>
 
                 <Button Width="200" Content="Download" Click="Download" />

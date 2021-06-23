@@ -22,6 +22,7 @@ namespace GeneaGrab
 
         public string ID { get; set; }
         public string URL { get; set; }
+
         public enum Type
         {
             /// <summary>Unable to determine</summary>
@@ -56,26 +57,26 @@ namespace GeneaGrab
             Military
         }
         [JsonProperty(ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))] public List<Type> Types { get; set; } = new List<Type>();
-        public string Notes { get; set; }
+        [JsonIgnore]
+        public string TypeToString => Types.Any() ? string.Join(", ", Types.Select(t =>
+        {
+            var type = Enum.GetName(typeof(Type), t);
+            return Data.Translate($"Registry/Type/{type}", type);
+        })) : null;
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
 
         [JsonConverter(typeof(DateFormatConverter), "yyyy-MM-dd")] public DateTime? From { get; set; }
         [JsonConverter(typeof(DateFormatConverter), "yyyy-MM-dd")] public DateTime? To { get; set; }
         [JsonIgnore]
-        public string Name
+        public string Dates
         {
             get
             {
-                var name = Types.Any() ? string.Join(", ", Types.Select(t =>
-                {
-                    var type = Enum.GetName(typeof(Type), t);
-                    return Data.Translate($"Registry/Type/{type}", type);
-                })) : ""; //Type
-
-                //Dates
                 const string Date = "dd/MM/yyyy";
                 const string Month = "MM/yyyy";
                 const string Year = "yyyy";
-                if (From.HasValue && To.HasValue && From.Value.Date == To.Value.Date) name += $" ({From.Value.ToString(Date)})";
+                if (From.HasValue && To.HasValue && From.Value.Date == To.Value.Date) return From.Value.ToString(Date);
                 else if (From.HasValue && To.HasValue)
                 {
                     var from = From.Value;
@@ -83,12 +84,29 @@ namespace GeneaGrab
                     var format = Year;
                     if (from.Day != to.Day || from.Day != 1) format = Date;
                     else if (from.Month != to.Month || from.Month != 1) format = Month;
-                    name += $" ({from.ToString(format)} - {to.ToString(format)})";
+                    return $"{from.ToString(format)} - {to.ToString(format)}";
                 }
-                else if (From.HasValue) name += $" ({From.Value.ToString(Date)} - ?)";
-                else if (To.HasValue) name += $" (? - {From.Value.ToString(Date)})";
+                else if (From.HasValue) return $"{From.Value.ToString(Date)} - ?";
+                else if (To.HasValue) return $"? - {From.Value.ToString(Date)}";
+                return null;
+            }
+        }
 
-                if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes}"; //Notes
+
+        [JsonIgnore]
+        public string Name
+        {
+            get
+            {
+                //Type
+                var name = TypeToString ?? "";
+
+                //Dates
+                var dates = Dates;
+                if (!string.IsNullOrEmpty(dates)) name += $" ({dates})";
+
+                //Notes
+                if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes}";
 
                 return name;
             }
@@ -130,7 +148,8 @@ namespace GeneaGrab
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore), System.ComponentModel.DefaultValue(-1)] public int MaxZoom { get; set; } = -1;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public int Width { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public int Height { get; set; }
-
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public int? TileSize { get; set; }
+
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
     }
 }
