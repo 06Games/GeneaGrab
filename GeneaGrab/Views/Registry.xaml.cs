@@ -19,7 +19,7 @@ namespace GeneaGrab.Views
         {
             base.OnNavigatedTo(e);
             var (success, inRam) = await LoadRegistry(e.Parameter).ConfigureAwait(false);
-            if (success)
+            if (success) await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
                 RefreshView();
                 if (inRam) return;
@@ -40,7 +40,7 @@ namespace GeneaGrab.Views
                         });
                     }
                 }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
-            }
+            });
             else await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
                 if (Frame.CanGoBack) Frame.GoBack();
@@ -84,7 +84,7 @@ namespace GeneaGrab.Views
                     page.Thumbnail = page.Page.Image.ToImageSource();
                     Pages[page.Number - 1] = page;
                 });
-            RefreshView();
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView);
         }
         public void RefreshView()
         {
