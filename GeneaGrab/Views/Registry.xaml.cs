@@ -116,6 +116,7 @@ namespace GeneaGrab.Views
 
             image.Source = Info.Page?.Image?.ToImageSource();
             PageList.SelectedIndex = Info.Page?.Number - 1 ?? 0;
+            PageList.ScrollIntoView(PageList.SelectedItem);
             imagePanel.Reset();
             OnPropertyChanged(nameof(image));
             App.SaveData();
