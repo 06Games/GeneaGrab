@@ -6,51 +6,10 @@ namespace FileFormat
 {
     namespace XML
     {
-        public static class Utils
-        {
-            public static string ClassToXML<T>(T data, bool minimised = true)
-            {
-                System.Xml.Serialization.XmlSerializer _serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
-                var settings = new System.Xml.XmlWriterSettings
-                {
-                    NewLineHandling = System.Xml.NewLineHandling.Entitize,
-                    Encoding = Encoding.UTF8,
-                    Indent = !minimised
-                };
-
-                using (var stream = new StringWriter())
-                using (var writer = System.Xml.XmlWriter.Create(stream, settings))
-                {
-                    _serializer.Serialize(writer, data);
-
-                    return stream.ToString();
-                }
-            }
-            public static T XMLtoClass<T>(string data)
-            {
-                System.Xml.Serialization.XmlSerializer _serializer = new System.Xml.Serialization.XmlSerializer(typeof(T));
-                if (string.IsNullOrEmpty(data))
-                    return default(T);
-
-                using (var stream = new StringReader(data))
-                using (var reader = System.Xml.XmlReader.Create(stream))
-                {
-                    return (T)_serializer.Deserialize(reader);
-                }
-            }
-
-            public static bool IsValid(string xmlFile)
-            {
-                try { new System.Xml.XmlDocument().LoadXml(xmlFile); }
-                catch { return false; }
-                return true;
-            }
-        }
-
         public class XML
         {
             readonly System.Xml.XmlDocument xmlDoc;
-            public XML() { xmlDoc = new System.Xml.XmlDocument(); }
+            public XML() => xmlDoc = new System.Xml.XmlDocument();
             public XML(System.Xml.XmlDocument xml) { if (xml == null) xmlDoc = new System.Xml.XmlDocument(); else xmlDoc = xml; }
             public XML(string plainText)
             {
@@ -93,10 +52,9 @@ namespace FileFormat
 
         public class RootElement : Base_Collection
         {
-            public RootElement(System.Xml.XmlNode xmlNode) { node = xmlNode; }
+            public RootElement(System.Xml.XmlNode xmlNode) => node = xmlNode;
             public Item item => new Item(node);
-
-            public XML xmlFile { get { return new XML(node == null ? null : node.OwnerDocument); } }
+            public XML xmlFile => new XML(node?.OwnerDocument);
         }
 
         public class Item : Base_Collection
@@ -104,9 +62,9 @@ namespace FileFormat
             public Item(System.Xml.XmlNode xmlNode) { node = xmlNode; }
             public static implicit operator Item(System.Xml.XmlNode n) => new Item(n);
             public static explicit operator System.Xml.XmlNode(Item b) => b.node;
-            public RootElement rootElement { get { return new RootElement(node.OwnerDocument.DocumentElement); } }
+            public RootElement rootElement => new RootElement(node.OwnerDocument.DocumentElement);
 
-            public string Attribute(string key) { return node.Attributes[key].Value; }
+            public string Attribute(string key) => node.Attributes[key].Value;
             public Item SetAttribute(string key, string value = "")
             {
                 if (node.Attributes != null && node.Attributes[key] != null) //Set value
@@ -122,7 +80,7 @@ namespace FileFormat
             }
             public Item RemoveAttribute(string key) { if (node != null) node.Attributes.Remove(node.Attributes[key]); return this; }
 
-            public Item Parent { get { return new Item(node == null ? null : node.ParentNode); } }
+            public Item Parent => new Item(node == null ? null : node.ParentNode);
 
             public T value<T>()
             {
@@ -132,7 +90,7 @@ namespace FileFormat
             }
             public string Value
             {
-                get { if (node == null) return null; else return node.InnerText; }
+                get => node?.InnerText;
                 set { if (node == null) throw new System.InvalidOperationException("This item does not exist! Can not set a value!\nCheck if item exists before calling this function."); else node.InnerText = value; }
             }
             public void Remove() { node.ParentNode.RemoveChild(node); }
@@ -161,22 +119,21 @@ namespace FileFormat
             }
             public Item[] GetItems()
             {
-                if (node == null) return new Item[0];
+                if (node == null) return System.Array.Empty<Item>();
                 System.Xml.XmlNodeList list = node.ChildNodes;
                 Item[] items = new Item[list.Count];
                 for (int i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
                 if (items.Length > 0) return items;
-                else return new Item[0];
+                else return System.Array.Empty<Item>();
             }
             public Item[] GetItems(string key)
             {
-                if (node == null) return new Item[0];
+                if (node == null) return System.Array.Empty<Item>();
                 System.Xml.XmlNodeList list = node.SelectNodes(key);
                 Item[] items = new Item[list.Count];
-                for (int i = 0; i < items.Length; i++)
-                    items[i] = new Item(list[i]);
+                for (int i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
                 if (items.Length > 0) return items;
-                else return new Item[0];
+                else return System.Array.Empty<Item>();
             }
 
             public Item GetItemByAttribute(string key, string attribute, string attributeValue = "")
@@ -191,8 +148,7 @@ namespace FileFormat
                 if (node == null) return new Item[0];
                 System.Xml.XmlNodeList list = node.SelectNodes(key + "[@" + attribute + " = '" + attributeValue + "']");
                 Item[] items = new Item[list.Count];
-                for (int i = 0; i < items.Length; i++)
-                    items[i] = new Item(list[i]);
+                for (int i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
                 if (items.Length > 0) return items;
                 else return null;
             }
@@ -205,9 +161,8 @@ namespace FileFormat
                 return new Item(xmlNode);
             }
 
-            public bool Exist { get { return node != null; } }
-
-            public override string ToString() { return node.OuterXml; }
+            public bool Exist => node != null;
+            public override string ToString() => node.OuterXml;
         }
     }
 }
