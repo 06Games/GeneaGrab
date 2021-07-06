@@ -20,7 +20,7 @@ namespace GeneaGrab.Providers
         public async Task<RegistryInfo> Infos(Uri URL)
         {
             var Location = new Location(Data.Providers["AD06"]);
-            var Registry = new Registry(Location) { URL = System.Web.HttpUtility.UrlDecode(URL.OriginalString, System.Text.Encoding.GetEncoding("iso-8859-1")) };
+            var Registry = new Registry(Location) { URL = System.Web.HttpUtility.UrlDecode(URL.OriginalString) };
 
             var query = System.Web.HttpUtility.ParseQueryString(new Uri(Registry.URL).Query);
             Registry.ID = query["IDDOC"];
@@ -84,7 +84,7 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.UnterterminedProgress);
             var client = new HttpClient();
             string link = await client.GetStringAsync(current.URL).ConfigureAwait(false);
-            string url = await client.GetStringAsync(link).ConfigureAwait(false);
+            string url = await client.GetStringAsync(Regex.Match(link, "(https?:\\/\\/.*)").Value).ConfigureAwait(false);
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
             if (string.IsNullOrWhiteSpace(id)) return current;
 
