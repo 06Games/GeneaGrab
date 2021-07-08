@@ -20,16 +20,10 @@ namespace GeneaGrab.Activation
         {
             PageType = SchemeActivationConfig.GetPage(activationUri.AbsolutePath);
 
-            if (!IsValid || string.IsNullOrEmpty(activationUri.Query))
-            {
-                return;
-            }
+            if (!IsValid || string.IsNullOrEmpty(activationUri.Query)) return;
 
             var uriQuery = HttpUtility.ParseQueryString(activationUri.Query);
-            foreach (var paramKey in uriQuery.AllKeys)
-            {
-                Parameters.Add(paramKey, uriQuery.Get(paramKey));
-            }
+            foreach (var paramKey in uriQuery.AllKeys) Parameters.Add(paramKey, uriQuery.Get(paramKey));
         }
 
         public SchemeActivationData(Type pageType, Dictionary<string, string> parameters = null)
@@ -45,10 +39,7 @@ namespace GeneaGrab.Activation
             var uriBuilder = new UriBuilder($"{ProtocolName}:{pageKey}");
             var query = HttpUtility.ParseQueryString(string.Empty);
 
-            foreach (var parameter in Parameters)
-            {
-                query.Set(parameter.Key, parameter.Value);
-            }
+            foreach (var parameter in Parameters) query.Set(parameter.Key, parameter.Value);
 
             uriBuilder.Query = query.ToString();
             return new Uri(uriBuilder.ToString());

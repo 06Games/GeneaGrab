@@ -11,7 +11,7 @@ namespace GeneaGrab.Activation
             { "registry", typeof(Views.Registry) }
         };
 
-        public static Type GetPage(string pageKey) => _activationPages.FirstOrDefault(p => p.Key == pageKey).Value;
+        public static Type GetPage(string pageKey) => _activationPages.GetValueOrDefault(pageKey);
         public static string GetPageKey(Type pageType) => _activationPages.FirstOrDefault(v => v.Value == pageType).Key;
     }
 }

@@ -69,7 +69,11 @@ namespace GeneaGrab.Views
             else if (Parameter is Dictionary<string, string>)
             {
                 var param = Parameter as Dictionary<string, string>;
-                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri)) Info = await TryGetFromProviders(uri).ConfigureAwait(false);
+                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
+                {
+                    await LocalData.LoadData().ConfigureAwait(false);
+                    Info = await TryGetFromProviders(uri).ConfigureAwait(false);
+                }
             }
             else if (Parameter is Uri) Info = await TryGetFromProviders(Parameter as Uri).ConfigureAwait(false);
             else inRam = true;
@@ -119,7 +123,7 @@ namespace GeneaGrab.Views
             PageList.ScrollIntoView(PageList.SelectedItem);
             imagePanel.Reset();
             OnPropertyChanged(nameof(image));
-            App.SaveData();
+            LocalData.SaveData();
         }
 
         private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download().ConfigureAwait(false);
@@ -131,7 +135,7 @@ namespace GeneaGrab.Views
         }
         private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            var page = await App.GetFile(Info.Registry, Info.Page);
+            var page = await LocalData.GetFile(Info.Registry, Info.Page);
             var options = new Windows.System.FolderLauncherOptions();
             options.ItemsToSelect.Add(page);
             await Windows.System.Launcher.LaunchFolderAsync(await page.GetParentAsync(), options);
