@@ -41,7 +41,7 @@ jobs:
         fetch-depth: 0
 
     - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.0
+      uses: microsoft/setup-msbuild@v1.0.2
 
     - name: Update manifest version
       run: |
@@ -76,8 +76,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
-        release_name: RC ${{steps.getVersion.outputs.result}}
-        draft: false
+        release_name: ${{steps.getVersion.outputs.result}}
+        draft: true
         prerelease: false
 
     - name: Update release asset
