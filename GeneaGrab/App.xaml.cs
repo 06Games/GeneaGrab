@@ -24,8 +24,8 @@ namespace GeneaGrab
         protected override async void OnActivated(IActivatedEventArgs args) => await ActivationService.ActivateAsync(args);
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
+            await LocalData.LoadData().ConfigureAwait(true);
             if (!args.PrelaunchActivated) await ActivationService.ActivateAsync(args);
-            await LocalData.LoadData().ConfigureAwait(false);
         }
     }
 }
