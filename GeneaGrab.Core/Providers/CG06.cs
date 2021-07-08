@@ -9,19 +9,20 @@ namespace GeneaGrab.Providers
 {
     public class CG06 : ProviderAPI
     {
-        public bool TryGetRegistryID(Uri URL, out string ID)
+        public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
-            var check = URL.Host == "www.basesdocumentaires-cg06.fr" && URL.AbsolutePath.StartsWith("/os-cgi");
-            if (!check) { ID = null; return false; }
+            info = null;
+            if (URL.Host != "www.basesdocumentaires-cg06.fr" || !URL.AbsolutePath.StartsWith("/os-cgi")) return false;
 
+            //TODO: Find a way to do this without having to make a request
             var task = GetInfos(URL);
             task.Wait();
-            ID = task.Result.RegistryID;
-            return !string.IsNullOrWhiteSpace(ID);
+            info = task.Result;
+            return true;
         }
 
         public Task<RegistryInfo> Infos(Uri URL) => GetInfos(URL);
-        async Task<RegistryInfo> GetInfos(Uri URL)
+        async Task<RegistryInfo> GetInfos(Uri URL) //TODO: Parse city name
         {
             var client = new HttpClient();
             string pageBody = System.Text.Encoding.UTF8.GetString(await client.GetByteArrayAsync(URL).ConfigureAwait(false)).Replace("\n", "").Replace("\r", "").Replace("\t", "");

@@ -18,14 +18,10 @@ namespace GeneaGrab
             Data.SaveImage = LocalData.SaveImageAsync;
 
             InitializeComponent();
-            UnhandledException += OnAppUnhandledException;
-            _activationService = new Lazy<ActivationService>(CreateActivationService); // Deferred execution until used. Check https://docs.microsoft.com/dotnet/api/system.lazy-1 for further info on Lazy<T> class.
+            UnhandledException += (_, e) => Log.Fatal(e.Message, e.Exception);
+            _activationService = new Lazy<ActivationService>(() => new ActivationService(this, typeof(Views.MainPage), new Lazy<UIElement>(new Views.ShellPage())));
         }
         protected override async void OnActivated(IActivatedEventArgs args) => await ActivationService.ActivateAsync(args);
-        private void OnAppUnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e) => Log.Fatal(e.Message, e.Exception);
-        private ActivationService CreateActivationService() => new ActivationService(this, typeof(Views.MainPage), new Lazy<UIElement>(CreateShell));
-        private UIElement CreateShell() => new Views.ShellPage();
-
         protected override async void OnLaunched(LaunchActivatedEventArgs args)
         {
             if (!args.PrelaunchActivated) await ActivationService.ActivateAsync(args);

@@ -7,7 +7,7 @@ namespace GeneaGrab
     /// <summary>Interface to communicate with the registry provider</summary>
     public interface ProviderAPI
     {
-        bool TryGetRegistryID(Uri URL, out string ID);
+        bool TryGetRegistryID(Uri URL, out RegistryInfo info);
         Task<RegistryInfo> Infos(Uri URL);
         Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
         Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress);

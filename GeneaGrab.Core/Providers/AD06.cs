@@ -10,11 +10,20 @@ namespace GeneaGrab.Providers
 {
     public class AD06 : ProviderAPI
     {
-        public bool TryGetRegistryID(Uri URL, out string id)
+        public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
-            var check = URL.Host == "www.basesdocumentaires-cg06.fr" && URL.AbsolutePath.StartsWith("/archives/ImageZoomViewerEC.php");
-            id = check ? System.Web.HttpUtility.ParseQueryString(URL.Query)["IDDOC"] : null;
-            return check && !string.IsNullOrWhiteSpace(id);
+            info = null;
+            if (URL.Host != "www.basesdocumentaires-cg06.fr" || !URL.AbsolutePath.StartsWith("/archives/ImageZoomViewerEC.php")) return false;
+
+            var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
+            info = new RegistryInfo
+            {
+                RegistryID = query["IDDOC"],
+                LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString(),
+                ProviderID = "AD06",
+                PageNumber = int.TryParse(query["page"], out var _p) ? _p : 1
+            };
+            return true;
         }
 
         public async Task<RegistryInfo> Infos(Uri URL)
@@ -22,7 +31,7 @@ namespace GeneaGrab.Providers
             var Location = new Location(Data.Providers["AD06"]);
             var Registry = new Registry(Location) { URL = System.Web.HttpUtility.UrlDecode(URL.OriginalString) };
 
-            var query = System.Web.HttpUtility.ParseQueryString(new Uri(Registry.URL).Query);
+            var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
             Registry.ID = query["IDDOC"];
 
             var client = new HttpClient();

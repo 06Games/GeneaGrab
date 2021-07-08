@@ -68,7 +68,7 @@ namespace GeneaGrab
         {
             try
             {
-                var file = await GetFile(registry, page, false).ConfigureAwait(false);
+                var file = await GetFile(registry, page).ConfigureAwait(false);
                 return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync().ConfigureAwait(false)).ConfigureAwait(false);
             }
             catch (Exception e)

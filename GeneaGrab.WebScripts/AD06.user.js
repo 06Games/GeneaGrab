@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AD06
 // @icon         https://github.com/06Games/GeneaGrab/raw/v1/GeneaGrab/Assets/Logo/Icon.png
-// @version      1.1.2
+// @version      1.1.3
 // @grant        none
 // @include      http://www.basesdocumentaires-cg06.fr/archives/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
@@ -52,7 +52,7 @@ if (window.location.href.startsWith("http://www.basesdocumentaires-cg06.fr/archi
     });
 
   function updateLink() {
-    $openIn.attr("href", "geneagrab:registry?url=" + encodeURIComponent(window.location.href) + "&page=" + $pageDiv.text());
+    $openIn.attr("href", "geneagrab:registry?url=" + encodeURIComponent(window.location.href + "&page=" + $pageDiv.text()));
   }
   $openIn = $('<a class="lien" href="geneagrab:registry?url=' + encodeURIComponent(window.location.href) + '">Ouvrir dans GeneaGrab</a>')
     .appendTo($buttons)
