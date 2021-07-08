@@ -33,7 +33,11 @@ jobs:
       uses: Amadevus/pwsh-script@v1
       id: getVersion
       with:
-        script: '("${{steps.tag.outputs.tag}}").Split("v")[1]'
+        script: |
+            $v = ("${{steps.tag.outputs.tag}}").Split("v")[1].Split(".")
+            $f = ""; 
+            for($i=0; $i -lt 4; $i++) { $f += (&{If($i -eq 0) {""} Else {"."}})+(&{If($i -lt $v.length) {$v[$i]} Else {"0"}}) }
+            return $f
 
     - name: Checkout
       uses: actions/checkout@v2
@@ -57,7 +61,7 @@ jobs:
         [IO.File]::WriteAllBytes("$certificatePath", $pfx_cert_byte)
         
     - name: Build the sideload solution
-      run: msbuild $env:Solution_Path /p:Platform=x86 /p:AppxBundle=$env:AppxBundle /p:AppxBundlePlatforms="x86|x64|arm|arm64" /p:AppxPackageDir=C:\DeployOutput /p:PackageCertificateKeyFile=$env:SigningCertificate /restore
+      run: msbuild $env:Solution_Path /p:Platform=x86 /p:AppxBundle=$env:AppxBundle /p:AppxBundlePlatforms="x86|x64|arm|arm64" /p:AppxPackageDir=C:\DeployOutput /p:PackageCertificateKeyFile=$env:SigningCertificate /m /restore
       env:
         AppxBundle: Always
         BuildMode: SideloadOnly
