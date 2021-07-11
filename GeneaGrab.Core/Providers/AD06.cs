@@ -1,6 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -10,15 +11,23 @@ namespace GeneaGrab.Providers
 {
     public class AD06 : ProviderAPI
     {
+        public readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS" };
+        public delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location);
+        public readonly Dictionary<string, Service> Appli = new Dictionary<string, Service> {
+            { "ec", EC }, // Etat civil
+            { "cad", CAD }, // Cadastre (Plan)
+            { "etc_mat", ETC_MAT } // Cadastre (Etat de section + Matrice)
+        };
+
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
             info = null;
-            if (URL.Host != "www.basesdocumentaires-cg06.fr" || !URL.AbsolutePath.StartsWith("/archives/ImageZoomViewerEC.php")) return false;
+            if (URL.Host != "www.basesdocumentaires-cg06.fr" || !SupportedServices.Any(s => URL.AbsolutePath.StartsWith($"/archives/ImageZoomViewer{s}.php"))) return false;
 
             var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
             info = new RegistryInfo
             {
-                RegistryID = query["IDDOC"],
+                RegistryID = query["IDDOC"] ?? query["cote"],
                 LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString(),
                 ProviderID = "AD06",
                 PageNumber = int.TryParse(query["page"], out var _p) ? _p : 1
@@ -31,18 +40,28 @@ namespace GeneaGrab.Providers
             var Location = new Location(Data.Providers["AD06"]);
             var Registry = new Registry(Location) { URL = System.Web.HttpUtility.UrlDecode(URL.OriginalString) };
 
-            var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
-            Registry.ID = query["IDDOC"];
-
             var client = new HttpClient();
             string pageBody = await client.GetStringAsync(Registry.URL).ConfigureAwait(false);
 
-            var regex = Regex.Matches(pageBody, "imagesListe\\.push\\('(?<page>.*?)'\\)");
-            var pages = regex.Cast<Match>().Select(m => m.Groups["page"]?.Value).ToArray();
-            var Pages = new List<RPage>();
-            for (int i = 1; i <= pages.Length; i++) Pages.Add(new RPage { Number = i, URL = $"http://www.basesdocumentaires-cg06.fr/archives/ImageViewerTargetJP2.php?imagePath={pages[i - 1]}" });
-            Registry.Pages = Pages.ToArray();
+            var appli = Regex.Match(pageBody, "<input type=\"hidden\" id=\"appliTag\" name=\"appliTag\" value=\"(?<appli>.*?)\" \\/>").Groups["appli"]?.Value;
+            var infos = Regex.Match(pageBody, "<input type=\"hidden\" id=\"infosTag\" name=\"infosTag\" value=\"(?<infos>.*?)\" \\/>").Groups["infos"]?.Value;
+            var pages = Regex.Matches(pageBody, "imagesListe\\.push\\('(?<page>.*?)'\\)").Cast<Match>().Select(m => m.Groups["page"]?.Value).ToArray();
+            Registry.Pages = pages.Select((p, i) => new RPage { Number = i + 1, URL = $"http://www.basesdocumentaires-cg06.fr/archives/ImageViewerTargetJP2.php?appli={appli}&imagePath={pages[i]}&infos={infos}" }).ToArray();
 
+            var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
+            if (Appli.TryGetValue(appli, out var service)) service(query, pageBody, ref Registry, ref Location);
+            if (!int.TryParse(query["page"], out var _p)) _p = 1;
+
+            Data.AddOrUpdate(Data.Providers["AD06"].Locations, Location.ID, Location);
+            Data.AddOrUpdate(Data.Providers["AD06"].Registries, Registry.ID, Registry);
+            return new RegistryInfo { ProviderID = "AD06", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
+        }
+
+        #region Services
+
+        static void EC(NameValueCollection query, string _, ref Registry Registry, ref Location Location)
+        {
+            Registry.ID = query["IDDOC"];
             Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             Registry.LocationID = Location.ID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
             Location.District = query["PAROISSE"];
@@ -50,38 +69,62 @@ namespace GeneaGrab.Providers
             Registry.From = Data.ParseDate(dates.FirstOrDefault());
             Registry.To = Data.ParseDate(dates.LastOrDefault());
             Registry.Types = GetTypes(query["TYPEACTE"]);
-            if (!int.TryParse(query["page"], out var _p)) _p = 1;
 
-            Data.AddOrUpdate(Data.Providers["AD06"].Locations, Location.ID, Location);
-            Data.AddOrUpdate(Data.Providers["AD06"].Registries, Registry.ID, Registry);
-            return new RegistryInfo { ProviderID = "AD06", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
-        }
-        public List<Registry.Type> GetTypes(string TYPEACTE)
-        {
-            var types = new List<Registry.Type>();
-            foreach (var t in Regex.Split(TYPEACTE, "(?=[A-Z])"))
-                if (TryGetType(t.Trim(' '), out var type)) types.Add(type);
-
-            bool TryGetType(string type, out Registry.Type t)
+            IEnumerable<RegistryType> GetTypes(string TYPEACTE)
             {
-                if (type == "Naissances") t = Registry.Type.Birth;
-                else if (type == "Tables décennales des naissances") t = Registry.Type.BirthTable;
-                else if (type == "Baptêmes") t = Registry.Type.Baptism;
-                else if (type == "Publications" || type == "Publications de mariages") t = Registry.Type.Banns;
-                else if (type == "Mariages") t = Registry.Type.Marriage;
-                else if (type == "Tables décennales des mariages") t = Registry.Type.BirthTable;
-                else if (type == "Décès") t = Registry.Type.Death;
-                else if (type == "Tables décennales des décès") t = Registry.Type.BirthTable;
-                else if (type == "Sépultures") t = Registry.Type.Burial;
-                else
+                foreach (var t in Regex.Split(TYPEACTE, "(?=[A-Z])"))
                 {
-                    t = Registry.Type.Unknown;
-                    return false;
+                    var type = t.Trim(' ');
+
+                    if (type == "Naissances") yield return RegistryType.Birth;
+                    else if (type == "Tables décennales des naissances") yield return RegistryType.BirthTable;
+                    else if (type == "Baptêmes") yield return RegistryType.Baptism;
+                    else if (type == "Publications" || type == "Publications de mariages") yield return RegistryType.Banns;
+                    else if (type == "Mariages") yield return RegistryType.Marriage;
+                    else if (type == "Tables décennales des mariages") yield return RegistryType.BirthTable;
+                    else if (type == "Décès") yield return RegistryType.Death;
+                    else if (type == "Tables décennales des décès") yield return RegistryType.BirthTable;
+                    else if (type == "Sépultures") yield return RegistryType.Burial;
                 }
-                return true;
             }
-            return types;
         }
+
+        static void CAD(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location)
+        {
+            Registry.ID = query["cote"];
+            Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            Registry.LocationID = Location.ID = Array.IndexOf(cities, query["c"]).ToString();
+            Location.District = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
+            Registry.From = Registry.To = Data.ParseDate(query["a"]);
+            Registry.Types = GetTypes(query["t"]);
+            Registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
+
+            IEnumerable<RegistryType> GetTypes(string type)
+            {
+                if (type == "T") yield return RegistryType.CadastralAssemblyTable; // Tableau d'assemblage
+                else if (type == "S") yield return RegistryType.CadastralMap; // Section
+            }
+        }
+
+
+        static void ETC_MAT(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location)
+        {
+            Registry.ID = query["IDDOC"];
+            Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
+            Registry.LocationID = Location.ID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
+            Location.District = query["COMPLEMENTLIEUX"];
+            Registry.From = Registry.To = Data.ParseDate(query["DATE"]);
+            Registry.Types = GetTypes(query["CHOIX"]).ToList();
+            Registry.Notes = $"{query["NATURE"]}\nCote: {query["COTE"]}";
+
+            IEnumerable<RegistryType> GetTypes(string type)
+            {
+                if (type == "ETS") yield return RegistryType.CadastralSectionStates; // Tableau d'assemblage
+                else if (type == "MAT") yield return RegistryType.CadastralMatrix; // Section
+            }
+        }
+
+        #endregion
 
         public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.1F, progress);
         public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
