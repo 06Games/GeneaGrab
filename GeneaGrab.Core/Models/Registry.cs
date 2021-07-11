@@ -106,7 +106,7 @@ namespace GeneaGrab
                 if (!string.IsNullOrEmpty(dates)) name += $" ({dates})";
 
                 //Notes
-                if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes}";
+                if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes.Split('\n').FirstOrDefault()}";
 
                 return name;
             }

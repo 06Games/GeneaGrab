@@ -12,12 +12,13 @@ namespace GeneaGrab.Views
     {
         public ZoomPanel() => Background = new SolidColorBrush(Windows.UI.Colors.Transparent); //Allows interaction with the element
 
-        private bool Initialized;
-        private UIElement child
+        /// <summary>The image component</summary>
+        public UIElement Child
         {
             get => _child;
-            set { _child = value; Initialized = false; }
+            private set { _child = value; Initialized = false; }
         }
+        private bool Initialized;
         private UIElement _child;
 
         /// <summary>The user has moved the child</summary>
@@ -32,7 +33,7 @@ namespace GeneaGrab.Views
         }
         public UIElement Initialize()
         {
-            if (Initialized && child != null) return child;
+            if (Initialized && Child != null) return Child;
             else if (!Initialized)
             {
                 RightTapped += (s, e) => Reset();
@@ -42,23 +43,23 @@ namespace GeneaGrab.Views
                 SetClip();
             }
 
-            child = Children.FirstOrDefault();
-            if (child is null) return null;
+            Child = Children.FirstOrDefault();
+            if (Child is null) return null;
 
             TransformGroup group = new TransformGroup();
             ScaleTransform st = new ScaleTransform();
             group.Children.Add(st);
             TranslateTransform tt = new TranslateTransform();
             group.Children.Add(tt);
-            child.RenderTransform = group;
-            child.RenderTransformOrigin = new Point(0.0, 0.0);
-            child.PointerWheelChanged += child_MouseWheel;
-            child.PointerPressed += child_MouseLeftButtonDown;
-            child.PointerReleased += (s, e) => child_MouseLeftButtonUp();
-            child.PointerMoved += child_MouseMove;
+            Child.RenderTransform = group;
+            Child.RenderTransformOrigin = new Point(0.0, 0.0);
+            Child.PointerWheelChanged += child_MouseWheel;
+            Child.PointerPressed += child_MouseLeftButtonDown;
+            Child.PointerReleased += (s, e) => child_MouseLeftButtonUp();
+            Child.PointerMoved += child_MouseMove;
 
             Initialized = true;
-            return child;
+            return Child;
         }
 
         private TranslateTransform GetTranslateTransform(UIElement element) => (TranslateTransform)((TransformGroup)element.RenderTransform).Children.First(tr => tr is TranslateTransform);
@@ -67,14 +68,14 @@ namespace GeneaGrab.Views
         /// <summary>Resets the child's position and zoom</summary>
         public void Reset()
         {
-            if (child is null) return;
+            if (Child is null) return;
 
             // Reset zoom
-            var st = GetScaleTransform(child);
+            var st = GetScaleTransform(Child);
             st.ScaleX = st.ScaleY = 1.0;
 
             // Reset position
-            var tt = GetTranslateTransform(child);
+            var tt = GetTranslateTransform(Child);
             tt.X = tt.Y = 0.0;
         }
 
@@ -82,16 +83,16 @@ namespace GeneaGrab.Views
 
         private void child_MouseWheel(object _, PointerRoutedEventArgs e)
         {
-            if (child is null) return;
+            if (Child is null) return;
 
-            var st = GetScaleTransform(child);
-            var tt = GetTranslateTransform(child);
+            var st = GetScaleTransform(Child);
+            var tt = GetTranslateTransform(Child);
 
             var delta = e.GetCurrentPoint(this).Properties.MouseWheelDelta;
             if (delta <= 0 && (st.ScaleX < .4 || st.ScaleY < .4)) return;
             double zoom = delta > 0 ? .2 : -.2;
 
-            Point relative = e.GetCurrentPoint(child).Position;
+            Point relative = e.GetCurrentPoint(Child).Position;
             double absoluteX;
             double absoluteY;
 
@@ -113,42 +114,42 @@ namespace GeneaGrab.Views
 
         private void child_MouseLeftButtonDown(object _, PointerRoutedEventArgs e)
         {
-            if (child is null) return;
+            if (Child is null) return;
 
-            var tt = GetTranslateTransform(child);
+            var tt = GetTranslateTransform(Child);
             start = e.GetCurrentPoint(this).Position;
             origin = new Point(tt.X, tt.Y);
             Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Hand, 1);
-            child.CapturePointer(e.Pointer);
+            Child.CapturePointer(e.Pointer);
         }
 
         private void child_MouseLeftButtonUp()
         {
-            if (child is null) return;
+            if (Child is null) return;
 
-            child.ReleasePointerCaptures();
+            Child.ReleasePointerCaptures();
             Window.Current.CoreWindow.PointerCursor = new Windows.UI.Core.CoreCursor(Windows.UI.Core.CoreCursorType.Arrow, 1);
         }
 
         private void child_MouseMove(object _, PointerRoutedEventArgs e)
         {
-            if (child is null || child.PointerCaptures is null || !child.PointerCaptures.Any()) return;
+            if (Child is null || Child.PointerCaptures is null || !Child.PointerCaptures.Any()) return;
 
-            var st = GetScaleTransform(child);
-            var tt = GetTranslateTransform(child);
+            var st = GetScaleTransform(Child);
+            var tt = GetTranslateTransform(Child);
             var v = e.GetCurrentPoint(this).Position;
 
 
             var X = origin.X - start.X + v.X;
-            var left = X - child.ActualSize.X / 2;
-            var right = left + child.ActualSize.X * st.ScaleX;
+            var left = X - Child.ActualSize.X / 2;
+            var right = left + Child.ActualSize.X * st.ScaleX;
             var minX = ActualWidth / -4;
             var maxX = ActualWidth / 4;
             if (left < maxX && right > minX) tt.X = X;
 
             var Y = origin.Y - start.Y + v.Y;
-            var top = Y - child.ActualSize.Y / 2;
-            var bottom = top + child.ActualSize.Y * st.ScaleY;
+            var top = Y - Child.ActualSize.Y / 2;
+            var bottom = top + Child.ActualSize.Y * st.ScaleY;
             var minY = ActualHeight / -4;
             var maxY = ActualHeight / 4;
             if (top < maxY && bottom > minY) tt.Y = Y;

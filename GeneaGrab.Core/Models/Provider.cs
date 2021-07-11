@@ -59,7 +59,7 @@ namespace GeneaGrab
     public class Progress
     {
         public static readonly Progress Finished = new Progress { Value = 1, Done = true };
-        public static readonly Progress UnterterminedProgress = new Progress { Undetermined = true };
+        public static readonly Progress Unknown = new Progress { Undetermined = true };
         private Progress() { }
 
         public static implicit operator Progress(int v) => new Progress(v);

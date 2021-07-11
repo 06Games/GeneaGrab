@@ -90,7 +90,7 @@ namespace GeneaGrab.Providers
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom * 100)) return current;
 
-            progress?.Invoke(Progress.UnterterminedProgress);
+            progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
             string link = await client.GetStringAsync(current.URL).ConfigureAwait(false);
             string url = await client.GetStringAsync(Regex.Match(link, "(https?:\\/\\/.*)").Value).ConfigureAwait(false);
@@ -109,7 +109,7 @@ namespace GeneaGrab.Providers
 
 
 
-        public readonly string[] cities = new[]{
+        public static readonly string[] cities = new[]{
             "Choisissez une commune",
             "AIGLUN",
             "AMIRAT",

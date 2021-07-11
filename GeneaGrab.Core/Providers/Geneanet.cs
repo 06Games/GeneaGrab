@@ -103,7 +103,7 @@ namespace GeneaGrab.Providers
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
 
-            progress?.Invoke(Progress.UnterterminedProgress);
+            progress?.Invoke(Progress.Unknown);
             var chemin_image = Uri.EscapeDataString($"doc/{current.URL}");
             var baseURL = $"https://www.geneanet.org/zoomify/?path={chemin_image}/";
 
