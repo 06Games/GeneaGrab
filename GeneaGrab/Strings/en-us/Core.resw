@@ -152,6 +152,22 @@
     <value>Burials</value>
     <comment>Burial records</comment>
   </data>
+  <data name="Registry.Type.CadastralAssemblyTable" xml:space="preserve">
+    <value>Cadastral assembly table</value>
+    <comment>Indication of the layout of the cadastral sections</comment>
+  </data>
+  <data name="Registry.Type.CadastralMap" xml:space="preserve">
+    <value>Cadastral map</value>
+    <comment>Overview of cadastres in a registration division</comment>
+  </data>
+  <data name="Registry.Type.CadastralMatrix" xml:space="preserve">
+    <value>Cadastral matrix</value>
+    <comment>Register showing the increases and decreases in areas and income recorded on the cadastral matrices</comment>
+  </data>
+  <data name="Registry.Type.CadastralSectionStates" xml:space="preserve">
+    <value>Cadastral section states</value>
+    <comment>Indicative table of land properties, their areas and their income</comment>
+  </data>
   <data name="Registry.Type.Census" xml:space="preserve">
     <value>Census</value>
     <comment>Census of the population</comment>
@@ -163,6 +179,10 @@
   <data name="Registry.Type.DeathTable" xml:space="preserve">
     <value>Table of deaths</value>
     <comment>Table of death certificates</comment>
+  </data>
+  <data name="Registry.Type.LiberStatutAnimarum" xml:space="preserve">
+    <value>Parish family book</value>
+    <comment>Register recording the biographical and religious data of parishioners</comment>
   </data>
   <data name="Registry.Type.Marriage" xml:space="preserve">
     <value>Marriages</value>

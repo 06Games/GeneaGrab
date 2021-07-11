@@ -36,7 +36,7 @@ namespace GeneaGrab.Providers
                 Notes = string.IsNullOrWhiteSpace(body["title"]?.Value) ? form["t"]?.Value : body["title"]?.Value,
                 From = Data.ParseDate(body["from"]?.Value),
                 To = Data.ParseDate(body["to"]?.Value),
-                Types = new System.Collections.Generic.List<Registry.Type> { body["pers"]?.Value.Contains("Notaire(s)") ?? false ? Registry.Type.Notarial : Registry.Type.Unknown },
+                Types = new System.Collections.Generic.List<RegistryType> { body["pers"]?.Value.Contains("Notaire(s)") ?? false ? RegistryType.Notarial : RegistryType.Unknown },
                 Pages = form["l"]?.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select((p, i) => new RPage { Number = i + 1, URL = p }).ToArray()
             };
 

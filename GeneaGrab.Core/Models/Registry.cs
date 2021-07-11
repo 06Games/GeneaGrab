@@ -22,45 +22,11 @@ namespace GeneaGrab
 
         public string ID { get; set; }
         public string URL { get; set; }
-
-        public enum Type
-        {
-            /// <summary>Unable to determine</summary>
-            Unknown = -2,
-            /// <summary>Uncategorized</summary>
-            Other = -1,
-
-            /// <summary>Birth certificates</summary>
-            Birth,
-            /// <summary>Table of birth certificates</summary>
-            BirthTable,
-            /// <summary>Baptismal records</summary>
-            Baptism,
-            /// <summary>Banns of marriage</summary>
-            Banns,
-            /// <summary>Marriage certificates</summary>
-            Marriage,
-            /// <summary>Table of marriage certificates</summary>
-            MarriageTable,
-            /// <summary>Death certificates</summary>
-            Death,
-            /// <summary>Table of death certificates</summary>
-            DeathTable,
-            /// <summary>Burial records</summary>
-            Burial,
-
-            /// <summary>Census of the population</summary>
-            Census,
-            /// <summary>Notarial deeds</summary>
-            Notarial,
-            /// <summary>Military numbers</summary>
-            Military
-        }
-        [JsonProperty(ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))] public List<Type> Types { get; set; } = new List<Type>();
+        [JsonProperty(ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))] public IEnumerable<RegistryType> Types { get; set; } = Array.Empty<RegistryType>();
         [JsonIgnore]
         public string TypeToString => Types.Any() ? string.Join(", ", Types.Select(t =>
         {
-            var type = Enum.GetName(typeof(Type), t);
+            var type = Enum.GetName(typeof(RegistryType), t);
             return Data.Translate($"Registry/Type/{type}", type);
         })) : null;
 

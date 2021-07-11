@@ -59,32 +59,32 @@ namespace GeneaGrab.Providers
             Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
             return new RegistryInfo { ProviderID = "Geneanet", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
         }
-        public static (List<Registry.Type> types, string location, string notes) TryParseNotes(string notes)
+        public static (List<RegistryType> types, string location, string notes) TryParseNotes(string notes)
         {
-            var types = new List<Registry.Type>();
+            var types = new List<RegistryType>();
             var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - ((?<betterType>.*?)\\.|-|).*)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/1
             var global = (typesMatch.Groups["globalType"] ?? typesMatch.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
             foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(','))
                 if (TryGetType(t.Trim(' ').ToLowerInvariant(), out var type)) types.Add(type);
 
-            bool TryGetType(string type, out Registry.Type t)
+            bool TryGetType(string type, out RegistryType t)
             {
                 var civilStatus = global.Contains("état civil");
-                if (type.Contains("naissances")) t = civilStatus ? Registry.Type.Birth : Registry.Type.BirthTable;
-                else if (type.Contains("baptemes")) t = Registry.Type.Baptism;
-                else if (type.Contains("promesses de mariage")) t = Registry.Type.Banns;
-                else if (type.Contains("mariages")) t = civilStatus ? Registry.Type.Marriage : Registry.Type.MarriageTable;
-                else if (type.Contains("décès")) t = civilStatus ? Registry.Type.Death : Registry.Type.DeathTable;
-                else if (type.Contains("sépultures") || type.Contains("inhumation")) t = Registry.Type.Burial;
+                if (type.Contains("naissances")) t = civilStatus ? RegistryType.Birth : RegistryType.BirthTable;
+                else if (type.Contains("baptemes")) t = RegistryType.Baptism;
+                else if (type.Contains("promesses de mariage")) t = RegistryType.Banns;
+                else if (type.Contains("mariages")) t = civilStatus ? RegistryType.Marriage : RegistryType.MarriageTable;
+                else if (type.Contains("décès")) t = civilStatus ? RegistryType.Death : RegistryType.DeathTable;
+                else if (type.Contains("sépultures") || type.Contains("inhumation")) t = RegistryType.Burial;
 
-                else if (type.Contains("recensements")) t = Registry.Type.Census;
-                else if (type.Contains("archives notariales")) t = Registry.Type.Notarial;
-                else if (type.Contains("registres matricules")) t = Registry.Type.Military;
+                else if (type.Contains("recensements")) t = RegistryType.Census;
+                else if (type.Contains("archives notariales")) t = RegistryType.Notarial;
+                else if (type.Contains("registres matricules")) t = RegistryType.Military;
 
-                else if (type.Contains("autres") || type.Contains("archives privées")) t = Registry.Type.Other;
+                else if (type.Contains("autres") || type.Contains("archives privées")) t = RegistryType.Other;
                 else
                 {
-                    t = Registry.Type.Unknown;
+                    t = RegistryType.Unknown;
                     return false;
                 }
                 return true;
