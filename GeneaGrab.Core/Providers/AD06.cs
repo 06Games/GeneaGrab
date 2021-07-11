@@ -11,9 +11,9 @@ namespace GeneaGrab.Providers
 {
     public class AD06 : ProviderAPI
     {
-        public readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS" };
-        public delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location);
-        public readonly Dictionary<string, Service> Appli = new Dictionary<string, Service> {
+        readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS" };
+        delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location);
+        readonly Dictionary<string, Service> Appli = new Dictionary<string, Service> {
             { "ec", EC }, // Etat civil
             { "cad", CAD }, // Cadastre (Plan)
             { "etc_mat", ETC_MAT } // Cadastre (Etat de section + Matrice)
@@ -107,7 +107,7 @@ namespace GeneaGrab.Providers
         }
 
 
-        static void ETC_MAT(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location)
+        static void ETC_MAT(NameValueCollection query, string _, ref Registry Registry, ref Location Location)
         {
             Registry.ID = query["IDDOC"];
             Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
@@ -152,7 +152,7 @@ namespace GeneaGrab.Providers
 
 
 
-        public static readonly string[] cities = new[]{
+        static readonly string[] cities = new[]{
             "Choisissez une commune",
             "AIGLUN",
             "AMIRAT",

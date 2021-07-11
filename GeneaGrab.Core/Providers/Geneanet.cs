@@ -59,7 +59,7 @@ namespace GeneaGrab.Providers
             Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
             return new RegistryInfo { ProviderID = "Geneanet", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
         }
-        public static (List<RegistryType> types, string location, string notes) TryParseNotes(string notes)
+        static (List<RegistryType> types, string location, string notes) TryParseNotes(string notes)
         {
             var types = new List<RegistryType>();
             var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - ((?<betterType>.*?)\\.|-|).*)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/1
