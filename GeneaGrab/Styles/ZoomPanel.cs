@@ -12,7 +12,14 @@ namespace GeneaGrab.Views
     {
         public ZoomPanel() => Background = new SolidColorBrush(Windows.UI.Colors.Transparent); //Allows interaction with the element
 
-        private UIElement child;
+        private bool Initialized;
+        private UIElement child
+        {
+            get => _child;
+            set { _child = value; Initialized = false; }
+        }
+        private UIElement _child;
+
         /// <summary>The user has moved the child</summary>
         public event System.Action<double, double> PositionChanged;
         /// <summary>The user has changed the zoom</summary>
@@ -25,12 +32,15 @@ namespace GeneaGrab.Views
         }
         public UIElement Initialize()
         {
-            RightTapped += (s, e) => Reset();
+            if (Initialized && child != null) return child;
+            else if (!Initialized)
+            {
+                RightTapped += (s, e) => Reset();
 
-            void SetClip() => Clip = new RectangleGeometry { Rect = new Rect(0, 0, ActualWidth, ActualHeight) }; //Prevents the child from being rendered out of the element
-            SizeChanged += (s, e) => SetClip();
-            SetClip();
-
+                void SetClip() => Clip = new RectangleGeometry { Rect = new Rect(0, 0, ActualWidth, ActualHeight) }; //Prevents the child from being rendered out of the element
+                SizeChanged += (s, e) => SetClip();
+                SetClip();
+            }
 
             child = Children.FirstOrDefault();
             if (child is null) return null;
@@ -46,6 +56,8 @@ namespace GeneaGrab.Views
             child.PointerPressed += child_MouseLeftButtonDown;
             child.PointerReleased += (s, e) => child_MouseLeftButtonUp();
             child.PointerMoved += child_MouseMove;
+
+            Initialized = true;
             return child;
         }
 
@@ -67,9 +79,6 @@ namespace GeneaGrab.Views
         }
 
         #region Child Events
-
-        private Point origin;
-        private Point start;
 
         private void child_MouseWheel(object _, PointerRoutedEventArgs e)
         {
@@ -97,6 +106,10 @@ namespace GeneaGrab.Views
 
             ZoomChanged?.Invoke(st.ScaleX);
         }
+
+
+        private Point origin;
+        private Point start;
 
         private void child_MouseLeftButtonDown(object _, PointerRoutedEventArgs e)
         {
