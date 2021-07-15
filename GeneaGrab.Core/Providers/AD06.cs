@@ -11,12 +11,13 @@ namespace GeneaGrab.Providers
 {
     public class AD06 : ProviderAPI
     {
-        readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS" };
+        readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS", "RP" };
         delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location);
         readonly Dictionary<string, Service> Appli = new Dictionary<string, Service> {
             { "ec", EC }, // Etat civil
             { "cad", CAD }, // Cadastre (Plan)
-            { "etc_mat", ETC_MAT } // Cadastre (Etat de section + Matrice)
+            { "etc_mat", ETC_MAT }, // Cadastre (Etat de section + Matrice)
+            { "rp", RP } // Recensements
         };
 
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
@@ -122,6 +123,16 @@ namespace GeneaGrab.Providers
                 if (type == "ETS") yield return RegistryType.CadastralSectionStates; // Tableau d'assemblage
                 else if (type == "MAT") yield return RegistryType.CadastralMatrix; // Section
             }
+        }
+
+        static void RP(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location)
+        {
+            Registry.ID = $"{query["cote"]}___{query["date"]}";
+            Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            Registry.LocationID = Location.ID = Array.IndexOf(cities, query["c"].ToUpper()).ToString();
+            Registry.From = Registry.To = Data.ParseDate(query["date"]);
+            Registry.Types = new[] { RegistryType.Census };
+            Registry.Notes = query["cote"];
         }
 
         #endregion
