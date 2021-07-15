@@ -8,7 +8,7 @@
     Style="{StaticResource PageStyle}"
     mc:Ignorable="d">
     <Grid x:Name="ContentArea" Margin="{StaticResource MediumLeftRightMargin}">
-        <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+        <Grid>
             <TreeView Name="LocationList" SelectionMode="None" CanDragItems="False" CanReorderItems="False" ItemsSource="{x:Bind Items}" ItemInvoked="RegisterList_ItemInvoked">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:LocationOrRegisterItem">

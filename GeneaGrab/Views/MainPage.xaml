@@ -8,7 +8,7 @@
     Style="{StaticResource PageStyle}"
     mc:Ignorable="d">
     <Grid x:Name="ContentArea" Margin="{StaticResource MediumLeftRightMargin}">
-        <Grid Background="{ThemeResource SystemControlPageBackgroundChromeLowBrush}">
+        <Grid>
             <ListView x:Name="ProvidersList" ItemsSource="{x:Bind Providers}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="ProvidersList_ItemClick">
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="local:Provider">

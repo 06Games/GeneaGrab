@@ -11,19 +11,15 @@
     mc:Ignorable="d">
 
     <winui:NavigationView
-        x:Name="navigationView"
-        PaneDisplayMode="Top" Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
+        x:Name="navigationView" PaneDisplayMode="Top"
         IsBackButtonVisible="Visible" IsBackEnabled="{x:Bind IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True"
         SelectedItem="{x:Bind Selected, Mode=OneWay}" ItemInvoked="OnItemInvoked">
+        <winui:NavigationView.Resources>
+            <AcrylicBrush x:Key="NavigationViewTopPaneBackground" BackgroundSource="Backdrop" TintColor="{ThemeResource SystemAltHighColor}" TintOpacity=".9" />
+        </winui:NavigationView.Resources>
         <winui:NavigationView.MenuItems>
-            <!--
-            TODO WTS: Change the symbols for each item as appropriate for your app
-            More on Segoe UI Symbol icons: https://docs.microsoft.com/windows/uwp/style/segoe-ui-symbol-font
-            Or to use an IconElement instead of a Symbol see https://github.com/Microsoft/WindowsTemplateStudio/blob/release/docs/UWP/projectTypes/navigationpane.md
-            Edit String/en-US/Resources.resw: Add a menu item title for each page
-            -->
-            <winui:NavigationViewItem x:Uid="Shell_Main" helpers:NavHelper.NavigateTo="views:MainPage" />
-            <winui:NavigationViewItem x:Uid="Shell_Registry" helpers:NavHelper.NavigateTo="views:Registry" IsEnabled="{x:Bind IsRegistryLoaded, Mode=OneWay}" />
+            <winui:NavigationViewItem x:Uid="Shell_Main" Icon="Library" helpers:NavHelper.NavigateTo="views:MainPage" />
+            <winui:NavigationViewItem x:Uid="Shell_Registry" Icon="Pictures" helpers:NavHelper.NavigateTo="views:Registry" IsEnabled="{x:Bind IsRegistryLoaded, Mode=OneWay}" />
         </winui:NavigationView.MenuItems>
         <winui:NavigationView.AutoSuggestBox>
             <AutoSuggestBox PlaceholderText="{x:Bind RegistryText}" MaxWidth="400" Width="300" MinWidth="200" TextChanged="RegistrySearch_TextChanged" SuggestionChosen="RegistrySearch_SuggestionChosen"/>
