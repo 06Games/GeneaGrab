@@ -11,8 +11,11 @@ using Windows.UI.Xaml.Navigation;
 
 namespace GeneaGrab.Views
 {
-    public sealed partial class Registry : Page, INotifyPropertyChanged
+    public sealed partial class Registry : Page, INotifyPropertyChanged, TabPage
     {
+        public Symbol IconSource => Symbol.Pictures;
+        public string DynaTabHeader => Info is null ? null : $"{Info.Location?.Name ?? Info.LocationID}: {Info.Registry?.Name ?? Info.RegistryID}";
+
         private string DownloadText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/Download");
         private string OpenFolderText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/OpenFolder");
 
@@ -33,6 +36,7 @@ namespace GeneaGrab.Views
             if (success) await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
                 RefreshView();
+                ShellPage.UpdateSelectedTitle();
                 if (inRam) return;
 
                 Pages.Clear();

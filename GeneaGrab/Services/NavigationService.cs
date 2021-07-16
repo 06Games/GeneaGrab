@@ -10,7 +10,6 @@ namespace GeneaGrab.Services
     public static class NavigationService
     {
         public static event NavigatedEventHandler Navigated;
-
         public static event NavigationFailedEventHandler NavigationFailed;
 
         private static Frame _frame;
@@ -36,20 +35,6 @@ namespace GeneaGrab.Services
                 RegisterFrameEvents();
             }
         }
-
-        public static bool CanGoBack => Frame.CanGoBack;
-
-        public static bool CanGoForward => Frame.CanGoForward;
-
-        public static bool GoBack()
-        {
-            if (!CanGoBack) return false;
-
-            Frame.GoBack();
-            return true;
-        }
-
-        public static void GoForward() => Frame.GoForward();
 
         public static bool Navigate(Type pageType, object parameter = null, NavigationTransitionInfo infoOverride = null)
         {

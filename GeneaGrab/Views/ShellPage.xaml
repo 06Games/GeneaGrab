@@ -5,27 +5,35 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:winui="using:Microsoft.UI.Xaml.Controls"
-    xmlns:helpers="using:GeneaGrab.Helpers"
-    xmlns:views="using:GeneaGrab.Views"
-    Loaded="OnLoaded"
     mc:Ignorable="d">
-
-    <winui:NavigationView
-        x:Name="navigationView" PaneDisplayMode="Top"
-        IsBackButtonVisible="Visible" IsBackEnabled="{x:Bind IsBackEnabled, Mode=OneWay}" IsSettingsVisible="True"
-        SelectedItem="{x:Bind Selected, Mode=OneWay}" ItemInvoked="OnItemInvoked">
-        <winui:NavigationView.Resources>
-            <AcrylicBrush x:Key="NavigationViewTopPaneBackground" BackgroundSource="Backdrop" TintColor="{ThemeResource SystemAltHighColor}" TintOpacity=".9" />
-        </winui:NavigationView.Resources>
-        <winui:NavigationView.MenuItems>
-            <winui:NavigationViewItem x:Uid="Shell_Main" Icon="Library" helpers:NavHelper.NavigateTo="views:MainPage" />
-            <winui:NavigationViewItem x:Uid="Shell_Registry" Icon="Pictures" helpers:NavHelper.NavigateTo="views:Registry" IsEnabled="{x:Bind IsRegistryLoaded, Mode=OneWay}" />
-        </winui:NavigationView.MenuItems>
-        <winui:NavigationView.AutoSuggestBox>
-            <AutoSuggestBox PlaceholderText="{x:Bind RegistryText}" MaxWidth="400" Width="300" MinWidth="200" TextChanged="RegistrySearch_TextChanged" SuggestionChosen="RegistrySearch_SuggestionChosen"/>
-        </winui:NavigationView.AutoSuggestBox>
-        <Grid>
-            <Frame x:Name="shellFrame" />
-        </Grid>
-    </winui:NavigationView>
+    <winui:TabView x:Name="tabView" AddTabButtonClick="AddTab" TabCloseRequested="CloseTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <winui:TabView.Resources>
+            <SolidColorBrush x:Name="TabViewBackground" Color="{ThemeResource SystemAltHighColor}" />
+            <SolidColorBrush x:Name="TabViewItemHeaderBackgroundSelected" Color="{ThemeResource SolidBackgroundFillColorBase}" />
+        </winui:TabView.Resources>
+        <winui:TabView.TabStripHeader>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel x:Name="ShellTitlebarInset" />
+                <Button Style="{StaticResource NavigationBackButtonNormalStyle}" IsEnabled="{Binding IsBackEnabled, Mode=OneWay}" ToolTipService.ToolTip="Back" Click="BackRequested" />
+                <Button Style="{StaticResource NavigationBackButtonNormalStyle}" IsEnabled="{Binding IsForwardEnabled, Mode=OneWay}" ToolTipService.ToolTip="Forward" Click="ForwardRequested" RenderTransformOrigin="0.5,0.5">
+                    <Button.RenderTransform>
+                        <ScaleTransform ScaleX="-1" />
+                    </Button.RenderTransform>
+                </Button>
+            </StackPanel>
+        </winui:TabView.TabStripHeader>
+        <winui:TabView.TabStripFooter>
+            <Grid ColumnSpacing="25" Padding="25,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition MaxWidth="400" Width="300" MinWidth="200" />
+                    <ColumnDefinition MaxWidth="100" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <AutoSuggestBox PlaceholderText="{x:Bind RegistryText}" TextChanged="RegistrySearch_TextChanged" SuggestionChosen="RegistrySearch_SuggestionChosen" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" x:Name="CustomDragRegion" />
+            </Grid>
+        </winui:TabView.TabStripFooter>
+    </winui:TabView>
 </Page>

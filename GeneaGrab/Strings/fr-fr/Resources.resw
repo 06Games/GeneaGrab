@@ -125,10 +125,6 @@
     <value>Télécharger depuis les archives départementales n'a jamais été aussi facile !</value>
     <comment>Application description</comment>
   </data>
-  <data name="Shell_Main.Content" xml:space="preserve">
-    <value>Liste</value>
-    <comment>Navigation view item name for Main</comment>
-  </data>
   <data name="Settings_Theme.Text" xml:space="preserve">
     <value>Thème</value>
     <comment>Choose theme text for Settings</comment>
@@ -165,14 +161,22 @@
     <value>Personnalisation</value>
     <comment>Personalization text for Settings</comment>
   </data>
-  <data name="Shell_Registry.Content" xml:space="preserve">
-    <value>Registre</value>
-    <comment>Navigation view item name for Registry</comment>
-  </data>
   <data name="Registry.Download" xml:space="preserve">
     <value>Télécharger</value>
   </data>
   <data name="Registry.OpenFolder" xml:space="preserve">
     <value>Ouvrir le dossier</value>
+  </data>
+  <data name="Shell.MainPage" xml:space="preserve">
+    <value>Plateformes</value>
+  </data>
+  <data name="Shell.RegistriesPage" xml:space="preserve">
+    <value>Registres</value>
+  </data>
+  <data name="Shell.Registry" xml:space="preserve">
+    <value>Consultation d'un registre</value>
+  </data>
+  <data name="Shell.SettingsPage" xml:space="preserve">
+    <value>Paramètres</value>
   </data>
 </root>

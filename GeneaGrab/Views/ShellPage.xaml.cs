@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -15,109 +13,110 @@ using WinUI = Microsoft.UI.Xaml.Controls;
 
 namespace GeneaGrab.Views
 {
+    public interface TabPage
+    {
+        Symbol IconSource { get; }
+        string DynaTabHeader { get; }
+    }
+
     public sealed partial class ShellPage : Page, INotifyPropertyChanged
     {
-        private readonly KeyboardAccelerator _altLeftKeyboardAccelerator = BuildKeyboardAccelerator(VirtualKey.Left, VirtualKeyModifiers.Menu);
-        private readonly KeyboardAccelerator _backKeyboardAccelerator = BuildKeyboardAccelerator(VirtualKey.GoBack);
-
         private bool _isBackEnabled;
         public bool IsBackEnabled
         {
             get => _isBackEnabled;
             set => Set(ref _isBackEnabled, value);
         }
-        private bool _isRegistryLoaded;
-        public bool IsRegistryLoaded
+        private bool _isForwardEnabled;
+        public bool IsForwardEnabled
         {
-            get => _isRegistryLoaded;
-            set => Set(ref _isRegistryLoaded, value);
+            get => _isForwardEnabled;
+            set => Set(ref _isForwardEnabled, value);
         }
-
         private string RegistryText => ResourceExtensions.GetLocalized(Resource.Core, "Registry/Name");
 
-        private WinUI.NavigationViewItem _selected;
-        public WinUI.NavigationViewItem Selected
-        {
-            get => _selected;
-            set => Set(ref _selected, value);
-        }
-
+        static WinUI.TabView TabView;
         public ShellPage()
         {
             InitializeComponent();
             DataContext = this;
             Initialize();
+            TabView = tabView;
         }
 
         private void Initialize()
         {
-            NavigationService.Frame = shellFrame;
-            NavigationService.NavigationFailed += Frame_NavigationFailed;
-            NavigationService.Navigated += Frame_Navigated;
-            navigationView.BackRequested += OnBackRequested;
-        }
+            NewTab(tabView, typeof(SettingsPage)).IsClosable = false;
+            NavigationService.Frame = NewTab(tabView).Content as Frame;
+            tabView.SelectionChanged += (s, e) => FrameChanged();
 
-        private async void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            // Keyboard accelerators are added here to avoid showing 'Alt + left' tooltip on the page.
-            // More info on tracking issue https://github.com/Microsoft/microsoft-ui-xaml/issues/8
-            KeyboardAccelerators.Add(_altLeftKeyboardAccelerator);
-            KeyboardAccelerators.Add(_backKeyboardAccelerator);
-            await Task.CompletedTask;
-        }
 
-        private void Frame_NavigationFailed(object sender, NavigationFailedEventArgs e) => throw e.Exception;
-        private void Frame_Navigated(object sender, NavigationEventArgs e)
-        {
-            IsBackEnabled = NavigationService.CanGoBack;
-            IsRegistryLoaded = Registry.Info != null;
-
-            if (e.SourcePageType == typeof(SettingsPage))
+            var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
+            coreTitleBar.ExtendViewIntoTitleBar = true;
+            coreTitleBar.LayoutMetricsChanged += (sender, _) =>
             {
-                Selected = navigationView.SettingsItem as WinUI.NavigationViewItem;
-                return;
-            }
-
-            var selectedItem = GetSelectedItem(navigationView.MenuItems, e.SourcePageType);
-            if (selectedItem != null) Selected = selectedItem;
-
+                CustomDragRegion.MinWidth = FlowDirection == FlowDirection.LeftToRight ? sender.SystemOverlayRightInset : sender.SystemOverlayLeftInset;
+                ShellTitlebarInset.MinWidth = FlowDirection == FlowDirection.LeftToRight ? sender.SystemOverlayLeftInset : sender.SystemOverlayRightInset;
+                CustomDragRegion.Height = ShellTitlebarInset.Height = sender.Height;
+            };
+            Window.Current.SetTitleBar(CustomDragRegion);
         }
-        private WinUI.NavigationViewItem GetSelectedItem(IEnumerable<object> menuItems, Type pageType)
+
+        /// <summary>Add a new Tab to the TabView</summary>
+        private void AddTab(WinUI.TabView sender, object args) => NewTab(sender);
+        private WinUI.TabViewItem NewTab(WinUI.TabView view) => NewTab(view, typeof(MainPage));
+        private WinUI.TabViewItem NewTab(WinUI.TabView view, Type page)
         {
-            foreach (var item in menuItems.OfType<WinUI.NavigationViewItem>())
-            {
-                if (IsMenuItemFoPageType(item, pageType)) return item;
-                var selectedChild = GetSelectedItem(item.MenuItems, pageType);
-                if (selectedChild != null) return selectedChild;
-            }
+            Frame frame = new Frame();
+            var newTab = new WinUI.TabViewItem { Content = frame };
+            frame.Navigate(page);
+            frame.Navigated += (s,e) => FrameChanged();
+            frame.NavigationFailed += (s, e) => throw e.Exception;
 
-            return null;
+            view.TabItems.Add(newTab);
+            UpdateTitle(newTab);
+            view.SelectedItem = newTab;
+            return newTab;
+        }
+        /// <summary>Remove the requested tab from the TabView</summary>
+        private void CloseTab(WinUI.TabView sender, WinUI.TabViewTabCloseRequestedEventArgs args)
+        {
+            sender.TabItems.Remove(args.Tab);
+            if (sender.TabItems.Count <= 1) NewTab(sender);
         }
 
-        private bool IsMenuItemFoPageType(WinUI.NavigationViewItem menuItem, Type sourcePageType) => menuItem.GetValue(NavHelper.NavigateToProperty) as Type == sourcePageType;
-        private void OnItemInvoked(WinUI.NavigationView sender, WinUI.NavigationViewItemInvokedEventArgs args)
+        private void FrameChanged()
         {
-            if (args.IsSettingsInvoked) NavigationService.Navigate(typeof(SettingsPage), null, args.RecommendedNavigationTransitionInfo);
-            else if (args.InvokedItemContainer is WinUI.NavigationViewItem selectedItem)
-            {
-                var pageType = selectedItem.GetValue(NavHelper.NavigateToProperty) as Type;
-                NavigationService.Navigate(pageType, null, args.RecommendedNavigationTransitionInfo);
-            }
+            if (!(tabView.SelectedItem is WinUI.TabViewItem tab)) return;
+            var frame = NavigationService.Frame = tab.Content as Frame;
+            IsBackEnabled = frame.CanGoBack;
+            IsForwardEnabled = frame.CanGoForward;
+            UpdateTitle(tab);
         }
-        private void OnBackRequested(WinUI.NavigationView sender, WinUI.NavigationViewBackRequestedEventArgs args) => NavigationService.GoBack();
+        public static void UpdateSelectedTitle() => UpdateTitle(TabView.SelectedItem as WinUI.TabViewItem);
+        static void UpdateTitle(WinUI.TabViewItem tab)
+        {
+            var frame = tab.Content as Frame;
+            var frameData = frame.Content as TabPage;
 
-        private static KeyboardAccelerator BuildKeyboardAccelerator(VirtualKey key, VirtualKeyModifiers? modifiers = null)
-        {
-            var keyboardAccelerator = new KeyboardAccelerator { Key = key };
-            if (modifiers.HasValue) keyboardAccelerator.Modifiers = modifiers.Value;
-            keyboardAccelerator.Invoked += OnKeyboardAcceleratorInvoked;
-            return keyboardAccelerator;
+            tab.IconSource = frameData is null ? null : new WinUI.SymbolIconSource { Symbol = frameData.IconSource };
+            tab.Header = frameData is null ? frame.SourcePageType.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Shell/{frame.SourcePageType.Name}");
         }
-        private static void OnKeyboardAcceleratorInvoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+
+
+
+        private void BackRequested(object sender, RoutedEventArgs e)
         {
-            var result = NavigationService.GoBack();
-            args.Handled = result;
+            var frame = (tabView.SelectedItem as WinUI.TabViewItem).Content as Frame;
+            if (frame.CanGoBack) frame.GoBack();
         }
+        private void ForwardRequested(object sender, RoutedEventArgs e)
+        {
+            var frame = (tabView.SelectedItem as WinUI.TabViewItem).Content as Frame;
+            if (frame.CanGoForward) frame.GoForward();
+        }
+
+
 
         public event PropertyChangedEventHandler PropertyChanged;
         private void Set<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
@@ -129,15 +128,17 @@ namespace GeneaGrab.Views
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
 
+
         private void RegistrySearch_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) { if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput) sender.ItemsSource = Search(sender.Text); }
         IEnumerable<Result> Search(string query)
         {
-            IEnumerable<Result> GetRegistries(Func<GeneaGrab.Registry, string> contains)
-                => Data.Providers.Values.SelectMany(p => p.Registries.Values).Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false).Select(r => new Result { Text = r.Name, Value = new RegistryInfo(r) });
+            IEnumerable<Result> GetRegistries(Func<Location, GeneaGrab.Registry, string> contains) => Data.Providers.Values.SelectMany(p => p.Locations.Values).SelectMany(l => l.Registers
+                .Where(r => contains?.Invoke(l, r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
+                .Select(r => new Result { Text = $"{l.Name}: {r.Name}", Value = new RegistryInfo(r) }));
 
-            if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => r.Name);
+            if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries((l, r) => $"{l.Name}: {r.Name}");
 
-            var registries = GetRegistries(r => r.URL).ToList() ?? new List<Result>();
+            var registries = GetRegistries((l, r) => r.URL).ToList() ?? new List<Result>();
             if (!registries.Any()) foreach (var provider in Data.Providers) if (provider.Value.API.TryGetRegistryID(uri, out var _)) registries.Add(new Result { Text = $"Online Match: {provider.Key}", Value = uri });
             return registries;
         }
@@ -149,8 +150,7 @@ namespace GeneaGrab.Views
         }
         private void RegistrySearch_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {
-            var result = args.SelectedItem as Result;
-            if (result != null) NavigationService.Navigate(typeof(Registry), result.Value);
+            if (args.SelectedItem is Result result) NavigationService.Navigate(typeof(Registry), result.Value);
             sender.Text = string.Empty;
         }
     }

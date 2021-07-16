@@ -125,10 +125,6 @@
     <value>Downloading from the departmental archives has never been easier!</value>
     <comment>Application description</comment>
   </data>
-  <data name="Shell_Main.Content" xml:space="preserve">
-    <value>List</value>
-    <comment>Navigation view item name for Main</comment>
-  </data>
   <data name="Settings_Theme.Text" xml:space="preserve">
     <value>Theme</value>
     <comment>Choose theme text for Settings</comment>
@@ -165,14 +161,22 @@
     <value>Personalization</value>
     <comment>Personalization text for Settings</comment>
   </data>
-  <data name="Shell_Registry.Content" xml:space="preserve">
-    <value>Registry</value>
-    <comment>Navigation view item name for Registry</comment>
-  </data>
   <data name="Registry.Download" xml:space="preserve">
     <value>Download</value>
   </data>
   <data name="Registry.OpenFolder" xml:space="preserve">
     <value>Open folder</value>
+  </data>
+  <data name="Shell.MainPage" xml:space="preserve">
+    <value>Platforms</value>
+  </data>
+  <data name="Shell.RegistriesPage" xml:space="preserve">
+    <value>Registers</value>
+  </data>
+  <data name="Shell.Registry" xml:space="preserve">
+    <value>Consulting a register</value>
+  </data>
+  <data name="Shell.SettingsPage" xml:space="preserve">
+    <value>Settings</value>
   </data>
 </root>

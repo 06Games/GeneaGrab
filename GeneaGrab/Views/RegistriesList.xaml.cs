@@ -1,32 +1,17 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
 
 namespace GeneaGrab.Views
 {
-    public sealed partial class RegistriesPage : Page, INotifyPropertyChanged
+    public sealed partial class RegistriesPage : Page, TabPage
     {
+        public Symbol IconSource => Symbol.Library;
+        public string DynaTabHeader => provider?.Name;
+
         public RegistriesPage() => InitializeComponent();
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void Set<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
-        {
-            if (Equals(storage, value))
-            {
-                return;
-            }
-
-            storage = value;
-            OnPropertyChanged(propertyName);
-        }
-
-        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
 
         private ObservableCollection<LocationOrRegisterItem> _items = new ObservableCollection<LocationOrRegisterItem>();
         public ObservableCollection<LocationOrRegisterItem> Items => _items;
@@ -37,6 +22,7 @@ namespace GeneaGrab.Views
 
             provider = e.Parameter as Provider;
             if (provider is null) return;
+            ShellPage.UpdateSelectedTitle();
 
             _items.Clear();
             foreach (var registry in provider.Registries.Values)
