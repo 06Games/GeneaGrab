@@ -7,16 +7,15 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Navigation;
 using WinUI = Microsoft.UI.Xaml.Controls;
 
 namespace GeneaGrab.Views
 {
-    public interface TabPage
+    public interface ITabPage
     {
         Symbol IconSource { get; }
         string DynaTabHeader { get; }
+        string Identifier { get; }
     }
 
     public sealed partial class ShellPage : Page, INotifyPropertyChanged
@@ -35,20 +34,24 @@ namespace GeneaGrab.Views
         }
         private string RegistryText => ResourceExtensions.GetLocalized(Resource.Core, "Registry/Name");
 
-        static WinUI.TabView TabView;
         public ShellPage()
         {
             InitializeComponent();
             DataContext = this;
             Initialize();
-            TabView = tabView;
         }
 
         private void Initialize()
         {
-            NewTab(tabView, typeof(SettingsPage)).IsClosable = false;
-            NavigationService.Frame = NewTab(tabView).Content as Frame;
-            tabView.SelectionChanged += (s, e) => FrameChanged();
+            NavigationService.TabView = tabView;
+            NavigationService.Navigated += (s, e) => FrameChanged();
+            NavigationService.NavigationFailed += (s, e) => throw e.Exception;
+            NavigationService.TabAdded += (tab) => UpdateTitle(tab);
+            NavigationService.TabRemoved += (tab) => { if (NavigationService.TabView.TabItems.Count <= 1) NewTab(); };
+            NavigationService.SelectionChanged += (s, e) => FrameChanged();
+
+            NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
+            NavigationService.Frame = NewTab().Content as Frame;
 
 
             var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
@@ -62,58 +65,32 @@ namespace GeneaGrab.Views
             Window.Current.SetTitleBar(CustomDragRegion);
         }
 
-        /// <summary>Add a new Tab to the TabView</summary>
-        private void AddTab(WinUI.TabView sender, object args) => NewTab(sender);
-        private WinUI.TabViewItem NewTab(WinUI.TabView view) => NewTab(view, typeof(MainPage));
-        private WinUI.TabViewItem NewTab(WinUI.TabView view, Type page)
-        {
-            Frame frame = new Frame();
-            var newTab = new WinUI.TabViewItem { Content = frame };
-            frame.Navigate(page);
-            frame.Navigated += (s,e) => FrameChanged();
-            frame.NavigationFailed += (s, e) => throw e.Exception;
+        private WinUI.TabViewItem NewTab() => NavigationService.NewTab(typeof(MainPage));
 
-            view.TabItems.Add(newTab);
-            UpdateTitle(newTab);
-            view.SelectedItem = newTab;
-            return newTab;
-        }
+        /// <summary>Add a new Tab to the TabView</summary>
+        private void AddTab(WinUI.TabView sender, object args) => NewTab();
         /// <summary>Remove the requested tab from the TabView</summary>
-        private void CloseTab(WinUI.TabView sender, WinUI.TabViewTabCloseRequestedEventArgs args)
-        {
-            sender.TabItems.Remove(args.Tab);
-            if (sender.TabItems.Count <= 1) NewTab(sender);
-        }
+        private void CloseTab(WinUI.TabView sender, WinUI.TabViewTabCloseRequestedEventArgs args) => NavigationService.CloseTab(args.Tab);
+        private void BackRequested(object sender, RoutedEventArgs e) => NavigationService.GoBack();
+        private void ForwardRequested(object sender, RoutedEventArgs e) => NavigationService.GoForward();
 
         private void FrameChanged()
         {
-            if (!(tabView.SelectedItem is WinUI.TabViewItem tab)) return;
-            var frame = NavigationService.Frame = tab.Content as Frame;
-            IsBackEnabled = frame.CanGoBack;
-            IsForwardEnabled = frame.CanGoForward;
-            UpdateTitle(tab);
+            IsBackEnabled = NavigationService.CanGoBack;
+            IsForwardEnabled = NavigationService.CanGoForward;
+            UpdateSelectedTitle();
         }
-        public static void UpdateSelectedTitle() => UpdateTitle(TabView.SelectedItem as WinUI.TabViewItem);
+        public static void UpdateSelectedTitle() => UpdateTitle(NavigationService.TabView.SelectedItem as WinUI.TabViewItem);
         static void UpdateTitle(WinUI.TabViewItem tab)
         {
+            if (tab is null) return;
             var frame = tab.Content as Frame;
-            var frameData = frame.Content as TabPage;
+            var frameData = frame.Content as ITabPage;
 
             tab.IconSource = frameData is null ? null : new WinUI.SymbolIconSource { Symbol = frameData.IconSource };
             tab.Header = frameData is null ? frame.SourcePageType.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Shell/{frame.SourcePageType.Name}");
-        }
-
-
-
-        private void BackRequested(object sender, RoutedEventArgs e)
-        {
-            var frame = (tabView.SelectedItem as WinUI.TabViewItem).Content as Frame;
-            if (frame.CanGoBack) frame.GoBack();
-        }
-        private void ForwardRequested(object sender, RoutedEventArgs e)
-        {
-            var frame = (tabView.SelectedItem as WinUI.TabViewItem).Content as Frame;
-            if (frame.CanGoForward) frame.GoForward();
+            tab.Tag = frameData.Identifier;
+            System.Diagnostics.Debug.WriteLine(tab.Tag);
         }
 
 

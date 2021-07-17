@@ -11,10 +11,11 @@ using Windows.UI.Xaml.Navigation;
 namespace GeneaGrab.Views
 {
     // TODO WTS: Add other settings as necessary. For help see https://github.com/Microsoft/WindowsTemplateStudio/blob/release/docs/UWP/pages/settings-codebehind.md
-    public sealed partial class SettingsPage : Page, INotifyPropertyChanged, TabPage
+    public sealed partial class SettingsPage : Page, INotifyPropertyChanged, ITabPage
     {
         public Symbol IconSource => Symbol.Setting;
         public string DynaTabHeader => null;
+        public string Identifier => null;
 
         private ElementTheme _elementTheme = ThemeSelectorService.Theme;
         public ElementTheme ElementTheme

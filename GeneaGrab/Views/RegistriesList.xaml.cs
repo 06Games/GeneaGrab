@@ -6,10 +6,11 @@ using Windows.UI.Xaml.Navigation;
 
 namespace GeneaGrab.Views
 {
-    public sealed partial class RegistriesPage : Page, TabPage
+    public sealed partial class RegistriesPage : Page, ITabPage
     {
         public Symbol IconSource => Symbol.Library;
         public string DynaTabHeader => provider?.Name;
+        public string Identifier => provider?.ID;
 
         public RegistriesPage() => InitializeComponent();
 

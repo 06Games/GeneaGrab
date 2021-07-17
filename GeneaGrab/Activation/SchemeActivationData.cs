@@ -9,21 +9,24 @@ namespace GeneaGrab.Activation
         private const string ProtocolName = "geneagrab";
 
         public Type PageType { get; private set; }
+        public string Identifier { get; private set; }
 
         public Uri Uri { get; private set; }
-
         public Dictionary<string, string> Parameters { get; private set; } = new Dictionary<string, string>();
 
         public bool IsValid => PageType != null;
 
         public SchemeActivationData(Uri activationUri)
         {
-            PageType = SchemeActivationConfig.GetPage(activationUri.AbsolutePath);
+            var Page = SchemeActivationConfig.GetPage(activationUri.AbsolutePath);
+            PageType = Page.Item1;
 
             if (!IsValid || string.IsNullOrEmpty(activationUri.Query)) return;
 
             var uriQuery = HttpUtility.ParseQueryString(activationUri.Query);
             foreach (var paramKey in uriQuery.AllKeys) Parameters.Add(paramKey, uriQuery.Get(paramKey));
+
+            Identifier = Page.Item2.GetIdFromParameters(Parameters);
         }
 
         public SchemeActivationData(Type pageType, Dictionary<string, string> parameters = null)

@@ -14,15 +14,11 @@ namespace GeneaGrab.Services
     // https://github.com/Microsoft/WindowsTemplateStudio/blob/release/docs/UWP/activation.md
     internal class ActivationService
     {
-        private readonly App _app;
         private readonly Type _defaultNavItem;
-        private Lazy<UIElement> _shell;
+        private readonly Lazy<UIElement> _shell;
 
-        private object _lastActivationArgs;
-
-        public ActivationService(App app, Type defaultNavItem, Lazy<UIElement> shell = null)
+        public ActivationService(App _, Type defaultNavItem, Lazy<UIElement> shell = null)
         {
-            _app = app;
             _shell = shell;
             _defaultNavItem = defaultNavItem;
         }
@@ -31,63 +27,33 @@ namespace GeneaGrab.Services
         {
             if (IsInteractive(activationArgs))
             {
-                // Initialize services that you need before app activation
-                // take into account that the splash screen is shown while this code runs.
-                await InitializeAsync();
-
-                // Do not repeat app initialization when the Window already has content,
-                // just ensure that the window is active
-                if (Window.Current.Content == null)
-                {
-                    // Create a Shell or Frame to act as the navigation context
-                    Window.Current.Content = _shell?.Value ?? new Frame();
-                }
+                await InitializeAsync(); // Initialize services that you need before app activation take into account that the splash screen is shown while this code runs.
+                if (Window.Current.Content == null) // Do not repeat app initialization when the Window already has content, just ensure that the window is active
+                    Window.Current.Content = _shell?.Value ?? new Frame(); // Create a Shell or Frame to act as the navigation context
             }
 
-            // Depending on activationArgs one of ActivationHandlers or DefaultActivationHandler
-            // will navigate to the first page
-            await HandleActivationAsync(activationArgs);
-            _lastActivationArgs = activationArgs;
+            await HandleActivationAsync(activationArgs); // Depending on activationArgs one of ActivationHandlers or DefaultActivationHandler will navigate to the first page
 
             if (IsInteractive(activationArgs))
             {
-                // Ensure the current window is active
-                Window.Current.Activate();
-
-                // Tasks after activation
-                await StartupAsync();
+                Window.Current.Activate(); // Ensure the current window is active
+                await StartupAsync(); // Tasks after activation
             }
         }
 
-        private async Task InitializeAsync()
-        {
-            await ThemeSelectorService.InitializeAsync().ConfigureAwait(false);
-        }
+        private Task InitializeAsync() => ThemeSelectorService.InitializeAsync();
 
         private async Task HandleActivationAsync(object activationArgs)
         {
-            var activationHandler = GetActivationHandlers()
-                                                .FirstOrDefault(h => h.CanHandle(activationArgs));
+            var activationHandler = GetActivationHandlers().FirstOrDefault(h => h.CanHandle(activationArgs));
+            if (activationHandler != null) await activationHandler.HandleAsync(activationArgs);
 
-            if (activationHandler != null)
-            {
-                await activationHandler.HandleAsync(activationArgs);
-            }
-
-            if (IsInteractive(activationArgs))
-            {
-                var defaultHandler = new DefaultActivationHandler(_defaultNavItem);
-                if (defaultHandler.CanHandle(activationArgs))
-                {
-                    await defaultHandler.HandleAsync(activationArgs);
-                }
-            }
+            if (!IsInteractive(activationArgs)) return;
+            var defaultHandler = new DefaultActivationHandler(_defaultNavItem);
+            if (defaultHandler.CanHandle(activationArgs)) await defaultHandler.HandleAsync(activationArgs);
         }
 
-        private async Task StartupAsync()
-        {
-            await ThemeSelectorService.SetRequestedThemeAsync();
-        }
+        private Task StartupAsync() => ThemeSelectorService.SetRequestedThemeAsync();
 
         private IEnumerable<ActivationHandler> GetActivationHandlers()
         {
@@ -95,9 +61,6 @@ namespace GeneaGrab.Services
             yield return Singleton<SchemeActivationHandler>.Instance;
         }
 
-        private bool IsInteractive(object args)
-        {
-            return args is IActivatedEventArgs;
-        }
+        private bool IsInteractive(object args) => args is IActivatedEventArgs;
     }
 }

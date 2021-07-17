@@ -1,4 +1,5 @@
-﻿using GeneaGrab.Helpers;
+﻿using GeneaGrab.Activation;
+using GeneaGrab.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,10 +12,26 @@ using Windows.UI.Xaml.Navigation;
 
 namespace GeneaGrab.Views
 {
-    public sealed partial class Registry : Page, INotifyPropertyChanged, TabPage
+    public sealed partial class Registry : Page, INotifyPropertyChanged, ITabPage, ISchemeSupport
     {
         public Symbol IconSource => Symbol.Pictures;
         public string DynaTabHeader => Info is null ? null : $"{Info.Location?.Name ?? Info.LocationID}: {Info.Registry?.Name ?? Info.RegistryID}";
+        public string Identifier => Info?.RegistryID;
+
+
+
+        public string UrlPath => "registry";
+        string ISchemeSupport.GetIdFromParameters(Dictionary<string, string> param)
+        {
+            if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
+            {
+                foreach (var provider in Data.Providers.Values)
+                    if (provider.API.TryGetRegistryID(uri, out var info)) return info.RegistryID;
+            }
+            return null;
+        }
+
+
 
         private string DownloadText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/Download");
         private string OpenFolderText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/OpenFolder");

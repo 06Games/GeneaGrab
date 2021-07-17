@@ -3,10 +3,11 @@ using Windows.UI.Xaml.Controls;
 
 namespace GeneaGrab.Views
 {
-    public sealed partial class MainPage : Page, TabPage
+    public sealed partial class MainPage : Page, ITabPage
     {
         public Symbol IconSource => Symbol.World;
         public string DynaTabHeader => null;
+        public string Identifier => null;
 
         public MainPage() => InitializeComponent();
 
