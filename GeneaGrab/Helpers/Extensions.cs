@@ -39,7 +39,7 @@ public static class Extensions
         return file;
     }
 
-    public static async Task<string> ReadFile(this Task<Windows.Storage.StorageFolder> folder, string filename) => await ReadFile(await folder.ConfigureAwait(false), filename);
+    public static async Task<string> ReadFile(this Task<Windows.Storage.StorageFolder> folder, string filename) => await ReadFile(await folder.ConfigureAwait(false), filename).ConfigureAwait(false);
     public static async Task<string> ReadFile(this Windows.Storage.StorageFolder folder, string filename)
     {
         var file = await folder.CreateFileAsync(GetValidFilename(filename.Trim(' ')), Windows.Storage.CreationCollisionOption.OpenIfExists);

@@ -85,7 +85,7 @@ namespace GeneaGrab.Helpers
             if ((item != null) && item.IsOfType(StorageItemTypes.File))
             {
                 var storageFile = await folder.GetFileAsync(fileName);
-                byte[] content = await storageFile.ReadBytesAsync();
+                byte[] content = await storageFile.ReadBytesAsync().ConfigureAwait(false);
                 return content;
             }
 

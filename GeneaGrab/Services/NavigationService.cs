@@ -111,15 +111,11 @@ namespace GeneaGrab.Services
         public static bool Navigate(Type pageType, object parameter = null, NavigationTransitionInfo infoOverride = null)
         {
             if (pageType == null || !pageType.IsSubclassOf(typeof(Page))) throw new ArgumentException($"Invalid pageType '{pageType}', please provide a valid pageType.", nameof(pageType));
+            if (Frame.Content?.GetType() == pageType && (parameter == null || parameter.Equals(_lastParamUsed))) return false; // Don't open the same page multiple times
 
-            // Don't open the same page multiple times
-            if (Frame.Content?.GetType() != pageType || (parameter != null && !parameter.Equals(_lastParamUsed)))
-            {
-                var navigationResult = Frame.Navigate(pageType, parameter, infoOverride);
-                if (navigationResult) _lastParamUsed = parameter;
-                return navigationResult;
-            }
-            else return false;
+            var navigationResult = Frame.Navigate(pageType, parameter, infoOverride);
+            if (navigationResult) _lastParamUsed = parameter;
+            return navigationResult;
         }
 
         public static bool CanGoBack => Frame.CanGoBack;

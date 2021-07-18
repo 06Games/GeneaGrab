@@ -16,32 +16,30 @@ namespace GeneaGrab.Services
 
         public static async Task InitializeAsync()
         {
-            Theme = await LoadThemeFromSettingsAsync();
+            Theme = await LoadThemeFromSettingsAsync().ConfigureAwait(false);
         }
 
         public static async Task SetThemeAsync(ElementTheme theme)
         {
             Theme = theme;
 
-            await SetRequestedThemeAsync();
-            await SaveThemeInSettingsAsync(Theme);
+            await SetRequestedThemeAsync().ConfigureAwait(false);
+            await SaveThemeInSettingsAsync(Theme).ConfigureAwait(false);
         }
 
         public static async Task SetRequestedThemeAsync()
         {
             foreach (var view in CoreApplication.Views)
-            {
                 await view.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     if (Window.Current.Content is FrameworkElement frameworkElement) frameworkElement.RequestedTheme = Theme;
                 });
-            }
         }
 
         private static async Task<ElementTheme> LoadThemeFromSettingsAsync()
         {
             ElementTheme cacheTheme = ElementTheme.Default;
-            string themeName = await ApplicationData.Current.LocalSettings.ReadAsync<string>(SettingsKey);
+            string themeName = await ApplicationData.Current.LocalSettings.ReadAsync<string>(SettingsKey).ConfigureAwait(false);
             if (!string.IsNullOrEmpty(themeName)) Enum.TryParse(themeName, out cacheTheme);
             return cacheTheme;
         }
