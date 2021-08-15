@@ -61,18 +61,25 @@ namespace GeneaGrab.Views
                 foreach (var page in Info.Registry.Pages) Pages.Add(new PageList { Number = page.Number, Page = page });
                 _ = Task.Run(async () =>
                 {
+                    await LoadImage(Info.PageNumber - 1, (page) => Info.Provider.API.Preview(Info.Registry, page, TrackProgress)).ContinueWith(async (t) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView));
                     for (int i = 0; i < Pages.Count; i++)
                     {
+                        if (i == Info.PageNumber - 1) continue;
+                        await LoadImage(i, (page) => Info.Provider.API.Thumbnail(Info.Registry, page, null));
+                    }
+
+                    async Task LoadImage(int i, Func<RPage, Task<RPage>> func)
+                    {
                         var page = Pages[i];
-                        var img = i == Info.PageNumber - 1 ? await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress) : await Info.Provider.API.Thumbnail(Info.Registry, page.Page, null);
+                        var img = await func?.Invoke(page.Page);
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                         {
                             page.Thumbnail = img.Image.ToImageSource();
                             Pages[i] = page;
-                            if (i == Info.PageNumber - 1) RefreshView();
                         });
                     }
                 }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
+
             });
             else await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
