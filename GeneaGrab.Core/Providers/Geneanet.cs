@@ -97,7 +97,7 @@ namespace GeneaGrab.Providers
         }
 
         public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0, progress);
-        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
+        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Grabber.CalculateIndex(page) * 0.75F, progress);
         public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Grabber.CalculateIndex(page), progress);
         public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, Action<Progress> progress)
         {
