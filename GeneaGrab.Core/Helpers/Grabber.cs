@@ -34,7 +34,7 @@ namespace GeneaGrab
         public static (Point tiles, int diviser) NbTiles(RPage page, double multiplier)
         {
             var diviser = Math.Pow(2, CalculateIndex(page) - multiplier);
-            int NbTiles(int val) => (int)Math.Ceiling(val / diviser / page.TileSize.GetValueOrDefault(1));
+            int NbTiles(int val) => (int)Math.Ceiling(val / diviser / page.TileSize.GetValueOrDefault(256));
             return (new Point(NbTiles(page.Width), NbTiles(page.Height)), (int)diviser);
         }
         public static async Task<Image> GetTile(string url)

@@ -9,6 +9,8 @@ namespace FileFormat
         public class XML
         {
             readonly System.Xml.XmlDocument xmlDoc;
+            public System.Xml.XmlDocument doc => xmlDoc;
+
             public XML() => xmlDoc = new System.Xml.XmlDocument();
             public XML(System.Xml.XmlDocument xml) { if (xml == null) xmlDoc = new System.Xml.XmlDocument(); else xmlDoc = xml; }
             public XML(string plainText)

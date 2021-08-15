@@ -29,7 +29,7 @@ namespace GeneaGrab
                 var folder = await dataFolder.CreateFolder(provider.Key);
 
                 var _l = await folder.ReadFile("Locations.json");
-                try { foreach (var loc in JsonConvert.DeserializeObject<Dictionary<string, Location>>(_l)) provider.Value.Locations.Add(loc.Key, loc.Value); }
+                try { foreach (var loc in JsonConvert.DeserializeObject<Dictionary<string, Location>>(_l) ?? new Dictionary<string, Location>()) provider.Value.Locations.Add(loc.Key, loc.Value); }
                 catch (Exception e) { Log.Error(e.Message, e); }
 
                 foreach (var reg in await folder.CreateFileQueryWithOptions(queryOptions).GetFilesAsync())
