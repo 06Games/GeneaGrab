@@ -42,6 +42,7 @@
                                 <Image Source="{x:Bind Thumbnail}" MaxHeight="125" MaxWidth="125" />
                             </StackPanel>
                             <TextBlock Text="{x:Bind Number}" Margin="0,6,0,0" Style="{ThemeResource BaseTextBlockStyle}" HorizontalTextAlignment="Center" Width="125" />
+                            <TextBlock Text="{x:Bind Notes}" Style="{ThemeResource CaptionTextBlockStyle}" HorizontalTextAlignment="Center" Width="125" />
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -61,6 +62,11 @@
 
                 <Button Width="200" Content="{x:Bind DownloadText, Mode=OneWay}" Click="Download" />
                 <Button Width="200" Content="{x:Bind OpenFolderText, Mode=OneWay}" Click="OpenFolder" />
+
+                <StackPanel>
+                    <TextBlock Margin="0,25,0,5" Style="{ThemeResource BaseTextBlockStyle}" FontSize="16" Text="{x:Bind NotesText, Mode=OneWay}">Notes</TextBlock>
+                    <TextBox x:Name="PageNotes" Height="100" FontSize="12" Background="Transparent" BorderBrush="Transparent" AcceptsReturn="True" Padding="0"></TextBox>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>
