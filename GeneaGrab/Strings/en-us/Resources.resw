@@ -179,6 +179,9 @@
   <data name="Shell.SettingsPage" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="Registry.Ark" xml:space="preserve">
+    <value>Copy reference</value>
+  </data>
   <data name="Registry.Notes" xml:space="preserve">
     <value>Notes</value>
   </data>

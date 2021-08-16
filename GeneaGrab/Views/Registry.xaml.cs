@@ -36,6 +36,7 @@ namespace GeneaGrab.Views
 
         private string DownloadText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/Download");
         private string OpenFolderText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/OpenFolder");
+        private string ArkText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/Ark");
         private string NotesText => ResourceExtensions.GetLocalized(Resource.Res, "Registry/Notes");
 
         public Registry()
@@ -177,6 +178,12 @@ namespace GeneaGrab.Views
             var options = new Windows.System.FolderLauncherOptions();
             options.ItemsToSelect.Add(page);
             await Windows.System.Launcher.LaunchFolderAsync(await page.GetParentAsync(), options);
+        }
+        private async void Ark(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage { RequestedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy };
+            dataPackage.SetText(await Info.Provider.API.Ark(Info.Registry, Info.Page));
+            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
         }
 
 

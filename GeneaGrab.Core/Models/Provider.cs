@@ -12,6 +12,7 @@ namespace GeneaGrab
         Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
         Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress);
         Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress);
+        Task<string> Ark(Registry Registry, RPage page);
     }
 
     /// <summary>Data on the registry provider</summary>

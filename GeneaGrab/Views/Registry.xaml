@@ -62,6 +62,7 @@
 
                 <Button Width="200" Content="{x:Bind DownloadText, Mode=OneWay}" Click="Download" />
                 <Button Width="200" Content="{x:Bind OpenFolderText, Mode=OneWay}" Click="OpenFolder" />
+                <Button Width="200" Content="{x:Bind ArkText, Mode=OneWay}" Click="Ark" />
 
                 <StackPanel>
                     <TextBlock Margin="0,25,0,5" Style="{ThemeResource BaseTextBlockStyle}" FontSize="16" Text="{x:Bind NotesText, Mode=OneWay}">Notes</TextBlock>

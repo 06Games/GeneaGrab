@@ -137,6 +137,7 @@ namespace GeneaGrab.Providers
 
         #endregion
 
+        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
         public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.1F, progress);
         public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
         public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);

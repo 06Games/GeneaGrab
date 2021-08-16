@@ -96,6 +96,7 @@ namespace GeneaGrab.Providers
             return (types, location, note ?? notes);
         }
 
+        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.URL}/{Page.Number}");
         public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0, progress);
         public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Grabber.CalculateIndex(page) * 0.75F, progress);
         public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Grabber.CalculateIndex(page), progress);

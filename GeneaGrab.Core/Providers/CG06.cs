@@ -45,6 +45,7 @@ namespace GeneaGrab.Providers
         }
 
 
+        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
         public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
             await Data.TryGetImageFromDrive(Registry, page, 0);
