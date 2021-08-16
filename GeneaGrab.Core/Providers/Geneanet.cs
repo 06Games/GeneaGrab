@@ -55,6 +55,14 @@ namespace GeneaGrab.Providers
             Registry.Pages = JObject.Parse($"{{results: {pages}}}").Value<JArray>("results").Select(p => new RPage { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p);
 
+            var marqueurs = Regex.Matches(page, "<option value=\\\"(?<index>\\d*)\\\" id=\\\".*\\\" ?>(?<year>\\d*)-(?<month>\\d*)-(?<type>.*)<\\/option>");
+            foreach (var pageMarqueurs in marqueurs.Cast<Match>().GroupBy(m => m.Groups["index"].Value))
+            {
+                if (!int.TryParse(pageMarqueurs.Key ?? "0", out int i) || i < 1) continue;
+                Registry.Pages[i - 1].Notes = string.Join(" - ", pageMarqueurs.Select(marqueur => marqueur.Groups["year"].Value)) + "\n\n"
+                                            + string.Join("\n", pageMarqueurs.Select(marqueur => $"{marqueur.Groups["month"]}/{marqueur.Groups["year"]} ({marqueur.Groups["type"]})"));
+            }
+
             Data.AddOrUpdate(Data.Providers["Geneanet"].Locations, Location.ID, Location);
             Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
             return new RegistryInfo { ProviderID = "Geneanet", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
