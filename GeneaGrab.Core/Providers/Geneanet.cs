@@ -106,8 +106,8 @@ namespace GeneaGrab.Providers
 
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.URL}/{Page.Number}");
         public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0, progress);
-        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Grabber.CalculateIndex(page) * 0.75F, progress);
-        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Grabber.CalculateIndex(page), progress);
+        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page) * 0.75F, progress);
+        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page), progress);
         public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, Action<Progress> progress)
         {
             if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
@@ -115,17 +115,19 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.Unknown);
             var chemin_image = Uri.EscapeDataString($"doc/{current.URL}");
             var baseURL = $"https://www.geneanet.org/zoomify/?path={chemin_image}/";
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0");
 
             if (!current.TileSize.HasValue)
             {
-                var args = await Grabber.Zoomify(baseURL);
+                var args = await Zoomify.ImageData(baseURL, client);
                 current.Width = args.w;
                 current.Height = args.h;
                 current.TileSize = args.tileSize;
             }
 
-            var data = Grabber.NbTiles(current, zoom);
-            if (current.MaxZoom == -1) current.MaxZoom = Grabber.CalculateIndex(current);
+            var data = Zoomify.NbTiles(current, zoom);
+            if (current.MaxZoom == -1) current.MaxZoom = Zoomify.CalculateIndex(current);
             current.Zoom = zoom < current.MaxZoom ? (int)Math.Ceiling(zoom) : current.MaxZoom;
 
             progress?.Invoke(0);
@@ -133,7 +135,7 @@ namespace GeneaGrab.Providers
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (int y = 0; y < data.tiles.Y; y++)
                 for (int x = 0; x < data.tiles.X; x++)
-                    tasks.Add(Grabber.GetTile($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg").ContinueWith((task) =>
+                    tasks.Add(Grabber.GetImage($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg", client).ContinueWith((task) =>
                     {
                         progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
                         return task.Result;
