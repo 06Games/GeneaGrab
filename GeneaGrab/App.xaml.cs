@@ -16,6 +16,9 @@ namespace GeneaGrab
             Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
             Data.GetImage = LocalData.GetImageAsync;
             Data.SaveImage = LocalData.SaveImageAsync;
+            Data.Log = (l, d) => { if (d is null) Log.Information(l); else Log.Information(d, l); };
+            Data.Warn = (l,d) => { if (d is null) Log.Warning(l); else Log.Warning(d, l); };
+            Data.Error = (l,d) => { if (d is null) Log.Error(l); else Log.Error(d, l); };
 
             InitializeComponent();
             UnhandledException += (_, e) => Log.Fatal(e.Message, e.Exception);
