@@ -75,15 +75,19 @@ namespace GeneaGrab.Views
                 if (Info.LocationID is null) Info.LocationID = Info.Registry.LocationID;
                 Pages.Clear();
                 PageNumber.Maximum = Info.Registry.Pages.Length;
-                foreach (var page in Info.Registry.Pages) Pages.Add(new PageList(page));
+                foreach (var page in Info.Registry.Pages) Pages.Add(page);
                 _ = Task.Run(async () =>
                 {
                     await LoadImage(Info.PageNumber - 1, (page) => Info.Provider.API.Preview(Info.Registry, page, TrackProgress)).ContinueWith(async (t) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView));
+
+                    List<Task> tasks = new List<Task>();
                     for (int i = 0; i < Pages.Count; i++)
                     {
                         if (i == Info.PageNumber - 1) continue;
-                        await LoadImage(i, (page) => Info.Provider.API.Thumbnail(Info.Registry, page, null));
+                        if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks));
+                        tasks.Add(LoadImage(i, (page) => Info.Provider.API.Thumbnail(Info.Registry, page, null)));
                     }
+                    await Task.WhenAll(tasks);
 
                     async Task LoadImage(int i, Func<RPage, Task<RPage>> func)
                     {
