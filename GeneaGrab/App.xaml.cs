@@ -13,12 +13,12 @@ namespace GeneaGrab
         public App()
         {
             Log.Logger = new LoggerConfiguration().WriteTo.File(new Serilog.Formatting.Compact.RenderedCompactJsonFormatter(), $@"{Windows.Storage.ApplicationData.Current.TemporaryFolder.Path}\Logs\{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.json").CreateLogger();
-            Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
-            Data.GetImage = LocalData.GetImageAsync;
-            Data.SaveImage = LocalData.SaveImageAsync;
             Data.Log = (l, d) => { if (d is null) Log.Information(l); else Log.Information(d, l); };
             Data.Warn = (l,d) => { if (d is null) Log.Warning(l); else Log.Warning(d, l); };
             Data.Error = (l,d) => { if (d is null) Log.Error(l); else Log.Error(d, l); };
+            Data.Translate = (id, fallback) => Helpers.ResourceExtensions.GetLocalized(Helpers.Resource.Core, id) ?? fallback;
+            Data.GetImage = LocalData.GetImageAsync;
+            Data.SaveImage = LocalData.SaveImageAsync;
 
             InitializeComponent();
             UnhandledException += (_, e) => Log.Fatal(e.Message, e.Exception);

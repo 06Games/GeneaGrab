@@ -15,7 +15,8 @@ namespace GeneaGrab.Activation
             if (NavigationService.TryGetTabWithId(data.Identifier, out var tab))
             {
                 NavigationService.OpenTab(tab);
-                NavigationService.Navigate(data.PageType, data.Parameters);
+                if (tab.Content is Windows.UI.Xaml.Controls.Frame frame && frame.Content is ISchemeSupport frameData) frameData.Load(data.Parameters);
+                else NavigationService.Navigate(data.PageType, data.Parameters);
             }
             else NavigationService.NewTab(data.PageType, data.Parameters);
             return Task.CompletedTask;

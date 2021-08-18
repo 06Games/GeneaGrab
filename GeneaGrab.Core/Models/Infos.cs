@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace GeneaGrab
 {
-    public class RegistryInfo
+    public class RegistryInfo : IEquatable<RegistryInfo>
     {
         public RegistryInfo() { }
         public RegistryInfo(Registry r) { ProviderID = r.ProviderID; LocationID = r.LocationID; RegistryID = r.ID; }
@@ -20,6 +20,13 @@ namespace GeneaGrab
         public Registry Registry => Provider.Registries.TryGetValue(RegistryID, out var r) ? r : null;
         public int PageNumber = 1;
         public RPage Page => Registry.Pages.ElementAtOrDefault(PageNumber - 1) ?? Registry.Pages.FirstOrDefault();
+
+
+        public bool Equals(RegistryInfo other) => ProviderID == other?.ProviderID && RegistryID == other?.RegistryID;
+        public override bool Equals(object obj) => Equals(obj as RegistryInfo);
+        public static bool operator ==(RegistryInfo one, RegistryInfo two) => one?.ProviderID == two?.ProviderID && one?.RegistryID == two?.RegistryID;
+        public static bool operator !=(RegistryInfo one, RegistryInfo two) => !(one == two);
+        public override int GetHashCode() => (ProviderID + RegistryID).GetHashCode();
     }
 
     public static class Data

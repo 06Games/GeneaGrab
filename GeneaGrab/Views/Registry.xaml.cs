@@ -31,6 +31,14 @@ namespace GeneaGrab.Views
             }
             return null;
         }
+        async void ISchemeSupport.Load(Dictionary<string, string> param)
+        {
+            if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
+            {
+                foreach (var provider in Data.Providers.Values)
+                    if (provider.API.TryGetRegistryID(uri, out var info)) await ChangePage(Pages[info.PageNumber]);
+            }
+        }
 
 
 
@@ -53,7 +61,7 @@ namespace GeneaGrab.Views
             };
         }
 
-        public static RegistryInfo Info { get; set; }
+        public RegistryInfo Info { get; set; }
         async protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -64,6 +72,7 @@ namespace GeneaGrab.Views
                 ShellPage.UpdateSelectedTitle();
                 if (inRam) return;
 
+                if (Info.LocationID is null) Info.LocationID = Info.Registry.LocationID;
                 Pages.Clear();
                 PageNumber.Maximum = Info.Registry.Pages.Length;
                 foreach (var page in Info.Registry.Pages) Pages.Add(new PageList(page));
@@ -101,17 +110,16 @@ namespace GeneaGrab.Views
         {
             var inRam = false;
 
-            if (Parameter is RegistryInfo) Info = Parameter as RegistryInfo;
-            else if (Parameter is Dictionary<string, string>)
+            if (Parameter is RegistryInfo infos) Info = infos;
+            else if (Parameter is Dictionary<string, string> param)
             {
-                var param = Parameter as Dictionary<string, string>;
                 if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
                 {
                     await LocalData.LoadData().ConfigureAwait(false);
                     Info = await TryGetFromProviders(uri).ConfigureAwait(false);
                 }
             }
-            else if (Parameter is Uri) Info = await TryGetFromProviders(Parameter as Uri).ConfigureAwait(false);
+            else if (Parameter is Uri url) Info = await TryGetFromProviders(url).ConfigureAwait(false);
             else inRam = true;
 
             async Task<RegistryInfo> TryGetFromProviders(Uri uri)
@@ -121,7 +129,6 @@ namespace GeneaGrab.Views
                         return provider.Registries.ContainsKey(info.RegistryID) ? info : await provider.API.Infos(uri);
                 return null;
             }
-
             return (Info != null, inRam);
         }
 
@@ -158,7 +165,7 @@ namespace GeneaGrab.Views
             PageNotes.Text = Info.Page?.Notes ?? "";
 
             image.Source = Info.Page?.Image?.ToImageSource();
-            PageList.SelectedIndex = Info.Page?.Number - 1 ?? 0;
+            PageList.SelectedIndex = Info.PageNumber - 1;
             PageList.ScrollIntoView(PageList.SelectedItem);
             imagePanel.Reset();
             OnPropertyChanged(nameof(image));
@@ -200,7 +207,7 @@ namespace GeneaGrab.Views
 
     public class PageList
     {
-        public PageList(RPage page) { Page = page; Refresh(); }
+        public static implicit operator PageList(RPage page) => new PageList { Page = page }.Refresh();
         public RPage Page { get; set; }
         public PageList Refresh()
         {

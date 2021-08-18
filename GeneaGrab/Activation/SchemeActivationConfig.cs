@@ -8,6 +8,7 @@ namespace GeneaGrab.Activation
     {
         string UrlPath { get; }
         string GetIdFromParameters(Dictionary<string, string> Parameters);
+        void Load(Dictionary<string, string> Parameters);
     }
 
     public static class SchemeActivationConfig
