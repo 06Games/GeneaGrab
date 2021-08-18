@@ -84,10 +84,10 @@ namespace GeneaGrab.Views
                     for (int i = 0; i < Pages.Count; i++)
                     {
                         if (i == Info.PageNumber - 1) continue;
-                        if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks));
+                        if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
                         tasks.Add(LoadImage(i, (page) => Info.Provider.API.Thumbnail(Info.Registry, page, null)));
                     }
-                    await Task.WhenAll(tasks);
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
 
                     async Task LoadImage(int i, Func<RPage, Task<RPage>> func)
                     {
