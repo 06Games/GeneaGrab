@@ -177,11 +177,10 @@ namespace GeneaGrab.Views
         }
 
         private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download().ConfigureAwait(false);
-        async Task<string> Download()
+        async Task Download()
         {
-            var page = await Info.Provider.API.Download(Info.Registry, Info.Page, TrackProgress);
+            await Info.Provider.API.Download(Info.Registry, Info.Page, TrackProgress);
             RefreshView();
-            return await Data.SaveImage(Info.Registry, page);
         }
         private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
