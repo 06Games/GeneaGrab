@@ -26,10 +26,10 @@ namespace GeneaGrab.Views
             ShellPage.UpdateSelectedTitle();
 
             _items.Clear();
+            foreach (var location in provider.Locations.Values.OrderBy(r => r.Name ?? r.ID)) _items.Add(location);
             foreach (var registry in provider.Registries.Values.OrderBy(r => r.From))
             {
                 if (string.IsNullOrWhiteSpace(registry.LocationID)) { _items.Add(registry); continue; }
-                if (provider.Locations.ContainsKey(registry.LocationID ?? "")) continue;
 
                 var loc = _items.FirstOrDefault(i => i.Location?.ID == registry.LocationID);
                 if (loc is null)
@@ -39,7 +39,6 @@ namespace GeneaGrab.Views
                 }
                 loc.Children.Add(registry);
             }
-            foreach (var location in provider.Locations.Values.OrderBy(r => r.Name ?? r.ID)) _items.Add(location);
         }
 
         private void RegisterList_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs e)
@@ -67,7 +66,6 @@ namespace GeneaGrab.Views
             Title = location.Name;
             SubTitle = location.District;
             Location = location;
-            Children = new ObservableCollection<LocationOrRegisterItem>(location.Registers.Select(r => new LocationOrRegisterItem(r, location)));
         }
 
         public static implicit operator LocationOrRegisterItem(GeneaGrab.Registry registry) => new LocationOrRegisterItem(registry, null);
