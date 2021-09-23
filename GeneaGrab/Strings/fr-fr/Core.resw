@@ -140,6 +140,10 @@
     <value>Baptêmes</value>
     <comment>Actes de baptême</comment>
   </data>
+  <data name="Registry.Type.BaptismTable" xml:space="preserve">
+    <value>Table des baptêmes</value>
+    <comment>Tableau des actes de baptême</comment>
+  </data>
   <data name="Registry.Type.Birth" xml:space="preserve">
     <value>Naissances</value>
     <comment>Actes de naissance</comment>
@@ -151,6 +155,10 @@
   <data name="Registry.Type.Burial" xml:space="preserve">
     <value>Sépultures</value>
     <comment>Actes de sépulture</comment>
+  </data>
+  <data name="Registry.Type.BurialTable" xml:space="preserve">
+    <value>Table des sépultures</value>
+    <comment>Tableau des actes de sépulture</comment>
   </data>
   <data name="Registry.Type.CadastralAssemblyTable" xml:space="preserve">
     <value>Tableau d'assemblage cadastral</value>

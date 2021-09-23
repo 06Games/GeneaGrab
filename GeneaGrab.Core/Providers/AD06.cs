@@ -80,12 +80,14 @@ namespace GeneaGrab.Providers
                     if (type == "Naissances") yield return RegistryType.Birth;
                     else if (type == "Tables décennales des naissances") yield return RegistryType.BirthTable;
                     else if (type == "Baptêmes") yield return RegistryType.Baptism;
+                    else if (type == "Tables des baptêmes") yield return RegistryType.BaptismTable;
                     else if (type == "Publications" || type == "Publications de mariages") yield return RegistryType.Banns;
                     else if (type == "Mariages") yield return RegistryType.Marriage;
                     else if (type == "Tables décennales des mariages") yield return RegistryType.BirthTable;
                     else if (type == "Décès") yield return RegistryType.Death;
                     else if (type == "Tables décennales des décès") yield return RegistryType.BirthTable;
                     else if (type == "Sépultures") yield return RegistryType.Burial;
+                    else if (type == "Tables des sépultures") yield return RegistryType.BurialTable;
                 }
             }
         }

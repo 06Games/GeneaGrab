@@ -17,6 +17,8 @@
         BirthTable,
         /// <summary>Baptismal records</summary>
         Baptism,
+        /// <summary>Table of baptismal records</summary>
+        BaptismTable,
         /// <summary>Banns of marriage</summary>
         Banns,
         /// <summary>Marriage certificates</summary>
@@ -29,6 +31,8 @@
         DeathTable,
         /// <summary>Burial records</summary>
         Burial,
+        /// <summary>Table of burial records</summary>
+        BurialTable,
 
         #endregion
 
