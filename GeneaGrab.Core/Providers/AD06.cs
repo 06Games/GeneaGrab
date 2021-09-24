@@ -110,8 +110,9 @@ namespace GeneaGrab.Providers
         static void ETC_MAT(NameValueCollection query, string _, ref Registry Registry)
         {
             Registry.ID = query["IDDOC"];
-            Registry.LocationID = Location.ID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
-            Location.District = query["COMPLEMENTLIEUX"];
+            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
+            Registry.LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
+            Registry.District = Registry.DistrictID = query["COMPLEMENTLIEUX"];
             Registry.From = Registry.To = Data.ParseDate(query["DATE"]);
             Registry.Types = GetTypes(query["CHOIX"]).ToList();
             Registry.Notes = $"{query["NATURE"]}\nCote: {query["COTE"]}";

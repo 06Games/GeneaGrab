@@ -153,7 +153,6 @@ namespace GeneaGrab.Views
         {
             PageNumber.Value = Info.PageNumber;
             PageTotal.Text = $"/ {Info.Registry.Pages.Length}";
-            SetInfo(Info_LocationCity, Info.Location?.Name);
             SetInfo(Info_LocationCity, Info.Registry?.Location ?? Info.Registry?.LocationID);
             SetInfo(Info_LocationDistrict, Info.Registry?.District ?? Info.Registry?.DistrictID);
             SetInfo(Info_RegistryType, Info.Registry?.TypeToString);
