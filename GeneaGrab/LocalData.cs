@@ -27,11 +27,6 @@ namespace GeneaGrab
             foreach (var provider in Data.Providers)
             {
                 var folder = await dataFolder.CreateFolder(provider.Key);
-
-                var _l = await folder.ReadFile("Locations.json");
-                try { foreach (var loc in JsonConvert.DeserializeObject<Dictionary<string, Location>>(_l) ?? new Dictionary<string, Location>()) provider.Value.Locations.Add(loc.Key, loc.Value); }
-                catch (Exception e) { Log.Error(e.Message, e); }
-
                 foreach (var reg in await folder.CreateFileQueryWithOptions(queryOptions).GetFilesAsync())
                 {
                     var kv = JsonConvert.DeserializeObject<KeyValuePair<string, Registry>>(await (await reg.GetParentAsync()).ReadFile(reg.Name));
@@ -50,7 +45,6 @@ namespace GeneaGrab
                 foreach (var provider in Data.Providers)
                 {
                     var folder = await dataFolder.CreateFolder(provider.Key);
-                    await folder.WriteFile("Locations.json", JsonConvert.SerializeObject(provider.Value.Locations, Formatting.Indented));
                     foreach (var registry in provider.Value.Registries) await folder.CreateFolderPath(registry.Value.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
                 }
             }

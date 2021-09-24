@@ -109,13 +109,13 @@ namespace GeneaGrab.Views
         private void RegistrySearch_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args) { if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput) sender.ItemsSource = Search(sender.Text); }
         IEnumerable<Result> Search(string query)
         {
-            IEnumerable<Result> GetRegistries(Func<Location, GeneaGrab.Registry, string> contains) => Data.Providers.Values.SelectMany(p => p.Locations.Values).SelectMany(l => l.Registers
-                .Where(r => contains?.Invoke(l, r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
-                .Select(r => new Result { Text = $"{l.Name}: {r.Name}", Value = new RegistryInfo(r) }));
+            IEnumerable<Result> GetRegistries(Func<GeneaGrab.Registry, string> contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
+                .Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
+                .Select(r => new Result { Text = $"{r.Location ?? r.LocationID}: {r.Name}", Value = new RegistryInfo(r) }));
 
-            if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries((l, r) => $"{l.Name}: {r.Name}");
+            if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries((r) => $"{r.Location ?? r.LocationID}: {r.Name}");
 
-            var registries = GetRegistries((l, r) => r.URL).ToList() ?? new List<Result>();
+            var registries = GetRegistries((r) => r.URL).ToList() ?? new List<Result>();
             if (!registries.Any()) foreach (var provider in Data.Providers) if (provider.Value.API.TryGetRegistryID(uri, out var _)) registries.Add(new Result { Text = $"Online Match: {provider.Key}", Value = uri });
             return registries;
         }

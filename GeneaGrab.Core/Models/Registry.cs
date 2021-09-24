@@ -9,16 +9,13 @@ namespace GeneaGrab
     public class Registry : IEquatable<Registry>
     {
         public Registry() { }
-        public Registry(Location location)
-        {
-            LocationID = location.ID;
-            ProviderID = location.ProviderID;
-        }
         public Registry(Provider provider) => ProviderID = provider.ID;
         public string ProviderID { get; set; }
         [JsonIgnore] public Provider Provider => Data.Providers[ProviderID];
-        public string LocationID { get; set; }
-        [JsonIgnore] public Location Location => Provider.Locations[LocationID];
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Location { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string LocationID { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string District { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string DistrictID { get; set; }
 
         public string ID { get; set; }
         public string URL { get; set; }

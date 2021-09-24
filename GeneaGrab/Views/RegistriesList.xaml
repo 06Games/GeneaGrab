@@ -11,7 +11,7 @@
         <Grid>
             <TreeView Name="LocationList" SelectionMode="None" CanDragItems="False" CanReorderItems="False" ItemsSource="{x:Bind Items}" ItemInvoked="RegisterList_ItemInvoked">
                 <TreeView.ItemTemplate>
-                    <DataTemplate x:DataType="local:LocationOrRegisterItem">
+                    <DataTemplate x:DataType="local:RegistriesTreeStructure">
                         <TreeViewItem ItemsSource="{x:Bind Children}">
                             <Grid>
                                 <Grid.RowDefinitions>

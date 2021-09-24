@@ -14,8 +14,8 @@ namespace GeneaGrab.Views
 
         public RegistriesPage() => InitializeComponent();
 
-        private ObservableCollection<LocationOrRegisterItem> _items = new ObservableCollection<LocationOrRegisterItem>();
-        public ObservableCollection<LocationOrRegisterItem> Items => _items;
+        private ObservableCollection<RegistriesTreeStructure> _items = new ObservableCollection<RegistriesTreeStructure>();
+        public ObservableCollection<RegistriesTreeStructure> Items => _items;
         public Provider provider { get; private set; }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -26,55 +26,54 @@ namespace GeneaGrab.Views
             ShellPage.UpdateSelectedTitle();
 
             _items.Clear();
-            foreach (var location in provider.Locations.Values.OrderBy(r => r.Name ?? r.ID)) _items.Add(location);
-            foreach (var registry in provider.Registries.Values.OrderBy(r => r.From))
+            foreach (var location in provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => r.LocationID ?? r.Location).OrderBy(l => l.Key ?? "zZzZ"))
             {
-                if (string.IsNullOrWhiteSpace(registry.LocationID)) { _items.Add(registry); continue; }
-
-                var loc = _items.FirstOrDefault(i => i.Location?.ID == registry.LocationID);
-                if (loc is null)
+                RegistriesTreeStructure loc = location.Key;
+                foreach (var district in location.GroupBy(r => r.DistrictID ?? r.District).OrderBy(d => d.Key ?? "zZzZ"))
                 {
-                    loc = new Location(provider) { ID = registry.LocationID, Name = registry.LocationID };
-                    _items.Add(loc);
+                    RegistriesTreeStructure dis = district.Key;
+                    foreach (var registry in district.OrderBy(r => r.From))
+                    {
+                        if (dis is null && loc is null) _items.Add(registry);
+                        else if (dis is null) loc.Children.Add(registry);
+                        else dis.Children.Add(registry);
+                    }
+                    if (dis != null) loc.Children.Add(dis);
                 }
-                loc.Children.Add(registry);
+                if (loc != null) _items.Add(loc);
             }
         }
 
         private void RegisterList_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs e)
         {
-            var data = e.InvokedItem as LocationOrRegisterItem;
+            var data = e.InvokedItem as RegistriesTreeStructure;
             var node = sender.NodeFromContainer(sender.ContainerFromItem(data));
             if (node.HasChildren) node.IsExpanded = !node.IsExpanded;
-            else if (data.Register != null) Frame.Navigate(typeof(Registry), new RegistryInfo { ProviderID = provider.ID, LocationID = data.Location?.ID, RegistryID = data.Register.ID });
+            else if (data.Register != null) Frame.Navigate(typeof(Registry), new RegistryInfo { ProviderID = provider.ID, RegistryID = data.Register.ID });
         }
     }
 
-    public class LocationOrRegisterItem
+    public class RegistriesTreeStructure
     {
         public string Title { get; set; }
         public string SubTitle { get; set; }
-        public ObservableCollection<LocationOrRegisterItem> Children { get; set; } = new ObservableCollection<LocationOrRegisterItem>();
+        public ObservableCollection<RegistriesTreeStructure> Children { get; set; } = new ObservableCollection<RegistriesTreeStructure>();
 
-        public Location Location { get; set; }
         public GeneaGrab.Registry Register { get; set; }
 
-
-        public static implicit operator LocationOrRegisterItem(Location location) => new LocationOrRegisterItem(location);
-        public LocationOrRegisterItem(Location location)
+        public static implicit operator RegistriesTreeStructure(string title) => title is null ? null : new RegistriesTreeStructure(title);
+        public RegistriesTreeStructure(string title, string subtitle = null)
         {
-            Title = location.Name;
-            SubTitle = location.District;
-            Location = location;
+            Title = title;
+            SubTitle = subtitle;
         }
 
-        public static implicit operator LocationOrRegisterItem(GeneaGrab.Registry registry) => new LocationOrRegisterItem(registry, null);
-        public LocationOrRegisterItem(GeneaGrab.Registry register, Location location)
+        public static implicit operator RegistriesTreeStructure(GeneaGrab.Registry registry) => new RegistriesTreeStructure(registry);
+        public RegistriesTreeStructure(GeneaGrab.Registry register)
         {
             Title = register.Name;
             SubTitle = PageCount(register);
             Register = register;
-            Location = location;
         }
         string PageCount(GeneaGrab.Registry register)
         {

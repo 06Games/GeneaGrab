@@ -10,12 +10,10 @@ namespace GeneaGrab
     public class RegistryInfo : IEquatable<RegistryInfo>
     {
         public RegistryInfo() { }
-        public RegistryInfo(Registry r) { ProviderID = r.ProviderID; LocationID = r.LocationID; RegistryID = r.ID; }
+        public RegistryInfo(Registry r) { ProviderID = r.ProviderID; RegistryID = r.ID; }
 
         public string ProviderID;
         public Provider Provider => Data.Providers.TryGetValue(ProviderID, out var p) ? p : null;
-        public string LocationID;
-        public Location Location => Provider.Locations.TryGetValue(LocationID ?? "", out var l) ? l : null;
         public string RegistryID;
         public Registry Registry => Provider.Registries.TryGetValue(RegistryID, out var r) ? r : null;
         public int PageNumber = 1;

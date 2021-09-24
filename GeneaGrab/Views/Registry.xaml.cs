@@ -16,7 +16,7 @@ namespace GeneaGrab.Views
     public sealed partial class Registry : Page, INotifyPropertyChanged, ITabPage, ISchemeSupport
     {
         public Symbol IconSource => Symbol.Pictures;
-        public string DynaTabHeader => Info is null ? null : $"{Info.Location?.Name ?? Info.LocationID}: {Info.Registry?.Name ?? Info.RegistryID}";
+        public string DynaTabHeader => Info is null ? null : $"{Info.Registry.Location ?? Info.Registry.LocationID}: {Info.Registry?.Name ?? Info.RegistryID}";
         public string Identifier => Info?.RegistryID;
 
 
@@ -72,7 +72,6 @@ namespace GeneaGrab.Views
                 ShellPage.UpdateSelectedTitle();
                 if (inRam) return;
 
-                if (Info.LocationID is null) Info.LocationID = Info.Registry.LocationID;
                 Pages.Clear();
                 PageNumber.Maximum = Info.Registry.Pages.Length;
                 foreach (var page in Info.Registry.Pages) Pages.Add(page);
@@ -155,7 +154,8 @@ namespace GeneaGrab.Views
             PageNumber.Value = Info.PageNumber;
             PageTotal.Text = $"/ {Info.Registry.Pages.Length}";
             SetInfo(Info_LocationCity, Info.Location?.Name);
-            SetInfo(Info_LocationDistrict, Info.Location?.District);
+            SetInfo(Info_LocationCity, Info.Registry?.Location ?? Info.Registry?.LocationID);
+            SetInfo(Info_LocationDistrict, Info.Registry?.District ?? Info.Registry?.DistrictID);
             SetInfo(Info_RegistryType, Info.Registry?.TypeToString);
             SetInfo(Info_RegistryDate, Info.Registry?.Dates);
             SetInfo(Info_RegistryNotes, Info.Registry?.Notes);

@@ -12,7 +12,7 @@ namespace GeneaGrab.Providers
     public class AD06 : ProviderAPI
     {
         readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS", "RP" };
-        delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location);
+        delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry);
         readonly Dictionary<string, Service> Appli = new Dictionary<string, Service> {
             { "ec", EC }, // Etat civil
             { "cad", CAD }, // Cadastre (Plan)
@@ -29,7 +29,6 @@ namespace GeneaGrab.Providers
             info = new RegistryInfo
             {
                 RegistryID = query["IDDOC"] ?? query["cote"],
-                LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString(),
                 ProviderID = "AD06",
                 PageNumber = int.TryParse(query["page"], out var _p) ? _p : 1
             };
@@ -38,8 +37,7 @@ namespace GeneaGrab.Providers
 
         public async Task<RegistryInfo> Infos(Uri URL)
         {
-            var Location = new Location(Data.Providers["AD06"]);
-            var Registry = new Registry(Location) { URL = System.Web.HttpUtility.UrlDecode(URL.OriginalString) };
+            var Registry = new Registry(Data.Providers["AD06"]) { URL = System.Web.HttpUtility.UrlDecode(URL.OriginalString) };
 
             var client = new HttpClient();
             string pageBody = await client.GetStringAsync(Registry.URL).ConfigureAwait(false);
@@ -50,22 +48,21 @@ namespace GeneaGrab.Providers
             Registry.Pages = pages.Select((p, i) => new RPage { Number = i + 1, URL = $"http://www.basesdocumentaires-cg06.fr/archives/ImageViewerTargetJP2.php?appli={appli}&imagePath={pages[i]}&infos={infos}" }).ToArray();
 
             var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
-            if (Appli.TryGetValue(appli, out var service)) service(query, pageBody, ref Registry, ref Location);
+            if (Appli.TryGetValue(appli, out var service)) service(query, pageBody, ref Registry);
             if (!int.TryParse(query["page"], out var _p)) _p = 1;
 
-            Data.AddOrUpdate(Data.Providers["AD06"].Locations, Location.ID, Location);
             Data.AddOrUpdate(Data.Providers["AD06"].Registries, Registry.ID, Registry);
-            return new RegistryInfo { ProviderID = "AD06", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
+            return new RegistryInfo { ProviderID = "AD06", RegistryID = Registry.ID, PageNumber = _p };
         }
 
         #region Services
 
-        static void EC(NameValueCollection query, string _, ref Registry Registry, ref Location Location)
+        static void EC(NameValueCollection query, string _, ref Registry Registry)
         {
             Registry.ID = query["IDDOC"];
-            Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
-            Registry.LocationID = Location.ID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
-            Location.District = query["PAROISSE"];
+            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
+            Registry.LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
+            Registry.District = Registry.DistrictID = query["PAROISSE"];
             var dates = query["DATE"]?.Split(new[] { " à " }, StringSplitOptions.None);
             Registry.From = Data.ParseDate(dates.FirstOrDefault());
             Registry.To = Data.ParseDate(dates.LastOrDefault());
@@ -92,12 +89,12 @@ namespace GeneaGrab.Providers
             }
         }
 
-        static void CAD(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location)
+        static void CAD(NameValueCollection query, string pageBody, ref Registry Registry)
         {
             Registry.ID = query["cote"];
-            Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
-            Registry.LocationID = Location.ID = Array.IndexOf(cities, query["c"]).ToString();
-            Location.District = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
+            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            Registry.LocationID = Array.IndexOf(cities, query["c"]).ToString();
+            Registry.District = Registry.DistrictID = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
             Registry.From = Registry.To = Data.ParseDate(query["a"]);
             Registry.Types = GetTypes(query["t"]);
             Registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
@@ -110,10 +107,9 @@ namespace GeneaGrab.Providers
         }
 
 
-        static void ETC_MAT(NameValueCollection query, string _, ref Registry Registry, ref Location Location)
+        static void ETC_MAT(NameValueCollection query, string _, ref Registry Registry)
         {
             Registry.ID = query["IDDOC"];
-            Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             Registry.LocationID = Location.ID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
             Location.District = query["COMPLEMENTLIEUX"];
             Registry.From = Registry.To = Data.ParseDate(query["DATE"]);
@@ -127,11 +123,11 @@ namespace GeneaGrab.Providers
             }
         }
 
-        static void RP(NameValueCollection query, string pageBody, ref Registry Registry, ref Location Location)
+        static void RP(NameValueCollection query, string pageBody, ref Registry Registry)
         {
             Registry.ID = $"{query["cote"]}___{query["date"]}";
-            Location.Name = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
-            Registry.LocationID = Location.ID = Array.IndexOf(cities, query["c"].ToUpper()).ToString();
+            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            Registry.LocationID = Array.IndexOf(cities, query["c"].ToUpper()).ToString();
             Registry.From = Registry.To = Data.ParseDate(query["date"]);
             Registry.Types = new[] { RegistryType.Census };
             Registry.Notes = query["cote"];

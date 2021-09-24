@@ -29,8 +29,7 @@ namespace GeneaGrab.Providers
 
         public async Task<RegistryInfo> Infos(Uri URL)
         {
-            var Location = new Location(Data.Providers["Geneanet"]);
-            var Registry = new Registry(Location) { URL = URL.OriginalString };
+            var Registry = new Registry(Data.Providers["Geneanet"]) { URL = URL.OriginalString };
 
             var regex = Regex.Match(Registry.URL, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
             Registry.ID = regex.Groups["col"]?.Value;
@@ -42,13 +41,12 @@ namespace GeneaGrab.Providers
             Registry.URL = $"https://www.geneanet.org/archives/registres/view/{Registry.ID}";
             string page = await client.GetStringAsync(Registry.URL);
             var infos = Regex.Match(page, "<h3>(?<location>.*)\\(.*\\| (?<from>.*) - (?<to>.*)<\\/h3>\\n.*<div class=\"note\">(?<note>(\\n\\s*.*)*?)\\n\\s*<\\/div>\\n\\s*<p class=\"noteShort\">"); //https://regex101.com/r/3Ou7DP/1
-            Location.Name = infos.Groups["location"].Value.Trim(' ');
+            Registry.Location = Registry.LocationID = infos.Groups["location"].Value.Trim(' ');
 
             var notes = TryParseNotes(infos.Groups["note"].Value.Replace("\n", "").Replace("\r", ""));
             Registry.Types = notes.types;
             Registry.Notes = notes.notes;
-            Location.District = notes.location;
-            Registry.LocationID = Location.ID = Location.ToString();
+            Registry.District = Registry.DistrictID = notes.location;
 
             Registry.From = Data.ParseDate(infos.Groups["from"].Value);
             Registry.To = Data.ParseDate(infos.Groups["to"].Value);
@@ -63,9 +61,8 @@ namespace GeneaGrab.Providers
                                             + string.Join("\n", pageMarqueurs.Select(marqueur => $"{marqueur.Groups["month"]}/{marqueur.Groups["year"]} ({marqueur.Groups["type"]})"));
             }
 
-            Data.AddOrUpdate(Data.Providers["Geneanet"].Locations, Location.ID, Location);
             Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
-            return new RegistryInfo { ProviderID = "Geneanet", LocationID = Location.ID, RegistryID = Registry.ID, PageNumber = _p };
+            return new RegistryInfo { ProviderID = "Geneanet", RegistryID = Registry.ID, PageNumber = _p };
         }
         static (List<RegistryType> types, string location, string notes) TryParseNotes(string notes)
         {

@@ -35,7 +35,6 @@ namespace GeneaGrab
 
         public string Icon { get; set; }
 
-        public Dictionary<string, Location> Locations { get; } = new Dictionary<string, Location>();
         public Dictionary<string, Registry> Registries { get; } = new Dictionary<string, Registry>();
         public string RegisterCount
         {
