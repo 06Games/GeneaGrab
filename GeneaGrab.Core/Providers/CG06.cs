@@ -22,10 +22,10 @@ namespace GeneaGrab.Providers
         }
 
         public Task<RegistryInfo> Infos(Uri URL) => GetInfos(URL);
-        async Task<RegistryInfo> GetInfos(Uri URL) //TODO: Parse city name
+        async Task<RegistryInfo> GetInfos(Uri URL)
         {
             var client = new HttpClient();
-            string pageBody = System.Text.Encoding.UTF8.GetString(await client.GetByteArrayAsync(URL).ConfigureAwait(false)).Replace("\n", "").Replace("\r", "").Replace("\t", "");
+            string pageBody = Regex.Replace(System.Text.CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(await client.GetByteArrayAsync(URL).ConfigureAwait(false)).Replace("\n", "").Replace("\r", "").Replace("\t", ""), "<font color=#0000FF><b>(?<content>.*)<\\/b><\\/font>", m => m.Groups["content"]?.Value, RegexOptions.IgnoreCase);
             var form = Regex.Match(pageBody, @"document\.write\(\""<input type=\\\""hidden\\\"" name=\\\""c\\\"" value=\\\""(?<c>.*)\\\"">\""\);.*document\.write\(\""<input type=\\\""hidden\\\"" name=\\\""l\\\"" value=\\\""(?<l>.*?)\\\"">\""\);.*document\.write\(\""<input type=\\\""hidden\\\"" name=\\\""t\\\"" value=\\\""(?<t>.*)\\\"">\""\);.*document\.write\(\""<\/form>\""\);").Groups;
             var body = Regex.Match(pageBody, @"<!-- CORPS DU DOCUMENT -->.*?<body style=\""text-align=justify\"">(.*?<h2 align=\""center\"">(?<title>.*?)<\/h2>)?(?<type>.*?)<b>.*?<\/b>.*?du (?<from>.*?)au (?<to>.*?)(<br>(?<source>.*?))?(<br> *?(?<pers>.*?))?<p>(.*?<p>)?(?<details>.*?)(.*?<p>.*?<hr.*?>(?<notes>.*))?(.*?)?<!-- Affichage des images -->", RegexOptions.IgnoreCase).Groups;
 
@@ -33,12 +33,43 @@ namespace GeneaGrab.Providers
             {
                 URL = URL.OriginalString,
                 ID = form["c"]?.Value,
-                Notes = string.IsNullOrWhiteSpace(body["title"]?.Value) ? form["t"]?.Value : body["title"]?.Value,
                 From = Data.ParseDate(body["from"]?.Value),
                 To = Data.ParseDate(body["to"]?.Value),
-                Types = new System.Collections.Generic.List<RegistryType> { body["pers"]?.Value.Contains("Notaire(s)") ?? false ? RegistryType.Notarial : RegistryType.Unknown },
                 Pages = form["l"]?.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select((p, i) => new RPage { Number = i + 1, URL = p }).ToArray()
             };
+
+            //Additional analysis
+            ModuleExtractor(GetModuleName(URL), ref registry);
+            string GetModuleName(Uri url) => System.Web.HttpUtility.ParseQueryString(url.Query)["fnmq"].Split('/').FirstOrDefault();
+            void ModuleExtractor(string module, ref Registry reg)
+            {
+                if (module == "arno") //Archives notariales
+                {
+                    var additionnalInfo = Regex.Match(body["pers"]?.Value ?? "", "Notaire\\(s\\) (?<notary>.*) à (?<city>.*)").Groups;
+                    reg.Location = additionnalInfo["city"]?.Value;
+                    reg.Notes = Notes((form["t"] ?? additionnalInfo["notary"])?.Value, body["notes"]?.Value);
+                    reg.Types = new[] { RegistryType.Notarial };
+                }
+                else if (module == "arca") //Archives anciennes & révolutionnaires
+                {
+                    reg.Location = string.IsNullOrWhiteSpace(body["title"]?.Value) ? form["t"]?.Value : body["title"]?.Value;
+                    reg.Notes = body["notes"]?.Value;
+                    reg.Types = new[] { RegistryType.Other };
+                }
+                else if (module == "comm") //Archives communales & hospitalières
+                {
+                    reg.Location = form["t"]?.Value;
+                    reg.Notes = Notes(body["title"]?.Value, body["notes"]?.Value);
+                    reg.Types = new[] { RegistryType.Other };
+                }
+                else
+                {
+                    reg.Notes = string.IsNullOrWhiteSpace(body["title"]?.Value) ? form["t"]?.Value : body["title"]?.Value;
+                    reg.Types = new[] { RegistryType.Unknown };
+                }
+
+                string Notes(params string[] notes) => string.Join("\n\n", notes.Where(n => !string.IsNullOrWhiteSpace(n)));
+            }
 
             Data.AddOrUpdate(Data.Providers["CG06"].Registries, registry.ID, registry);
             return new RegistryInfo { ProviderID = "CG06", RegistryID = registry.ID, PageNumber = 1 };
