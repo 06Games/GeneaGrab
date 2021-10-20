@@ -46,7 +46,7 @@ namespace GeneaGrab.Providers
             var notes = TryParseNotes(infos.Groups["note"].Value.Replace("\n", "").Replace("\r", ""));
             Registry.Types = notes.types;
             Registry.Notes = notes.notes;
-            Registry.District = Registry.DistrictID = notes.location;
+            Registry.District = Registry.DistrictID = string.IsNullOrWhiteSpace(notes.location) ? null : notes.location;
 
             Registry.From = Data.ParseDate(infos.Groups["from"].Value);
             Registry.To = Data.ParseDate(infos.Groups["to"].Value);
