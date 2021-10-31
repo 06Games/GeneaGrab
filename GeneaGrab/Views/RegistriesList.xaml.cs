@@ -26,9 +26,9 @@ namespace GeneaGrab.Views
             ShellPage.UpdateSelectedTitle();
 
             _items.Clear();
-            foreach (var location in provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => r.LocationID ?? r.Location).OrderBy(l => l.Key ?? "zZzZ"))
+            foreach (var location in provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => new Location { ID = r.LocationID, Name = r.Location }).OrderBy(l => l.Key ?? "zZzZ"))
             {
-                RegistriesTreeStructure loc = location.Key;
+                RegistriesTreeStructure loc = (string)location.Key;
                 foreach (var district in location.GroupBy(r => r.DistrictID ?? r.District).OrderBy(d => d.Key ?? "zZzZ"))
                 {
                     RegistriesTreeStructure dis = district.Key;
@@ -42,6 +42,17 @@ namespace GeneaGrab.Views
                 }
                 if (loc != null) _items.Add(loc);
             }
+        }
+        class Location : System.Collections.Generic.IEqualityComparer<Location>
+        {
+            public string ID;
+            public string Name;
+            public static implicit operator string(Location l) => l.Name ?? l.ID;
+
+            public override bool Equals(object obj) => Equals(this, obj as Location);
+            public bool Equals(Location x, Location y) => (!string.IsNullOrEmpty(x.ID) && !string.IsNullOrEmpty(y.ID)) ? x.ID == y.ID : x.Name == y.Name;
+            public override int GetHashCode() => (ID ?? Name ?? "").GetHashCode();
+            public int GetHashCode(Location obj) => obj.GetHashCode();
         }
 
         private void RegisterList_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs e)
