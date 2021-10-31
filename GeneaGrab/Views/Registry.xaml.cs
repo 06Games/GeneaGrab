@@ -36,7 +36,7 @@ namespace GeneaGrab.Views
             if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
             {
                 foreach (var provider in Data.Providers.Values)
-                    if (provider.API.TryGetRegistryID(uri, out var info)) await ChangePage(Pages[info.PageNumber]);
+                    if (provider.API.TryGetRegistryID(uri, out var info)) await ChangePage(Pages[info.PageNumber - 1]);
             }
         }
 
