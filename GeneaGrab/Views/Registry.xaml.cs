@@ -10,6 +10,7 @@ using Windows.UI.Core;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
+using Windows.UI.Xaml;
 
 namespace GeneaGrab.Views
 {
@@ -162,7 +163,7 @@ namespace GeneaGrab.Views
             void SetInfo(TextBlock block, string text)
             {
                 block.Text = text ?? "";
-                block.Visibility = string.IsNullOrWhiteSpace(text) ? Windows.UI.Xaml.Visibility.Collapsed : Windows.UI.Xaml.Visibility.Visible;
+                block.Visibility = string.IsNullOrWhiteSpace(text) ? Visibility.Collapsed : Visibility.Visible;
             }
 
             PageNotes.Text = Info.Page?.Notes ?? "";
@@ -175,20 +176,20 @@ namespace GeneaGrab.Views
             LocalData.SaveData();
         }
 
-        private async void Download(object sender, Windows.UI.Xaml.RoutedEventArgs e) => await Download().ConfigureAwait(false);
+        private async void Download(object sender, RoutedEventArgs e) => await Download().ConfigureAwait(false);
         async Task Download()
         {
             await Info.Provider.API.Download(Info.Registry, Info.Page, TrackProgress);
             RefreshView();
         }
-        private async void OpenFolder(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void OpenFolder(object sender, RoutedEventArgs e)
         {
             var page = await LocalData.GetFile(Info.Registry, Info.Page);
             var options = new Windows.System.FolderLauncherOptions();
             options.ItemsToSelect.Add(page);
             await Windows.System.Launcher.LaunchFolderAsync(await page.GetParentAsync(), options);
         }
-        private async void Ark(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void Ark(object sender, RoutedEventArgs e)
         {
             var dataPackage = new Windows.ApplicationModel.DataTransfer.DataPackage { RequestedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy };
             dataPackage.SetText(await Info.Provider.API.Ark(Info.Registry, Info.Page));
