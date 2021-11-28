@@ -67,7 +67,7 @@ namespace GeneaGrab.Providers
         static (List<RegistryType> types, string location, string notes) TryParseNotes(string notes)
         {
             var types = new List<RegistryType>();
-            var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - ((?<betterType>.*?)\\.|-|).*)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/1
+            var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - (?<betterType>.*?)(\\..*| -.*)?)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/3
             var global = (typesMatch.Groups["globalType"] ?? typesMatch.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
             foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(','))
                 if (TryGetType(t.Trim(' ').ToLowerInvariant(), out var type)) types.Add(type);
@@ -83,6 +83,7 @@ namespace GeneaGrab.Providers
                 else if (type.Contains("sépultures") || type.Contains("inhumation")) t = RegistryType.Burial;
 
                 else if (type.Contains("recensements")) t = RegistryType.Census;
+                else if (type.Contains("etat des âmes")) t = RegistryType.LiberStatutAnimarum;
                 else if (type.Contains("archives notariales")) t = RegistryType.Notarial;
                 else if (type.Contains("registres matricules")) t = RegistryType.Military;
 
@@ -125,18 +126,18 @@ namespace GeneaGrab.Providers
 
             if (current.MaxZoom == -1) current.MaxZoom = Zoomify.CalculateIndex(current);
             current.Zoom = zoom < current.MaxZoom ? (int)Math.Ceiling(zoom) : current.MaxZoom;
-            var data = Zoomify.NbTiles(current, current.Zoom);
+            var (tiles, diviser) = Zoomify.NbTiles(current, current.Zoom);
 
             progress?.Invoke(0);
             if (current.Image == null) current.Image = new Image<Rgb24>(current.Width, current.Height);
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
-            for (int y = 0; y < data.tiles.Y; y++)
-                for (int x = 0; x < data.tiles.X; x++)
+            for (int y = 0; y < tiles.Y; y++)
+                for (int x = 0; x < tiles.X; x++)
                     tasks.Add(Grabber.GetImage($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg", client).ContinueWith((task) =>
                     {
                         progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
                         return task.Result;
-                    }), (current.TileSize.Value, data.diviser, new Point(x, y)));
+                    }), (current.TileSize.Value, diviser, new Point(x, y)));
 
             await Task.WhenAll(tasks.Keys).ConfigureAwait(false);
             progress?.Invoke(Progress.Finished);
