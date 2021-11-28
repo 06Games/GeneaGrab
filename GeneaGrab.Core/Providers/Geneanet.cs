@@ -123,9 +123,9 @@ namespace GeneaGrab.Providers
                 current.TileSize = args.tileSize;
             }
 
-            var data = Zoomify.NbTiles(current, zoom);
             if (current.MaxZoom == -1) current.MaxZoom = Zoomify.CalculateIndex(current);
             current.Zoom = zoom < current.MaxZoom ? (int)Math.Ceiling(zoom) : current.MaxZoom;
+            var data = Zoomify.NbTiles(current, current.Zoom);
 
             progress?.Invoke(0);
             if (current.Image == null) current.Image = new Image<Rgb24>(current.Width, current.Height);
