@@ -47,6 +47,7 @@ namespace GeneaGrab
                 providers.Add(new Provider(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" });
                 providers.Add(new Provider(new AD06(), "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" });
                 providers.Add(new Provider(new CG06(), "CG06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" });
+                providers.Add(new Provider(new Antenati(), "Antenati") { URL = "https://www.antenati.san.beniculturali.it/" });
                 //TODO: Add the others
                 return _providers = new ReadOnlyDictionary<string, Provider>(providers.ToDictionary(k => k.ID, v => v));
             }

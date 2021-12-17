@@ -121,6 +121,10 @@
     <value>Archives départementales des Alpes-Maritimes</value>
     <comment>departement06.fr</comment>
   </data>
+  <data name="Provider.Antenati" xml:space="preserve">
+    <value>Antenati</value>
+    <comment>antenati.san.beniculturali.it</comment>
+  </data>
   <data name="Provider.CG06" xml:space="preserve">
     <value>Archives départementales des Alpes-Maritimes (CG06)</value>
     <comment>departement06.fr</comment>

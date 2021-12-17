@@ -19,6 +19,7 @@ namespace GeneaGrab
 
         public string ID { get; set; }
         public string URL { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string ArkURL { get; set; }
         [JsonProperty(ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))] public IEnumerable<RegistryType> Types { get; set; } = Array.Empty<RegistryType>();
         [JsonIgnore]
         public string TypeToString => Types.Any() ? string.Join(", ", Types.Select(t =>
