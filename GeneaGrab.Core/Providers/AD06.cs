@@ -62,7 +62,7 @@ namespace GeneaGrab.Providers
             Registry.ID = query["IDDOC"];
             Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             Registry.LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
-            Registry.District = Registry.DistrictID = query["PAROISSE"];
+            Registry.District = Registry.DistrictID = string.IsNullOrWhiteSpace(query["PAROISSE"]) ? null : query["PAROISSE"];
             var dates = query["DATE"]?.Split(new[] { " à " }, StringSplitOptions.None);
             Registry.From = Data.ParseDate(dates.FirstOrDefault());
             Registry.To = Data.ParseDate(dates.LastOrDefault());

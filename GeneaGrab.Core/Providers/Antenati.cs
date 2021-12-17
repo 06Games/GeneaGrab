@@ -11,6 +11,8 @@ namespace GeneaGrab.Providers
 {
     public class Antenati : ProviderAPI
     {
+        public bool IndexSupport => false;
+
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
             info = null;
