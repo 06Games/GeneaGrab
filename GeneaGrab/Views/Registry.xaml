@@ -20,7 +20,16 @@
 
         <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <local:ZoomPanel x:Name="imagePanel" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True">
-                <Image x:Name="image" />
+
+                <Grid x:Name="MainGrid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Image Grid.Column="1" x:Name="image" Stretch="Uniform" />
+                    <Canvas Grid.Column="1" x:Name="imageCanvas"></Canvas>
+                </Grid>
             </local:ZoomPanel>
             <muxc:ProgressBar x:Name="imageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Visibility="Collapsed" Maximum="1" />
         </RelativePanel>
@@ -60,13 +69,49 @@
                     <TextBlock x:Name="Info_RegistryID" Style="{ThemeResource CaptionTextBlockStyle}" Text="Document number" TextWrapping="WrapWholeWords" Margin="0 12 0 0"  />
                 </StackPanel>
 
-                <Button Width="200" Content="{x:Bind DownloadText}" Click="Download" />
-                <Button Width="200" Content="{x:Bind OpenFolderText}" Click="OpenFolder" />
-                <Button Width="200" Content="{x:Bind ArkText}" Click="Ark" />
+                <StackPanel Spacing="15">
+                    <Button Width="200" Content="{x:Bind DownloadText}" Click="Download" />
+                    <Button Width="200" Content="{x:Bind OpenFolderText}" Click="OpenFolder" />
+                    <Button Width="200" Content="{x:Bind ArkText}" Click="Ark" />
+                </StackPanel>
 
                 <StackPanel>
                     <TextBlock Margin="0,25,0,5" Style="{ThemeResource BaseTextBlockStyle}" FontSize="16" Text="{x:Bind NotesText}">Notes</TextBlock>
                     <TextBox x:Name="PageNotes" Height="100" FontSize="12" Background="Transparent" BorderBrush="Transparent" AcceptsReturn="True" Padding="0"/>
+                </StackPanel>
+
+                <StackPanel Margin="0,25,0,5" x:Name="IndexPanel">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="22"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Style="{ThemeResource BaseTextBlockStyle}" FontSize="16">Index</TextBlock>
+                        <Button Grid.Column="1" Content="+" Padding="5,0,5,1" Click="AddIndex" />
+                    </Grid>
+                    <ListView ItemsSource="{x:Bind Index}" IsItemClickEnabled="False" MaxHeight="500">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="local:Index">
+                                <Grid Padding="0,5" Width="200">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100"/>
+                                        <ColumnDefinition Width="100"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{x:Bind FormatedDate}" Style="{ThemeResource BaseTextBlockStyle}" FontSize="12" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind FormatedType}" Style="{ThemeResource BaseTextBlockStyle}" FontSize="12" HorizontalTextAlignment="Right" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{x:Bind District}" FontSize="13" />
+                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{x:Bind Retranscription}" Style="{ThemeResource CaptionTextBlockStyle}" Margin="0,5" />
+                                    <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{x:Bind Notes}" Style="{ThemeResource CaptionTextBlockStyle}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

@@ -100,7 +100,7 @@ namespace GeneaGrab.Views
                         });
                     }
                 }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
-
+                GetIndex().ContinueWith(async (t) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView));
             });
             else await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
@@ -148,6 +148,7 @@ namespace GeneaGrab.Views
                     page.Thumbnail = page.Page.Image.ToImageSource();
                     Pages[page.Number - 1] = page;
                 });
+            await GetIndex();
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView);
         }
         public void RefreshView()
@@ -167,6 +168,8 @@ namespace GeneaGrab.Views
             }
 
             PageNotes.Text = Info.Page?.Notes ?? "";
+            imageCanvas.Children.Clear();
+            foreach (var index in Index.Where(i => i.Page == Info.PageNumber)) DisplayIndexRectangle(index);
 
             image.Source = Info.Page?.Image?.ToImageSource();
             PageList.SelectedIndex = Info.PageNumber - 1;
@@ -196,18 +199,67 @@ namespace GeneaGrab.Views
             Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dataPackage);
         }
 
-
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public async void TrackProgress(Progress progress) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
         {
-            imageProgress.Visibility = progress.Done ? Windows.UI.Xaml.Visibility.Collapsed : Windows.UI.Xaml.Visibility.Visible;
+            imageProgress.Visibility = progress.Done ? Visibility.Collapsed : Visibility.Visible;
             imageProgress.IsIndeterminate = progress.Undetermined;
             imageProgress.Value = progress.Value;
         });
+
+        #region Index
+        public ObservableCollection<Index> Index = new ObservableCollection<Index>();
+        private async Task GetIndex()
+        {
+            if (!Info.Provider.API.IndexSupport) { IndexPanel.Visibility = Visibility.Collapsed; return; }
+            else IndexPanel.Visibility = Visibility.Visible;
+            var indexAPI = Info.Provider.API as IndexAPI;
+            var index = await indexAPI.GetIndex(Info.Registry, Info.Page);
+            if (index is null) Index.Clear();
+            else Index = new ObservableCollection<Index>(index.Cast<Index>());
+        }
+        private void AddIndex(object sender, RoutedEventArgs e)
+        {
+            if (!Info.Provider.API.IndexSupport) return;
+            /* TODO */
+        }
+        private void DisplayIndexRectangle(Index index)
+        {
+            if (index is null || index.Position.IsEmpty) return;
+
+            var pos = index.Position;
+            var btn = new Windows.UI.Xaml.Shapes.Rectangle
+            {
+                Fill = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Color.FromArgb(255, (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255))),
+                Opacity = .25,
+                Width = pos.Width,
+                Height = pos.Height
+            };
+
+            var tt = new ToolTip { Content = $"{index.FormatedDate} ({index.FormatedType}): {index.District}\n{index.Notes}" };
+            ToolTipService.SetToolTip(btn, tt);
+
+            imageCanvas.Children.Add(btn);
+            Canvas.SetTop(btn, pos.X);
+            Canvas.SetLeft(btn, pos.Y);
+        }
+        #endregion
     }
 
+    public class Index : GeneaGrab.Index
+    {
+        public string FormatedDate => Date.ToString("d");
+        public string FormatedType
+        {
+            get
+            {
+                var typeName = Enum.GetName(typeof(RegistryType), Type);
+                return Data.Translate($"Registry/Type/{typeName}", typeName);
+            }
+        }
+    }
     public class PageList
     {
         public static implicit operator PageList(RPage page) => new PageList { Page = page }.Refresh();

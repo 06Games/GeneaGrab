@@ -13,6 +13,13 @@ namespace GeneaGrab
         Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress);
         Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress);
         Task<string> Ark(Registry Registry, RPage page);
+
+        bool IndexSupport { get; }
+    }
+    public interface IndexAPI
+    {
+        Task<IEnumerable<Index>> GetIndex(Registry Registry, RPage page);
+        Task AddIndex(Registry Registry, RPage page, Index index);
     }
 
     /// <summary>Data on the registry provider</summary>

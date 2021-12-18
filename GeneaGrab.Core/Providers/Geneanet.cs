@@ -27,6 +27,7 @@ namespace GeneaGrab.Providers
             return true;
         }
 
+        #region Infos
         public async Task<RegistryInfo> Infos(Uri URL)
         {
             var Registry = new Registry(Data.Providers["Geneanet"]) { URL = URL.OriginalString };
@@ -101,7 +102,9 @@ namespace GeneaGrab.Providers
 
             return (types, location, note ?? notes);
         }
+        #endregion
 
+        #region Page
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.URL}/{Page.Number}");
         public Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0, progress);
         public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page) * 0.75F, progress);
@@ -147,5 +150,6 @@ namespace GeneaGrab.Providers
             await Data.SaveImage(Registry, current).ConfigureAwait(false);
             return current;
         }
+        #endregion
     }
 }

@@ -11,6 +11,8 @@ namespace GeneaGrab.Providers
 {
     public class AD06 : ProviderAPI
     {
+        public bool IndexSupport => false;
+
         readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS", "RP" };
         delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry);
         readonly Dictionary<string, Service> Appli = new Dictionary<string, Service> {

@@ -1,5 +1,4 @@
-﻿using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -9,6 +8,8 @@ namespace GeneaGrab.Providers
 {
     public class CG06 : ProviderAPI
     {
+        public bool IndexSupport => false;
+
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
             info = null;
