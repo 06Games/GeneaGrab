@@ -160,7 +160,7 @@ namespace GeneaGrab.Views
             SetInfo(Info_RegistryType, Info.Registry?.TypeToString);
             SetInfo(Info_RegistryDate, Info.Registry?.Dates);
             SetInfo(Info_RegistryNotes, Info.Registry?.Notes);
-            SetInfo(Info_RegistryID, Info.Registry?.ID);
+            SetInfo(Info_RegistryID, Info.Registry?.CallNumber ?? Info.Registry?.ID);
             void SetInfo(TextBlock block, string text)
             {
                 block.Text = text ?? "";

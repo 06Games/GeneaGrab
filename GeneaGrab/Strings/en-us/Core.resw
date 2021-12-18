@@ -121,6 +121,10 @@
     <value>Alpes-Maritimes Departmental Archives</value>
     <comment>departement06.fr</comment>
   </data>
+  <data name="Provider.AD79-86" xml:space="preserve">
+    <value>Departmental Archives of Deux-Sèvres and Vienne</value>
+    <comment>archives-deux-sevres-vienne.fr</comment>
+  </data>
   <data name="Provider.Antenati" xml:space="preserve">
     <value>Antenati</value>
     <comment>antenati.san.beniculturali.it</comment>

@@ -44,7 +44,7 @@ namespace GeneaGrab.IIIF
         internal Canvas(JToken canvas)
         {
             Id = canvas.Value<string>("@id");
-            Label = canvas.Value<string>("label");
+            Label = canvas.Value<string>("label") ?? canvas.Value<string>("@label");
             Ark = canvas.Value<string>("ligeoPermalink");
             Thumbnail = canvas["thumbnail"].HasValues ? canvas["thumbnail"].Value<string>("@id") : canvas.Value<string>("thumbnail");
             Images = canvas["images"].Select(s => new Image(s));

@@ -41,8 +41,8 @@ namespace GeneaGrab.Providers
             }).ToArray();
 
             var dates = iiif.MetaData["Datazione"].Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
-            Registry.From = DateTime.Parse(dates[0]);
-            Registry.To = DateTime.Parse(dates[1]);
+            Registry.From = Data.ParseDate(dates[0]);
+            Registry.To = Data.ParseDate(dates[1]);
             Registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
             Registry.Location = iiif.MetaData["Contesto archivistico"].Replace(" > ", ", ");
             Registry.ArkURL = Regex.Match(iiif.MetaData["Vedi il registro"], "<a .*>(?<url>.*)</a>").Groups["url"]?.Value;

@@ -18,6 +18,7 @@ namespace GeneaGrab
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string DistrictID { get; set; }
 
         public string ID { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string CallNumber { get; set; }
         public string URL { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string ArkURL { get; set; }
         [JsonProperty(ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))] public IEnumerable<RegistryType> Types { get; set; } = Array.Empty<RegistryType>();
