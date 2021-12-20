@@ -2,10 +2,10 @@
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/06Games/GeneaGrab?include_prereleases)](https://github.com/06Games/GeneaGrab/releases/latest)  
 **GeneaGrab** is a tool for downloading and managing digitised registers available on the websites of departmental archives.
 
-## Supported providers :
+## Supported providers
 ### France
-* [Geneanet](https://www.geneanet.org/)
-* [Archives départementales des Alpes-Maritimes](https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html)
-* [Archives départementales des Deux-Sèvres et de la Vienne](https://archives-deux-sevres-vienne.fr/)
+  * [Geneanet](https://www.geneanet.org/)
+  * [Archives départementales des Alpes-Maritimes](https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html)
+  * [Archives départementales des Deux-Sèvres et de la Vienne](https://archives-deux-sevres-vienne.fr/)
 ### Italy
-* [Antenati](https://www.antenati.san.beniculturali.it/)
+  * [Antenati](https://www.antenati.san.beniculturali.it/)
