@@ -44,7 +44,9 @@ namespace GeneaGrab.Providers
             Registry.From = Data.ParseDate(dates[0]);
             Registry.To = Data.ParseDate(dates[1]);
             Registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
-            Registry.Location = iiif.MetaData["Contesto archivistico"].Replace(" > ", ", ");
+            var location = iiif.MetaData["Contesto archivistico"].Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries);
+            Registry.Location = location.Last();
+            Registry.LocationDetails = location.Take(location.Length - 1).ToArray();
             Registry.ArkURL = Regex.Match(iiif.MetaData["Vedi il registro"], "<a .*>(?<url>.*)</a>").Groups["url"]?.Value;
 
             Data.AddOrUpdate(Data.Providers["Antenati"].Registries, Registry.ID, Registry);

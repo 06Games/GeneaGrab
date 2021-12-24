@@ -12,6 +12,7 @@ namespace GeneaGrab
         public Registry(Provider provider) => ProviderID = provider.ID;
         public string ProviderID { get; set; }
         [JsonIgnore] public Provider Provider => Data.Providers[ProviderID];
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string[] LocationDetails { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Location { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string LocationID { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string District { get; set; }

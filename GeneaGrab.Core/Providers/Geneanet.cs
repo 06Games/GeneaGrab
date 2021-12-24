@@ -15,7 +15,7 @@ namespace GeneaGrab.Providers
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
             info = null;
-            if (URL.Host != "www.geneanet.org" || !URL.AbsolutePath.StartsWith("/archives")) return false;
+            if (URL.Host != "www.geneanet.org" || !URL.AbsolutePath.StartsWith("/registres/view")) return false;
 
             var regex = Regex.Match(URL.OriginalString, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
             info = new RegistryInfo
@@ -37,14 +37,15 @@ namespace GeneaGrab.Providers
             if (string.IsNullOrEmpty(Registry.ID)) return null;
 
             var client = new HttpClient();
-            string pages = await client.GetStringAsync($"https://www.geneanet.org/archives/registres/api/?idcollection={Registry.ID}");
+            string pages = await client.GetStringAsync($"https://www.geneanet.org/registres/api/images/{Registry.ID}");
 
-            Registry.URL = $"https://www.geneanet.org/archives/registres/view/{Registry.ID}";
+            Registry.URL = $"https://www.geneanet.org/registres/view/{Registry.ID}";
             string page = await client.GetStringAsync(Registry.URL);
-            var infos = Regex.Match(page, "<h3>(?<location>.*)\\(.*\\| (?<from>.*) - (?<to>.*)<\\/h3>\\n.*<div class=\"note\">(?<note>(\\n\\s*.*)*?)\\n\\s*<\\/div>\\n\\s*<p class=\"noteShort\">"); //https://regex101.com/r/3Ou7DP/1
+            var infos = Regex.Match(page, "Informations sur le document.*?<p>(\\[.*\\] - )?(?<location>.*) \\((?<locationDetails>.*?)\\) - (?<globalType>.*?)( \\((?<type>.*?)\\))?( - .*)? *\\| (?<from>.*) - (?<to>.*?)<\\/p>.*?<p>(?<cote>.*)</p>.*<p>(?<notaire>.*)</p>.*<p class=\\\"no-margin-bottom\\\">(?<betterType>.*?)(\\..*| -.*)?</p>.*<p>(?<note>.*)</p>.*<strong>Lien permanent : </strong>", RegexOptions.Multiline | RegexOptions.Singleline); //https://regex101.com/r/3Ou7DP/4
             Registry.Location = Registry.LocationID = infos.Groups["location"].Value.Trim(' ');
+            Registry.LocationDetails = infos.Groups["locationDetails"]?.Value.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Reverse().ToArray() ?? new string[0];
 
-            var notes = TryParseNotes(infos.Groups["note"].Value.Replace("\n", "").Replace("\r", ""));
+            var notes = TryParseNotes(page, infos);
             Registry.Types = notes.types;
             Registry.Notes = notes.notes;
             Registry.District = Registry.DistrictID = string.IsNullOrWhiteSpace(notes.location) ? null : notes.location;
@@ -54,23 +55,24 @@ namespace GeneaGrab.Providers
             Registry.Pages = JObject.Parse($"{{results: {pages}}}").Value<JArray>("results").Select(p => new RPage { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p);
 
-            var marqueurs = Regex.Matches(page, "<option value=\\\"(?<index>\\d*)\\\" id=\\\".*\\\" ?>(?<year>\\d*)-(?<month>\\d*)-(?<type>.*)<\\/option>");
-            foreach (var pageMarqueurs in marqueurs.Cast<Match>().GroupBy(m => m.Groups["index"].Value))
+            // TODO: Necessite un token
+            /* string marqueursPage = await client.GetStringAsync($"https://www.geneanet.org/registres/api/tool-panel/marqueur_date/view/{Registry.ID}/{_p}?lang=fr");
+            var marqueurs = Regex.Matches(marqueursPage.Replace("\t", "").Replace("\n", "").Replace("\r", ""), "<option *value=\\\"(?<year>\\d*)-(?<month>\\d*)-(?<type>.)\\\" *data-redirect-url=\\\".*?\\/(?<page>\\d*)\\\" *>"); //https://regex101.com/r/t6l2HF/1
+            foreach (var pageMarqueurs in marqueurs.Cast<Match>().GroupBy(m => m.Groups["page"].Value))
             {
                 if (!int.TryParse(pageMarqueurs.Key ?? "0", out int i) || i < 1) continue;
                 Registry.Pages[i - 1].Notes = string.Join(" - ", pageMarqueurs.Select(marqueur => marqueur.Groups["year"].Value)) + "\n\n"
                                             + string.Join("\n", pageMarqueurs.Select(marqueur => $"{marqueur.Groups["month"]}/{marqueur.Groups["year"]} ({marqueur.Groups["type"]})"));
-            }
+            } */
 
             Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
             return new RegistryInfo { ProviderID = "Geneanet", RegistryID = Registry.ID, PageNumber = _p };
         }
-        static (List<RegistryType> types, string location, string notes) TryParseNotes(string notes)
+        static (List<RegistryType> types, string location, string notes) TryParseNotes(string page, Match infos)
         {
             var types = new List<RegistryType>();
-            var typesMatch = Regex.Match(notes, "((?<globalType>.*) - .* : )?(?<type>.+?)( - (?<betterType>.*?)(\\..*| -.*)?)?<div class=\\\"analyse\\\">.*<\\/div>"); //https://regex101.com/r/SE97Xj/3
-            var global = (typesMatch.Groups["globalType"] ?? typesMatch.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
-            foreach (var t in (typesMatch.Groups["betterType"] ?? typesMatch.Groups["type"])?.Value.Split(','))
+            var global = (infos.Groups["globalType"] ?? infos.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
+            foreach (var t in (infos.Groups["betterType"] ?? infos.Groups["type"])?.Value.Split(','))
                 if (TryGetType(t.Trim(' ').ToLowerInvariant(), out var type)) types.Add(type);
 
             bool TryGetType(string type, out RegistryType t)
@@ -97,10 +99,10 @@ namespace GeneaGrab.Providers
                 return true;
             }
 
-            var location = Regex.Match(notes, ".*Paroisse de (?<location>.*)\\.|-|<.*").Groups["location"]?.Value;
-            var note = Regex.Match(notes, ".*<div class=\"analyse\">(?<notes>.+)<\\/div>").Groups["notes"]?.Value;
+            var location = Regex.Match(page, "Paroisse de (?<location>.*?)(\\.|-|<)").Groups["location"]?.Value;
+            var note = infos.Groups["notes"]?.Value;
 
-            return (types, location, note ?? notes);
+            return (types, location, note);
         }
         #endregion
 
@@ -115,17 +117,12 @@ namespace GeneaGrab.Providers
 
             progress?.Invoke(Progress.Unknown);
             var chemin_image = Uri.EscapeDataString($"doc/{current.URL}");
-            var baseURL = $"https://www.geneanet.org/zoomify/?path={chemin_image}/";
+            var baseURL = $"https://www.geneanet.org/viewer/zoomify/api/{chemin_image}/";
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0");
 
             if (!current.TileSize.HasValue)
-            {
-                var args = await Zoomify.ImageData(baseURL, client);
-                current.Width = args.w;
-                current.Height = args.h;
-                current.TileSize = args.tileSize;
-            }
+                (current.Width, current.Height, current.TileSize) = await Zoomify.ImageData(baseURL, client);
 
             if (current.MaxZoom == -1) current.MaxZoom = Zoomify.CalculateIndex(current);
             current.Zoom = zoom < current.MaxZoom ? (int)Math.Ceiling(zoom) : current.MaxZoom;
