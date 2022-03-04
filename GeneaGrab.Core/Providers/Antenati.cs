@@ -50,7 +50,7 @@ namespace GeneaGrab.Providers
             Registry.ArkURL = Regex.Match(iiif.MetaData["Vedi il registro"], "<a .*>(?<url>.*)</a>").Groups["url"]?.Value;
 
             Data.AddOrUpdate(Data.Providers["Antenati"].Registries, Registry.ID, Registry);
-            return new RegistryInfo { ProviderID = "Antenati", RegistryID = Registry.ID, PageNumber = 1 };
+            return new RegistryInfo(Registry) { PageNumber = 1 };
         }
         IEnumerable<RegistryType> ParseTypes(string[] types)
         {

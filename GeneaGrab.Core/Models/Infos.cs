@@ -9,15 +9,22 @@ namespace GeneaGrab
 {
     public class RegistryInfo : IEquatable<RegistryInfo>
     {
-        public RegistryInfo() { }
-        public RegistryInfo(Registry r) { ProviderID = r.ProviderID; RegistryID = r.ID; }
+        public RegistryInfo() { PageNumber = Registry?.Pages?.FirstOrDefault()?.Number ?? 1; }
+        public RegistryInfo(Registry r)
+        {
+            ProviderID = r.ProviderID;
+            RegistryID = r.ID;
+            PageNumber = Registry?.Pages?.FirstOrDefault()?.Number ?? 1;
+        }
 
         public string ProviderID;
-        public Provider Provider => Data.Providers.TryGetValue(ProviderID, out var p) ? p : null;
+        public Provider Provider => ProviderID is null ? null : (Data.Providers.TryGetValue(ProviderID, out var p) ? p : null);
         public string RegistryID;
-        public Registry Registry => Provider.Registries.TryGetValue(RegistryID, out var r) ? r : null;
-        public int PageNumber = 1;
-        public RPage Page => Registry.Pages.ElementAtOrDefault(PageNumber - 1) ?? Registry.Pages.FirstOrDefault();
+        public Registry Registry => RegistryID is null ? null : (Provider.Registries.TryGetValue(RegistryID, out var r) ? r : null);
+        public int PageNumber;
+        public int PageIndex => Array.IndexOf(Registry.Pages, Page);
+        public RPage Page => GetPage(PageNumber);
+        public RPage GetPage(int number) => Registry.Pages.FirstOrDefault(page => page.Number == number);
 
 
         public bool Equals(RegistryInfo other) => ProviderID == other?.ProviderID && RegistryID == other?.RegistryID;
@@ -49,6 +56,7 @@ namespace GeneaGrab
                     new Provider(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" },
                     new Provider(new AD06(), "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
                     new Provider(new CG06(), "CG06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
+                    new Provider(new NiceHistorique(), "NiceHistorique") { URL = "http://www.nicehistorique.org/" },
                     new Provider(new AD79_86(), "AD79-86") { URL = "https://archives-deux-sevres-vienne.fr/" },
 
                     // Italy

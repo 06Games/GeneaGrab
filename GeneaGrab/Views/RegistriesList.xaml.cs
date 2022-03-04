@@ -60,7 +60,7 @@ namespace GeneaGrab.Views
             var data = e.InvokedItem as RegistriesTreeStructure;
             var node = sender.NodeFromContainer(sender.ContainerFromItem(data));
             if (node.HasChildren) node.IsExpanded = !node.IsExpanded;
-            else if (data.Register != null) Frame.Navigate(typeof(Registry), new RegistryInfo { ProviderID = provider.ID, RegistryID = data.Register.ID });
+            else if (data.Register != null) Frame.Navigate(typeof(Registry), new RegistryInfo(data.Register));
         }
     }
 

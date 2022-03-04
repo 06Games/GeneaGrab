@@ -19,6 +19,10 @@
         Baptism,
         /// <summary>Table of baptismal records</summary>
         BaptismTable,
+        /// <summary>Communions records</summary>
+        Communion,
+        /// <summary>Confirmation records</summary>
+        Confirmation,
         /// <summary>Banns of marriage</summary>
         Banns,
         /// <summary>Marriage certificates</summary>
@@ -54,6 +58,16 @@
 
         #endregion
 
+        #region Publications
+
+        /// <summary>Work that is not intended to be published on a regular basis</summary>
+        Book,
+        /// <summary>A publication, usually published daily or weekly, containing news and other articles</summary>
+        Newspaper,
+        /// <summary>A publication issued regularly, but less frequently than daily</summary>
+        Periodical,
+
+        #endregion
 
         #region Cadastre
 

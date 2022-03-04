@@ -137,6 +137,10 @@
     <value>Geneanet</value>
     <comment>geneanet.org</comment>
   </data>
+  <data name="Provider.NiceHistorique" xml:space="preserve">
+    <value>Nice Historique</value>
+    <comment>www.nicehistorique.org</comment>
+  </data>
   <data name="Registry.Name" xml:space="preserve">
     <value>Registry</value>
   </data>
@@ -159,6 +163,10 @@
   <data name="Registry.Type.BirthTable" xml:space="preserve">
     <value>Table of births</value>
     <comment>Table of birth certificates</comment>
+  </data>
+  <data name="Registry.Type.Book" xml:space="preserve">
+    <value>Book</value>
+    <comment>Work that is not intended to be published on a regular basis</comment>
   </data>
   <data name="Registry.Type.Burial" xml:space="preserve">
     <value>Burials</value>
@@ -188,6 +196,14 @@
     <value>Census</value>
     <comment>Census of the population</comment>
   </data>
+  <data name="Registry.Type.Communion" xml:space="preserve">
+    <value>Communions</value>
+    <comment>Communion registry</comment>
+  </data>
+  <data name="Registry.Type.Confirmation" xml:space="preserve">
+    <value>Confirmations</value>
+    <comment>Confirmation registry</comment>
+  </data>
   <data name="Registry.Type.Death" xml:space="preserve">
     <value>Deaths</value>
     <comment>Death certificates</comment>
@@ -212,6 +228,10 @@
     <value>Military</value>
     <comment>Military numbers</comment>
   </data>
+  <data name="Registry.Type.Newspaper" xml:space="preserve">
+    <value>Newspaper</value>
+    <comment>A publication, usually published daily or weekly, containing news and other articles</comment>
+  </data>
   <data name="Registry.Type.Notarial" xml:space="preserve">
     <value>Notarial deeds</value>
     <comment>Notarial deeds</comment>
@@ -219,5 +239,9 @@
   <data name="Registry.Type.Other" xml:space="preserve">
     <value>Other</value>
     <comment>Uncategorized</comment>
+  </data>
+  <data name="Registry.Type.Periodical" xml:space="preserve">
+    <value>Periodical</value>
+    <comment>A publication issued regularly, but less frequently than daily</comment>
   </data>
 </root>

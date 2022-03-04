@@ -54,7 +54,7 @@ namespace GeneaGrab.Providers
             Registry.ArkURL = sequence.Id;
 
             Data.AddOrUpdate(Data.Providers["AD79-86"].Registries, Registry.ID, Registry);
-            return new RegistryInfo { ProviderID = "AD79-86", RegistryID = Registry.ID, PageNumber = 1 };
+            return new RegistryInfo(Registry) { PageNumber = 1 };
         }
         string GenerateNotes(Dictionary<string, string> MetaData)
         {

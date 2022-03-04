@@ -66,7 +66,7 @@ namespace GeneaGrab.Providers
             } */
 
             Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
-            return new RegistryInfo { ProviderID = "Geneanet", RegistryID = Registry.ID, PageNumber = _p };
+            return new RegistryInfo(Registry) { PageNumber = _p };
         }
         static (List<RegistryType> types, string location, string notes) TryParseNotes(string page, Match infos)
         {
@@ -80,6 +80,8 @@ namespace GeneaGrab.Providers
                 var civilStatus = global.Contains("état civil");
                 if (type.Contains("naissances")) t = civilStatus ? RegistryType.Birth : RegistryType.BirthTable;
                 else if (type.Contains("baptemes")) t = RegistryType.Baptism;
+                else if (type.Contains("communions")) t = RegistryType.Communion;
+                else if (type.Contains("confirmations")) t = RegistryType.Confirmation;
                 else if (type.Contains("promesses de mariage")) t = RegistryType.Banns;
                 else if (type.Contains("mariages")) t = civilStatus ? RegistryType.Marriage : RegistryType.MarriageTable;
                 else if (type.Contains("décès")) t = civilStatus ? RegistryType.Death : RegistryType.DeathTable;

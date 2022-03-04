@@ -36,7 +36,7 @@
         <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Padding="15">
             <muxc:NumberBox x:Name="PageNumber" PlaceholderText="Page" Minimum="1" Width="90" Height="32.5"></muxc:NumberBox>
             <TextBlock x:Name="PageTotal" Text="/ 1" Margin="100 6.25 0 0" Height="20" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
-            <ListView x:Name="PageList" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages}" ItemClick="ChangePage"
+            <ListView x:Name="PageList" ItemContainerTransitions="{x:Null}" IsItemClickEnabled="True" ItemsSource="{x:Bind Pages.Values}" ItemClick="ChangePage"
                       ScrollViewer.HorizontalScrollMode="Enabled" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                       RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True" Margin="0 45 0 0 ">
                 <ListView.ItemsPanel>

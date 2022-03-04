@@ -54,7 +54,7 @@ namespace GeneaGrab.Providers
             if (!int.TryParse(query["page"], out var _p)) _p = 1;
 
             Data.AddOrUpdate(Data.Providers["AD06"].Registries, Registry.ID, Registry);
-            return new RegistryInfo { ProviderID = "AD06", RegistryID = Registry.ID, PageNumber = _p };
+            return new RegistryInfo(Registry) { PageNumber = _p };
         }
 
         #region Services

@@ -11,7 +11,7 @@ namespace GeneaGrab
         public int Page { get; set; }
         public System.Drawing.Rectangle Position { get; set; }
 
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
         public RegistryType Type { get; set; }
         public string District { get; set; }
 

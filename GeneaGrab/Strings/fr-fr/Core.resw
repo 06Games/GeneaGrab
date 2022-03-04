@@ -137,6 +137,10 @@
     <value>Geneanet</value>
     <comment>geneanet.org</comment>
   </data>
+  <data name="Provider.NiceHistorique" xml:space="preserve">
+    <value>Nice Historique</value>
+    <comment>www.nicehistorique.org</comment>
+  </data>
   <data name="Registry.Name" xml:space="preserve">
     <value>Registre</value>
   </data>
@@ -159,6 +163,10 @@
   <data name="Registry.Type.BirthTable" xml:space="preserve">
     <value>Table des naissances</value>
     <comment>Table des actes de naissance</comment>
+  </data>
+  <data name="Registry.Type.Book" xml:space="preserve">
+    <value>Livre</value>
+    <comment>Ouvrage qui n'est pas destiné à être publié régulièrement</comment>
   </data>
   <data name="Registry.Type.Burial" xml:space="preserve">
     <value>Sépultures</value>
@@ -188,6 +196,14 @@
     <value>Recensement</value>
     <comment>Recensement de la population</comment>
   </data>
+  <data name="Registry.Type.Communion" xml:space="preserve">
+    <value>Communions</value>
+    <comment>Registre des communions</comment>
+  </data>
+  <data name="Registry.Type.Confirmation" xml:space="preserve">
+    <value>Confirmations</value>
+    <comment>Registre des confirmations</comment>
+  </data>
   <data name="Registry.Type.Death" xml:space="preserve">
     <value>Décès</value>
     <comment>Actes de décès</comment>
@@ -212,6 +228,10 @@
     <value>Militaire</value>
     <comment>Matricules militaires</comment>
   </data>
+  <data name="Registry.Type.Newspaper" xml:space="preserve">
+    <value>Journal</value>
+    <comment>Feuille quotidienne ou périodique donnant les nouvelles et les accompagnant ou non d’articles raisonnés</comment>
+  </data>
   <data name="Registry.Type.Notarial" xml:space="preserve">
     <value>Actes notariés</value>
     <comment>Actes notariés</comment>
@@ -219,5 +239,9 @@
   <data name="Registry.Type.Other" xml:space="preserve">
     <value>Autres</value>
     <comment>Hors catégorie</comment>
+  </data>
+  <data name="Registry.Type.Periodical" xml:space="preserve">
+    <value>Périodique</value>
+    <comment>Qualifie un ouvrage ou un écrit qui paraît par livraisons successives, dans des temps fixes et réglés.</comment>
   </data>
 </root>

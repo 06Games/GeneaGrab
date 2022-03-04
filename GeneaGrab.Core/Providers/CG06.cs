@@ -34,6 +34,7 @@ namespace GeneaGrab.Providers
             {
                 URL = URL.OriginalString,
                 ID = form["c"]?.Value,
+                CallNumber = form["c"]?.Value,
                 From = Data.ParseDate(body["from"]?.Value),
                 To = Data.ParseDate(body["to"]?.Value),
                 Pages = form["l"]?.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select((p, i) => new RPage { Number = i + 1, URL = p }).ToArray()
@@ -73,7 +74,7 @@ namespace GeneaGrab.Providers
             }
 
             Data.AddOrUpdate(Data.Providers["CG06"].Registries, registry.ID, registry);
-            return new RegistryInfo { ProviderID = "CG06", RegistryID = registry.ID, PageNumber = 1 };
+            return new RegistryInfo(registry) { PageNumber = 1 };
         }
 
 
