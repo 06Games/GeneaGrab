@@ -29,14 +29,14 @@ namespace GeneaGrab
                 var folder = await dataFolder.CreateFolder(provider.Key);
                 foreach (var reg in await folder.CreateFileQueryWithOptions(queryOptions).GetFilesAsync())
                 {
-                    var kv = JsonConvert.DeserializeObject<KeyValuePair<string, Registry>>(await (await reg.GetParentAsync()).ReadFile(reg.Name));
-                    provider.Value.Registries.Add(kv.Key, kv.Value);
+                    var registry = JsonConvert.DeserializeObject<Registry>(await (await reg.GetParentAsync()).ReadFile(reg.Name));
+                    if (registry != null) provider.Value.Registries.Add(registry.ID, registry);
+                    else Log.Warning("Registry file is empty", registry);
                 }
             }
             Log.Information("Data loaded");
             Loaded = true;
         }
-        public static void SaveData() => Task.Run(SaveDataAsync);
         public static async Task SaveDataAsync()
         {
             try
@@ -45,11 +45,19 @@ namespace GeneaGrab
                 foreach (var provider in Data.Providers)
                 {
                     var folder = await dataFolder.CreateFolder(provider.Key);
-                    foreach (var registry in provider.Value.Registries) await folder.CreateFolderPath(registry.Value.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+                    foreach (var registry in provider.Value.Registries) await SaveRegistryAsync(registry.Value, folder);
                 }
             }
             catch (Exception e) { Log.Error(e.Message, e); }
         }
+        public static async Task SaveRegistryAsync(Registry registry)
+        {
+            var dataFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
+            var folder = await dataFolder.CreateFolder(registry.ProviderID);
+            await SaveRegistryAsync(registry, folder);
+        }
+        public static Task SaveRegistryAsync(Registry registry, Windows.Storage.StorageFolder folder) => folder.CreateFolderPath(registry.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+
 
         public static async Task<Windows.Storage.StorageFile> GetFile(Registry registry, RPage page, bool write = false)
         {

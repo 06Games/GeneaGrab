@@ -178,7 +178,7 @@ namespace GeneaGrab.Views
             PageList.ScrollIntoView(PageList.SelectedItem);
             imagePanel.Reset();
             OnPropertyChanged(nameof(image));
-            LocalData.SaveData();
+            Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));
         }
 
         private async void Download(object sender, RoutedEventArgs e) => await Download().ConfigureAwait(false);
