@@ -17,10 +17,12 @@ namespace GeneaGrab.IIIF
         internal Manifest(JObject manifest) => Parse(manifest);
         private void Parse(JObject manifest)
         {
+            Json = manifest;
             MetaData = manifest["metadata"].ToDictionary(m => m.Value<string>("label"), m => m.Value<string>("value"));
             Sequences = manifest["sequences"].Select(s => new Sequence(s));
         }
 
+        public JToken Json { get; private set; }
         public Dictionary<string, string> MetaData { get; private set; }
         public IEnumerable<Sequence> Sequences { get; private set; }
     }
@@ -29,11 +31,13 @@ namespace GeneaGrab.IIIF
     {
         internal Sequence(JToken sequence)
         {
+            Json = sequence;
             Id = sequence.Value<string>("@id");
             Label = sequence.Value<string>("@label");
             Canvases = sequence["canvases"].Select(s => new Canvas(s));
         }
 
+        public JToken Json { get; }
         public string Id { get; }
         public string Label { get; }
         public IEnumerable<Canvas> Canvases { get; }
@@ -43,6 +47,7 @@ namespace GeneaGrab.IIIF
     {
         internal Canvas(JToken canvas)
         {
+            Json = canvas;
             Id = canvas.Value<string>("@id");
             Label = canvas.Value<string>("label") ?? canvas.Value<string>("@label");
             Ark = canvas.Value<string>("ligeoPermalink");
@@ -50,6 +55,7 @@ namespace GeneaGrab.IIIF
             Images = canvas["images"].Select(s => new Image(s));
         }
 
+        public JToken Json { get; }
         public string Id { get; }
         public string Label { get; }
         public string Ark { get; }
@@ -61,11 +67,13 @@ namespace GeneaGrab.IIIF
     {
         internal Image(JToken image)
         {
+            Json = image;
             Id = image.Value<string>("@id");
             Format = image["resource"].Value<string>("format");
             ServiceId = image["resource"]["service"].Value<string>("@id");
         }
 
+        public JToken Json { get; }
         public string Id { get; }
         public string Format { get; }
         public string ServiceId { get; }

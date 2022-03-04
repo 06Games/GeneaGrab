@@ -40,7 +40,9 @@ namespace GeneaGrab.Providers
             Registry.Pages = sequence.Canvases.Select(p => new RPage
             {
                 Number = int.Parse(p.Label),
-                URL = p.Images.First().ServiceId
+                URL = p.Images.First().ServiceId,
+                DownloadURL = p.Images.First().Id,
+                Extra = p.Json["ligeoClasseur"]
             }).ToArray();
 
             var dates = sequence.Label.Split(new[] { "- (" }, StringSplitOptions.RemoveEmptyEntries).Last().Replace(") ", "").Split('-');
@@ -84,7 +86,7 @@ namespace GeneaGrab.Providers
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            current.Image = await Image.LoadAsync(await client.GetStreamAsync(IIIF.IIIF.GenerateImageRequestUri(current.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
+            current.Image = await Image.LoadAsync(await client.GetStreamAsync(zoom == 100 ? new Uri(current.DownloadURL) : IIIF.IIIF.GenerateImageRequestUri(current.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
             current.Zoom = zoom;
             progress?.Invoke(Progress.Finished);
 

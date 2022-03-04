@@ -108,6 +108,7 @@ namespace GeneaGrab
         [JsonIgnore] public int Number { get; set; }
         public override string ToString() => Number.ToString();
         public string URL { get; set; }
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public string DownloadURL { get; set; }
         [JsonIgnore] public SixLabors.ImageSharp.Image Image { get; set; }
 
         public int Zoom { get; set; } = -1;
@@ -117,5 +118,6 @@ namespace GeneaGrab
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public int? TileSize { get; set; }
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public object Extra { get; set; }
     }
 }
