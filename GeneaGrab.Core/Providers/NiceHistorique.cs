@@ -30,12 +30,14 @@ namespace GeneaGrab.Providers
             string pageBody = await client.GetStringAsync(URL).ConfigureAwait(false);
 
             var data = Regex.Match(pageBody, "<h2>R&eacute;f&eacute;rence :  (?<title>.* (?<number>\\d*)) de l'ann&eacute;e (?<year>\\d*).*<\\/h2>").Groups;
-            var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";").Groups;
+            var date = Data.ParseDate(data["year"]?.Value);
 
+            var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";").Groups;
             Uri.TryCreate(URL, pageData["path"].Value, out var path);
             var pages = pageData["pages"].Value.Split(new[] { ", " }, StringSplitOptions.None);
 
             var pagesTable = Regex.Matches(pageBody, "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>").Cast<Match>();
+
             var registry = new Registry(Data.Providers[ProviderID])
             {
                 URL = URL.OriginalString,
@@ -43,7 +45,8 @@ namespace GeneaGrab.Providers
                 ProviderID = ProviderID,
                 ID = data["number"]?.Value,
                 CallNumber = System.Web.HttpUtility.HtmlDecode(data["title"]?.Value),
-                From = Data.ParseDate(data["year"]?.Value),
+                From = date,
+                To = date,
                 Pages = pagesTable.Select(page =>
                 {
                     var pData = System.Web.HttpUtility.UrlDecode(pages[int.Parse(page.Groups["index"].Value) - 1]).Trim('"', ' ');
