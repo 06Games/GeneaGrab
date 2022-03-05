@@ -30,7 +30,7 @@ namespace GeneaGrab.Providers
             string pageBody = await client.GetStringAsync(URL).ConfigureAwait(false);
 
             var data = Regex.Match(pageBody, "<h2>R&eacute;f&eacute;rence :  (?<title>.* (?<number>\\d*)) de l'ann&eacute;e (?<year>\\d*).*<\\/h2>").Groups;
-            var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*\");").Groups;
+            var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";").Groups;
 
             Uri.TryCreate(URL, pageData["path"].Value, out var path);
             var pages = pageData["pages"].Value.Split(new[] { ", " }, StringSplitOptions.None);
@@ -46,7 +46,7 @@ namespace GeneaGrab.Providers
                 From = Data.ParseDate(data["year"]?.Value),
                 Pages = pagesTable.Select(page =>
                 {
-                    var pData = pages[int.Parse(page.Groups["index"].Value) - 1].Trim('"', '\"', ' ');
+                    var pData = System.Web.HttpUtility.UrlDecode(pages[int.Parse(page.Groups["index"].Value) - 1]).Trim('"', ' ');
                     return new RPage {
                         Number = int.Parse(page.Groups["number"].Value),
                         URL = $"{path.AbsoluteUri}{pData}"
