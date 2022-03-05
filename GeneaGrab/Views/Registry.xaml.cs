@@ -53,12 +53,13 @@ namespace GeneaGrab.Views
             InitializeComponent();
             PageNumber.ValueChanged += async (ns, ne) =>
             {
-                if (Pages.ContainsKey((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
+                if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
             };
             PageNotes.TextChanged += (s, e) =>
             {
-                if (Pages.ContainsKey(Info.PageNumber)) Info.Page.Notes = string.IsNullOrWhiteSpace(PageNotes.Text) ? null : PageNotes.Text;
-                Pages[Info.PageNumber] = Pages[Info.PageNumber].Refresh();
+                if (PageNumbers.Contains(Info.PageNumber)) Info.Page.Notes = string.IsNullOrWhiteSpace(PageNotes.Text) ? null : PageNotes.Text;
+                var index = PageNumbers.IndexOf(Info.PageNumber);
+                Pages[index] = Pages[index].Refresh();
             };
         }
 
@@ -73,10 +74,12 @@ namespace GeneaGrab.Views
                 ShellPage.UpdateSelectedTitle();
                 if (inRam) return;
 
+                PageNumbers.Clear();
                 Pages.Clear();
                 PageNumber.Minimum = Info.Registry.Pages.Min(p => p.Number);
                 PageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
-                foreach (var page in Info.Registry.Pages) Pages.Add(page.Number, page);
+                PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
+                foreach (var page in Info.Registry.Pages) Pages.Add(page);
                 _ = Task.Run(async () =>
                 {
                     await LoadImage(Info.PageNumber, (page) => Info.Provider.API.Preview(Info.Registry, page, TrackProgress)).ContinueWith(async (t) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView));
@@ -84,14 +87,15 @@ namespace GeneaGrab.Views
                     List<Task> tasks = new List<Task>();
                     foreach (var page in Pages.ToList())
                     {
-                        if (page.Key == Info.PageNumber) continue;
+                        if (page.Number == Info.PageNumber) continue;
                         if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                        tasks.Add(LoadImage(page.Key, (_page) => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
+                        tasks.Add(LoadImage(page.Number, (_page) => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
                     }
                     await Task.WhenAll(tasks).ConfigureAwait(false);
 
-                    async Task LoadImage(int i, Func<RPage, Task<RPage>> func)
+                    async Task LoadImage(int number, Func<RPage, Task<RPage>> func)
                     {
+                        var i = PageNumbers.IndexOf(number);
                         var page = Pages[i];
                         var img = await func?.Invoke(page.Page);
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
@@ -110,7 +114,8 @@ namespace GeneaGrab.Views
             });
         }
 
-        public Dictionary<int, PageList> Pages = new Dictionary<int, PageList>();
+        public List<int> PageNumbers { get; set; } = new List<int>();
+        public ObservableCollection<PageList> Pages = new ObservableCollection<PageList> ();
         public async Task<(bool success, bool inRam)> LoadRegistry(object Parameter)
         {
             var inRam = false;
@@ -148,7 +153,7 @@ namespace GeneaGrab.Views
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                 {
                     page.Thumbnail = page.Page.Image.ToImageSource();
-                    Pages[page.Number] = page;
+                    Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
             await GetIndex();
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView);
