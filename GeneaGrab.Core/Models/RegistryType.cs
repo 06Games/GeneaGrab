@@ -53,8 +53,16 @@
 
         #region Notarial
 
-        /// <summary>Notarial deeds</summary>
+        /// <summary>Uncategorized notarial deeds</summary>
         Notarial,
+        /// <summary>Methodical list where the subjects are arranged in an order that makes it easy to find them</summary>
+        Catalogue,
+        /// <summary>The minutes, or official record, of a negotiation or transaction; especially a document drawn up officially which forms the legal basis for subsequent agreements based on it</summary>
+        Protocol,
+        /// <summary>Original of an authentic act kept by the authority which holds it and which cannot separate from it (notarial deed in the case of a notary, court decision in the case of a jurisdiction...)</summary>
+        Minutes,
+        /// <summary>A copy, by a notary, of an obligation, a contract, etc., or, by a court clerk, of a judgment, of a ruling, which is delivered in enforceable form and which was usually written in larger characters than the minute. Sometimes called an enforceable copy</summary>
+        Engrossments,
 
         #endregion
 

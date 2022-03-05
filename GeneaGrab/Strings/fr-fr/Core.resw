@@ -234,7 +234,7 @@
   </data>
   <data name="Registry.Type.Notarial" xml:space="preserve">
     <value>Actes notariés</value>
-    <comment>Actes notariés</comment>
+    <comment>Actes notariés non catégorisés</comment>
   </data>
   <data name="Registry.Type.Other" xml:space="preserve">
     <value>Autres</value>
@@ -243,5 +243,21 @@
   <data name="Registry.Type.Periodical" xml:space="preserve">
     <value>Périodique</value>
     <comment>Qualifie un ouvrage ou un écrit qui paraît par livraisons successives, dans des temps fixes et réglés.</comment>
+  </data>
+  <data name="Registry.Type.Protocol" xml:space="preserve">
+    <value>Protocole</value>
+    <comment>La minute, ou compte rendu officiel, d'une négociation ou d'une transaction ; en particulier, un document établi officiellement qui constitue la base juridique des accords ultérieurs fondés sur ce document.</comment>
+  </data>
+  <data name="Registry.Type.Minutes" xml:space="preserve">
+    <value>Minute</value>
+    <comment>Original d'un acte authentique conservé par l'autorité qui le détient et qui ne peut s'en séparer (acte notarié dans le cas d'un notaire, décision de justice dans le cas d'une juridiction...).</comment>
+  </data>
+  <data name="Registry.Type.Engrossments" xml:space="preserve">
+    <value>Grosse</value>
+    <comment>Copie, par un notaire, d'une obligation, d'un contrat, etc., ou, par un greffier, d'un jugement, d'une décision, qui est délivrée sous forme exécutoire et qui était généralement écrite en plus gros caractères que la minute. Parfois appelée copie exécutoire</comment>
+  </data>
+  <data name="Registry.Type.Catalogue" xml:space="preserve">
+    <value>Répertoire</value>
+    <comment>Inventaire méthodique, lexique où les matières sont rangées dans un ordre qui permet de les retrouver facilement.</comment>
   </data>
 </root>
