@@ -17,7 +17,17 @@ namespace GeneaGrab.Views
     public sealed partial class Registry : Page, INotifyPropertyChanged, ITabPage, ISchemeSupport
     {
         public Symbol IconSource => Symbol.Pictures;
-        public string DynaTabHeader => Info is null ? null : $"{Info.Registry.Location ?? Info.Registry.LocationID}: {Info.Registry?.Name ?? Info.RegistryID}";
+        public string DynaTabHeader
+        {
+            get
+            {
+                if (Info is null) return null;
+                var location = Info.Registry.Location ?? Info.Registry.LocationID;
+                var registry = Info.Registry?.Name ?? Info.RegistryID;
+                if (location is null) return registry;
+                return $"{location}: {registry}";
+            }
+        }
         public string Identifier => Info?.RegistryID;
 
 
@@ -115,7 +125,7 @@ namespace GeneaGrab.Views
         }
 
         public List<int> PageNumbers { get; set; } = new List<int>();
-        public ObservableCollection<PageList> Pages = new ObservableCollection<PageList> ();
+        public ObservableCollection<PageList> Pages = new ObservableCollection<PageList>();
         public async Task<(bool success, bool inRam)> LoadRegistry(object Parameter)
         {
             var inRam = false;
@@ -196,7 +206,7 @@ namespace GeneaGrab.Views
         {
             var page = await LocalData.GetFile(Info.Registry, Info.Page);
             var options = new Windows.System.FolderLauncherOptions();
-            if(page.IsAvailable) options.ItemsToSelect.Add(page);
+            if (page.IsAvailable) options.ItemsToSelect.Add(page);
             await Windows.System.Launcher.LaunchFolderAsync(await page.GetParentAsync(), options);
         }
         private async void Ark(object sender, RoutedEventArgs e)
