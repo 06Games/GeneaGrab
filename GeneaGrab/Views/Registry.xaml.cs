@@ -196,7 +196,7 @@ namespace GeneaGrab.Views
             imageCanvas.Children.Clear();
             foreach (var index in Index.Where(i => i.Page == Info.PageNumber)) DisplayIndexRectangle(index);
 
-            image.Source = Info.Page?.Image?.ToImageSource();
+            if(img != null) image.Source = img.ToImageSource();
             PageList.SelectedIndex = Info.PageIndex;
             PageList.ScrollIntoView(PageList.SelectedItem);
             imagePanel.Reset();
