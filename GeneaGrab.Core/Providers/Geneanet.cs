@@ -150,7 +150,7 @@ namespace GeneaGrab.Providers
             foreach (var tile in tasks) current.Image = current.Image.MergeTile(tile.Key.Result, tile.Value);
 
             Data.Providers["Geneanet"].Registries[Registry.ID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Registry, current).ConfigureAwait(false);
+            await Data.SaveImage(Registry, current, false).ConfigureAwait(false);
             return current;
         }
         #endregion

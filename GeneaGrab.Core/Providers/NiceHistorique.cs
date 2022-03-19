@@ -82,7 +82,7 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.Finished);
 
             Data.Providers[ProviderID].Registries[Registry.ID].Pages[index] = page;
-            await Data.SaveImage(Registry, page);
+            await Data.SaveImage(Registry, page, false);
             return page;
         }
     }

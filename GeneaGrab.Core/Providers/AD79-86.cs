@@ -95,7 +95,7 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.Finished);
 
             Data.Providers["AD79-86"].Registries[Registry.ID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Registry, current);
+            await Data.SaveImage(Registry, current, false);
             return current;
         }
     }
