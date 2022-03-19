@@ -109,7 +109,6 @@ namespace GeneaGrab
         public override string ToString() => Number.ToString();
         public string URL { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public string DownloadURL { get; set; }
-        [JsonIgnore] public SixLabors.ImageSharp.Image Image { get; set; }
 
         public int Zoom { get; set; } = -1;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore), System.ComponentModel.DefaultValue(-1)] public int MaxZoom { get; set; } = -1;

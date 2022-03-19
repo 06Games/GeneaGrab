@@ -63,27 +63,29 @@ namespace GeneaGrab.Providers
 
 
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
-        public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<SixLabors.ImageSharp.Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            if (await Data.TryGetThumbnailFromDrive(Registry, page)) return page;
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            if (tryGet.success) return tryGet.image;
             return await GetTile(Registry, page, 0, progress);
         }
-        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
-        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
-        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress)
+        public Task<SixLabors.ImageSharp.Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
+        public Task<SixLabors.ImageSharp.Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
+        public async Task<SixLabors.ImageSharp.Image> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress)
         {
-            if (await Data.TryGetImageFromDrive(Registry, page, zoom)) return page;
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (tryGet.success) return tryGet.image;
             var index = Array.IndexOf(Registry.Pages, page);
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            page.Image = await Grabber.GetImage(page.URL, client);
+            var image =  await Grabber.GetImage(page.URL, client);
             page.Zoom = 1;
             progress?.Invoke(Progress.Finished);
 
             Data.Providers[ProviderID].Registries[Registry.ID].Pages[index] = page;
-            await Data.SaveImage(Registry, page, false);
-            return page;
+            await Data.SaveImage(Registry, page, image, false);
+            return image;
         }
     }
 }

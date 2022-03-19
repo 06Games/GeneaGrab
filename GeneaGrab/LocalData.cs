@@ -83,18 +83,17 @@ namespace GeneaGrab
                 return null;
             }
         }
-        public static async Task<string> SaveImageAsync(Registry registry, RPage page, bool thumbnail = false)
+        public static async Task<string> SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
         {
-            var thumb = await _SaveImageAsync(registry, page, true).ConfigureAwait(false);
-            if (!thumbnail) return await _SaveImageAsync(registry, page).ConfigureAwait(false);
+            var thumb = await _SaveImageAsync(registry, page, img, true).ConfigureAwait(false);
+            if (!thumbnail) return await _SaveImageAsync(registry, page, img).ConfigureAwait(false);
             else return thumb;
         }
-        private static async Task<string> _SaveImageAsync(Registry registry, RPage page, bool thumbnail = false)
+        private static async Task<string> _SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
         {
             try
             {
                 var file = await GetFile(registry, page, true, thumbnail).ConfigureAwait(false);
-                var img = page.Image;
                 if (thumbnail)
                 {
                     int w = THUMBNAIL_SIZE;

@@ -110,48 +110,51 @@ namespace GeneaGrab.Providers
 
         #region Page
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.URL}/{Page.Number}");
-        public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            if (await Data.TryGetThumbnailFromDrive(Registry, page)) return page;
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            if (tryGet.success) return tryGet.image;
             return await GetTiles(Registry, page, 0, progress);
         }
-        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page) * 0.75F, progress);
-        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page), progress);
-        public static async Task<RPage> GetTiles(Registry Registry, RPage current, double zoom, Action<Progress> progress)
+        public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page) * 0.75F, progress);
+        public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page), progress);
+        public static async Task<Image> GetTiles(Registry Registry, RPage page, double zoom, Action<Progress> progress)
         {
-            if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
-            var chemin_image = Uri.EscapeDataString($"doc/{current.URL}");
+            var chemin_image = Uri.EscapeDataString($"doc/{page.URL}");
             var baseURL = $"https://www.geneanet.org/viewer/zoomify/api/{chemin_image}/";
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0");
 
-            if (!current.TileSize.HasValue)
-                (current.Width, current.Height, current.TileSize) = await Zoomify.ImageData(baseURL, client);
+            if (!page.TileSize.HasValue)
+                (page.Width, page.Height, page.TileSize) = await Zoomify.ImageData(baseURL, client);
 
-            if (current.MaxZoom == -1) current.MaxZoom = Zoomify.CalculateIndex(current);
-            current.Zoom = zoom < current.MaxZoom ? (int)Math.Ceiling(zoom) : current.MaxZoom;
-            var (tiles, diviser) = Zoomify.NbTiles(current, current.Zoom);
+            if (page.MaxZoom == -1) page.MaxZoom = Zoomify.CalculateIndex(page);
+            page.Zoom = zoom < page.MaxZoom ? (int)Math.Ceiling(zoom) : page.MaxZoom;
+            var (tiles, diviser) = Zoomify.NbTiles(page, page.Zoom);
 
             progress?.Invoke(0);
-            if (current.Image == null) current.Image = new Image<Rgb24>(current.Width, current.Height);
+            if (tryGet.image == null) tryGet.image = new Image<Rgb24>(page.Width, page.Height);
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (int y = 0; y < tiles.Y; y++)
                 for (int x = 0; x < tiles.X; x++)
-                    tasks.Add(Grabber.GetImage($"{baseURL}TileGroup0/{current.Zoom}-{x}-{y}.jpg", client).ContinueWith((task) =>
+                    tasks.Add(Grabber.GetImage($"{baseURL}TileGroup0/{page.Zoom}-{x}-{y}.jpg", client).ContinueWith((task) =>
                     {
                         progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
                         return task.Result;
-                    }), (current.TileSize.Value, diviser, new Point(x, y)));
+                    }), (page.TileSize.Value, diviser, new Point(x, y)));
 
             await Task.WhenAll(tasks.Keys).ConfigureAwait(false);
             progress?.Invoke(Progress.Finished);
-            foreach (var tile in tasks) current.Image = current.Image.MergeTile(tile.Key.Result, tile.Value);
+            foreach (var tile in tasks) tryGet.image = tryGet.image.MergeTile(tile.Key.Result, tile.Value);
 
-            Data.Providers["Geneanet"].Registries[Registry.ID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Registry, current, false).ConfigureAwait(false);
-            return current;
+            Data.Providers["Geneanet"].Registries[Registry.ID].Pages[page.Number - 1] = page;
+            await Data.SaveImage(Registry, page, tryGet.image, false).ConfigureAwait(false);
+            return tryGet.image;
+
         }
         #endregion
     }

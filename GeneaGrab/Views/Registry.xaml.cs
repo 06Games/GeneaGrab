@@ -90,9 +90,15 @@ namespace GeneaGrab.Views
                 PageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
                 PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
                 foreach (var page in Info.Registry.Pages) Pages.Add(page);
+                SixLabors.ImageSharp.Image img = null;
                 _ = Task.Run(async () =>
                 {
-                    await LoadImage(Info.PageNumber, (page) => Info.Provider.API.Preview(Info.Registry, page, TrackProgress)).ContinueWith(async (t) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView));
+                    img = await LoadImage(Info.PageNumber, (page) => Info.Provider.API.Preview(Info.Registry, page, TrackProgress))
+                        .ContinueWith(async (t) =>
+                        {
+                            await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () => RefreshView(t.Result));
+                            return t.Result;
+                        }).Result;
 
                     List<Task> tasks = new List<Task>();
                     foreach (var page in Pages.ToList())
@@ -103,19 +109,20 @@ namespace GeneaGrab.Views
                     }
                     await Task.WhenAll(tasks).ConfigureAwait(false);
 
-                    async Task LoadImage(int number, Func<RPage, Task<RPage>> func)
+                    async Task<SixLabors.ImageSharp.Image> LoadImage(int number, Func<RPage, Task<SixLabors.ImageSharp.Image>> func)
                     {
                         var i = PageNumbers.IndexOf(number);
                         var page = Pages[i];
-                        var img = await func?.Invoke(page.Page);
+                        var thumbnail = await func?.Invoke(page.Page);
                         await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                         {
-                            page.Thumbnail = img.Image.ToImageSource();
+                            page.Thumbnail = thumbnail.ToImageSource();
                             Pages[i] = page;
                         });
+                        return thumbnail;
                     }
                 }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
-                GetIndex().ContinueWith(async (t) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView));
+                GetIndex().ContinueWith(async (t) => await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () => RefreshView(img)));
             });
             else await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
@@ -158,17 +165,18 @@ namespace GeneaGrab.Views
         {
             if (page is null) return;
             Info.PageNumber = page.Number;
-            await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress);
-            if ((page.Thumbnail is null || page.Thumbnail.PixelWidth == 0 || page.Thumbnail.PixelHeight == 0) && await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page))
+            var image = await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress);
+            var tryGet = await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page);
+            if ((page.Thumbnail is null || page.Thumbnail.PixelWidth == 0 || page.Thumbnail.PixelHeight == 0) && tryGet.success)
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                 {
-                    page.Thumbnail = page.Page.Image.ToImageSource();
+                    page.Thumbnail = tryGet.image.ToImageSource();
                     Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
             await GetIndex();
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Low, RefreshView);
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () => RefreshView(image));
         }
-        public void RefreshView()
+        public void RefreshView(SixLabors.ImageSharp.Image img = null)
         {
             PageNumber.Value = Info.PageNumber;
             PageTotal.Text = $"/ {Info.Registry.Pages.Max(p => p.Number)}";

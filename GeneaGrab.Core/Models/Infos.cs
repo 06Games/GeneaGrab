@@ -1,4 +1,5 @@
 ﻿using GeneaGrab.Providers;
+using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -37,8 +38,8 @@ namespace GeneaGrab
     public static class Data
     {
         public static Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
-        public static Func<Registry, RPage, bool, Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<SixLabors.ImageSharp.Image>;
-        public static Func<Registry, RPage, bool, Task<string>> SaveImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<string>;
+        public static Func<Registry, RPage, bool, Task<Image>> GetImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<Image>;
+        public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (r, p, i, t) => Task.CompletedTask as Task<string>;
         public static Action<string, Exception> Log { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
         public static Action<string, Exception> Warn { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
         public static Action<string, Exception> Error { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
@@ -83,24 +84,22 @@ namespace GeneaGrab
             else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return d;
             return null;
         }
-        public static async Task<bool> TryGetThumbnailFromDrive(Registry registry, RPage current)
+        public static async Task<(bool success, Image image)> TryGetThumbnailFromDrive(Registry registry, RPage current)
         {
-            if (current.Image != null) return true;
+            var image = await GetImage(registry, current, true).ConfigureAwait(false);
+            if (image != null) return (true, image);
 
-            current.Image = await GetImage(registry, current, true).ConfigureAwait(false);
-            if (current.Image != null) return true;
-
-            if(await TryGetImageFromDrive(registry, current, 0)) { await SaveImage(registry, current, true); return true; }
-            else return false;
+            var tryGet = await TryGetImageFromDrive(registry, current, 0);
+            if (tryGet.success) { await SaveImage(registry, current, tryGet.image, true); return (true, tryGet.image); }
+            else return (false, null);
         }
-        public static async Task<bool> TryGetImageFromDrive(Registry registry, RPage current, double zoom)
+        public static async Task<(bool success, Image image)> TryGetImageFromDrive(Registry registry, RPage current, double zoom)
         {
-            if (zoom > current.Zoom) return false;
-            if (current.Image != null) return true;
+            if (zoom > current.Zoom) return (false, null);
 
-            current.Image = await GetImage(registry, current, false).ConfigureAwait(false);
-            if (current.Image != null) return true;
-            else return false;
+            var image = await GetImage(registry, current, false).ConfigureAwait(false);
+            if (image != null) return (true, image);
+            else return (false, null);
         }
     }
 }

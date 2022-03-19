@@ -9,9 +9,9 @@ namespace GeneaGrab
     {
         bool TryGetRegistryID(Uri URL, out RegistryInfo info);
         Task<RegistryInfo> Infos(Uri URL);
-        Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
-        Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress);
-        Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress);
+        Task<SixLabors.ImageSharp.Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
+        Task<SixLabors.ImageSharp.Image> Preview(Registry Registry, RPage page, Action<Progress> progress);
+        Task<SixLabors.ImageSharp.Image> Download(Registry Registry, RPage page, Action<Progress> progress);
         Task<string> Ark(Registry Registry, RPage page);
 
         bool IndexSupport { get; }

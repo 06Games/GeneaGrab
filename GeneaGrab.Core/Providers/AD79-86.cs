@@ -76,27 +76,29 @@ namespace GeneaGrab.Providers
         }
 
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.ArkURL}/{Page.Number}");
-        public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            if (await Data.TryGetThumbnailFromDrive(Registry, page)) return page;
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            if (tryGet.success) return tryGet.image;
             return await GetTiles(Registry, page, 0.1F, progress);
         }
-        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
-        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
-        public static async Task<RPage> GetTiles(Registry Registry, RPage current, float scale, Action<Progress> progress)
+        public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
+        public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
+        public static async Task<Image> GetTiles(Registry Registry, RPage page, float scale, Action<Progress> progress)
         {
             int zoom = (int)(scale * 100);
-            if (await Data.TryGetImageFromDrive(Registry, current, zoom)) return current;
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            current.Image = await Image.LoadAsync(await client.GetStreamAsync(zoom == 100 ? new Uri(current.DownloadURL) : IIIF.IIIF.GenerateImageRequestUri(current.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
-            current.Zoom = zoom;
+            var image = await Image.LoadAsync(await client.GetStreamAsync(zoom == 100 ? new Uri(page.DownloadURL) : IIIF.IIIF.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
+            page.Zoom = zoom;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers["AD79-86"].Registries[Registry.ID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Registry, current, false);
-            return current;
+            Data.Providers["AD79-86"].Registries[Registry.ID].Pages[page.Number - 1] = page;
+            await Data.SaveImage(Registry, page, image, false);
+            return image;
         }
     }
 }

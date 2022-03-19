@@ -79,27 +79,29 @@ namespace GeneaGrab.Providers
 
 
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
-        public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<SixLabors.ImageSharp.Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            if (await Data.TryGetThumbnailFromDrive(Registry, page)) return page;
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            if (tryGet.success) return tryGet.image;
             return await GetTile(Registry, page, 0, progress);
         }
-        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
-        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
-        public async Task<RPage> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress)
+        public Task<SixLabors.ImageSharp.Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
+        public Task<SixLabors.ImageSharp.Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
+        public async Task<SixLabors.ImageSharp.Image> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress)
         {
-            if (await Data.TryGetImageFromDrive(Registry, page, zoom)) return page;
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
             await client.GetStringAsync($"http://www.basesdocumentaires-cg06.fr/ISVIEWER/ISViewerTarget.php?imagePath={page.URL}").ConfigureAwait(false); //Create the cache on server side
-            page.Image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr/ISVIEWER/cache/{page.URL.Replace('/', '_')}", client); //Request the cache content
+            var image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr/ISVIEWER/cache/{page.URL.Replace('/', '_')}", client); //Request the cache content
             page.Zoom = 1;
             progress?.Invoke(Progress.Finished);
 
             Data.Providers["CG06"].Registries[Registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(Registry, page, false);
-            return page;
+            await Data.SaveImage(Registry, page, image, false);
+            return image;
         }
     }
 }

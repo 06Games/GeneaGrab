@@ -141,32 +141,34 @@ namespace GeneaGrab.Providers
         #endregion
 
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
-        public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            if (await Data.TryGetThumbnailFromDrive(Registry, page)) return page;
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            if (tryGet.success) return tryGet.image;
             return await GetTiles(Registry, page, 0.1F, progress);
         }
-        public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
-        public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
-        public static async Task<RPage> GetTiles(Registry Registry, RPage current, float zoom, Action<Progress> progress)
+        public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
+        public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
+        public static async Task<Image> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
         {
-            if (await Data.TryGetImageFromDrive(Registry, current, zoom * 100)) return current;
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            string link = await client.GetStringAsync(current.URL).ConfigureAwait(false);
+            string link = await client.GetStringAsync(page.URL).ConfigureAwait(false);
             string url = await client.GetStringAsync(Regex.Match(link, "(https?:\\/\\/.*)").Value).ConfigureAwait(false);
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
-            if (string.IsNullOrWhiteSpace(id)) return current;
+            if (string.IsNullOrWhiteSpace(id)) return null;
 
             //We can't track the progress because we don't know the final size
-            current.Image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}", client);
-            current.Zoom = (int)(zoom * 100);
+            var image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}", client);
+            page.Zoom = (int)(zoom * 100);
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers["AD06"].Registries[Registry.ID].Pages[current.Number - 1] = current;
-            await Data.SaveImage(Registry, current, false);
-            return current;
+            Data.Providers["AD06"].Registries[Registry.ID].Pages[page.Number - 1] = page;
+            await Data.SaveImage(Registry, page, image, false);
+            return image;
         }
 
 
