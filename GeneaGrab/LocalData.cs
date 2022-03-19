@@ -85,9 +85,10 @@ namespace GeneaGrab
         }
         public static async Task<string> SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
         {
+            string path = null;
+            if (!thumbnail) path = await _SaveImageAsync(registry, page, img).ConfigureAwait(false);
             var thumb = await _SaveImageAsync(registry, page, img, true).ConfigureAwait(false);
-            if (!thumbnail) return await _SaveImageAsync(registry, page, img).ConfigureAwait(false);
-            else return thumb;
+            return thumbnail ? thumb : path;
         }
         private static async Task<string> _SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
         {
