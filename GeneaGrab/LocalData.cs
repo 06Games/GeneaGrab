@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Serilog;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,6 +12,8 @@ namespace GeneaGrab
 {
     public static class LocalData
     {
+        public const int THUMBNAIL_SIZE = 512;
+
         public static bool Loaded { get; private set; }
         public static async Task LoadData(bool bypassLoadedCheck = false)
         {
@@ -59,18 +62,19 @@ namespace GeneaGrab
         public static Task SaveRegistryAsync(Registry registry, Windows.Storage.StorageFolder folder) => folder.CreateFolderPath(registry.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
 
 
-        public static async Task<Windows.Storage.StorageFile> GetFile(Registry registry, RPage page, bool write = false)
+        public static async Task<Windows.Storage.StorageFile> GetFile(Registry registry, RPage page, bool write = false, bool thumbnail = false)
         {
             Windows.Storage.StorageFolder folder = await Windows.Storage.ApplicationData.Current.LocalCacheFolder.CreateFolderPath(registry.ProviderID, registry.ID);
+            if (thumbnail) folder = await folder.CreateFolder(".thumbnails");
             return write ? await folder.CreateFileAsync($"p{page.Number}.jpg", Windows.Storage.CreationCollisionOption.ReplaceExisting) : await folder.TryGetItemAsync($"p{page.Number}.jpg") as Windows.Storage.StorageFile;
         }
 
 
-        public static async Task<Image> GetImageAsync(Registry registry, RPage page)
+        public static async Task<Image> GetImageAsync(Registry registry, RPage page, bool thumbnail = false)
         {
             try
             {
-                var file = await GetFile(registry, page).ConfigureAwait(false);
+                var file = await GetFile(registry, page, thumbnail: thumbnail).ConfigureAwait(false);
                 return file is null ? null : await Image.LoadAsync(await file.OpenStreamForReadAsync().ConfigureAwait(false)).ConfigureAwait(false);
             }
             catch (Exception e)
@@ -81,10 +85,24 @@ namespace GeneaGrab
         }
         public static async Task<string> SaveImageAsync(Registry registry, RPage page)
         {
+            await _SaveImageAsync(registry, page, true).ConfigureAwait(false);
+            return await _SaveImageAsync(registry, page).ConfigureAwait(false);
+        }
+        private static async Task<string> _SaveImageAsync(Registry registry, RPage page, bool thumbnail = false)
+        {
             try
             {
-                var file = await GetFile(registry, page, true).ConfigureAwait(false);
-                await page.Image.SaveAsJpegAsync(await file.OpenStreamForWriteAsync().ConfigureAwait(false)).ConfigureAwait(false);
+                var file = await GetFile(registry, page, true, thumbnail).ConfigureAwait(false);
+                var img = page.Image;
+                if (thumbnail)
+                {
+                    int w = THUMBNAIL_SIZE;
+                    int h = THUMBNAIL_SIZE;
+                    if (img.Width < img.Height) h = THUMBNAIL_SIZE / img.Width * img.Height;
+                    else w = THUMBNAIL_SIZE / img.Height * img.Width;
+                    img.Mutate(x => x.Resize(w, h));
+                }
+                await img.SaveAsJpegAsync(await file.OpenStreamForWriteAsync().ConfigureAwait(false)).ConfigureAwait(false);
                 return file.Path;
             }
             catch (Exception e)

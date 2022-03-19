@@ -159,7 +159,7 @@ namespace GeneaGrab.Views
             if (page is null) return;
             Info.PageNumber = page.Number;
             await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress);
-            if ((page.Thumbnail is null || page.Thumbnail.PixelWidth == 0 || page.Thumbnail.PixelHeight == 0) && await Data.TryGetImageFromDrive(Info.Registry, page.Page, 0))
+            if ((page.Thumbnail is null || page.Thumbnail.PixelWidth == 0 || page.Thumbnail.PixelHeight == 0) && await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page))
                 await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
                 {
                     page.Thumbnail = page.Page.Image.ToImageSource();

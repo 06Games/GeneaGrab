@@ -37,7 +37,7 @@ namespace GeneaGrab
     public static class Data
     {
         public static Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
-        public static Func<Registry, RPage, Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p) => Task.CompletedTask as Task<SixLabors.ImageSharp.Image>;
+        public static Func<Registry, RPage, bool, Task<SixLabors.ImageSharp.Image>> GetImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<SixLabors.ImageSharp.Image>;
         public static Func<Registry, RPage, Task<string>> SaveImage { get; set; } = (r, p) => Task.CompletedTask as Task<string>;
         public static Action<string, Exception> Log { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
         public static Action<string, Exception> Warn { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
@@ -83,12 +83,22 @@ namespace GeneaGrab
             else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return d;
             return null;
         }
+        public static async Task<bool> TryGetThumbnailFromDrive(Registry registry, RPage current)
+        {
+            if (current.Image != null) return true;
+
+            current.Image = await GetImage(registry, current, true).ConfigureAwait(false);
+            if (current.Image != null) return true;
+
+            if(await TryGetImageFromDrive(registry, current, 0)) { await SaveImage(registry, current); return true; }
+            else return false;
+        }
         public static async Task<bool> TryGetImageFromDrive(Registry registry, RPage current, double zoom)
         {
             if (zoom > current.Zoom) return false;
             if (current.Image != null) return true;
 
-            current.Image = await GetImage(registry, current).ConfigureAwait(false);
+            current.Image = await GetImage(registry, current, false).ConfigureAwait(false);
             if (current.Image != null) return true;
             else return false;
         }

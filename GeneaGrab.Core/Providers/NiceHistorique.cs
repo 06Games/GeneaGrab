@@ -65,8 +65,8 @@ namespace GeneaGrab.Providers
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
         public async Task<RPage> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            await Data.TryGetImageFromDrive(Registry, page, 0);
-            return page;
+            if (await Data.TryGetThumbnailFromDrive(Registry, page)) return page;
+            return await GetTile(Registry, page, 0, progress);
         }
         public Task<RPage> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
         public Task<RPage> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
