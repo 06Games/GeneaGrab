@@ -81,7 +81,8 @@ namespace GeneaGrab
             var culture = new System.Globalization.CultureInfo("fr-FR");
             var style = System.Globalization.DateTimeStyles.AssumeLocal;
 
-            if (DateTime.TryParse(date, culture, style, out var d)) return d;
+            if (string.IsNullOrWhiteSpace(date)) return null;
+            else if (DateTime.TryParse(date, culture, style, out var d)) return d;
             else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return d;
             return null;
         }

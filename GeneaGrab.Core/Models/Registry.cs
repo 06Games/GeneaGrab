@@ -53,7 +53,7 @@ namespace GeneaGrab
                     return $"{from.ToString(format)} - {to.ToString(format)}";
                 }
                 else if (From.HasValue) return $"{From.Value.ToString(Date)} - ?";
-                else if (To.HasValue) return $"? - {From.Value.ToString(Date)}";
+                else if (To.HasValue) return $"? - {To.Value.ToString(Date)}";
                 return null;
             }
         }

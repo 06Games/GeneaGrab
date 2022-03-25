@@ -39,15 +39,15 @@ namespace GeneaGrab.Providers
             var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
             if (!int.TryParse(query["page"], out var _p)) _p = 1;
 
-            var infos = Regex.Match(query["infos"], @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?) - (?<date_fin>.*?)</option>").Groups; // https://regex101.com/r/Ju2Y1b/3
-            if (infos.Count == 0) infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?) - (?<date_fin>.*?)</option>", RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
+            var infos = Regex.Match(query["infos"], @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>").Groups; // https://regex101.com/r/Ju2Y1b/3
+            if (infos.Count == 0) infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>", RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
             Registry.ID = query["id"] ?? infos["id"]?.Value;
             Registry.CallNumber = infos["cote"]?.Value;
             Registry.Location = infos["commune"]?.Value;
             Registry.LocationID = cities.TryGetValue(Registry.Location, out var location) ? location.ToString() : null;
             Registry.Notes = infos["type"].Success ? $"{infos["type"]?.Value}: {infos["collection"]?.Value}" : null;
             Registry.From = Data.ParseDate(infos["date_debut"]?.Value);
-            Registry.To = Data.ParseDate(infos["date_fin"]?.Value);
+            Registry.To = Data.ParseDate(infos["date_fin"]?.Value) ?? Registry.From;
             Registry.Types = GetTypes(infos["actes"]?.Value);
 
             IEnumerable<RegistryType> GetTypes(string type)
@@ -85,6 +85,8 @@ namespace GeneaGrab.Providers
             var desc = $"{Registry.CallNumber} - {Registry.Location} - {Registry.Notes.Replace(": ", " - ")} - {Registry.TypeToString} - {Registry.From?.Year} - {Registry.To?.Year}".Replace(' ', '+');
             var ark = await client.GetStringAsync($"http://www.archinoe.net/v2/ark/permalien.html?chemin={Page.DownloadURL}&desc={desc}&id={Registry.ID}&ir=&vue=1&ajax=true").ConfigureAwait(false);
             var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups["link"]?.Value;
+
+            if (string.IsNullOrWhiteSpace(link)) { Data.Error("AD17: Couldn't parse ark url", new ArgumentException(ark)); return $"p{Page.Number}"; }
 
             Page.URL = link;
             Data.Providers["AD17"].Registries[Registry.ID].Pages[Page.Number - 1] = Page;
