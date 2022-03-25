@@ -77,7 +77,19 @@ namespace GeneaGrab.Providers
             return new RegistryInfo(Registry) { PageNumber = _p };
         }
 
-        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.URL}"); //TODO
+        public async Task<string> Ark(Registry Registry, RPage Page)
+        {
+            if (Page.URL != null) return Page.URL;
+
+            var client = new HttpClient();
+            var desc = $"{Registry.CallNumber} - {Registry.Location} - {Registry.Notes.Replace(": ", " - ")} - {Registry.TypeToString} - {Registry.From?.Year} - {Registry.To?.Year}".Replace(' ', '+');
+            var ark = await client.GetStringAsync($"http://www.archinoe.net/v2/ark/permalien.html?chemin={Page.DownloadURL}&desc={desc}&id={Registry.ID}&ir=&vue=1&ajax=true").ConfigureAwait(false);
+            var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups["link"]?.Value;
+
+            Page.URL = link;
+            Data.Providers["AD17"].Registries[Registry.ID].Pages[Page.Number - 1] = Page;
+            return link;
+        }
         public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
             var (success, image) = await Data.TryGetThumbnailFromDrive(Registry, page);
