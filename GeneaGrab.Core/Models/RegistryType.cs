@@ -29,6 +29,8 @@
         Marriage,
         /// <summary>Table of marriage certificates</summary>
         MarriageTable,
+        /// <summary>Process of terminating a marriage or marital union</summary>
+        Divorce,
         /// <summary>Death certificates</summary>
         Death,
         /// <summary>Table of death certificates</summary>

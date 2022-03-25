@@ -107,16 +107,23 @@ namespace GeneaGrab
     {
         [JsonIgnore] public int Number { get; set; }
         public override string ToString() => Number.ToString();
-        public string URL { get; set; }
+        /// <summary>Ark URL</summary>
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public string URL { get; set; }
+        /// <summary>Used internaly to download the image</summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public string DownloadURL { get; set; }
 
         public int Zoom { get; set; } = -1;
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore), System.ComponentModel.DefaultValue(-1)] public int MaxZoom { get; set; } = -1;
+        /// <summary>Total width of the image</summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public int Width { get; set; }
+        /// <summary>Total height of the image</summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public int Height { get; set; }
+        /// <summary>Tiles size (if applicable)</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public int? TileSize { get; set; }
 
+        /// <summary>Notes about the page (user can edit this information)</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
+        /// <summary>Any additional information the grabber needs</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public object Extra { get; set; }
     }
 }

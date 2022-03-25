@@ -260,4 +260,8 @@
     <value>Répertoire</value>
     <comment>Inventaire méthodique, lexique où les matières sont rangées dans un ordre qui permet de les retrouver facilement.</comment>
   </data>
+  <data name="Provider.AD17" xml:space="preserve">
+    <value>Archives départementales de la Charente-Maritime</value>
+    <comment>archives.charente-maritime.fr</comment>
+  </data>
 </root>

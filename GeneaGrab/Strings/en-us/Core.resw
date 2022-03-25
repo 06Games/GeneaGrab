@@ -260,4 +260,8 @@
     <value>Catalogue</value>
     <comment>Methodical list where the subjects are arranged in an order that makes it easy to find them</comment>
   </data>
+  <data name="Provider.AD17" xml:space="preserve">
+    <value>Departmental Archives of Charente-Maritime</value>
+    <comment>archives.charente-maritime.fr</comment>
+  </data>
 </root>
