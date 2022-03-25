@@ -118,7 +118,7 @@ namespace GeneaGrab.Providers
 
             int wantedW = (int)(page.Width * zoom);
             int wantedH = (int)(page.Height * zoom);
-            if(Math.Max(wantedW, wantedH) > 1800) generate = await client.GetStringAsync($"http://www.archinoe.net/v2/images/genereImage.html?l={page.Width}&h={page.Height}&x=0&y=0&r=0&n=0&b=0&c=0&o=TILE&id=tuile_20_2_2_3&image={page.DownloadURL}&ol={page.Width * zoom}&oh={page.Height * zoom}").ConfigureAwait(false);
+            if(Math.Max(wantedW, wantedH) > 1800 || generate is null) generate = await client.GetStringAsync($"http://www.archinoe.net/v2/images/genereImage.html?l={page.Width}&h={page.Height}&x=0&y=0&r=0&n=0&b=0&c=0&o=TILE&id=tuile_20_2_2_3&image={page.DownloadURL}&ol={page.Width * zoom}&oh={page.Height * zoom}").ConfigureAwait(false);
 
             //We can't track the progress because we don't know the final size
             var image = await Grabber.GetImage($"http://www.archinoe.net{generate.Split('\t')[1]}", client);
