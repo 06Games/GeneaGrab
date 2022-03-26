@@ -94,16 +94,16 @@ namespace GeneaGrab.Providers
         }
         public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var (success, image) = await Data.TryGetThumbnailFromDrive(Registry, page);
+            var (success, image) = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
             if (success) return image;
-            return await GetTiles(Registry, page, 0.1F, progress);
+            return await GetTiles(Registry, page, 0.1F, progress).ConfigureAwait(false);
         }
         public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.75F, progress);
         public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
         public static async Task<Image> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
         {
             var Zoom = (int)(zoom * 100);
-            var (success, img) = await Data.TryGetImageFromDrive(Registry, page, Zoom);
+            var (success, img) = await Data.TryGetImageFromDrive(Registry, page, Zoom).ConfigureAwait(false);
             if (success) return img;
 
             progress?.Invoke(Progress.Unknown);
@@ -123,16 +123,15 @@ namespace GeneaGrab.Providers
             if(Math.Max(wantedW, wantedH) > 1800 || generate is null) generate = await client.GetStringAsync($"http://www.archinoe.net/v2/images/genereImage.html?l={page.Width}&h={page.Height}&x=0&y=0&r=0&n=0&b=0&c=0&o=TILE&id=tuile_20_2_2_3&image={page.DownloadURL}&ol={page.Width * zoom}&oh={page.Height * zoom}").ConfigureAwait(false);
 
             //We can't track the progress because we don't know the final size
-            var image = await Grabber.GetImage($"http://www.archinoe.net{generate.Split('\t')[1]}", client);
+            var image = await Grabber.GetImage($"http://www.archinoe.net{generate.Split('\t')[1]}", client).ConfigureAwait(false);
             page.Zoom = Zoom;
             progress?.Invoke(Progress.Finished);
 
             Data.Providers["AD17"].Registries[Registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(Registry, page, image, false);
+            await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
             return image;
         }
-
-        public static readonly Dictionary<string, int> cities = new Dictionary<string, int> {
+        private static readonly Dictionary<string, int> cities = new Dictionary<string, int> {
             { "Agonnay", 170000598 },
             { "Agudelle", 170000003 },
             { "Aigrefeuille-d'Aunis", 170019179 },

@@ -15,9 +15,9 @@ $pageDiv = $("#visu_pagination");
 
 function updateLink(e) {
     e.preventDefault();
-    url = "geneagrab:registry?url=" + encodeURIComponent(window.location.href + "&infos=" + $("option:selected").prop('outerHTML') + "&page=" + $pageDiv.text().split('/')[0]);
-  	console.log(url);
-  	window.location = url;
+    url = "geneagrab:registry?url=" + encodeURIComponent(window.location.href + "&infos=" + $("option:selected").prop("outerHTML") + "&page=" + $pageDiv.text().split('/')[0]);
+    console.log(url);
+    window.location = url;
 }
 $openIn = $('<li class="outils_permanent fa fa-book" id="outils_geneagrab" title="Ouvrir dans GeneaGrab"></li>')
     .appendTo($buttons)

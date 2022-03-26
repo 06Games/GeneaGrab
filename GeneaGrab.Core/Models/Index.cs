@@ -66,14 +66,14 @@ namespace GeneaGrab
         public Task<IEnumerable<Index>> GetIndex(Registry Registry, RPage page) => GetIndexFromLocalData(Registry, page);
         public static async Task<IEnumerable<Index>> GetIndexFromLocalData(Registry Registry, RPage page)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             return null;
         }
 
         public Task AddIndex(Registry Registry, RPage page, Index index) => AddIndexToLocalData(Registry, page, index);
         public static async Task AddIndexToLocalData(Registry Registry, RPage page, Index index)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
     }
 }

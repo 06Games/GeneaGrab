@@ -65,26 +65,26 @@ namespace GeneaGrab.Providers
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
         public async Task<SixLabors.ImageSharp.Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
-            return await GetTile(Registry, page, 0, progress);
+            return await GetTile(Registry, page, 0, progress).ConfigureAwait(false);
         }
         public Task<SixLabors.ImageSharp.Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
         public Task<SixLabors.ImageSharp.Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
         public async Task<SixLabors.ImageSharp.Image> GetTile(Registry Registry, RPage page, int zoom, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
             var index = Array.IndexOf(Registry.Pages, page);
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            var image =  await Grabber.GetImage(page.URL, client);
+            var image =  await Grabber.GetImage(page.URL, client).ConfigureAwait(false);
             page.Zoom = 1;
             progress?.Invoke(Progress.Finished);
 
             Data.Providers[ProviderID].Registries[Registry.ID].Pages[index] = page;
-            await Data.SaveImage(Registry, page, image, false);
+            await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
             return image;
         }
     }

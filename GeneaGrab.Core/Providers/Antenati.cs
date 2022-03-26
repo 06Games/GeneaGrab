@@ -65,16 +65,16 @@ namespace GeneaGrab.Providers
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.ArkURL} (p{Page.Number})");
         public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
-            return await GetTiles(Registry, page, 0.1F, progress);
+            return await GetTiles(Registry, page, 0.1F, progress).ConfigureAwait(false);
         }
         public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
         public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
         public static async Task<Image> GetTiles(Registry Registry, RPage page, float scale, Action<Progress> progress)
         {
             int zoom = (int)(scale * 100);
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
@@ -84,7 +84,7 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.Finished);
 
             Data.Providers["Antenati"].Registries[Registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(Registry, page, image, false);
+            await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
             return image;
         }
     }

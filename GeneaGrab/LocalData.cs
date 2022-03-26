@@ -12,7 +12,7 @@ namespace GeneaGrab
 {
     public static class LocalData
     {
-        public const int THUMBNAIL_SIZE = 512;
+        const int THUMBNAIL_SIZE = 512;
 
         public static bool Loaded { get; private set; }
         public static async Task LoadData(bool bypassLoadedCheck = false)
@@ -47,8 +47,8 @@ namespace GeneaGrab
                 var dataFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
                 foreach (var provider in Data.Providers)
                 {
-                    var folder = await dataFolder.CreateFolder(provider.Key);
-                    foreach (var registry in provider.Value.Registries) await SaveRegistryAsync(registry.Value, folder);
+                    var folder = await dataFolder.CreateFolder(provider.Key).ConfigureAwait(false);
+                    foreach (var registry in provider.Value.Registries) await SaveRegistryAsync(registry.Value, folder).ConfigureAwait(false);
                 }
             }
             catch (Exception e) { Log.Error(e.Message, e); }
@@ -56,8 +56,8 @@ namespace GeneaGrab
         public static async Task SaveRegistryAsync(Registry registry)
         {
             var dataFolder = Windows.Storage.ApplicationData.Current.LocalCacheFolder;
-            var folder = await dataFolder.CreateFolder(registry.ProviderID);
-            await SaveRegistryAsync(registry, folder);
+            var folder = await dataFolder.CreateFolder(registry.ProviderID).ConfigureAwait(false);
+            await SaveRegistryAsync(registry, folder).ConfigureAwait(false);
         }
         public static Task SaveRegistryAsync(Registry registry, Windows.Storage.StorageFolder folder) => folder.CreateFolderPath(registry.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
 
