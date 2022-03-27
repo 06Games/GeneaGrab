@@ -10,8 +10,11 @@ using System.Threading.Tasks;
 
 namespace GeneaGrab.Providers
 {
-    public class Geneanet : ProviderAPI
+    public class Geneanet : ProviderAPI, IndexAPI
     {
+        public string ProviderID => "Geneanet";
+        public bool IndexSupport => true;
+
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
             info = null;
@@ -21,7 +24,7 @@ namespace GeneaGrab.Providers
             info = new RegistryInfo
             {
                 RegistryID = regex.Groups["col"]?.Value,
-                ProviderID = "Geneanet",
+                ProviderID = ProviderID,
                 PageNumber = int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p) ? _p : 1
             };
             return true;
@@ -30,7 +33,7 @@ namespace GeneaGrab.Providers
         #region Infos
         public async Task<RegistryInfo> Infos(Uri URL)
         {
-            var Registry = new Registry(Data.Providers["Geneanet"]) { URL = URL.OriginalString };
+            var Registry = new Registry(Data.Providers[ProviderID]) { URL = URL.OriginalString };
 
             var regex = Regex.Match(Registry.URL, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
             Registry.ID = regex.Groups["col"]?.Value;
@@ -65,7 +68,7 @@ namespace GeneaGrab.Providers
                                             + string.Join("\n", pageMarqueurs.Select(marqueur => $"{marqueur.Groups["month"]}/{marqueur.Groups["year"]} ({marqueur.Groups["type"]})"));
             } */
 
-            Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, Registry.ID, Registry);
+            Data.AddOrUpdate(Data.Providers[ProviderID].Registries, Registry.ID, Registry);
             return new RegistryInfo(Registry) { PageNumber = _p };
         }
         static (List<RegistryType> types, string location, string notes) TryParseNotes(string page, Match infos)
@@ -112,15 +115,15 @@ namespace GeneaGrab.Providers
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.URL}/{Page.Number}");
         public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
-            return await GetTiles(Registry, page, 0, progress);
+            return await GetTiles(Registry, page, 0, progress).ConfigureAwait(false);
         }
         public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page) * 0.75F, progress);
         public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page), progress);
         public static async Task<Image> GetTiles(Registry Registry, RPage page, double zoom, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
@@ -154,7 +157,45 @@ namespace GeneaGrab.Providers
             Data.Providers["Geneanet"].Registries[Registry.ID].Pages[page.Number - 1] = page;
             await Data.SaveImage(Registry, page, tryGet.image, false).ConfigureAwait(false);
             return tryGet.image;
+        }
+        #endregion
 
+
+        #region Index
+        public async Task<bool> Login(string username, string password)
+        {
+            var client = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = new System.Net.CookieContainer { } });
+
+            var loginData = new Dictionary<string, string> { { "_username", username }, { "_password", password } };
+            var loginRequest = await client.PostAsync("https://www.geneanet.org/connexion/login_check", new FormUrlEncodedContent(loginData));
+            if (!loginRequest.IsSuccessStatusCode) return false;
+
+            if (loginRequest.Headers.TryGetValues("Set-Cookie", out var cookies))
+                foreach (var cookie in cookies)
+                {
+                    //Get token
+                }
+            return true;
+        }
+
+        public async Task<IEnumerable<Index>> GetIndex(Registry Registry, RPage page)
+        {
+            var client = new HttpClient();
+            //await Login("", "");
+            await Task.CompletedTask;
+
+
+            /*var body = await client.GetStringAsync($"https://www.geneanet.org/archives/registres/view/marqueurs-noms.php?action=showPage&idcollection={Registry.ID}&page={page.Number}");
+            var xml = new FileFormat.XML.XML($"<html>{body}</html>");
+            var marqueurs = xml.RootElement.GetItems("div/table/tr[1]/td/div/div/table/tbody/tr");
+            await Task.CompletedTask.ConfigureAwait(false);*/
+            return null;
+            //return await GenericIndex.GetIndexFromLocalData(Registry, page);
+        }
+
+        public async Task AddIndex(Registry Registry, RPage page, Index index)
+        {
+            await GenericIndex.AddIndexToLocalData(Registry, page, index);
         }
         #endregion
     }

@@ -185,4 +185,7 @@
   <data name="Registry.Notes" xml:space="preserve">
     <value>Notes</value>
   </data>
+  <data name="Settings_Accounts.Text" xml:space="preserve">
+    <value>Accounts</value>
+  </data>
 </root>

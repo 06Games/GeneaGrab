@@ -12,10 +12,9 @@
         <helper:EnumToBooleanConverter x:Key="EnumToBooleanConverter" EnumType="ElementTheme" />
     </Page.Resources>
     <Grid Margin="{StaticResource MediumLeftTopRightBottomMargin}">
-        <StackPanel
-            x:Name="ContentArea">
-            <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" />
-            <StackPanel Margin="{StaticResource SmallTopBottomMargin}">
+        <StackPanel x:Name="ContentArea">
+            <TextBlock x:Uid="Settings_Personalization" Style="{ThemeResource SubtitleTextBlockStyle}" Margin="{StaticResource SmallBottomMargin}" />
+            <StackPanel Margin="{StaticResource MediumBottomMargin}">
                 <TextBlock x:Uid="Settings_Theme" />
 
                 <StackPanel Margin="{StaticResource XSmallTopMargin}">
@@ -52,8 +51,15 @@
                 </StackPanel>
             </StackPanel>
 
-            <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
+            <TextBlock x:Uid="Settings_Accounts" Style="{ThemeResource SubtitleTextBlockStyle}" />
+            <StackPanel Margin="{StaticResource MediumBottomMargin}">
+                <TextBox Header="Geneanet" PlaceholderText="Enter your username" Text="{x:Bind GeneanetUsername, Mode=OneWay}" x:Name="Geneanet_Username" TextChanged="AccountInfoChanged" IsSpellCheckEnabled="False" Margin="{StaticResource SmallTopMargin}"></TextBox>
+                <PasswordBox PlaceholderText="Enter your password" Password="{x:Bind GeneanetPassword, Mode=OneWay}" x:Name="Geneanet_Password" PasswordChanged="AccountInfoChanged" Margin="{StaticResource XSmallTopMargin}"></PasswordBox>
+                <TextBox Header="FamilySearch" PlaceholderText="Enter your username" Text="{x:Bind FamilysearchUsername, Mode=OneWay}" x:Name="FamilySearch_Username" TextChanged="AccountInfoChanged" IsSpellCheckEnabled="False" Margin="{StaticResource SmallTopMargin}"></TextBox>
+                <PasswordBox PlaceholderText="Enter your password" Password="{x:Bind FamilysearchPassword, Mode=OneWay}" x:Name="FamilySearch_Password" PasswordChanged="AccountInfoChanged" Margin="{StaticResource XSmallTopMargin}"></PasswordBox>
+            </StackPanel>
 
+            <TextBlock x:Uid="Settings_About" Style="{ThemeResource SubtitleTextBlockStyle}" />
             <StackPanel Margin="{StaticResource XSmallTopMargin}">
                 <TextBlock Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind VersionDescription, Mode=OneWay}" />
                 <TextBlock

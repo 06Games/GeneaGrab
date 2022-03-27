@@ -47,7 +47,7 @@ namespace GeneaGrab.Views
             if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
             {
                 foreach (var provider in Data.Providers.Values)
-                    if (provider.API.TryGetRegistryID(uri, out var info)) await ChangePage(info.PageNumber);
+                    if (provider.API.TryGetRegistryID(uri, out var info)) await ChangePage(info.PageNumber).ConfigureAwait(false);
             }
         }
 
@@ -61,11 +61,11 @@ namespace GeneaGrab.Views
         public Registry()
         {
             InitializeComponent();
-            PageNumber.ValueChanged += async (ns, ne) =>
+            PageNumber.ValueChanged += async (_, ne) =>
             {
-                if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
+                if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue).ConfigureAwait(false);
             };
-            PageNotes.TextChanged += (s, e) =>
+            PageNotes.TextChanged += (_, e) =>
             {
                 if (PageNumbers.Contains(Info.PageNumber)) Info.Page.Notes = string.IsNullOrWhiteSpace(PageNotes.Text) ? null : PageNotes.Text;
                 var index = PageNumbers.IndexOf(Info.PageNumber);
@@ -173,7 +173,7 @@ namespace GeneaGrab.Views
                     page.Thumbnail = tryGet.image.ToImageSource();
                     Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
-            await GetIndex();
+            await GetIndex().ConfigureAwait(false);
             await Dispatcher.RunAsync(CoreDispatcherPriority.Low, () => RefreshView(image));
         }
         public void RefreshView(SixLabors.ImageSharp.Image img = null)
@@ -243,7 +243,7 @@ namespace GeneaGrab.Views
             var indexAPI = Info.Provider.API as IndexAPI;
             var index = await indexAPI.GetIndex(Info.Registry, Info.Page);
             if (index is null) Index.Clear();
-            else Index = new ObservableCollection<Index>(index.Cast<Index>());
+            else Index = new ObservableCollection<Index>(index.Select(i => new Index(i)));
         }
         private void AddIndex(object sender, RoutedEventArgs e)
         {
@@ -275,7 +275,16 @@ namespace GeneaGrab.Views
 
     public class Index : GeneaGrab.Index
     {
-        public string FormatedDate => Date.ToString("d");
+        public Index(GeneaGrab.Index baseClassInstance)
+        {
+            foreach (var propertyInfo in baseClassInstance.GetType().GetProperties())
+            {
+                object value = propertyInfo.GetValue(baseClassInstance, null);
+                if (null != value) propertyInfo.SetValue(this, value, null);
+            }
+        }
+
+        public string FormatedDate => Date?.ToString("d") ?? null;
         public string FormatedType
         {
             get

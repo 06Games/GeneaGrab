@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace GeneaGrab.Providers
 {
-    public class AD79_86 : ProviderAPI
+    public class AD79_86 : ProviderAPI, IndexAPI
     {
-        public bool IndexSupport => false;
+        public bool IndexSupport => true;
 
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
@@ -78,16 +78,16 @@ namespace GeneaGrab.Providers
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.ArkURL}/{Page.Number}");
         public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
+            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
-            return await GetTiles(Registry, page, 0.1F, progress);
+            return await GetTiles(Registry, page, 0.1F, progress).ConfigureAwait(false);
         }
         public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
         public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
         public static async Task<Image> GetTiles(Registry Registry, RPage page, float scale, Action<Progress> progress)
         {
             int zoom = (int)(scale * 100);
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
@@ -97,8 +97,30 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.Finished);
 
             Data.Providers["AD79-86"].Registries[Registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(Registry, page, image, false);
+            await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
             return image;
         }
+
+        public async Task<IEnumerable<Index>> GetIndex(Registry Registry, RPage page)
+        {
+            //TODO: Login, the response is empty if the session isn't authentificated
+            var client = new HttpClient();
+            var request = await client.PostAsJsonAsync("https://archives-deux-sevres-vienne.fr/archives/aidx/index/data", new { classeur = page.Extra });
+            var index = JObject.Parse(await request.Content.ReadAsStringAsync());
+            return index["data"].Select(d =>
+            {
+                var pos = d.Value<string>("_viewbox").Split(',')
+                    .Select(p => (int)double.Parse(p, System.Globalization.CultureInfo.InvariantCulture)).ToList();
+                return new Index
+                {
+                    Id = d.Value<string>("id"),
+                    Retranscription = d.Value<string>("contenu"),
+                    Position = new System.Drawing.Rectangle(pos[0], pos[1], pos[2], pos[3]),
+                    Page = page.Number
+                };
+            });
+        }
+
+        public Task AddIndex(Registry Registry, RPage page, Index index) => throw new NotImplementedException();
     }
 }
