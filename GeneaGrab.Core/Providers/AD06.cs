@@ -66,8 +66,8 @@ namespace GeneaGrab.Providers
             Registry.LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
             Registry.District = Registry.DistrictID = string.IsNullOrWhiteSpace(query["PAROISSE"]) ? null : query["PAROISSE"];
             var dates = query["DATE"]?.Split(new[] { " à " }, StringSplitOptions.None);
-            Registry.From = Data.ParseDate(dates.FirstOrDefault());
-            Registry.To = Data.ParseDate(dates.LastOrDefault());
+            Registry.From = Core.Models.Dates.Date.ParseDate(dates.FirstOrDefault());
+            Registry.To = Core.Models.Dates.Date.ParseDate(dates.LastOrDefault());
             Registry.Types = GetTypes(query["TYPEACTE"]);
 
             IEnumerable<RegistryType> GetTypes(string TYPEACTE)
@@ -99,7 +99,7 @@ namespace GeneaGrab.Providers
             Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
             Registry.LocationID = Array.IndexOf(cities, query["c"]).ToString();
             Registry.District = Registry.DistrictID = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
-            Registry.From = Registry.To = Data.ParseDate(query["a"]);
+            Registry.From = Registry.To = Core.Models.Dates.Date.ParseDate(query["a"]);
             Registry.Types = GetTypes(query["t"]);
             Registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
 
@@ -117,7 +117,7 @@ namespace GeneaGrab.Providers
             Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             Registry.LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
             Registry.District = Registry.DistrictID = query["COMPLEMENTLIEUX"];
-            Registry.From = Registry.To = Data.ParseDate(query["DATE"]);
+            Registry.From = Registry.To = Core.Models.Dates.Date.ParseDate(query["DATE"]);
             Registry.Types = GetTypes(query["CHOIX"]).ToList();
             Registry.Notes = $"{query["NATURE"]}\nCote: {query["COTE"]}";
 
@@ -133,7 +133,7 @@ namespace GeneaGrab.Providers
             Registry.ID = $"{query["cote"]}___{query["date"]}";
             Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
             Registry.LocationID = Array.IndexOf(cities, query["c"].ToUpper()).ToString();
-            Registry.From = Registry.To = Data.ParseDate(query["date"]);
+            Registry.From = Registry.To = Core.Models.Dates.Date.ParseDate(query["date"]);
             Registry.Types = new[] { RegistryType.Census };
             Registry.Notes = query["cote"];
         }

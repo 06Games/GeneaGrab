@@ -35,8 +35,8 @@ namespace GeneaGrab.Providers
                 URL = URL.OriginalString,
                 ID = form["c"]?.Value,
                 CallNumber = form["c"]?.Value,
-                From = Data.ParseDate(body["from"]?.Value),
-                To = Data.ParseDate(body["to"]?.Value),
+                From = Core.Models.Dates.Date.ParseDate(body["from"]?.Value),
+                To = Core.Models.Dates.Date.ParseDate(body["to"]?.Value),
                 Pages = form["l"]?.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select((p, i) => new RPage { Number = i + 1, URL = p }).ToArray()
             };
 

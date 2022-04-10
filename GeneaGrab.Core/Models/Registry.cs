@@ -32,28 +32,25 @@ namespace GeneaGrab
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
 
-        [JsonConverter(typeof(DateFormatConverter), "yyyy-MM-dd")] public DateTime? From { get; set; }
-        [JsonConverter(typeof(DateFormatConverter), "yyyy-MM-dd")] public DateTime? To { get; set; }
+        public Core.Models.Dates.Date From { get; set; }
+        public Core.Models.Dates.Date To { get; set; }
         [JsonIgnore]
         public string Dates
         {
             get
             {
-                const string Date = "dd/MM/yyyy";
-                const string Month = "MM/yyyy";
-                const string Year = "yyyy";
-                if (From.HasValue && To.HasValue && From.Value.Date == To.Value.Date) return From.Value.ToString(Date);
-                else if (From.HasValue && To.HasValue)
+                if (From != null && To != null && From == To) return From.ToString(Core.Models.Dates.Precision.Days);
+                else if (From != null && To != null)
                 {
-                    var from = From.Value;
-                    var to = To.Value;
-                    var format = Year;
-                    if (from.Day != to.Day || from.Day != 1) format = Date;
-                    else if (from.Month != to.Month || from.Month != 1) format = Month;
+                    var from = From;
+                    var to = To;
+                    var format = Core.Models.Dates.Precision.Years;
+                    if (from.Precision >= Core.Models.Dates.Precision.Days && to.Precision >= Core.Models.Dates.Precision.Days && (from.Day != to.Day || from.Day.Value != 1)) format = Core.Models.Dates.Precision.Days;
+                    else if (from.Precision >= Core.Models.Dates.Precision.Months && to.Precision >= Core.Models.Dates.Precision.Months && (from.Month != to.Month || from.Month.Value != 1)) format = Core.Models.Dates.Precision.Months;
                     return $"{from.ToString(format)} - {to.ToString(format)}";
                 }
-                else if (From.HasValue) return $"{From.Value.ToString(Date)} - ?";
-                else if (To.HasValue) return $"? - {To.Value.ToString(Date)}";
+                else if (From != null) return $"{From.ToString(Core.Models.Dates.Precision.Days)} - ?";
+                else if (To != null) return $"? - {To.ToString(Core.Models.Dates.Precision.Days)}";
                 return null;
             }
         }

@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,8 +45,8 @@ namespace GeneaGrab.Providers
             }).ToArray();
 
             var dates = sequence.Label.Split(new[] { "- (" }, StringSplitOptions.RemoveEmptyEntries).Last().Replace(") ", "").Split('-');
-            Registry.From = Data.ParseDate(dates.First());
-            Registry.To = Data.ParseDate(dates.Last());
+            Registry.From = Core.Models.Dates.Date.ParseDate(dates.First());
+            Registry.To = Core.Models.Dates.Date.ParseDate(dates.Last());
             Registry.Types = ParseTypes(iiif.MetaData["Type de document"]);
             Registry.CallNumber = iiif.MetaData["Cote"];
             Registry.Notes = GenerateNotes(iiif.MetaData);

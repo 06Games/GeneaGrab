@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using SixLabors.ImageSharp;
+﻿using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -41,8 +40,8 @@ namespace GeneaGrab.Providers
             }).ToArray();
 
             var dates = iiif.MetaData["Datazione"].Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
-            Registry.From = Data.ParseDate(dates[0]);
-            Registry.To = Data.ParseDate(dates[1]);
+            Registry.From = Core.Models.Dates.Date.ParseDate(dates[0]);
+            Registry.To = Core.Models.Dates.Date.ParseDate(dates[1]);
             Registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
             var location = iiif.MetaData["Contesto archivistico"].Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries);
             Registry.Location = location.Last();

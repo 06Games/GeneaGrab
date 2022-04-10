@@ -12,6 +12,8 @@ namespace GeneaGrab.Providers
 {
     public class Geneanet : ProviderAPI
     {
+        public bool IndexSupport => false;
+
         public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
         {
             info = null;
@@ -50,8 +52,8 @@ namespace GeneaGrab.Providers
             Registry.Notes = notes.notes;
             Registry.District = Registry.DistrictID = string.IsNullOrWhiteSpace(notes.location) ? null : notes.location;
 
-            Registry.From = Data.ParseDate(infos.Groups["from"].Value);
-            Registry.To = Data.ParseDate(infos.Groups["to"].Value);
+            Registry.From = Core.Models.Dates.Date.ParseDate(infos.Groups["from"].Value);
+            Registry.To = Core.Models.Dates.Date.ParseDate(infos.Groups["to"].Value);
             Registry.Pages = JObject.Parse($"{{results: {pages}}}").Value<JArray>("results").Select(p => new RPage { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p);
 

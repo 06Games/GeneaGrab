@@ -275,7 +275,7 @@ namespace GeneaGrab.Views
 
     public class Index : GeneaGrab.Index
     {
-        public string FormatedDate => Date.ToString("d");
+        public string FormatedDate => Date?.ToString("d");
         public string FormatedType
         {
             get

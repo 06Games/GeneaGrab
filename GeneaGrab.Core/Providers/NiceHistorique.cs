@@ -30,7 +30,7 @@ namespace GeneaGrab.Providers
             string pageBody = await client.GetStringAsync(URL).ConfigureAwait(false);
 
             var data = Regex.Match(pageBody, "<h2>R&eacute;f&eacute;rence :  (?<title>.* (?<number>\\d*)) de l'ann&eacute;e (?<year>\\d*).*<\\/h2>").Groups;
-            var date = Data.ParseDate(data["year"]?.Value);
+            var date = Core.Models.Dates.Date.ParseDate(data["year"]?.Value);
 
             var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";").Groups;
             Uri.TryCreate(URL, pageData["path"].Value, out var path);
@@ -50,7 +50,8 @@ namespace GeneaGrab.Providers
                 Pages = pagesTable.Select(page =>
                 {
                     var pData = System.Web.HttpUtility.UrlDecode(pages[int.Parse(page.Groups["index"].Value) - 1]).Trim('"', ' ');
-                    return new RPage {
+                    return new RPage
+                    {
                         Number = int.Parse(page.Groups["number"].Value),
                         URL = $"{path.AbsoluteUri}{pData}"
                     };
@@ -79,7 +80,7 @@ namespace GeneaGrab.Providers
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            var image =  await Grabber.GetImage(page.URL, client).ConfigureAwait(false);
+            var image = await Grabber.GetImage(page.URL, client).ConfigureAwait(false);
             page.Zoom = 1;
             progress?.Invoke(Progress.Finished);
 

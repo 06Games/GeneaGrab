@@ -8,7 +8,7 @@ namespace GeneaGrab
     public static class Zoomify
     {
         /// <summary>Returns the maximum zoom level</summary>
-        // Each zoom level multiplies the size of the image by two. The zoom level 0 corresponds to the entire image contained in a single tile. 
+        // Each zoom level multiplies the size of the image by two. The zoom level 0 corresponds to the entire image contained in a single tile.
         public static int CalculateIndex(RPage page) => (int)Math.Ceiling(Math.Log(Math.Max(page.Width, page.Height) / page.TileSize.GetValueOrDefault(256)) / Math.Log(2));
 
         /// <summary>Returns the properties of the image</summary>

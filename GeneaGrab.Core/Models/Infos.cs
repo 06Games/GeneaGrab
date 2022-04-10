@@ -76,16 +76,6 @@ namespace GeneaGrab
             if (dic.ContainsKey(key)) dic[key] = obj;
             else dic.Add(key, obj);
         }
-        public static DateTime? ParseDate(string date)
-        {
-            var culture = new System.Globalization.CultureInfo("fr-FR");
-            var style = System.Globalization.DateTimeStyles.AssumeLocal;
-
-            if (string.IsNullOrWhiteSpace(date)) return null;
-            else if (DateTime.TryParse(date, culture, style, out var d)) return d;
-            else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return d;
-            return null;
-        }
         public static async Task<(bool success, Image image)> TryGetThumbnailFromDrive(Registry registry, RPage current)
         {
             var image = await GetImage(registry, current, true).ConfigureAwait(false);
