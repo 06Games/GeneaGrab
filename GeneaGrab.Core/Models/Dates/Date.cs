@@ -143,6 +143,7 @@ namespace GeneaGrab.Core.Models.Dates
         public override Date ReadJson(JsonReader reader, Type objectType, Date existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.String) return Date.ParseDate((string)reader.Value);
+            if (reader.TokenType != JsonToken.StartObject) return null;
 
             var jObject = JObject.Load(reader);
             var calendar = (Calendar)Enum.Parse(typeof(Calendar), jObject.Value<string>("Calendar"));
