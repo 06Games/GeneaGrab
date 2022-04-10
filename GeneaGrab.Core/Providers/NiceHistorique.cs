@@ -66,9 +66,9 @@ namespace GeneaGrab.Providers
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
         public async Task<SixLabors.ImageSharp.Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
-            if (tryGet.success) return tryGet.image;
-            return await GetTile(Registry, page, 0, progress).ConfigureAwait(false);
+            var (success, image) = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
+            if (success) return image;
+            return null;
         }
         public Task<SixLabors.ImageSharp.Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
         public Task<SixLabors.ImageSharp.Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTile(Registry, page, 1, progress);
