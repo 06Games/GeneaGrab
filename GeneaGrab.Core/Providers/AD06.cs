@@ -151,7 +151,8 @@ namespace GeneaGrab.Providers
         public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
         public static async Task<Image> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom).ConfigureAwait(false);
+            var Zoom = (int)(zoom * 100);
+            var tryGet = await Data.TryGetImageFromDrive(Registry, page, Zoom).ConfigureAwait(false);
             if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
@@ -163,7 +164,7 @@ namespace GeneaGrab.Providers
 
             //We can't track the progress because we don't know the final size
             var image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}", client);
-            page.Zoom = (int)(zoom * 100);
+            page.Zoom = Zoom;
             progress?.Invoke(Progress.Finished);
 
             Data.Providers["AD06"].Registries[Registry.ID].Pages[page.Number - 1] = page;
