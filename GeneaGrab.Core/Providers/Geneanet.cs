@@ -39,11 +39,11 @@ namespace GeneaGrab.Providers
             if (string.IsNullOrEmpty(Registry.ID)) return null;
 
             var client = new HttpClient();
-            string pages = await client.GetStringAsync($"https://www.geneanet.org/registres/api/images/{Registry.ID}");
+            string pages = await client.GetStringAsync($"https://www.geneanet.org/registres/api/images/{Registry.ID}?min_page=1&max_page={int.MaxValue}");
 
             Registry.URL = $"https://www.geneanet.org/registres/view/{Registry.ID}";
             string page = await client.GetStringAsync(Registry.URL);
-            var infos = Regex.Match(page, "Informations sur le document.*?<p>(\\[.*\\] - )?(?<location>.*) \\((?<locationDetails>.*?)\\) - (?<globalType>.*?)( \\((?<type>.*?)\\))?( - .*)? *\\| (?<from>.*) - (?<to>.*?)<\\/p>.*?<p>(?<cote>.*)</p>.*<p>(?<notaire>.*)</p>.*<p class=\\\"no-margin-bottom\\\">(?<betterType>.*?)(\\..*| -.*)?</p>.*<p>(?<note>.*)</p>.*<strong>Lien permanent : </strong>", RegexOptions.Multiline | RegexOptions.Singleline); //https://regex101.com/r/3Ou7DP/4
+            var infos = Regex.Match(page, "Informations sur le document.*?<p>(\\[.*\\] - )?(?<location>.*) \\((?<locationDetails>.*?)\\) - (?<globalType>.*?)( \\((?<type>.*?)\\))?( - .*)? *\\| (?<from>.*) - (?<to>.*?)<\\/p>.*?<p>(?<cote>.*)</p>(.*<p>(?<notaire>.*)</p>)?.*<p class=\\\"no-margin-bottom\\\">(?<betterType>.*?)(\\..*| -.*)?</p>.*<p>(?<note>.*)</p>.*<strong>Lien permanent : </strong>", RegexOptions.Multiline | RegexOptions.Singleline); //https://regex101.com/r/3Ou7DP/5
             Registry.Location = Registry.LocationID = infos.Groups["location"].Value.Trim(' ');
             Registry.LocationDetails = infos.Groups["locationDetails"]?.Value.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Reverse().ToArray() ?? new string[0];
 
@@ -54,7 +54,12 @@ namespace GeneaGrab.Providers
 
             Registry.From = Core.Models.Dates.Date.ParseDate(infos.Groups["from"].Value);
             Registry.To = Core.Models.Dates.Date.ParseDate(infos.Groups["to"].Value);
-            Registry.Pages = JObject.Parse($"{{results: {pages}}}").Value<JArray>("results").Select(p => new RPage { Number = p.Value<int>("page"), URL = p.Value<string>("chemin_image") }).ToArray();
+            Registry.Pages = JObject.Parse($"{{results: {pages}}}").Value<JArray>("results").Select(p => new RPage
+            {
+                Number = p.Value<int>("page"),
+                DownloadURL = $"https://www.geneanet.org{p.Value<string>("image_base_url").TrimEnd('/')}/",
+                URL = p.Value<string>("image_route")
+            }).ToArray();
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var _p);
 
             // TODO: Necessite un token
@@ -111,7 +116,7 @@ namespace GeneaGrab.Providers
         #endregion
 
         #region Page
-        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.URL}/{Page.Number}");
+        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult(Registry.URL);
         public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
             var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
@@ -126,13 +131,11 @@ namespace GeneaGrab.Providers
             if (tryGet.success) return tryGet.image;
 
             progress?.Invoke(Progress.Unknown);
-            var chemin_image = Uri.EscapeDataString($"doc/{page.URL}");
-            var baseURL = $"https://www.geneanet.org/viewer/zoomify/api/{chemin_image}/";
             var client = new HttpClient();
             client.DefaultRequestHeaders.Add("UserAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0");
 
             if (!page.TileSize.HasValue)
-                (page.Width, page.Height, page.TileSize) = await Zoomify.ImageData(baseURL, client);
+                (page.Width, page.Height, page.TileSize) = await Zoomify.ImageData(page.DownloadURL, client);
 
             if (page.MaxZoom == -1) page.MaxZoom = Zoomify.CalculateIndex(page);
             page.Zoom = zoom < page.MaxZoom ? (int)Math.Ceiling(zoom) : page.MaxZoom;
@@ -143,7 +146,7 @@ namespace GeneaGrab.Providers
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (int y = 0; y < tiles.Y; y++)
                 for (int x = 0; x < tiles.X; x++)
-                    tasks.Add(Grabber.GetImage($"{baseURL}TileGroup0/{page.Zoom}-{x}-{y}.jpg", client).ContinueWith((task) =>
+                    tasks.Add(Grabber.GetImage($"{page.DownloadURL}TileGroup0/{page.Zoom}-{x}-{y}.jpg", client).ContinueWith((task) =>
                     {
                         progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
                         return task.Result;
