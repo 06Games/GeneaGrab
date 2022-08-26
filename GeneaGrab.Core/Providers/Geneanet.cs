@@ -127,8 +127,8 @@ namespace GeneaGrab.Providers
         public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page), progress);
         public static async Task<Image> GetTiles(Registry Registry, RPage page, double zoom, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
-            if (tryGet.success) return tryGet.image;
+            var (success, image) = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (success) return image;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
@@ -142,7 +142,7 @@ namespace GeneaGrab.Providers
             var (tiles, diviser) = Zoomify.NbTiles(page, page.Zoom);
 
             progress?.Invoke(0);
-            if (tryGet.image == null) tryGet.image = new Image<Rgb24>(page.Width, page.Height);
+            if (image == null) image = new Image<Rgb24>(page.Width, page.Height);
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (int y = 0; y < tiles.Y; y++)
                 for (int x = 0; x < tiles.X; x++)
@@ -153,13 +153,12 @@ namespace GeneaGrab.Providers
                     }), (page.TileSize.Value, diviser, new Point(x, y)));
 
             await Task.WhenAll(tasks.Keys).ConfigureAwait(false);
+            foreach (var tile in tasks) image = image.MergeTile(tile.Key.Result, tile.Value);
             progress?.Invoke(Progress.Finished);
-            foreach (var tile in tasks) tryGet.image = tryGet.image.MergeTile(tile.Key.Result, tile.Value);
 
             Data.Providers["Geneanet"].Registries[Registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(Registry, page, tryGet.image, false).ConfigureAwait(false);
-            return tryGet.image;
-
+            await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
+            return image;
         }
         #endregion
     }
