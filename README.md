@@ -5,7 +5,9 @@
 ## Supported providers
 ### France
   * [Geneanet](https://www.geneanet.org/)
+  * [Nice Historique](http://www.nicehistorique.org/)
   * [Archives départementales des Alpes-Maritimes](https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html)
+  * [Archives départementales de la Charente-Maritime](https://www.archinoe.net/v2/ad17/registre.html)
   * [Archives départementales des Deux-Sèvres et de la Vienne](https://archives-deux-sevres-vienne.fr/)
 ### Italy
   * [Antenati](https://www.antenati.san.beniculturali.it/)
