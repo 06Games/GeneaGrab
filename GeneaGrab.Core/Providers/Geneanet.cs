@@ -116,7 +116,7 @@ namespace GeneaGrab.Providers
         #endregion
 
         #region Page
-        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult(Registry.URL);
+        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult(Page.URL);
         public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
             var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
