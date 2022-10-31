@@ -1,29 +1,23 @@
-﻿using System;
-using System.Linq;
-using Windows.ApplicationModel;
-using Windows.ApplicationModel.Activation;
+﻿using Avalonia;
+using Avalonia.ReactiveUI;
+using System;
 
 namespace GeneaGrab
 {
-    public static class Program
+    class Program
     {
-        static void Main(string[] _)
-        {
-            IActivatedEventArgs activatedArgs = AppInstance.GetActivatedEventArgs();
+        // Initialization code. Don't use any Avalonia, third-party APIs or any
+        // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
+        // yet and stuff might break.
+        [STAThread]
+        public static void Main(string[] args) => BuildAvaloniaApp()
+            .StartWithClassicDesktopLifetime(args);
 
-            // If the Windows shell indicates a recommended instance, then the app can choose to redirect this activation to that instance instead.
-            if (AppInstance.RecommendedInstance != null)
-            {
-                AppInstance.RecommendedInstance.RedirectActivationTo();
-                return;
-            }
-
-            AppInstance instance = null;
-            if (activatedArgs.Kind != ActivationKind.Launch) instance = AppInstance.GetInstances().FirstOrDefault();
-            if (instance is null) instance = AppInstance.FindOrRegisterInstanceForKey(Guid.NewGuid().ToString());
-
-            if (instance.IsCurrentInstance) Windows.UI.Xaml.Application.Start((p) => new App()); // If we successfully registered this instance, we can now just go ahead and do normal XAML initialization.
-            else instance.RedirectActivationTo(); // Some other instance has registered for this key, so we'll redirect this activation to that instance instead.
-        }
+        // Avalonia configuration, don't remove; also used by visual designer.
+        public static AppBuilder BuildAvaloniaApp()
+            => AppBuilder.Configure<App>()
+                .UsePlatformDetect()
+                .LogToTrace()
+                .UseReactiveUI();
     }
 }
