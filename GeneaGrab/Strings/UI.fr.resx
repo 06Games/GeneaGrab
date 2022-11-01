@@ -1,0 +1,71 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="AppDescription" xml:space="preserve">
+        <value>Télécharger depuis les archives départementales n'a jamais été aussi facile !</value>
+    </data>
+    <data name="AppDisplayName" xml:space="preserve">
+        <value>GeneaGrab</value>
+    </data>
+    <data name="Registry.Ark" xml:space="preserve">
+        <value>Copier la référence</value>
+    </data>
+    <data name="Registry.Download" xml:space="preserve">
+        <value>Télécharger</value>
+    </data>
+    <data name="Registry.Notes" xml:space="preserve">
+        <value>Remarques</value>
+    </data>
+    <data name="Registry.OpenFolder" xml:space="preserve">
+        <value>Ouvrir le dossier</value>
+    </data>
+    <data name="Settings_About.Text" xml:space="preserve">
+        <value>À propos de cette application</value>
+    </data>
+    <data name="Settings_AboutDescription.Text" xml:space="preserve">
+        <value>Télécharger depuis les archives départementales n'a jamais été aussi facile !</value>
+    </data>
+    <data name="Settings_Personalization.Text" xml:space="preserve">
+        <value>Personnalisation</value>
+    </data>
+    <data name="Settings_PrivacyTermsLink.Content" xml:space="preserve">
+        <value>Code source</value>
+    </data>
+    <data name="Settings_PrivacyTermsLink.NavigateUri" xml:space="preserve">
+        <value>https://github.com/06Games/GeneaGrab</value>
+    </data>
+    <data name="Settings_Theme.Text" xml:space="preserve">
+        <value>Thème</value>
+    </data>
+    <data name="Settings_Theme_Dark.Content" xml:space="preserve">
+        <value>Sombre</value>
+    </data>
+    <data name="Settings_Theme_Default.Content" xml:space="preserve">
+        <value>Système</value>
+    </data>
+    <data name="Settings_Theme_Light.Content" xml:space="preserve">
+        <value>Clair</value>
+    </data>
+    <data name="Tab.ProviderList" xml:space="preserve">
+        <value>Plateformes</value>
+    </data>
+    <data name="Tab.RegistriesPage" xml:space="preserve">
+        <value>Registres</value>
+    </data>
+    <data name="Tab.Registry" xml:space="preserve">
+        <value>Consultation d'un registre</value>
+    </data>
+    <data name="Tab.SettingsPage" xml:space="preserve">
+        <value>Paramètres</value>
+    </data>
+</root>

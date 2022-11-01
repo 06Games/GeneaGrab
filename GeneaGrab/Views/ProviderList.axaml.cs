@@ -2,15 +2,17 @@
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using FluentAvalonia.UI.Controls;
 
 namespace GeneaGrab.Views;
 
-public partial class ProviderList : UserControl
+public partial class ProviderList : UserControl, ITabPage
 {
-    public ProviderList()
-    {
-        InitializeComponent();
-    }
+    public Symbol IconSource => Symbol.World;
+    public string? DynaTabHeader => null;
+    public string? Identifier => null;
+    
+    public ProviderList() => InitializeComponent();
 
     private void InitializeComponent()
     {

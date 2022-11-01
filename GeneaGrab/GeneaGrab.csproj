@@ -29,12 +29,21 @@
         <Generator>ResXFileCodeGenerator</Generator>
         <LastGenOutput>Core.Designer.cs</LastGenOutput>
       </EmbeddedResource>
+      <EmbeddedResource Update="Strings\UI.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>UI.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
     <ItemGroup>
       <Compile Update="Strings\Core.Designer.cs">
         <DesignTime>True</DesignTime>
         <AutoGen>True</AutoGen>
         <DependentUpon>Strings.resx</DependentUpon>
+      </Compile>
+      <Compile Update="Strings\UI.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>UI.resx</DependentUpon>
       </Compile>
     </ItemGroup>
 </Project>

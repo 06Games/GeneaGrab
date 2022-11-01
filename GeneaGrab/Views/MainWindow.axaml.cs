@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Avalonia.Controls;
@@ -15,8 +14,8 @@ namespace GeneaGrab.Views;
 public interface ITabPage
 {
     Symbol IconSource { get; }
-    string DynaTabHeader { get; }
-    string Identifier { get; }
+    string? DynaTabHeader { get; }
+    string? Identifier { get; }
 }
     
 public partial class MainWindow : Window
@@ -88,7 +87,7 @@ public partial class MainWindow : Window
         var frameData = frame?.Content as ITabPage;
 
         tab.IconSource = frameData is null ? null : new SymbolIconSource { Symbol = frameData.IconSource };
-        tab.Header = frameData is null ? frame?.SourcePageType.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Shell/{frame?.SourcePageType.Name}");
+        tab.Header = frameData is null ? frame?.SourcePageType.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Tab.{frame?.SourcePageType.Name}", ResourceExtensions.Resource.UI);
         tab.Tag = frameData?.Identifier;
         System.Diagnostics.Debug.WriteLine(tab.Tag);
     }

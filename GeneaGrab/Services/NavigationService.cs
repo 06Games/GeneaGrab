@@ -66,8 +66,8 @@ public static class NavigationService
     }
     public static bool CloseTab(TabViewItem tab)
     {
-        if (!tab.IsClosable) return false;
-        (TabView?.TabItems as IList)?.Remove(tab);
+        if (!tab.IsClosable || TabView == null) return false;
+        (TabView.TabItems as IList)?.Remove(tab);
         TabRemoved?.Invoke(tab);
         return true;
     }

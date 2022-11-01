@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="AppDisplayName" xml:space="preserve">
+    <value>GeneaGrab</value>
+        <comment>Application display name</comment>
+  </data>
+    <data name="AppDescription" xml:space="preserve">
+    <value>Downloading from the departmental archives has never been easier!</value>
+        <comment>Application description</comment>
+  </data>
+    <data name="Settings_Theme.Text" xml:space="preserve">
+    <value>Theme</value>
+        <comment>Choose theme text for Settings</comment>
+  </data>
+    <data name="Settings_Theme_Dark.Content" xml:space="preserve">
+    <value>Dark</value>
+        <comment>Dark theme text for Settings</comment>
+  </data>
+    <data name="Settings_Theme_Default.Content" xml:space="preserve">
+    <value>Windows default</value>
+        <comment>Windows default theme text for Settings</comment>
+  </data>
+    <data name="Settings_Theme_Light.Content" xml:space="preserve">
+    <value>Light</value>
+        <comment>Light theme text for Settings</comment>
+  </data>
+    <data name="Settings_About.Text" xml:space="preserve">
+    <value>About this application</value>
+        <comment>About this application title for Settings</comment>
+  </data>
+    <data name="Settings_AboutDescription.Text" xml:space="preserve">
+    <value>Downloading from the departmental archives has never been easier!</value>
+        <comment>About this application description for Settings</comment>
+  </data>
+    <data name="Settings_PrivacyTermsLink.Content" xml:space="preserve">
+    <value>Source code</value>
+        <comment>Privacy Statement link content for Settings</comment>
+  </data>
+    <data name="Settings_PrivacyTermsLink.NavigateUri" xml:space="preserve">
+    <value>https://github.com/06Games/GeneaGrab</value>
+        <comment>Here is your Privacy Statement url for Settings</comment>
+  </data>
+    <data name="Settings_Personalization.Text" xml:space="preserve">
+    <value>Personalization</value>
+        <comment>Personalization text for Settings</comment>
+  </data>
+    <data name="Registry.Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+    <data name="Registry.OpenFolder" xml:space="preserve">
+    <value>Open folder</value>
+  </data>
+    <data name="Tab.ProviderList" xml:space="preserve">
+    <value>Platforms</value>
+  </data>
+    <data name="Tab.RegistriesPage" xml:space="preserve">
+    <value>Registers</value>
+  </data>
+    <data name="Tab.Registry" xml:space="preserve">
+    <value>Consulting a register</value>
+  </data>
+    <data name="Tab.SettingsPage" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+    <data name="Registry.Ark" xml:space="preserve">
+    <value>Copy reference</value>
+  </data>
+    <data name="Registry.Notes" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+</root>
