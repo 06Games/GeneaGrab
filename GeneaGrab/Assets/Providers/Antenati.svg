@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="84px" height="79px" viewBox="0 0 84 79" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><script xmlns=""/>
+    <title>Artboard</title>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group-4" fill-rule="nonzero">
+            <rect id="Rectangle" fill="#F2AA3E" x="29" y="3" width="16" height="25" rx="3"/>
+            <path d="M34,17.5769231 L40,17.5769231 C41.6568542,17.5769231 43,18.9200688 43,20.5769231 L43,28.4230769 L43,28.4230769 L31,28.4230769 L31,20.5769231 C31,18.9200688 32.3431458,17.5769231 34,17.5769231 Z" id="Rectangle" fill="#FFFFFF"/>
+            <rect id="Rectangle" fill="#D75F43" x="69" y="35" width="15" height="22" rx="3"/>
+            <path d="M74.2307692,48 L79,48 C80.6568542,48 82,49.3431458 82,51 L82,57 L82,57 L71.2307692,57 L71.2307692,51 C71.2307692,49.3431458 72.573915,48 74.2307692,48 Z" id="Rectangle" fill="#FFFFFF"/>
+            <g id="Group-2" transform="translate(73.000000, 39.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="3.5" cy="3.5" r="3.5"/>
+            </g>
+            <rect id="Rectangle" fill="#58A09A" x="0" y="0" width="19" height="28" rx="3"/>
+            <path d="M5,16 L14,16 C15.6568542,16 17,17.3431458 17,19 L17,28 L17,28 L2,28 L2,19 C2,17.3431458 3.34314575,16 5,16 Z" id="Rectangle" fill="#FFFFFF"/>
+            <ellipse id="Oval" fill="#58A09A" cx="23.5" cy="33.5" rx="10.5" ry="9.5"/>
+            <rect id="Rectangle" fill="#D75F43" x="13" y="22" width="21" height="28" rx="3"/>
+            <g id="Group-2" transform="translate(19.000000, 27.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="4.5" cy="4.5" r="4.5"/>
+            </g>
+            <path d="M19,39 L28,39 C29.6568542,39 31,40.3431458 31,42 L31,53 L31,53 L16,53 L16,42 C16,40.3431458 17.3431458,39 19,39 Z" id="Rectangle" fill="#FFFFFF"/>
+            <rect id="Rectangle" fill="#395487" x="42" y="22" width="24" height="35" rx="3"/>
+            <g id="Group-2" transform="translate(48.000000, 28.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="6" cy="6" r="6"/>
+            </g>
+            <path d="M47,44.1176471 L60,44.1176471 C61.6568542,44.1176471 63,45.4607928 63,47.1176471 L63,59.8823529 L63,59.8823529 L44,59.8823529 L44,47.1176471 C44,45.4607928 45.3431458,44.1176471 47,44.1176471 Z" id="Rectangle" fill="#FFFFFF"/>
+            <rect id="Rectangle" fill="#58A09A" x="70" y="66" width="4" height="9" rx="1"/>
+            <rect id="Rectangle" fill="#F2AA3E" x="30" y="46" width="16" height="22" rx="3"/>
+            <g id="Group-2" transform="translate(34.000000, 50.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="4" cy="4" r="4"/>
+            </g>
+            <path d="M35,61 L41,61 C42.6568542,61 44,62.3431458 44,64 L44,68 L44,68 L32,68 L32,64 C32,62.3431458 33.3431458,61 35,61 Z" id="Rectangle" fill="#FFFFFF"/>
+            <rect id="Rectangle" fill="#58A09A" x="55" y="53" width="19" height="25" rx="3"/>
+            <g id="Group-2" transform="translate(60.000000, 58.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="4.5" cy="4.5" r="4.5"/>
+            </g>
+            <circle id="Oval" fill="#58A09A" cx="11" cy="57" r="11"/>
+            <rect id="Rectangle" fill="#395487" x="0" y="46" width="22" height="28" rx="3"/>
+            <g id="Group-2" transform="translate(6.000000, 51.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="5" cy="5" r="5"/>
+            </g>
+            <path d="M6,64 L16,64 C17.6568542,64 19,65.3431458 19,67 L19,74 L19,74 L3,74 L3,67 C3,65.3431458 4.34314575,64 6,64 Z" id="Rectangle" fill="#FFFFFF"/>
+            <g id="Group-2" transform="translate(33.000000, 7.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="4" cy="4" r="4"/>
+            </g>
+            <g id="Group-2" transform="translate(5.000000, 4.000000)" fill="#FFFFFF">
+                <circle id="Oval" cx="4.5" cy="4.5" r="4.5"/>
+            </g>
+            <path d="M60,70 L69,70 C70.6568542,70 72,71.3431458 72,73 L72,78 L72,78 L57,78 L57,73 C57,71.3431458 58.3431458,70 60,70 Z" id="Rectangle" fill="#FFFFFF"/>
+        </g>
+    </g>
+</svg>

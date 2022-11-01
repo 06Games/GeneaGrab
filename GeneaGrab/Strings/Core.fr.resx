@@ -1,0 +1,122 @@
+﻿<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="Provider.AD06" xml:space="preserve">
+        <value>Archives départementales des Alpes-Maritimes</value>
+    </data>
+    <data name="Provider.AD79-86" xml:space="preserve">
+        <value>Archives départementales des Deux-Sèvres et de la Vienne</value>
+    </data>
+    <data name="Provider.CG06" xml:space="preserve">
+        <value>Archives départementales des Alpes-Maritimes (CG06)</value>
+    </data>
+    <data name="Provider.Geneanet" xml:space="preserve">
+        <value>Geneanet</value>
+    </data>
+    <data name="Provider.NiceHistorique" xml:space="preserve">
+        <value>Nice Historique</value>
+    </data>
+    <data name="Registry.Name" xml:space="preserve">
+    <value>Registre</value>
+  </data>
+    <data name="Registry.Type.Banns" xml:space="preserve">
+        <value>Publication des bans</value>
+    </data>
+    <data name="Registry.Type.Baptism" xml:space="preserve">
+        <value>Baptêmes</value>
+    </data>
+    <data name="Registry.Type.BaptismTable" xml:space="preserve">
+        <value>Table des baptêmes</value>
+    </data>
+    <data name="Registry.Type.Birth" xml:space="preserve">
+        <value>Naissances</value>
+    </data>
+    <data name="Registry.Type.BirthTable" xml:space="preserve">
+        <value>Table des naissances</value>
+    </data>
+    <data name="Registry.Type.Book" xml:space="preserve">
+        <value>Livre</value>
+    </data>
+    <data name="Registry.Type.Burial" xml:space="preserve">
+        <value>Sépultures</value>
+    </data>
+    <data name="Registry.Type.BurialTable" xml:space="preserve">
+        <value>Table des sépultures</value>
+    </data>
+    <data name="Registry.Type.CadastralAssemblyTable" xml:space="preserve">
+        <value>Tableau d'assemblage cadastral</value>
+    </data>
+    <data name="Registry.Type.CadastralMap" xml:space="preserve">
+        <value>Plan cadastral</value>
+    </data>
+    <data name="Registry.Type.CadastralMatrix" xml:space="preserve">
+        <value>Matrice cadastrale</value>
+    </data>
+    <data name="Registry.Type.CadastralSectionStates" xml:space="preserve">
+        <value>États de section cadastrale</value>
+    </data>
+    <data name="Registry.Type.Census" xml:space="preserve">
+        <value>Recensement</value>
+    </data>
+    <data name="Registry.Type.Communion" xml:space="preserve">
+        <value>Communions</value>
+    </data>
+    <data name="Registry.Type.Confirmation" xml:space="preserve">
+        <value>Confirmations</value>
+    </data>
+    <data name="Registry.Type.Death" xml:space="preserve">
+        <value>Décès</value>
+    </data>
+    <data name="Registry.Type.DeathTable" xml:space="preserve">
+        <value>Table des décès</value>
+    </data>
+    <data name="Registry.Type.LiberStatutAnimarum" xml:space="preserve">
+        <value>États des âmes</value>
+    </data>
+    <data name="Registry.Type.Marriage" xml:space="preserve">
+        <value>Mariages</value>
+    </data>
+    <data name="Registry.Type.MarriageTable" xml:space="preserve">
+        <value>Table des mariages</value>
+    </data>
+    <data name="Registry.Type.Military" xml:space="preserve">
+        <value>Militaire</value>
+    </data>
+    <data name="Registry.Type.Newspaper" xml:space="preserve">
+        <value>Journal</value>
+    </data>
+    <data name="Registry.Type.Notarial" xml:space="preserve">
+        <value>Actes notariés</value>
+    </data>
+    <data name="Registry.Type.Other" xml:space="preserve">
+        <value>Autres</value>
+    </data>
+    <data name="Registry.Type.Periodical" xml:space="preserve">
+        <value>Périodique</value>
+    </data>
+    <data name="Registry.Type.Protocol" xml:space="preserve">
+        <value>Protocole</value>
+    </data>
+    <data name="Registry.Type.Minutes" xml:space="preserve">
+        <value>Minute</value>
+    </data>
+    <data name="Registry.Type.Engrossments" xml:space="preserve">
+        <value>Grosse</value>
+    </data>
+    <data name="Registry.Type.Catalogue" xml:space="preserve">
+        <value>Répertoire</value>
+    </data>
+    <data name="Provider.AD17" xml:space="preserve">
+        <value>Archives départementales de la Charente-Maritime</value>
+    </data>
+</root>

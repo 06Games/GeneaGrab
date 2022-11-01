@@ -1,12 +1,15 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="using:GeneaGrab"
+             xmlns:helpers="clr-namespace:GeneaGrab.Helpers"
+             xmlns:styling="clr-namespace:FluentAvalonia.Styling;assembly=FluentAvalonia"
              x:Class="GeneaGrab.App">
-    <Application.DataTemplates>
-        <local:ViewLocator/>
-    </Application.DataTemplates>
+    
+    <Application.Resources>
+        <helpers:BitmapAssetValueConverter x:Key="VariableImage"/>
+        <helpers:ResourceConverter x:Key="Translate"/>
+    </Application.Resources>
 
     <Application.Styles>
-        <FluentTheme Mode="Light"/>
+        <styling:FluentAvaloniaTheme />
     </Application.Styles>
 </Application>

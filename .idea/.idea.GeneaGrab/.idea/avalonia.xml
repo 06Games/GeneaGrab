@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AvaloniaProject">
+    <option name="projectPerEditor">
+      <map>
+        <entry key="GeneaGrab/App.axaml" value="GeneaGrab/GeneaGrab.csproj" />
+        <entry key="GeneaGrab/Views/MainPage.xaml" value="GeneaGrab/GeneaGrab.csproj" />
+        <entry key="GeneaGrab/Views/MainWindow.axaml" value="GeneaGrab/GeneaGrab.csproj" />
+        <entry key="GeneaGrab/Views/ProviderList.axaml" value="GeneaGrab/GeneaGrab.csproj" />
+      </map>
+    </option>
+  </component>
+</project>

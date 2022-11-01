@@ -1,17 +1,40 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:GeneaGrab.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GeneaGrab.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/Logo/Icon.png"
         Title="GeneaGrab">
 
-    <Design.DataContext>
-        <vm:MainWindowViewModel/>
-    </Design.DataContext>
+    <Panel>
+        <controls:TabView Name="TabView" AddTabButtonClick="AddTab" TabCloseRequested="CloseTab" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <controls:TabView.TabStripHeader>
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel Name="ShellTitlebarInset" />
+                    <Button IsEnabled="{Binding IsBackEnabled, Mode=OneWay}" Click="BackRequested">
+                        <controls:SymbolIcon Symbol="Back" />
+                    </Button>
+                    <Button IsEnabled="{Binding IsForwardEnabled, Mode=OneWay}" Click="ForwardRequested" RenderTransformOrigin="0.5,0.5">
+                        <controls:SymbolIcon Symbol="Forward" />
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
+                    </Button>
+                </StackPanel>
+            </controls:TabView.TabStripHeader>
+            <controls:TabView.TabStripFooter>
+                <Grid> <!--ColumnSpacing="25" Padding="25,0"-->
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition MaxWidth="400" Width="300" MinWidth="200" />
+                        <ColumnDefinition MaxWidth="100" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <AutoCompleteBox TextChanged="RegistrySearch_TextChanged" SelectionChanged="RegistrySearch_SuggestionChosen" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" Name="CustomDragRegion" />
+                </Grid>
+            </controls:TabView.TabStripFooter>
+        </controls:TabView>
+    </Panel>
 </Window>
