@@ -9,6 +9,7 @@
         <entry key="GeneaGrab/Views/ProviderList.axaml" value="GeneaGrab/GeneaGrab.csproj" />
         <entry key="GeneaGrab/Views/RegistriesList.axaml" value="GeneaGrab/GeneaGrab.csproj" />
         <entry key="GeneaGrab/Views/RegistriesList.xaml" value="GeneaGrab/GeneaGrab.csproj" />
+        <entry key="GeneaGrab/Views/RegistryViewer.axaml" value="GeneaGrab/GeneaGrab.csproj" />
       </map>
     </option>
   </component>

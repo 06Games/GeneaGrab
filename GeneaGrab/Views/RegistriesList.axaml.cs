@@ -1,12 +1,9 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
-using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
-using GeneaGrab;
 using GeneaGrab.Services;
 
 namespace GeneaGrab.Views
@@ -77,7 +74,7 @@ namespace GeneaGrab.Views
 
             var node = (TreeViewItem)treeView.ItemContainerGenerator.Index.ContainerFromItem(data);
             if (data.Children.Any()) node.IsExpanded = !node.IsExpanded;
-            //else if (data.Register != null) NavigationService.Navigate(typeof(Registry), new RegistryInfo(data.Register));
+            else if (data.Register != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Register));
         }
     }
 

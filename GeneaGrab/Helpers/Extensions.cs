@@ -11,6 +11,7 @@ public static class Extensions
     {
         var ms = new MemoryStream();
         image.Save(ms, new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder());
+        ms.Seek(0, SeekOrigin.Begin);
         return new Bitmap(ms);
     }
 

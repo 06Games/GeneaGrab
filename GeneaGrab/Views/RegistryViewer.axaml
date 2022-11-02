@@ -1,0 +1,120 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:GeneaGrab.Views"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="GeneaGrab.Views.RegistryViewer">
+    <Design.DataContext>
+        <views:RegistryViewer />
+    </Design.DataContext>
+
+    <Grid x:Name="LayoutRoot">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition MaxHeight="225" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition MinWidth="230" MaxWidth="260" />
+        </Grid.ColumnDefinitions>
+
+        <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="ViewerRelativePanel">
+            <views:ZoomPanel x:Name="ImagePanel"
+                             RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True">
+                <!--Width="{Binding Width, ElementName=ViewerRelativePanel, Mode=OneWay}" Height="{Binding Height, ElementName=ViewerRelativePanel, Mode=OneWay}">-->
+                <Grid x:Name="MainGrid" ColumnDefinitions="*,*,*">
+                    <Image Grid.Column="1" Name="Image" Stretch="Uniform" />
+                    <Canvas Grid.Column="1" Name="ImageCanvas"></Canvas>
+                </Grid>
+            </views:ZoomPanel>
+            <ProgressBar Name="ImageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" IsVisible="False" Maximum="1" />
+        </RelativePanel>
+        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0" BorderBrush="Gray">
+            <RelativePanel Margin="15">
+                <controls:NumberBox Name="PageNumber" PlaceholderText="Page" Minimum="1" Width="90" Height="32.5"></controls:NumberBox>
+                <TextBlock Name="PageTotal" Text="/ 1" Margin="100 6.25 0 0" Height="20" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
+                <ListBox Name="PageList" Items="{Binding Pages}" SelectionChanged="ChangePage"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                         RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
+                         Margin="0 45 0 0 ">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="views:PageList">
+                            <StackPanel Width="125">
+                                <StackPanel Width="125" Height="100">
+                                    <Image Source="{Binding Thumbnail}" MaxHeight="125" MaxWidth="125" />
+                                </StackPanel>
+                                <TextBlock Text="{Binding Number}" Margin="0,6,0,0" TextAlignment="Center" Width="125" />
+                                <TextBlock Text="{Binding Notes}" TextAlignment="Center" Width="125" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </RelativePanel>
+        </Border>
+
+        <Border Grid.Column="1" Grid.RowSpan="2" BorderThickness="1 0 0 0" BorderBrush="Gray">
+            <StackPanel Spacing="15" Margin="15">
+                <StackPanel>
+                    <TextBlock Name="Info_LocationCity" FontSize="18" Text="City" TextWrapping="Wrap" />
+                    <TextBlock Name="Info_LocationDistrict" Text="District" TextWrapping="Wrap" />
+                    <TextBlock Name="Info_RegistryType" Text="Type" FontSize="18" TextWrapping="Wrap" Margin="0 12 0 0" />
+                    <TextBlock Name="Info_RegistryDate" Text="From - To" TextWrapping="Wrap" />
+                    <TextBlock Name="Info_RegistryNotes" Text="Notes" TextWrapping="Wrap" />
+                    <TextBlock Name="Info_RegistryID" Text="Document number" TextWrapping="Wrap" Margin="0 12 0 0" />
+                </StackPanel>
+
+                <StackPanel Spacing="15">
+                    <Button Width="200" Content="{Binding DownloadText}" Click="Download" />
+                    <Button Width="200" Content="{Binding OpenFolderText}" Click="OpenFolder" />
+                    <Button Width="200" Content="{Binding ArkText}" Click="Ark" />
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Margin="0,25,0,5" FontSize="16" Text="{Binding NotesText}" />
+                    <TextBox Name="PageNotes" Height="100" FontSize="12" Background="Transparent" BorderBrush="Transparent" AcceptsReturn="True" Padding="0" />
+                </StackPanel>
+
+                <StackPanel Margin="0,25,0,5" x:Name="IndexPanel">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="22" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" FontSize="16">Index</TextBlock>
+                        <Button Grid.Column="1" Content="+" Padding="5,0,5,1" Click="AddIndex" />
+                    </Grid>
+                    <ListBox Items="{Binding Index}" MaxHeight="500">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate DataType="views:Index">
+                                <Grid Width="200">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="100" />
+                                        <ColumnDefinition Width="100" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding FormatedDate}" FontSize="12" />
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FormatedType}" FontSize="12" TextAlignment="Right" />
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding District}" FontSize="13" />
+                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Retranscription}" Margin="0,5" />
+                                    <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Notes}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
