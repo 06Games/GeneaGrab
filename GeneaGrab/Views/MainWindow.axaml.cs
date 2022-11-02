@@ -43,10 +43,14 @@ public partial class MainWindow : Window
     private void Initialize()
     {
         NavigationService.TabView = this.FindControl<TabView>("TabView");
-        NavigationService.Navigated += (s, e) => FrameChanged();
+        NavigationService.Navigated += (s, e) =>
+        {
+            FrameChanged();
+            if (e.Content is Page page) page.OnNavigatedTo(e);
+        };
         NavigationService.NavigationFailed += (s, e) => throw e.Exception;
         NavigationService.TabAdded += UpdateTitle;
-        NavigationService.TabRemoved += (tab) => { if (NavigationService.TabView.TabItems.Count() <= 1) NewTab(); };
+        NavigationService.TabRemoved += _ => { if (NavigationService.TabView.TabItems.Count() <= 1) NewTab(); };
         NavigationService.SelectionChanged += (s, e) => FrameChanged();
 
         //NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;

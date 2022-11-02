@@ -9,21 +9,15 @@
     <Panel>
         <Grid x:Name="ContentArea">
             <Grid>
-                <ListBox x:Name="ProvidersList" Items="{Binding Providers}"
-                         SelectionChanged="ProvidersList_OnSelectionChanged">
+                <ListBox x:Name="ProvidersList" Items="{Binding Providers}" SelectionChanged="ProvidersList_OnSelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="local:Provider">
                             <Grid RowDefinitions="*,*" ColumnDefinitions="Auto,*">
                                 <Grid Grid.Column="0" Grid.RowSpan="2">
-                                    <Ellipse Width="32" Height="32" VerticalAlignment="Center"
-                                             HorizontalAlignment="Center"
-                                             Fill="{StaticResource ButtonBackground}" />
-                                    <Ellipse Width="32" Height="32" VerticalAlignment="Center"
-                                             HorizontalAlignment="Center">
+                                    <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{StaticResource ButtonBackground}" />
+                                    <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <Ellipse.Fill>
-                                            <ImageBrush
-                                                Source="{Binding Icon, Converter={StaticResource VariableImage}}">
-                                            </ImageBrush>
+                                            <ImageBrush Source="{Binding Icon, Converter={StaticResource VariableImage}}" />
                                         </Ellipse.Fill>
                                     </Ellipse>
                                 </Grid>

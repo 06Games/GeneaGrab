@@ -3,6 +3,7 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using FluentAvalonia.UI.Controls;
+using GeneaGrab.Services;
 
 namespace GeneaGrab.Views;
 
@@ -20,13 +21,13 @@ public partial class ProviderList : UserControl, ITabPage
         AvaloniaXamlLoader.Load(this);
     }
 
-    public Collection<Provider> Providers => new(Data.Providers.Values.ToList());
+    public ObservableCollection<Provider> Providers => new(Data.Providers.Values);
     protected void ProvidersList_OnSelectionChanged(object? _, SelectionChangedEventArgs e)
     {
         if (e.AddedItems.Count < 1) return;
 
         var provider = e.AddedItems[0] as Provider;
-            
+        NavigationService.Navigate(typeof(RegistriesPage), provider);
     }
 }
 

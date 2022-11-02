@@ -1,0 +1,25 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:GeneaGrab.Views"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="GeneaGrab.Views.RegistriesPage">
+
+    <Panel>
+        <Grid Name="ContentArea">
+            <Grid>
+                <TreeView Name="LocationList" Items="{Binding Items}" SelectionChanged="RegisterList_ItemInvoked">
+                    <TreeView.DataTemplates>
+                        <TreeDataTemplate DataType="views:RegistriesTreeStructure" ItemsSource="{Binding Children}">
+                            <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*">
+                                <TextBlock Grid.Column="1" Text="{Binding Title}" Margin="12,6,0,0" />
+                                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding SubTitle}" Margin="12,0,0,6" />
+                            </Grid>
+                        </TreeDataTemplate>
+                    </TreeView.DataTemplates>
+                </TreeView>
+            </Grid>
+        </Grid>
+    </Panel>
+</UserControl>
