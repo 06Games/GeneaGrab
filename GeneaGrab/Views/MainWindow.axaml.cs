@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Platform;
 using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Helpers;
@@ -18,27 +21,28 @@ public interface ITabPage
     string? Identifier { get; }
 }
     
-public partial class MainWindow : Window
+public partial class MainWindow : Window, INotifyPropertyChanged
 {
+    public bool IsMacOS => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+    public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+    public GridLength WindowsTitleBarWidth => new(IsWindows ? 150 : 15);
+    
     public MainWindow()
     {
+        if (IsWindows || IsMacOS)
+        {
+            ExtendClientAreaToDecorationsHint = true;
+            ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
+            ExtendClientAreaTitleBarHeightHint = -1;
+        }
+        
         InitializeComponent();
         DataContext = this;
         Initialize();
     }
         
-    private bool _isBackEnabled;
-    public bool IsBackEnabled
-    {
-        get => _isBackEnabled;
-        set => Set(ref _isBackEnabled, value);
-    }
-    private bool _isForwardEnabled;
-    public bool IsForwardEnabled
-    {
-        get => _isForwardEnabled;
-        set => Set(ref _isForwardEnabled, value);
-    }
+    public bool IsBackEnabled => NavigationService.CanGoBack;
+    public bool IsForwardEnabled => NavigationService.CanGoForward;
 
     private void Initialize()
     {
@@ -55,17 +59,6 @@ public partial class MainWindow : Window
 
         //NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
         NavigationService.Frame = NewTab().Content as Frame;
-
-
-        /*var coreTitleBar = Windows.ApplicationModel.Core.CoreApplication.GetCurrentView().TitleBar;
-        coreTitleBar.ExtendViewIntoTitleBar = true;
-        coreTitleBar.LayoutMetricsChanged += (sender, _) =>
-        {
-            CustomDragRegion.MinWidth = FlowDirection == FlowDirection.LeftToRight ? sender.SystemOverlayRightInset : sender.SystemOverlayLeftInset;
-            ShellTitlebarInset.MinWidth = FlowDirection == FlowDirection.LeftToRight ? sender.SystemOverlayLeftInset : sender.SystemOverlayRightInset;
-            CustomDragRegion.Height = ShellTitlebarInset.Height = sender.Height;
-        };
-        Window.Current.SetTitleBar(CustomDragRegion);*/
     }
 
     private TabViewItem NewTab() => NavigationService.NewTab(typeof(ProviderList));
@@ -77,10 +70,11 @@ public partial class MainWindow : Window
     private void BackRequested(object sender, RoutedEventArgs e) => NavigationService.GoBack();
     private void ForwardRequested(object sender, RoutedEventArgs e) => NavigationService.GoForward();
 
+    public new event PropertyChangedEventHandler PropertyChanged;
     private void FrameChanged()
     {
-        IsBackEnabled = NavigationService.CanGoBack;
-        IsForwardEnabled = NavigationService.CanGoForward;
+        PropertyChanged(this, new PropertyChangedEventArgs(nameof(IsBackEnabled)));
+        PropertyChanged(this, new PropertyChangedEventArgs(nameof(IsForwardEnabled)));
         UpdateSelectedTitle();
     }
     public static void UpdateSelectedTitle() => UpdateTitle(NavigationService.TabView?.SelectedItem as TabViewItem);
@@ -93,27 +87,19 @@ public partial class MainWindow : Window
         tab.IconSource = frameData is null ? null : new SymbolIconSource { Symbol = frameData.IconSource };
         tab.Header = frameData is null ? frame?.SourcePageType.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Tab.{frame?.SourcePageType.Name}", ResourceExtensions.Resource.UI);
         tab.Tag = frameData?.Identifier;
-        System.Diagnostics.Debug.WriteLine(tab.Tag);
-    }
-
-
-
-    private void Set<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (Equals(storage, value)) return;
-        storage = value;
+        Debug.WriteLine(tab.Tag);
     }
 
     protected void RegistrySearch_TextChanged(object? sender, EventArgs _) { if(sender is AutoCompleteBox searchBar) searchBar.Items = Search(searchBar.Text); }
     IEnumerable<Result> Search(string query)
     {
-        IEnumerable<Result> GetRegistries(Func<GeneaGrab.Registry, string> contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
+        IEnumerable<Result> GetRegistries(Func<Registry, string> contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
             .Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
             .Select(r => new Result { Text = $"{r.Location ?? r.LocationID}: {r.Name}", Value = new RegistryInfo(r) }));
 
-        if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries((r) => $"{r.Location ?? r.LocationID}: {r.Name}");
+        if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => $"{r.Location ?? r.LocationID}: {r.Name}");
 
-        var registries = GetRegistries((r) => r.URL).ToList() ?? new List<Result>();
+        var registries = GetRegistries(r => r.URL).ToList() ?? new List<Result>();
         if (!registries.Any()) 
             foreach (var (key, value) in Data.Providers) 
                 if (value.API.TryGetRegistryID(uri, out var _)) 

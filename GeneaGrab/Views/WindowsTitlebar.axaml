@@ -1,0 +1,74 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="GeneaGrab.Views.WindowsTitleBar"
+             DockPanel.Dock="Top">
+
+    <Grid VerticalAlignment="Stretch">
+        <DockPanel Name="TitleBar">
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Spacing="0">
+                <Button Width="46" VerticalAlignment="Stretch" BorderThickness="0" Name="MinimizeButton" ToolTip.Tip="Minimize">
+                    <Button.Resources>
+                        <!-- ReSharper disable once Xaml.RedundantResource -->
+                        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+                    </Button.Resources>
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="#44AAAAAA" />
+                        </Style>
+                        <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
+                    </Button.Styles>
+                    <controls:SymbolIcon Symbol="Pin" />
+                </Button>
+
+                <Button Width="46" VerticalAlignment="Stretch" BorderThickness="0" Name="MaximizeButton">
+                    <ToolTip.Tip>
+                        <ToolTip Content="Maximize" Name="MaximizeToolTip">
+                        </ToolTip>
+                    </ToolTip.Tip>
+
+                    <Button.Resources>
+                        <!-- ReSharper disable once Xaml.RedundantResource -->
+                        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+                    </Button.Resources>
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="#44AAAAAA" />
+                        </Style>
+                        <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
+                    </Button.Styles>
+                    <controls:SymbolIcon Symbol="FullScreenMaximize" Name="MaximizeIcon" />
+                </Button>
+
+                <Button Width="46" VerticalAlignment="Stretch" BorderThickness="0" Name="CloseButton" ToolTip.Tip="Close">
+                    <Button.Resources>
+                        <!-- ReSharper disable once Xaml.RedundantResource -->
+                        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+                    </Button.Resources>
+                    <Button.Styles>
+                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="Red" />
+                        </Style>
+                        <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                            <Setter Property="Background" Value="Transparent" />
+                        </Style>
+                        <Style Selector="Button:pointerover > Path">
+                            <Setter Property="Fill" Value="White" />
+                        </Style>
+                        <Style Selector="Button:not(:pointerover) > Path">
+                            <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+                        </Style>
+                    </Button.Styles>
+                    <controls:SymbolIcon Symbol="Dismiss" />
+                </Button>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</UserControl>
