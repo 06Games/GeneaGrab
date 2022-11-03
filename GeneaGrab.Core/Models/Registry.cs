@@ -1,7 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using GeneaGrab.Core.Models.Dates;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace GeneaGrab
 {
@@ -22,7 +25,7 @@ namespace GeneaGrab
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string CallNumber { get; set; }
         public string URL { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string ArkURL { get; set; }
-        [JsonProperty(ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))] public IEnumerable<RegistryType> Types { get; set; } = Array.Empty<RegistryType>();
+        [JsonProperty(ItemConverterType = typeof(StringEnumConverter))] public IEnumerable<RegistryType> Types { get; set; } = Array.Empty<RegistryType>();
         [JsonIgnore]
         public string TypeToString => Types.Any() ? string.Join(", ", Types.Select(t =>
         {
@@ -32,25 +35,25 @@ namespace GeneaGrab
 
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
 
-        public Core.Models.Dates.Date From { get; set; }
-        public Core.Models.Dates.Date To { get; set; }
+        public Date From { get; set; }
+        public Date To { get; set; }
         [JsonIgnore]
         public string Dates
         {
             get
             {
-                if (From != null && To != null && From == To) return From.ToString(Core.Models.Dates.Precision.Days);
-                else if (From != null && To != null)
+                if (From != null && To != null && From == To) return From.ToString(Precision.Days);
+                if (From != null && To != null)
                 {
                     var from = From;
                     var to = To;
-                    var format = Core.Models.Dates.Precision.Years;
-                    if (from.Precision >= Core.Models.Dates.Precision.Days && to.Precision >= Core.Models.Dates.Precision.Days && (from.Day != to.Day || from.Day.Value != 1)) format = Core.Models.Dates.Precision.Days;
-                    else if (from.Precision >= Core.Models.Dates.Precision.Months && to.Precision >= Core.Models.Dates.Precision.Months && (from.Month != to.Month || from.Month.Value != 1)) format = Core.Models.Dates.Precision.Months;
+                    var format = Precision.Years;
+                    if (from.Precision >= Precision.Days && to.Precision >= Precision.Days && (from.Day != to.Day || from.Day.Value != 1)) format = Precision.Days;
+                    else if (from.Precision >= Precision.Months && to.Precision >= Precision.Months && (from.Month != to.Month || from.Month.Value != 1)) format = Precision.Months;
                     return $"{from.ToString(format)} - {to.ToString(format)}";
                 }
-                else if (From != null) return $"{From.ToString(Core.Models.Dates.Precision.Days)} - ?";
-                else if (To != null) return $"? - {To.ToString(Core.Models.Dates.Precision.Days)}";
+                if (From != null) return $"{From.ToString(Precision.Days)} - ?";
+                if (To != null) return $"? - {To.ToString(Precision.Days)}";
                 return null;
             }
         }
@@ -85,7 +88,7 @@ namespace GeneaGrab
         public static bool operator !=(Registry one, Registry two) => !(one == two);
         public override int GetHashCode() => ID.GetHashCode();
     }
-    public class DateFormatConverter : Newtonsoft.Json.Converters.IsoDateTimeConverter { public DateFormatConverter(string format) => DateTimeFormat = format; }
+    public class DateFormatConverter : IsoDateTimeConverter { public DateFormatConverter(string format) => DateTimeFormat = format; }
     public class PagesConverter : JsonConverter<RPage[]>
     {
         public override RPage[] ReadJson(JsonReader reader, Type objectType, RPage[] existingValue, bool hasExistingValue, JsonSerializer serializer)
@@ -110,7 +113,7 @@ namespace GeneaGrab
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public string DownloadURL { get; set; }
 
         public int Zoom { get; set; } = -1;
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore), System.ComponentModel.DefaultValue(-1)] public int MaxZoom { get; set; } = -1;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore), DefaultValue(-1)] public int MaxZoom { get; set; } = -1;
         /// <summary>Total width of the image</summary>
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)] public int Width { get; set; }
         /// <summary>Total height of the image</summary>

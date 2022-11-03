@@ -44,11 +44,11 @@ namespace GeneaGrab.Core.Models.Dates
             return null;
         }
 
-        public override string ToString() => ToString(Precision.Seconds);
+        public override string ToString() => ToString(Precision);
         public string ToString(Precision precision)
         {
             var txt = new System.Text.StringBuilder();
-            var format = (Precision)Math.Max((int)precision, (int)Precision);
+            var format = (Precision)Math.Min((int)precision, (int)Precision);
 
             txt.Append(Year.Short);
             if (format == Precision.Years) return txt.ToString();
@@ -136,6 +136,21 @@ namespace GeneaGrab.Core.Models.Dates
                 return c != 0;
             }
         }
+        
+        public static bool operator ==(Date date1, Date date2)
+        {
+            if (ReferenceEquals(date1, date2)) return true;
+            if (date1 is null || date2 is null) return false;
+            if (date1.Precision != date2.Precision || date1.Calendar != date2.Calendar) return false;
+
+            if (date1.Precision >= Precision.Years && date1.Year?.Value != date2.Year?.Value) return false;
+            if (date1.Precision >= Precision.Months && date1.Month?.Value != date2.Month?.Value) return false;
+            if (date1.Precision >= Precision.Days && date1.Day?.Value != date2.Day?.Value) return false;
+            if (date1.Precision >= Precision.Hours && date1.Hour?.Value != date2.Hour?.Value) return false;
+            if (date1.Precision >= Precision.Minutes && date1.Minute?.Value != date2.Minute?.Value) return false;
+            return date1.Precision < Precision.Seconds || date1.Second?.Value == date2.Second?.Value;
+        }
+        public static bool operator !=(Date date1, Date date2) => !(date1 == date2);
     }
 
     class DateConverter : JsonConverter<Date>

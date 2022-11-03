@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
 
 namespace GeneaGrab.Core.Models.Dates
 {
@@ -13,7 +12,7 @@ namespace GeneaGrab.Core.Models.Dates
     [JsonObject(MemberSerialization.OptIn)]
     public abstract class Generic
     {
-        [JsonProperty()] public int Value { get; set; }
+        [JsonProperty] public int Value { get; set; }
         public virtual string Long => Medium;
         public virtual string Medium => Short;
         public virtual string Short => Value.ToString("00");
