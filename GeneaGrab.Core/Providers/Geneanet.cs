@@ -3,6 +3,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -128,18 +129,18 @@ namespace GeneaGrab.Providers
 
         #region Page
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult(Page.URL);
-        public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
-            if (tryGet.success) return tryGet.image;
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(Registry, page);
+            if (success) return stream;
             return await GetTiles(Registry, page, 0, progress);
         }
-        public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page) * 0.75F, progress);
-        public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page), progress);
-        public static async Task<Image> GetTiles(Registry Registry, RPage page, double zoom, Action<Progress> progress)
+        public Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page) * 0.75F, progress);
+        public Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, Zoomify.CalculateIndex(page), progress);
+        public static async Task<Stream> GetTiles(Registry Registry, RPage page, double zoom, Action<Progress> progress)
         {
-            var (success, image) = await Data.TryGetImageFromDrive(Registry, page, zoom);
-            if (success) return image;
+            var (success, stream) = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
@@ -158,7 +159,7 @@ namespace GeneaGrab.Providers
             var (tiles, diviser) = Zoomify.NbTiles(page, page.Zoom);
 
             progress?.Invoke(0);
-            if (image == null) image = new Image<Rgb24>(page.Width, page.Height);
+            Image image = new Image<Rgb24>(page.Width, page.Height);
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (int y = 0; y < tiles.Y; y++)
                 for (int x = 0; x < tiles.X; x++)
@@ -174,7 +175,7 @@ namespace GeneaGrab.Providers
 
             Data.Providers["Geneanet"].Registries[Registry.ID].Pages[page.Number - 1] = page;
             await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
-            return image;
+            return image.ToStream();
         }
         #endregion
     }

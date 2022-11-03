@@ -1,6 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -75,19 +76,19 @@ namespace GeneaGrab.Providers
         }
 
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.ArkURL}/{Page.Number}");
-        public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page);
-            if (tryGet.success) return tryGet.image;
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(Registry, page);
+            if (success) return stream;
             return await GetTiles(Registry, page, 0.1F, progress);
         }
-        public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
-        public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
-        public static async Task<Image> GetTiles(Registry Registry, RPage page, float scale, Action<Progress> progress)
+        public Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
+        public Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
+        public static async Task<Stream> GetTiles(Registry Registry, RPage page, float scale, Action<Progress> progress)
         {
             int zoom = (int)(scale * 100);
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, zoom);
-            if (tryGet.success) return tryGet.image;
+            var (success, stream) = await Data.TryGetImageFromDrive(Registry, page, zoom);
+            if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
@@ -97,7 +98,7 @@ namespace GeneaGrab.Providers
 
             Data.Providers["AD79-86"].Registries[Registry.ID].Pages[page.Number - 1] = page;
             await Data.SaveImage(Registry, page, image, false);
-            return image;
+            return image.ToStream();
         }
     }
 }

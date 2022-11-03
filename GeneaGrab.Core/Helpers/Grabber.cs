@@ -1,19 +1,23 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
+﻿using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Bmp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 namespace GeneaGrab
 {
     public static class Grabber
     {
-        public static async System.Threading.Tasks.Task<Image> GetImage(string url, HttpClient client = null)
+        public static async Task<Image> GetImage(string url, HttpClient client = null)
         {
             if (client is null) client = new HttpClient();
             try { return await Image.LoadAsync(await client.GetStreamAsync(url).ConfigureAwait(false)).ConfigureAwait(false); }
             catch (HttpRequestException e)
             {
                 Data.Error($"Failed to retrieve image at {url}", e);
-                return new Image<SixLabors.ImageSharp.PixelFormats.Rgb24>(1, 1, Color.Black);
+                return new Image<Rgb24>(1, 1, Color.Black);
             }
         }
         public static Image MergeTile(this Image tex, Image tile, (int tileSize, int scale, Point pos) a) => MergeTile(tex, tile, a.tileSize, a.scale, a.pos);
@@ -24,6 +28,14 @@ namespace GeneaGrab
             var point = new Point(pos.X * tileSize * scale, pos.Y * tileSize * scale);
             tex.Mutate(x => x.DrawImage(tile, point, 1));
             return tex;
+        }
+        
+        public static Stream ToStream(this Image image)
+        {
+            var ms = new MemoryStream();
+            image.Save(ms, new BmpEncoder());
+            ms.Seek(0, SeekOrigin.Begin);
+            return ms;
         }
     }
 }

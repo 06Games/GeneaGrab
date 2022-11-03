@@ -1,6 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -44,7 +45,7 @@ namespace GeneaGrab.Providers
             Registry.ID = query["id"] ?? infos["id"]?.Value;
             Registry.CallNumber = infos["cote"]?.Value;
             Registry.Location = infos["commune"]?.Value;
-            Registry.LocationID = cities.TryGetValue(Registry.Location, out var location) ? location.ToString() : null;
+            Registry.LocationID = Cities.TryGetValue(Registry.Location, out var location) ? location.ToString() : null;
             Registry.Notes = infos["type"].Success ? $"{infos["type"]?.Value}: {infos["collection"]?.Value}" : null;
             Registry.From = Core.Models.Dates.Date.ParseDate(infos["date_debut"]?.Value);
             Registry.To = Core.Models.Dates.Date.ParseDate(infos["date_fin"]?.Value) ?? Registry.From;
@@ -92,19 +93,19 @@ namespace GeneaGrab.Providers
             Data.Providers["AD17"].Registries[Registry.ID].Pages[Page.Number - 1] = Page;
             return link;
         }
-        public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var (success, image) = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
-            if (success) return image;
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
+            if (success) return stream;
             return await GetTiles(Registry, page, 0.1F, progress).ConfigureAwait(false);
         }
-        public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.75F, progress);
-        public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
-        public static async Task<Image> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
+        public Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.75F, progress);
+        public Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
+        public static async Task<Stream> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
         {
             var Zoom = (int)(zoom * 100);
-            var (success, img) = await Data.TryGetImageFromDrive(Registry, page, Zoom).ConfigureAwait(false);
-            if (success) return img;
+            var (success, stream) = await Data.TryGetImageFromDrive(Registry, page, Zoom).ConfigureAwait(false);
+            if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
@@ -129,9 +130,10 @@ namespace GeneaGrab.Providers
 
             Data.Providers["AD17"].Registries[Registry.ID].Pages[page.Number - 1] = page;
             await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
-            return image;
+            return image.ToStream();
         }
-        private static readonly Dictionary<string, int> cities = new Dictionary<string, int> {
+        
+        private static readonly Dictionary<string, int> Cities = new Dictionary<string, int> {
             { "Agonnay", 170000598 },
             { "Agudelle", 170000003 },
             { "Aigrefeuille-d'Aunis", 170019179 },

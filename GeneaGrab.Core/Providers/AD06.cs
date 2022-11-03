@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -141,19 +142,19 @@ namespace GeneaGrab.Providers
         #endregion
 
         public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
-        public async Task<Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public async Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
         {
-            var tryGet = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
-            if (tryGet.success) return tryGet.image;
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
+            if (success) return stream;
             return await GetTiles(Registry, page, 0.1F, progress).ConfigureAwait(false);
         }
-        public Task<Image> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
-        public Task<Image> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
-        public static async Task<Image> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
+        public Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
+        public Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
+        public static async Task<Stream> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
         {
             var Zoom = (int)(zoom * 100);
-            var tryGet = await Data.TryGetImageFromDrive(Registry, page, Zoom).ConfigureAwait(false);
-            if (tryGet.success) return tryGet.image;
+            var (success, stream) = await Data.TryGetImageFromDrive(Registry, page, Zoom).ConfigureAwait(false);
+            if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
@@ -169,12 +170,12 @@ namespace GeneaGrab.Providers
 
             Data.Providers["AD06"].Registries[Registry.ID].Pages[page.Number - 1] = page;
             await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
-            return image;
+            return image.ToStream();
         }
 
 
 
-        static readonly string[] cities = new[]{
+        static readonly string[] cities = {
             "Choisissez une commune",
             "AIGLUN",
             "AMIRAT",

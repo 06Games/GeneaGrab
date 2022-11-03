@@ -7,14 +7,12 @@ namespace GeneaGrab.Helpers;
 
 public static class Extensions
 {
-    public static Bitmap ToImageSource(this SixLabors.ImageSharp.Image image)
+    public static Bitmap ToBitmap(this Stream stream)
     {
-        var ms = new MemoryStream();
-        image.Save(ms, new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder());
-        ms.Seek(0, SeekOrigin.Begin);
-        return new Bitmap(ms);
+        stream.Seek(0, SeekOrigin.Begin);
+        return new Bitmap(stream);
     }
-
+    
     public static Task<DirectoryInfo> CreateFolder(this DirectoryInfo folder, string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return Task.FromResult(folder);

@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using Image = SixLabors.ImageSharp.Image;
 
 namespace GeneaGrab.Helpers;
 
@@ -66,12 +67,12 @@ public static class LocalData
     }
 
 
-    public static async Task<Image?> GetImageAsync(Registry registry, RPage page, bool thumbnail = false)
+    public static async Task<Stream?> GetImageAsync(Registry registry, RPage page, bool thumbnail = false)
     {
         try
         {
             var file = await GetFile(registry, page, thumbnail: thumbnail).ConfigureAwait(false);
-            return file.Exists ? await Image.LoadAsync(file.OpenRead()).ConfigureAwait(false) : null;
+            return !file.Exists ? null : file.OpenRead();
         }
         catch (Exception e)
         {
@@ -89,16 +90,22 @@ public static class LocalData
         try
         {
             var file = await GetFile(registry, page, true, thumbnail).ConfigureAwait(false);
-            if (thumbnail)
+
+            if (!thumbnail) return await Save(img);
+            
+            int w = ThumbnailSize;
+            int h = ThumbnailSize;
+            if (img.Width < img.Height) h = ThumbnailSize / img.Width * img.Height;
+            else w = ThumbnailSize / img.Height * img.Width;
+            using var thumb = img.Clone(x => x.Resize(w, h));
+            return await Save(thumb);
+
+
+            async Task<string> Save(Image image)
             {
-                int w = ThumbnailSize;
-                int h = ThumbnailSize;
-                if (img.Width < img.Height) h = ThumbnailSize / img.Width * img.Height;
-                else w = ThumbnailSize / img.Height * img.Width;
-                img.Mutate(x => x.Resize(w, h));
+                await image.SaveAsJpegAsync(file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite)).ConfigureAwait(false);
+                return file.FullName;
             }
-            await img.SaveAsJpegAsync(file.OpenRead()).ConfigureAwait(false);
-            return file.FullName;
         }
         catch (Exception e)
         {

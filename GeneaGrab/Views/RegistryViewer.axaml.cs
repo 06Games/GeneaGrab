@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
@@ -107,39 +108,33 @@ namespace GeneaGrab.Views
                 PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
                 foreach (var page in Info.Registry.Pages) Pages.Add(page!);
                 
-                SixLabors.ImageSharp.Image img = null;
                 _ = Task.Run(async () =>
                 {
-                    img = LoadImage(Info.PageNumber, (page) => Info.Provider.API.Preview(Info.Registry, page, TrackProgress))
-                        .ContinueWith((t) =>
-                        {
-                            Dispatcher.UIThread.Post(() => RefreshView(t.Result));
-                            return t.Result;
-                        }).Result;
+                    await LoadImage(Info.PageNumber, page => Info.Provider.API.Preview(Info.Registry, page, TrackProgress))
+                        .ContinueWith(t => Dispatcher.UIThread.Post(() => RefreshView(t.Result)));
 
-                    List<Task> tasks = new List<Task>();
-                    foreach (var page in Pages.ToList())
+                    var tasks = new List<Task>();
+                    foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
                     {
-                        if (page.Number == Info.PageNumber) continue;
                         if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
                         tasks.Add(LoadImage(page.Number, _page => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
                     }
                     await Task.WhenAll(tasks).ConfigureAwait(false);
 
-                    async Task<SixLabors.ImageSharp.Image> LoadImage(int number, Func<RPage, Task<SixLabors.ImageSharp.Image>> func)
+                    async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func)
                     {
                         var i = PageNumbers.IndexOf(number);
                         var page = Pages[i];
                         var thumbnail = await func?.Invoke(page.Page);
                         Dispatcher.UIThread.Post(() =>
                         {
-                            page.Thumbnail = thumbnail.ToImageSource();
+                            page.Thumbnail = thumbnail.ToBitmap();
                             Pages[i] = page;
                         }, DispatcherPriority.Background);
                         return thumbnail;
                     }
-                }).ContinueWith((task) => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
-                GetIndex().ContinueWith( _ => Dispatcher.UIThread.Post(() => RefreshView(img)));
+                }).ContinueWith(task => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
+                GetIndex().ContinueWith( _ => Dispatcher.UIThread.Post(() => RefreshView()));
             });
             else Dispatcher.UIThread.Post(() =>
             {
@@ -166,7 +161,7 @@ namespace GeneaGrab.Views
             else if (parameter is Uri url) Info = await TryGetFromProviders(url).ConfigureAwait(false);
             else inRam = true;
 
-            async Task<RegistryInfo> TryGetFromProviders(Uri uri)
+            async Task<RegistryInfo?> TryGetFromProviders(Uri uri)
             {
                 foreach (var provider in Data.Providers.Values)
                     if (provider.API.TryGetRegistryID(uri, out var info))
@@ -176,7 +171,7 @@ namespace GeneaGrab.Views
             return (Info != null, inRam);
         }
 
-        private async void ChangePage(object sender, SelectionChangedEventArgs e)
+        private async void ChangePage(object _, SelectionChangedEventArgs e)
         {
             if(e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
         }
@@ -186,17 +181,17 @@ namespace GeneaGrab.Views
             if (page is null || Info is null) return;
             Info.PageNumber = page.Number;
             var image = await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress);
-            var tryGet = await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page);
-            if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && tryGet.success)
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page);
+            if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && success)
                 Dispatcher.UIThread.Post(() =>
                 {
-                    page.Thumbnail = tryGet.image.ToImageSource();
+                    page.Thumbnail = stream.ToBitmap();
                     Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
             await GetIndex();
             Dispatcher.UIThread.Post(() => RefreshView(image));
         }
-        public void RefreshView(SixLabors.ImageSharp.Image img = null)
+        public void RefreshView(Stream? img = null)
         {
             if (Info is null) return;
             this.FindControl<NumberBox>("PageNumber").Value = Info.PageNumber;
@@ -219,7 +214,7 @@ namespace GeneaGrab.Views
 
             var image = this.FindControl<Image>("Image");
             var pageList = this.FindControl<ListBox>("PageList");
-            if (img != null) image.Source = img.ToImageSource();
+            if (img != null) image.Source = img.ToBitmap();
             pageList.SelectedIndex = Info.PageIndex;
             pageList.ScrollIntoView(pageList.SelectedIndex); // TODO: Seems like Avalonia doesn't support automated horizontal scrolling, maybe open an issue on their Github repo
             this.FindControl<ZoomPanel>("ImagePanel").Reset();
@@ -287,7 +282,7 @@ namespace GeneaGrab.Views
             };
 
             var tt = new ToolTip { Content = $"{index.FormatedDate} ({index.FormatedType}): {index.District}\n{index.Notes}" };
-            //ToolTipService.SetToolTip(btn, tt);
+            //ToolTipService.SetToolTip(btn, tt); //TODO
 
             this.FindControl<Canvas>("ImageCanvas").Children.Add(btn);
             Canvas.SetTop(btn, pos.X);

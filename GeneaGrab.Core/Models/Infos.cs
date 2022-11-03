@@ -3,6 +3,7 @@ using SixLabors.ImageSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,7 +39,7 @@ namespace GeneaGrab
     public static class Data
     {
         public static Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
-        public static Func<Registry, RPage, bool, Task<Image>> GetImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<Image>;
+        public static Func<Registry, RPage, bool, Task<Stream>> GetImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<Stream>;
         public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (r, p, i, t) => Task.CompletedTask as Task<string>;
         public static Action<string, Exception> Log { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
         public static Action<string, Exception> Warn { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
@@ -76,22 +77,23 @@ namespace GeneaGrab
             if (dic.ContainsKey(key)) dic[key] = obj;
             else dic.Add(key, obj);
         }
-        public static async Task<(bool success, Image image)> TryGetThumbnailFromDrive(Registry registry, RPage current)
+        public static async Task<(bool success, Stream stream)> TryGetThumbnailFromDrive(Registry registry, RPage current)
         {
             var image = await GetImage(registry, current, true).ConfigureAwait(false);
             if (image != null) return (true, image);
 
-            var tryGet = await TryGetImageFromDrive(registry, current, 0);
-            if (tryGet.success) { await SaveImage(registry, current, tryGet.image, true); return (true, tryGet.image); }
-            else return (false, null);
+            var (success, stream) = await TryGetImageFromDrive(registry, current, 0);
+            if (!success) return (false, null);
+            
+            await SaveImage(registry, current, await Image.LoadAsync(stream).ConfigureAwait(false), true);
+            return (true, stream);
         }
-        public static async Task<(bool success, Image image)> TryGetImageFromDrive(Registry registry, RPage current, double zoom)
+        public static async Task<(bool success, Stream stream)> TryGetImageFromDrive(Registry registry, RPage current, double zoom)
         {
             if (zoom > current.Zoom) return (false, null);
 
             var image = await GetImage(registry, current, false).ConfigureAwait(false);
-            if (image != null) return (true, image);
-            else return (false, null);
+            return image != null ? (true, image) : (false, null);
         }
     }
 }

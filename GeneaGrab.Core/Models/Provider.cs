@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace GeneaGrab
@@ -9,9 +10,9 @@ namespace GeneaGrab
     {
         bool TryGetRegistryID(Uri URL, out RegistryInfo info);
         Task<RegistryInfo> Infos(Uri URL);
-        Task<SixLabors.ImageSharp.Image> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
-        Task<SixLabors.ImageSharp.Image> Preview(Registry Registry, RPage page, Action<Progress> progress);
-        Task<SixLabors.ImageSharp.Image> Download(Registry Registry, RPage page, Action<Progress> progress);
+        Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
+        Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress);
+        Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress);
         Task<string> Ark(Registry Registry, RPage page);
 
         bool IndexSupport { get; }
@@ -29,7 +30,7 @@ namespace GeneaGrab
         public Provider(ProviderAPI api, string id)
         {
             ID = id;
-            Name = Data.Translate($"Provider/{ID}", ID);
+            Name = Data.Translate($"Provider.{ID}", ID);
             Icon = $"/Assets/Providers/{ID}.png";
             API = api;
         }
