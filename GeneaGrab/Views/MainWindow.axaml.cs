@@ -29,12 +29,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     
     public MainWindow()
     {
-        if (IsWindows || IsMacOS)
+        if (IsWindows)
         {
             ExtendClientAreaToDecorationsHint = true;
             ExtendClientAreaChromeHints = ExtendClientAreaChromeHints.NoChrome;
             ExtendClientAreaTitleBarHeightHint = -1;
         }
+        else if (IsMacOS) ExtendClientAreaToDecorationsHint = true;
         
         InitializeComponent();
         DataContext = this;
