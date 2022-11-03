@@ -20,7 +20,7 @@ using GeneaGrab.Services;
 
 namespace GeneaGrab.Views
 {
-    public partial class RegistryViewer : Page, INotifyPropertyChanged, ITabPage//, ISchemeSupport
+    public partial class RegistryViewer : Page, INotifyPropertyChanged, ITabPage //, ISchemeSupport
     {
         public Symbol IconSource => Symbol.Pictures;
         public string? DynaTabHeader
@@ -62,16 +62,16 @@ namespace GeneaGrab.Views
         protected string? OpenFolderText => ResourceExtensions.GetLocalized("Registry.OpenFolder", ResourceExtensions.Resource.UI);
         protected string? ArkText => ResourceExtensions.GetLocalized("Registry.Ark", ResourceExtensions.Resource.UI);
         protected string? NotesText => ResourceExtensions.GetLocalized("Registry.Notes", ResourceExtensions.Resource.UI);
-        
-        
+
+
         public RegistryViewer()
         {
             InitializeComponent();
             this.FindControl<NumberBox>("PageNumber").ValueChanged += async (ns, ne) =>
             {
                 if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
-            };           
-            
+            };
+
             var pageNotes = this.FindControl<TextBox>("PageNotes");
             pageNotes.TextInput += (s, e) =>
             {
@@ -81,7 +81,7 @@ namespace GeneaGrab.Views
                 Pages[index] = Pages[index].Refresh();
             };
         }
-        
+
         private void InitializeComponent()
         {
             DataContext = this;
@@ -93,54 +93,48 @@ namespace GeneaGrab.Views
         {
             base.OnNavigatedTo(e);
             var (success, inRam) = await LoadRegistry(e.Parameter).ConfigureAwait(false);
-            if (success) Dispatcher.UIThread.Post(() =>
-            {
-                RefreshView();
-                MainWindow.UpdateSelectedTitle();
-                if (inRam || Info == null) return;
-
-                PageNumbers.Clear();
-                Pages.Clear();
-
-                var pageNumber = this.FindControl<NumberBox>("PageNumber");
-                pageNumber.Minimum = Info.Registry.Pages.Min(p => p.Number);
-                pageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
-                PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
-                foreach (var page in Info.Registry.Pages) Pages.Add(page!);
-                
-                _ = Task.Run(async () =>
-                {
-                    await LoadImage(Info.PageNumber, page => Info.Provider.API.Preview(Info.Registry, page, TrackProgress))
-                        .ContinueWith(t => Dispatcher.UIThread.Post(() => RefreshView(t.Result)));
-
-                    var tasks = new List<Task>();
-                    foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
-                    {
-                        if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                        tasks.Add(LoadImage(page.Number, _page => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
-                    }
-                    await Task.WhenAll(tasks).ConfigureAwait(false);
-
-                    async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func)
-                    {
-                        var i = PageNumbers.IndexOf(number);
-                        var page = Pages[i];
-                        var thumbnail = await func?.Invoke(page.Page);
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            page.Thumbnail = thumbnail.ToBitmap();
-                            Pages[i] = page;
-                        }, DispatcherPriority.Background);
-                        return thumbnail;
-                    }
-                }).ContinueWith(task => throw task.Exception, TaskContinuationOptions.OnlyOnFaulted);
-                GetIndex().ContinueWith( _ => Dispatcher.UIThread.Post(() => RefreshView()));
-            });
-            else Dispatcher.UIThread.Post(() =>
+            if (!success)
             {
                 if (NavigationService.CanGoBack) NavigationService.GoBack();
                 else NavigationService.Navigate(typeof(ProviderList));
-            });
+            }
+
+            RefreshView();
+            MainWindow.UpdateSelectedTitle();
+            if (inRam || Info == null) return;
+
+            PageNumbers.Clear();
+            Pages.Clear();
+
+            var pageNumber = this.FindControl<NumberBox>("PageNumber");
+            pageNumber.Minimum = Info.Registry.Pages.Min(p => p.Number);
+            pageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
+            PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
+            foreach (var page in Info.Registry.Pages) Pages.Add(page!);
+
+
+            var img = await LoadImage(Info.PageNumber, page => Info.Provider.API.Preview(Info.Registry, page, TrackProgress));
+            RefreshView(img);
+
+            var tasks = new List<Task>();
+            foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
+            {
+                if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
+                tasks.Add(LoadImage(page.Number, _page => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
+            }
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+
+            async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func)
+            {
+                var i = PageNumbers.IndexOf(number);
+                var page = Pages[i];
+                var thumbnail = await func?.Invoke(page.Page);
+                page.Thumbnail = thumbnail.ToBitmap();
+                Pages[i] = page;
+                return thumbnail;
+            }
+            await GetIndex();
+            RefreshView();
         }
 
         public List<int> PageNumbers { get; set; } = new();
@@ -173,7 +167,7 @@ namespace GeneaGrab.Views
 
         private async void ChangePage(object _, SelectionChangedEventArgs e)
         {
-            if(e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
+            if (e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
         }
         public Task ChangePage(int pageNumber) => ChangePage(Info?.GetPage(pageNumber));
         public async Task ChangePage(PageList? page)
@@ -189,7 +183,7 @@ namespace GeneaGrab.Views
                     Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
             await GetIndex();
-            Dispatcher.UIThread.Post(() => RefreshView(image));
+            RefreshView(image);
         }
         public void RefreshView(Stream? img = null)
         {
@@ -241,21 +235,25 @@ namespace GeneaGrab.Views
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public void TrackProgress(Progress progress) => Dispatcher.UIThread.Post(() =>
-        {
+        public void TrackProgress(Progress progress) {
             var imageProgress = this.FindControl<ProgressBar>("ImageProgress");
             imageProgress.IsVisible = !progress.Done;
             imageProgress.IsIndeterminate = progress.Undetermined;
             imageProgress.Value = progress.Value;
-        }, DispatcherPriority.Background);
+        }
 
         #region Index
+
         public ObservableCollection<Index> Index { get; private set; } = new();
         private async Task GetIndex()
         {
             var indexPanel = this.FindControl<StackPanel>("IndexPanel");
-            if (!Info.Provider.API.IndexSupport) { indexPanel.IsVisible = false; return; }
-            
+            if (!Info.Provider.API.IndexSupport)
+            {
+                indexPanel.IsVisible = false;
+                return;
+            }
+
             indexPanel.IsVisible = true;
             IEnumerable<GeneaGrab.Index>? index = null;
             if (Info.Provider.API is IndexAPI indexAPI)
@@ -288,6 +286,7 @@ namespace GeneaGrab.Views
             Canvas.SetTop(btn, pos.X);
             Canvas.SetLeft(btn, pos.Y);
         }
+
         #endregion
     }
 
@@ -299,7 +298,7 @@ namespace GeneaGrab.Views
             get
             {
                 var typeName = Enum.GetName(typeof(RegistryType), Type);
-                return Data.Translate($"Registry/Type/{typeName}", typeName);
+                return Data.Translate($"Registry.Type.{typeName}", typeName);
             }
         }
     }
