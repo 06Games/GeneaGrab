@@ -21,7 +21,7 @@
                                         </Ellipse.Fill>
                                     </Ellipse>
                                 </Grid>
-                                <TextBlock Grid.Row="0" Grid.Column="1" Margin="12,6,0,0" Text="{Binding Name, Converter={StaticResource Translate}, ConverterParameter=Provider}" />
+                                <TextBlock Grid.Column="1" Grid.Row="0" Margin="12,6,0,0" Text="{Binding Name}" />
                                 <TextBlock Grid.Column="1" Grid.Row="1" Margin="12,0,0,6" Text="{Binding RegisterCount}" />
                             </Grid>
                         </DataTemplate>

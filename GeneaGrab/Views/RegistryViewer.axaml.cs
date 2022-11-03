@@ -19,21 +19,20 @@ using GeneaGrab.Services;
 
 namespace GeneaGrab.Views
 {
-    public sealed partial class RegistryViewer : Page, INotifyPropertyChanged, ITabPage//, ISchemeSupport
+    public partial class RegistryViewer : Page, INotifyPropertyChanged, ITabPage//, ISchemeSupport
     {
         public Symbol IconSource => Symbol.Pictures;
-        public string DynaTabHeader
+        public string? DynaTabHeader
         {
             get
             {
                 if (Info is null) return null;
                 var location = Info.Registry.Location ?? Info.Registry.LocationID;
                 var registry = Info.Registry?.Name ?? Info.RegistryID;
-                if (location is null) return registry;
-                return $"{location}: {registry}";
+                return location is null ? registry : $"{location}: {registry}";
             }
         }
-        public string Identifier => Info?.RegistryID;
+        public string? Identifier => Info?.RegistryID;
 
 
 
@@ -58,10 +57,10 @@ namespace GeneaGrab.Views
 
 
 
-        private string DownloadText => ResourceExtensions.GetLocalized("Registry/Download", ResourceExtensions.Resource.UI);
-        private string OpenFolderText => ResourceExtensions.GetLocalized("Registry/OpenFolder", ResourceExtensions.Resource.UI);
-        private string ArkText => ResourceExtensions.GetLocalized("Registry/Ark", ResourceExtensions.Resource.UI);
-        private string NotesText => ResourceExtensions.GetLocalized("Registry/Notes", ResourceExtensions.Resource.UI);
+        protected string? DownloadText => ResourceExtensions.GetLocalized("Registry.Download", ResourceExtensions.Resource.UI);
+        protected string? OpenFolderText => ResourceExtensions.GetLocalized("Registry.OpenFolder", ResourceExtensions.Resource.UI);
+        protected string? ArkText => ResourceExtensions.GetLocalized("Registry.Ark", ResourceExtensions.Resource.UI);
+        protected string? NotesText => ResourceExtensions.GetLocalized("Registry.Notes", ResourceExtensions.Resource.UI);
         
         
         public RegistryViewer()
@@ -75,6 +74,7 @@ namespace GeneaGrab.Views
             var pageNotes = this.FindControl<TextBox>("PageNotes");
             pageNotes.TextInput += (s, e) =>
             {
+                if (Info == null) return;
                 if (PageNumbers.Contains(Info.PageNumber)) Info.Page.Notes = string.IsNullOrWhiteSpace(pageNotes.Text) ? null : pageNotes.Text;
                 var index = PageNumbers.IndexOf(Info.PageNumber);
                 Pages[index] = Pages[index].Refresh();
@@ -87,7 +87,7 @@ namespace GeneaGrab.Views
             AvaloniaXamlLoader.Load(this);
         }
 
-        public RegistryInfo Info { get; set; }
+        public RegistryInfo? Info { get; set; }
         public override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -96,7 +96,7 @@ namespace GeneaGrab.Views
             {
                 RefreshView();
                 MainWindow.UpdateSelectedTitle();
-                if (inRam) return;
+                if (inRam || Info == null) return;
 
                 PageNumbers.Clear();
                 Pages.Clear();
@@ -105,7 +105,7 @@ namespace GeneaGrab.Views
                 pageNumber.Minimum = Info.Registry.Pages.Min(p => p.Number);
                 pageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
                 PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
-                foreach (var page in Info.Registry.Pages) Pages.Add(page);
+                foreach (var page in Info.Registry.Pages) Pages.Add(page!);
                 
                 SixLabors.ImageSharp.Image img = null;
                 _ = Task.Run(async () =>
@@ -122,7 +122,7 @@ namespace GeneaGrab.Views
                     {
                         if (page.Number == Info.PageNumber) continue;
                         if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                        tasks.Add(LoadImage(page.Number, (_page) => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
+                        tasks.Add(LoadImage(page.Number, _page => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
                     }
                     await Task.WhenAll(tasks).ConfigureAwait(false);
 
@@ -150,12 +150,12 @@ namespace GeneaGrab.Views
 
         public List<int> PageNumbers { get; set; } = new();
         public ObservableCollection<PageList> Pages { get; } = new();
-        public async Task<(bool success, bool inRam)> LoadRegistry(object Parameter)
+        public async Task<(bool success, bool inRam)> LoadRegistry(object parameter)
         {
             var inRam = false;
 
-            if (Parameter is RegistryInfo infos) Info = infos;
-            else if (Parameter is Dictionary<string, string> param)
+            if (parameter is RegistryInfo infos) Info = infos;
+            else if (parameter is Dictionary<string, string> param)
             {
                 if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
                 {
@@ -163,7 +163,7 @@ namespace GeneaGrab.Views
                     Info = await TryGetFromProviders(uri).ConfigureAwait(false);
                 }
             }
-            else if (Parameter is Uri url) Info = await TryGetFromProviders(url).ConfigureAwait(false);
+            else if (parameter is Uri url) Info = await TryGetFromProviders(url).ConfigureAwait(false);
             else inRam = true;
 
             async Task<RegistryInfo> TryGetFromProviders(Uri uri)
@@ -180,10 +180,10 @@ namespace GeneaGrab.Views
         {
             if(e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
         }
-        public Task ChangePage(int pageNumber) => ChangePage(Info.GetPage(pageNumber));
-        public async Task ChangePage(PageList page)
+        public Task ChangePage(int pageNumber) => ChangePage(Info?.GetPage(pageNumber));
+        public async Task ChangePage(PageList? page)
         {
-            if (page is null) return;
+            if (page is null || Info is null) return;
             Info.PageNumber = page.Number;
             var image = await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress);
             var tryGet = await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page);
@@ -198,6 +198,7 @@ namespace GeneaGrab.Views
         }
         public void RefreshView(SixLabors.ImageSharp.Image img = null)
         {
+            if (Info is null) return;
             this.FindControl<NumberBox>("PageNumber").Value = Info.PageNumber;
             this.FindControl<TextBlock>("PageTotal").Text = $"/ {Info.Registry.Pages.Max(p => p.Number)}";
             SetInfo(this.FindControl<TextBlock>("Info_LocationCity"), Info.Registry?.Location ?? Info.Registry?.LocationID);
@@ -220,7 +221,7 @@ namespace GeneaGrab.Views
             var pageList = this.FindControl<ListBox>("PageList");
             if (img != null) image.Source = img.ToImageSource();
             pageList.SelectedIndex = Info.PageIndex;
-            pageList.ScrollIntoView(pageList.SelectedItem);
+            pageList.ScrollIntoView(pageList.SelectedIndex); // TODO: Seems like Avalonia doesn't support automated horizontal scrolling, maybe open an issue on their Github repo
             this.FindControl<ZoomPanel>("ImagePanel").Reset();
             OnPropertyChanged(nameof(image));
             Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));
@@ -235,13 +236,14 @@ namespace GeneaGrab.Views
         private async void OpenFolder(object sender, RoutedEventArgs e)
         {
             var page = await LocalData.GetFile(Info.Registry, Info.Page);
+            //TODO: Needs Avalonia 0.11 to use TopLevel/Window.StorageProvider
             /*var options = new Windows.System.FolderLauncherOptions();
             if (page.Exists) options.ItemsToSelect.Add(page);
             await Windows.System.Launcher.LaunchFolderAsync(page.Directory!.FullName, options);*/
         }
         private async void Ark(object sender, RoutedEventArgs e) => await Application.Current?.Clipboard?.SetTextAsync(await Info.Provider.API.Ark(Info.Registry, Info.Page))!;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public new event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
         public void TrackProgress(Progress progress) => Dispatcher.UIThread.Post(() =>
@@ -260,17 +262,18 @@ namespace GeneaGrab.Views
             if (!Info.Provider.API.IndexSupport) { indexPanel.IsVisible = false; return; }
             
             indexPanel.IsVisible = true;
-            var indexAPI = Info.Provider.API as IndexAPI;
-            var index = await indexAPI.GetIndex(Info.Registry, Info.Page);
+            IEnumerable<GeneaGrab.Index>? index = null;
+            if (Info.Provider.API is IndexAPI indexAPI)
+                index = await indexAPI.GetIndex(Info.Registry, Info.Page);
             if (index is null) Index.Clear();
             else Index = new ObservableCollection<Index>(index.Cast<Index>());
         }
         private void AddIndex(object sender, RoutedEventArgs e)
         {
-            if (!Info.Provider.API.IndexSupport) return;
+            if (!(Info?.Provider.API.IndexSupport ?? false)) return;
             /* TODO */
         }
-        private void DisplayIndexRectangle(Index index)
+        private void DisplayIndexRectangle(Index? index)
         {
             if (index is null || index.Position.IsEmpty) return;
 
@@ -295,8 +298,8 @@ namespace GeneaGrab.Views
 
     public class Index : GeneaGrab.Index
     {
-        public string FormatedDate => Date?.ToString("d");
-        public string FormatedType
+        public string? FormatedDate => Date?.ToString("d");
+        public string? FormatedType
         {
             get
             {
@@ -307,7 +310,7 @@ namespace GeneaGrab.Views
     }
     public class PageList
     {
-        public static implicit operator PageList(RPage page) => new PageList { Page = page }.Refresh();
+        public static implicit operator PageList?(RPage? page) => page is null ? null : new PageList { Page = page }.Refresh();
         public RPage Page { get; set; }
         public PageList Refresh()
         {
@@ -316,8 +319,8 @@ namespace GeneaGrab.Views
             return this;
         }
 
-        public Bitmap Thumbnail { get; set; }
+        public Bitmap? Thumbnail { get; set; }
         public int Number { get; private set; }
-        public string Notes { get; private set; }
+        public string Notes { get; private set; } = "";
     }
 }

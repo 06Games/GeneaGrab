@@ -23,7 +23,6 @@
         <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="ViewerRelativePanel">
             <views:ZoomPanel x:Name="ImagePanel"
                              RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True">
-                <!--Width="{Binding Width, ElementName=ViewerRelativePanel, Mode=OneWay}" Height="{Binding Height, ElementName=ViewerRelativePanel, Mode=OneWay}">-->
                 <Grid x:Name="MainGrid" ColumnDefinitions="*,*,*">
                     <Image Grid.Column="1" Name="Image" Stretch="Uniform" />
                     <Canvas Grid.Column="1" Name="ImageCanvas"></Canvas>
@@ -35,7 +34,7 @@
             <RelativePanel Margin="15">
                 <controls:NumberBox Name="PageNumber" PlaceholderText="Page" Minimum="1" Width="90" Height="32.5"></controls:NumberBox>
                 <TextBlock Name="PageTotal" Text="/ 1" Margin="100 6.25 0 0" Height="20" VerticalAlignment="Center" TextAlignment="Center"></TextBlock>
-                <ListBox Name="PageList" Items="{Binding Pages}" SelectionChanged="ChangePage"
+                <ListBox Name="PageList" Items="{Binding Pages}" SelectionChanged="ChangePage" AutoScrollToSelectedItem="True"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                          RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
                          Margin="0 45 0 0 ">
@@ -46,21 +45,21 @@
                     </ListBox.ItemsPanel>
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="views:PageList">
-                            <StackPanel Width="125">
-                                <StackPanel Width="125" Height="100">
-                                    <Image Source="{Binding Thumbnail}" MaxHeight="125" MaxWidth="125" />
+                            <Grid Width="125" RowDefinitions="100,15,15">
+                                <StackPanel Grid.Row="0">
+                                    <Image Source="{Binding Thumbnail}" MaxHeight="100" MaxWidth="125" />
                                 </StackPanel>
-                                <TextBlock Text="{Binding Number}" Margin="0,6,0,0" TextAlignment="Center" Width="125" />
-                                <TextBlock Text="{Binding Notes}" TextAlignment="Center" Width="125" />
-                            </StackPanel>
+                                <TextBlock Text="{Binding Number}" Margin="0,6,0,0" TextAlignment="Center" Grid.Row="1" />
+                                <TextBlock Text="{Binding Notes}" TextAlignment="Center" FontSize="11" Grid.Row="2" />
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
             </RelativePanel>
         </Border>
 
-        <Border Grid.Column="1" Grid.RowSpan="2" BorderThickness="1 0 0 0" BorderBrush="Gray">
-            <StackPanel Spacing="15" Margin="15">
+        <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" BorderThickness="1 0 0 0" BorderBrush="Gray">
+            <StackPanel Spacing="15" Margin="15" Name="SidePanel">
                 <StackPanel>
                     <TextBlock Name="Info_LocationCity" FontSize="18" Text="City" TextWrapping="Wrap" />
                     <TextBlock Name="Info_LocationDistrict" Text="District" TextWrapping="Wrap" />
@@ -71,9 +70,24 @@
                 </StackPanel>
 
                 <StackPanel Spacing="15">
-                    <Button Width="200" Content="{Binding DownloadText}" Click="Download" />
-                    <Button Width="200" Content="{Binding OpenFolderText}" Click="OpenFolder" />
-                    <Button Width="200" Content="{Binding ArkText}" Click="Ark" />
+                    <Button Width="{Binding Bounds.Width, ElementName=SidePanel}" Click="Download">
+                        <StackPanel Orientation="Horizontal">
+                            <controls:SymbolIcon Symbol="Download" Margin="0 0 5 0" />
+                            <TextBlock Text="{Binding DownloadText}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Width="{Binding Bounds.Width, ElementName=SidePanel}" Click="OpenFolder">
+                        <StackPanel Orientation="Horizontal">
+                            <controls:SymbolIcon Symbol="Folder" Margin="0 0 5 0" />
+                            <TextBlock Text="{Binding OpenFolderText}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Width="{Binding Bounds.Width, ElementName=SidePanel}" Click="Ark">
+                        <StackPanel Orientation="Horizontal">
+                            <controls:SymbolIcon Symbol="Link" Margin="0 0 5 0" />
+                            <TextBlock Text="{Binding ArkText}" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
 
                 <StackPanel>
@@ -107,8 +121,8 @@
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding FormatedDate}" FontSize="12" />
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FormatedType}" FontSize="12" TextAlignment="Right" />
                                     <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding District}" FontSize="13" />
-                                    <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding Retranscription}" Margin="0,5" />
-                                    <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="{Binding Notes}" />
+                                    <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Retranscription}" Margin="0,5" />
+                                    <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Notes}" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

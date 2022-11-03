@@ -29,7 +29,7 @@ public class ResourceConverter : IValueConverter
         if (!targetType.IsAssignableFrom(typeof(string))) throw new NotSupportedException();
         Debug.Assert(value != null, nameof(value) + " != null");
 
-        var res = ResourceExtensions.Resource.Core;
+        var res = ResourceExtensions.Resource.UI;
         var cat = string.Empty;
         if (parameter is string param)
         {

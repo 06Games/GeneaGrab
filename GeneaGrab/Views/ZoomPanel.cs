@@ -35,9 +35,10 @@ namespace GeneaGrab.Views
             if (Initialized && Child != null) return Child;
             if (!Initialized)
             {
-                Tapped += (s, e) =>
+                PointerPressed += (s, e) =>
                 {
-                    //Reset();
+                    var point = e.GetCurrentPoint(this);
+                    if(point.Properties.IsRightButtonPressed) Reset();
                 };
 
                 void SetClip() => Clip = new RectangleGeometry { Rect = new Rect(0, 0, Bounds.Width, Bounds.Height) }; //Prevents the child from being rendered out of the element
