@@ -27,6 +27,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     public GridLength WindowsTitleBarWidth => new(IsWindows ? 150 : 15);
     
+    protected string? RegistryText => ResourceExtensions.GetLocalized("Registry.Name");
+    
     public MainWindow()
     {
         if (IsWindows)
@@ -55,7 +57,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         };
         NavigationService.NavigationFailed += (s, e) => throw e.Exception;
         NavigationService.TabAdded += UpdateTitle;
-        NavigationService.TabRemoved += _ => { if (NavigationService.TabView.TabItems.Count() <= 1) NewTab(); };
+        NavigationService.TabRemoved += _ =>
+        {
+            if (NavigationService.TabView.TabItems.Count() <= 1) NewTab();
+        };
         NavigationService.SelectionChanged += (s, e) => FrameChanged();
 
         //NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
@@ -91,7 +96,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Debug.WriteLine(tab.Tag);
     }
 
-    protected void RegistrySearch_TextChanged(object? sender, EventArgs _) { if(sender is AutoCompleteBox searchBar) searchBar.Items = Search(searchBar.Text); }
+    protected void RegistrySearch_TextChanged(object? sender, EventArgs _)
+    {
+        if (sender is not AutoCompleteBox searchBar) return;
+        if(searchBar.Text != searchBar.SelectedItem?.ToString()) searchBar.Items = Search(searchBar.Text);
+        searchBar.FilterMode = AutoCompleteFilterMode.None;
+    }
     IEnumerable<Result> Search(string query)
     {
         IEnumerable<Result> GetRegistries(Func<Registry, string> contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
@@ -115,7 +125,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     }
     private void RegistrySearch_SuggestionChosen(object? sender, SelectionChangedEventArgs args)
     {
-        if (args.AddedItems[0] is Result result) NavigationService.Navigate(typeof(Registry), result.Value);
-        if(sender is AutoCompleteBox searchBar) searchBar.Text = string.Empty;
+        if(args.AddedItems.Count == 0) return;
+        if (args.AddedItems[0] is Result result) NavigationService.Navigate(typeof(RegistryViewer), result.Value);
+        if (sender is AutoCompleteBox searchBar) searchBar.Text = string.Empty;
     }
 }

@@ -50,7 +50,8 @@
                         <ColumnDefinition Width="{Binding WindowsTitleBarWidth}" />
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <AutoCompleteBox TextChanged="RegistrySearch_TextChanged" SelectionChanged="RegistrySearch_SuggestionChosen" />
+                        <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
+                        <AutoCompleteBox Name="SearchBox" TextChanged="RegistrySearch_TextChanged" ValueMemberBinding="{Binding Text}" SelectionChanged="RegistrySearch_SuggestionChosen" Watermark="{Binding RegistryText}" />
                     </StackPanel>
                     <views:WindowsTitleBar Grid.Column="2" VerticalAlignment="Stretch" />
                 </Grid>
