@@ -16,7 +16,7 @@ public static class LocalData
     public static readonly string AppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
     public static readonly string LogFolder = Path.Combine(AppData, "Logs");
     public static readonly DirectoryInfo RegistriesFolder = new(Path.Combine(AppData, "Registries"));
-    
+
     private const int ThumbnailSize = 512;
 
     private static bool Loaded { get; set; }
@@ -26,7 +26,7 @@ public static class LocalData
         Log.Information("Loading data");
 
         foreach (var provider in Data.Providers)
-        { 
+        {
             var folder = await RegistriesFolder.CreateFolder(provider.Key);
             foreach (var reg in Directory.EnumerateFiles(folder.FullName, "Registry.json", SearchOption.AllDirectories).AsParallel())
             {
@@ -56,11 +56,12 @@ public static class LocalData
         var folder = await RegistriesFolder.CreateFolder(registry.ProviderID).ConfigureAwait(false);
         await SaveRegistryAsync(registry, folder).ConfigureAwait(false);
     }
-    public static Task SaveRegistryAsync(Registry registry, DirectoryInfo folder) => folder.CreateFolder(registry.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+    public static Task SaveRegistryAsync(Registry registry, DirectoryInfo folder)
+        => folder.CreateFolder(registry.ID).WriteFile("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
 
 
     public static async Task<FileInfo> GetFile(Registry registry, RPage page, bool write = false, bool thumbnail = false)
-    { 
+    {
         var folder = await RegistriesFolder.CreateFolderPath(registry.ProviderID, registry.ID);
         if (thumbnail) folder = await folder.CreateFolder(".thumbnails");
         return new FileInfo(Path.Combine(folder.FullName, $"p{page.Number}.jpg"));
@@ -82,30 +83,26 @@ public static class LocalData
     }
     public static async Task<string?> SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
     {
-        var thumb = await _SaveImageAsync(registry, page, img, true).ConfigureAwait(false);
+        var thumb = await _SaveImageAsync(registry, page, await ToThumbnail(img), true).ConfigureAwait(false);
         return thumbnail ? thumb : await _SaveImageAsync(registry, page, img).ConfigureAwait(false);
     }
+
+    public static async Task<Image> ToThumbnail(this Image img) => await Task.Run(() =>
+    {
+        int w = ThumbnailSize;
+        int h = ThumbnailSize;
+        if (img.Width < img.Height) h = ThumbnailSize / img.Width * img.Height;
+        else w = ThumbnailSize / img.Height * img.Width;
+        return img.Clone(x => x.Resize(w, h));
+    });
+
     private static async Task<string?> _SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
     {
         try
         {
             var file = await GetFile(registry, page, true, thumbnail).ConfigureAwait(false);
-
-            if (!thumbnail) return await Save(img);
-            
-            int w = ThumbnailSize;
-            int h = ThumbnailSize;
-            if (img.Width < img.Height) h = ThumbnailSize / img.Width * img.Height;
-            else w = ThumbnailSize / img.Height * img.Width;
-            using var thumb = img.Clone(x => x.Resize(w, h));
-            return await Save(thumb);
-
-
-            async Task<string> Save(Image image)
-            {
-                await image.SaveAsJpegAsync(file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite)).ConfigureAwait(false);
-                return file.FullName;
-            }
+            await img.SaveAsJpegAsync(file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite)).ConfigureAwait(false);
+            return file.FullName;
         }
         catch (Exception e)
         {

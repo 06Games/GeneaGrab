@@ -26,11 +26,12 @@ namespace GeneaGrab
             Data.Translate = (id, fallback) => ResourceExtensions.GetLocalized(id) ?? fallback;
             Data.GetImage = LocalData.GetImageAsync;
             Data.SaveImage = LocalData.SaveImageAsync;
+            Data.ToThumbnail = LocalData.ToThumbnail;
         }
 
         public override void OnFrameworkInitializationCompleted()
         {
-            LocalData.LoadData();
+            _ = LocalData.LoadData();
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow();

@@ -95,46 +95,55 @@ namespace GeneaGrab.Views
             var (success, inRam) = await LoadRegistry(e.Parameter).ConfigureAwait(false);
             if (!success)
             {
-                if (NavigationService.CanGoBack) NavigationService.GoBack();
-                else NavigationService.Navigate(typeof(ProviderList));
+                await Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    if (NavigationService.CanGoBack) NavigationService.GoBack();
+                    else NavigationService.Navigate(typeof(ProviderList));
+                });
+                return;
             }
 
-            RefreshView();
-            MainWindow.UpdateSelectedTitle();
-            if (inRam || Info == null) return;
-
-            PageNumbers.Clear();
-            Pages.Clear();
-
-            var pageNumber = this.FindControl<NumberBox>("PageNumber");
-            pageNumber.Minimum = Info.Registry.Pages.Min(p => p.Number);
-            pageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
-            PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
-            foreach (var page in Info.Registry.Pages) Pages.Add(page!);
-
-
-            var img = await LoadImage(Info.PageNumber, page => Info.Provider.API.Preview(Info.Registry, page, TrackProgress));
-            RefreshView(img);
-
-            var tasks = new List<Task>();
-            foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
+            await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                tasks.Add(LoadImage(page.Number, _page => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
-            }
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+                RefreshView();
+                MainWindow.UpdateSelectedTitle();
+                if (inRam || Info == null) return;
 
-            async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func)
+                PageNumbers.Clear();
+                Pages.Clear();
+
+                var pageNumber = this.FindControl<NumberBox>("PageNumber");
+                pageNumber.Minimum = Info.Registry.Pages.Min(p => p.Number);
+                pageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
+                PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
+                foreach (var page in Info.Registry.Pages) Pages.Add(page!);
+            });
+
+            Task.Run(async () =>
             {
-                var i = PageNumbers.IndexOf(number);
-                var page = Pages[i];
-                var thumbnail = await func?.Invoke(page.Page);
-                page.Thumbnail = thumbnail.ToBitmap();
-                Pages[i] = page;
-                return thumbnail;
-            }
-            await GetIndex();
-            RefreshView();
+                var img = await LoadImage(Info.PageNumber, page => Info.Provider.API.Preview(Info.Registry, page, TrackProgress));
+                await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
+
+                var tasks = new List<Task>();
+                foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
+                {
+                    if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
+                    tasks.Add(LoadImage(page.Number, _page => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
+                }
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+
+                async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func)
+                {
+                    var i = PageNumbers.IndexOf(number);
+                    var page = Pages[i];
+                    var thumbnail = await func?.Invoke(page.Page);
+                    page.Thumbnail = thumbnail.ToBitmap();
+                    await Dispatcher.UIThread.InvokeAsync(() => Pages[i] = page);
+                    return thumbnail;
+                }
+                await GetIndex();
+                await Dispatcher.UIThread.InvokeAsync(() => RefreshView());
+            });
         }
 
         public List<int> PageNumbers { get; set; } = new();
@@ -210,7 +219,7 @@ namespace GeneaGrab.Views
             var pageList = this.FindControl<ListBox>("PageList");
             if (img != null) image.Source = img.ToBitmap();
             pageList.SelectedIndex = Info.PageIndex;
-            pageList.ScrollIntoView(pageList.SelectedIndex); // TODO: Seems like Avalonia doesn't support automated horizontal scrolling, maybe open an issue on their Github repo
+            pageList.ScrollIntoView(pageList.SelectedIndex);
             this.FindControl<ZoomPanel>("ImagePanel").Reset();
             OnPropertyChanged(nameof(image));
             Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));

@@ -41,6 +41,7 @@ namespace GeneaGrab
         public static Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
         public static Func<Registry, RPage, bool, Task<Stream>> GetImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<Stream>;
         public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (r, p, i, t) => Task.CompletedTask as Task<string>;
+        public static Func<Image, Task<Image>> ToThumbnail { get; set; } = Task.FromResult;
         public static Action<string, Exception> Log { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
         public static Action<string, Exception> Warn { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
         public static Action<string, Exception> Error { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
@@ -84,9 +85,10 @@ namespace GeneaGrab
 
             var (success, stream) = await TryGetImageFromDrive(registry, current, 0);
             if (!success) return (false, null);
-            
-            await SaveImage(registry, current, await Image.LoadAsync(stream).ConfigureAwait(false), true);
-            return (true, stream);
+
+            var thumb = await ToThumbnail(await Image.LoadAsync(stream).ConfigureAwait(false)).ConfigureAwait(false);
+            await SaveImage(registry, current, thumb, true);
+            return (true, thumb.ToStream());
         }
         public static async Task<(bool success, Stream stream)> TryGetImageFromDrive(Registry registry, RPage current, double zoom)
         {
