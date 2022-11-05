@@ -119,7 +119,7 @@ namespace GeneaGrab.Views
                 foreach (var page in Info.Registry.Pages) Pages.Add(page!);
             });
 
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 var img = await LoadImage(Info.PageNumber, page => Info.Provider.API.Preview(Info.Registry, page, TrackProgress));
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
