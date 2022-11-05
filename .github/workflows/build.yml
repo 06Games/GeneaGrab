@@ -1,0 +1,63 @@
+name: Build
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '6.0.401' # The .NET SDK version to use
+
+jobs:
+  build:
+    name: "Build"
+    strategy:
+      matrix:
+        kind: [ 'linux', 'windows', 'macOS' ]
+        include:
+          - kind: linux
+            os: ubuntu-latest
+            target: linux-x64
+          - kind: windows
+            os: windows-latest
+            target: win-x64
+          - kind: macOS
+            os: macos-latest
+            target: osx-x64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: Build
+        shell: bash
+        run: |
+          # Define some variables for things we need
+          release_name="GeneaGrab-${{ matrix.target }}"
+
+          # Build everything
+          dotnet publish -r "${{ matrix.target }}" -c Release -o "$release_name" --self-contained
+
+          # Pack files
+          mkdir output
+          if [ "${{ matrix.target }}" == "win-x64" ]; then
+            7z a -tzip "output/${release_name}.zip" "./${release_name}/*"
+          else
+            tar czvf "output/${release_name}.tar.gz" "$release_name"
+          fi
+
+          # Delete output directory
+          rm -r "$release_name"
+          
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          path: output/GeneaGrab*
+      
