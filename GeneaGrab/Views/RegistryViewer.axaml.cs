@@ -235,11 +235,15 @@ namespace GeneaGrab.Views
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public void TrackProgress(Progress progress) {
-            var imageProgress = this.FindControl<ProgressBar>("ImageProgress");
-            imageProgress.IsVisible = !progress.Done;
-            imageProgress.IsIndeterminate = progress.Undetermined;
-            imageProgress.Value = progress.Value;
+        public void TrackProgress(Progress progress)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                var imageProgress = this.FindControl<ProgressBar>("ImageProgress");
+                imageProgress.IsVisible = !progress.Done;
+                imageProgress.IsIndeterminate = progress.Undetermined;
+                imageProgress.Value = progress.Value;
+            });
         }
 
         #region Index
