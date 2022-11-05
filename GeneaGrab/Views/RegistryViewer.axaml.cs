@@ -73,13 +73,13 @@ namespace GeneaGrab.Views
             };
 
             var pageNotes = this.FindControl<TextBox>("PageNotes");
-            pageNotes.TextInput += (s, e) =>
+            pageNotes.GetObservable(TextBox.TextProperty).Subscribe(text => //TODO: To be replaced by TextBox.TextChanging when Avalonia v0.11 is released
             {
-                if (Info == null) return;
-                if (PageNumbers.Contains(Info.PageNumber)) Info.Page.Notes = string.IsNullOrWhiteSpace(pageNotes.Text) ? null : pageNotes.Text;
+                if (Info == null || !PageNumbers.Contains(Info.PageNumber)) return;
+                Info.Page.Notes = string.IsNullOrWhiteSpace(text) ? null : text;
                 var index = PageNumbers.IndexOf(Info.PageNumber);
                 Pages[index] = Pages[index].Refresh();
-            };
+            });
         }
 
         private void InitializeComponent()

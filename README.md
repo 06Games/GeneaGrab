@@ -1,5 +1,5 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f898064ba2e44ed2a46b4670e0c9b9c7)](https://www.codacy.com/manual/evan_g/GeneaGrab?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=06Games/GeneaGrab&amp;utm_campaign=Badge_Grade)
-[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/06Games/GeneaGrab?include_prereleases)](https://github.com/06Games/GeneaGrab/releases/latest)  
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f898064ba2e44ed2a46b4670e0c9b9c7)](https://www.codacy.com/gh/06Games/GeneaGrab/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=06Games/GeneaGrab&amp;utm_campaign=Badge_Grade)
+[![GitHub release](https://img.shields.io/github/v/release/06Games/GeneaGrab?include_prereleases)](https://github.com/06Games/GeneaGrab/releases/latest)  
 **GeneaGrab** is a tool to download pages of digitised registers available on the websites of various (mainly French) archive services.
 
 ## Supported providers
