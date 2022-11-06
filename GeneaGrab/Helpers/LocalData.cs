@@ -89,11 +89,10 @@ public static class LocalData
 
     public static async Task<Image> ToThumbnail(this Image img) => await Task.Run(() =>
     {
-        int w = ThumbnailSize;
-        int h = ThumbnailSize;
-        if (img.Width < img.Height) h = ThumbnailSize / img.Width * img.Height;
-        else w = ThumbnailSize / img.Height * img.Width;
-        return img.Clone(x => x.Resize(w, h));
+        var wScale = (float)ThumbnailSize / img.Width;
+        var hScale = (float)ThumbnailSize / img.Height;
+        var scale = Math.Min(wScale, hScale);
+        return img.Clone(x => x.Resize((int)(img.Width * scale), (int)(img.Height * scale)));
     });
 
     private static async Task<string?> _SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
