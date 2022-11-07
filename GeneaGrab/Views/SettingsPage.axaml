@@ -1,0 +1,76 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:GeneaGrab.Views"
+             xmlns:helpers="clr-namespace:GeneaGrab.Helpers"
+             xmlns:services="clr-namespace:GeneaGrab.Services"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="GeneaGrab.Views.SettingsPage">
+    <Design.DataContext>
+        <views:SettingsPage />
+    </Design.DataContext>
+    <UserControl.Resources>
+        <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" EnumType="services:Theme" />
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel x:Name="ContentArea">
+            <TextBlock Text="{Binding Personalization}" />
+            <StackPanel>
+                <TextBlock Text="{Binding Theme}" />
+
+                <StackPanel>
+                    <RadioButton 
+                        Content="{Binding SystemTheme}"
+                        Checked="ThemeChanged_CheckedAsync"
+                        IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=System, Mode=OneWay}"
+                        FontSize="15"
+                        GroupName="AppTheme">
+                        <RadioButton.CommandParameter>
+                            <services:Theme>System</services:Theme>
+                        </RadioButton.CommandParameter>
+                    </RadioButton>
+                    <RadioButton 
+                        Content="{Binding LightTheme}"
+                        Checked="ThemeChanged_CheckedAsync" 
+                        IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
+                        FontSize="15"
+                        GroupName="AppTheme">
+                        <RadioButton.CommandParameter>
+                            <services:Theme>Light</services:Theme>
+                        </RadioButton.CommandParameter> 
+                    </RadioButton>
+                    <RadioButton 
+                        Content="{Binding DarkTheme}"
+                        Checked="ThemeChanged_CheckedAsync" 
+                        IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
+                        FontSize="15"
+                        GroupName="AppTheme">
+                        <RadioButton.CommandParameter>
+                            <services:Theme>Dark</services:Theme>
+                        </RadioButton.CommandParameter>
+                    </RadioButton>
+                    <RadioButton 
+                        Content="{Binding HighContrastTheme}"
+                        Checked="ThemeChanged_CheckedAsync" 
+                        IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=HighContrast, Mode=OneWay}"
+                        FontSize="15"
+                        GroupName="AppTheme">
+                        <RadioButton.CommandParameter>
+                            <services:Theme>HighContrast</services:Theme>
+                        </RadioButton.CommandParameter>
+                    </RadioButton>
+                </StackPanel>
+            </StackPanel>
+
+            <TextBlock Text="{Binding About}" />
+
+            <StackPanel>
+                <TextBlock Text="{Binding VersionDescription, Mode=OneWay}" />
+                <TextBlock Text="{Binding AboutDescription}" />
+                <controls:HyperlinkButton NavigateUri="https://github.com/06Games/GeneaGrab" Content="{Binding AboutSourceCode}" />
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

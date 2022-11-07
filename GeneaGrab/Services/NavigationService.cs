@@ -46,7 +46,10 @@ public static class NavigationService
         TabOpenned();
         SelectionChanged?.Invoke(sender, e);
     }
-    static void TabOpenned() { if (TabView?.SelectedItem is TabViewItem tab) Frame = tab.Content as Frame; }
+    static void TabOpenned()
+    {
+        if (TabView?.SelectedItem is TabViewItem tab) Frame = tab.Content as Frame;
+    }
 
 
     public static TabViewItem NewTab(Type page, object? parameter = null)
@@ -71,16 +74,23 @@ public static class NavigationService
         TabRemoved?.Invoke(tab);
         return true;
     }
-    public static TabViewItem OpenTab(TabViewItem tab) {
+    public static TabViewItem OpenTab(TabViewItem tab)
+    {
         if (TabView != null) TabView.SelectedItem = tab;
-        TabOpenned(); return tab; }
+        TabOpenned();
+        return tab;
+    }
     public static bool TryGetTabWithId(string? id, out TabViewItem? tab)
     {
         tab = null;
         if (id is null) return false;
 
         foreach (var item in TabView?.TabItems ?? Array.Empty<object>())
-            if (item is TabViewItem t && t.Tag as string == id) { tab = t; return true; }
+            if (item is TabViewItem t && t.Tag as string == id)
+            {
+                tab = t;
+                return true;
+            }
         return false;
     }
 

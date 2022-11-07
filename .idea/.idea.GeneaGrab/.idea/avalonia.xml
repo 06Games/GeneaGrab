@@ -10,6 +10,7 @@
         <entry key="GeneaGrab/Views/RegistriesList.axaml" value="GeneaGrab/GeneaGrab.csproj" />
         <entry key="GeneaGrab/Views/RegistriesList.xaml" value="GeneaGrab/GeneaGrab.csproj" />
         <entry key="GeneaGrab/Views/RegistryViewer.axaml" value="GeneaGrab/GeneaGrab.csproj" />
+        <entry key="GeneaGrab/Views/SettingsPage.axaml" value="GeneaGrab/GeneaGrab.csproj" />
         <entry key="GeneaGrab/Views/WindowsTitlebar.axaml" value="GeneaGrab/GeneaGrab.csproj" />
       </map>
     </option>

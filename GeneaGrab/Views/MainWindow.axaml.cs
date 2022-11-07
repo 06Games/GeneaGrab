@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform;
+using Avalonia.Threading;
 using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Helpers;
@@ -38,7 +39,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             ExtendClientAreaTitleBarHeightHint = -1;
         }
         else if (IsMacOS) ExtendClientAreaToDecorationsHint = true;
-        
+
         InitializeComponent();
         DataContext = this;
         Initialize();
@@ -63,8 +64,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         };
         NavigationService.SelectionChanged += (s, e) => FrameChanged();
 
-        //NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
-        NavigationService.Frame = NewTab().Content as Frame;
+        NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
+        Dispatcher.UIThread.Post(() => NavigationService.OpenTab(NewTab()));
     }
 
     private TabViewItem NewTab() => NavigationService.NewTab(typeof(ProviderList));

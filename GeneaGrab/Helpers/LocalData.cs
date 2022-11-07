@@ -13,6 +13,12 @@ namespace GeneaGrab.Helpers;
 public static class LocalData
 {
     public const string AppName = "GeneaGrab";
+    
+    /// <summary>Application appdata folder</summary>
+    /// <returns>
+    /// On Windows: %localappdata%\GeneaGrab
+    /// On MacOS and Linux: ~/.local/share/GeneaGrab
+    /// </returns>
     public static readonly string AppData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), AppName);
     public static readonly string LogFolder = Path.Combine(AppData, "Logs");
     public static readonly DirectoryInfo RegistriesFolder = new(Path.Combine(AppData, "Registries"));

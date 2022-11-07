@@ -117,81 +117,81 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to About this application.
         /// </summary>
-        internal static string Settings_About_Text {
+        internal static string Settings_About {
             get {
-                return ResourceManager.GetString("Settings_About.Text", resourceCulture);
+                return ResourceManager.GetString("Settings.About", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Downloading from the departmental archives has never been easier!.
         /// </summary>
-        internal static string Settings_AboutDescription_Text {
+        internal static string Settings_About_Description {
             get {
-                return ResourceManager.GetString("Settings_AboutDescription.Text", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Personalization.
-        /// </summary>
-        internal static string Settings_Personalization_Text {
-            get {
-                return ResourceManager.GetString("Settings_Personalization.Text", resourceCulture);
+                return ResourceManager.GetString("Settings.About.Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Source code.
         /// </summary>
-        internal static string Settings_PrivacyTermsLink_Content {
+        internal static string Settings_About_SourceCode {
             get {
-                return ResourceManager.GetString("Settings_PrivacyTermsLink.Content", resourceCulture);
+                return ResourceManager.GetString("Settings.About.SourceCode", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to https://github.com/06Games/GeneaGrab.
+        ///   Looks up a localized string similar to Personalization.
         /// </summary>
-        internal static string Settings_PrivacyTermsLink_NavigateUri {
+        internal static string Settings_Personalization {
             get {
-                return ResourceManager.GetString("Settings_PrivacyTermsLink.NavigateUri", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Dark.
-        /// </summary>
-        internal static string Settings_Theme_Dark_Content {
-            get {
-                return ResourceManager.GetString("Settings_Theme_Dark.Content", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Windows default.
-        /// </summary>
-        internal static string Settings_Theme_Default_Content {
-            get {
-                return ResourceManager.GetString("Settings_Theme_Default.Content", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Light.
-        /// </summary>
-        internal static string Settings_Theme_Light_Content {
-            get {
-                return ResourceManager.GetString("Settings_Theme_Light.Content", resourceCulture);
+                return ResourceManager.GetString("Settings.Personalization", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Theme.
         /// </summary>
-        internal static string Settings_Theme_Text {
+        internal static string Settings_Theme {
             get {
-                return ResourceManager.GetString("Settings_Theme.Text", resourceCulture);
+                return ResourceManager.GetString("Settings.Theme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        internal static string Settings_Theme_Dark {
+            get {
+                return ResourceManager.GetString("Settings.Theme.Dark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to High Contrast.
+        /// </summary>
+        internal static string Settings_Theme_HighContrast {
+            get {
+                return ResourceManager.GetString("Settings.Theme.HighContrast", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        internal static string Settings_Theme_Light {
+            get {
+                return ResourceManager.GetString("Settings.Theme.Light", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to System.
+        /// </summary>
+        internal static string Settings_Theme_System {
+            get {
+                return ResourceManager.GetString("Settings.Theme.System", resourceCulture);
             }
         }
         

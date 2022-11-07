@@ -29,31 +29,28 @@
     <data name="Registry.OpenFolder" xml:space="preserve">
         <value>Ouvrir le dossier</value>
     </data>
-    <data name="Settings_About.Text" xml:space="preserve">
+    <data name="Settings.About" xml:space="preserve">
         <value>À propos de cette application</value>
     </data>
-    <data name="Settings_AboutDescription.Text" xml:space="preserve">
+    <data name="Settings.About.Description" xml:space="preserve">
         <value>Télécharger depuis les archives départementales n'a jamais été aussi facile !</value>
     </data>
-    <data name="Settings_Personalization.Text" xml:space="preserve">
+    <data name="Settings.Personalization" xml:space="preserve">
         <value>Personnalisation</value>
     </data>
-    <data name="Settings_PrivacyTermsLink.Content" xml:space="preserve">
+    <data name="Settings.About.SourceCode" xml:space="preserve">
         <value>Code source</value>
     </data>
-    <data name="Settings_PrivacyTermsLink.NavigateUri" xml:space="preserve">
-        <value>https://github.com/06Games/GeneaGrab</value>
-    </data>
-    <data name="Settings_Theme.Text" xml:space="preserve">
+    <data name="Settings.Theme" xml:space="preserve">
         <value>Thème</value>
     </data>
-    <data name="Settings_Theme_Dark.Content" xml:space="preserve">
+    <data name="Settings.Theme.Dark" xml:space="preserve">
         <value>Sombre</value>
     </data>
-    <data name="Settings_Theme_Default.Content" xml:space="preserve">
+    <data name="Settings.Theme.System" xml:space="preserve">
         <value>Système</value>
     </data>
-    <data name="Settings_Theme_Light.Content" xml:space="preserve">
+    <data name="Settings.Theme.Light" xml:space="preserve">
         <value>Clair</value>
     </data>
     <data name="Tab.ProviderList" xml:space="preserve">
@@ -67,5 +64,8 @@
     </data>
     <data name="Tab.SettingsPage" xml:space="preserve">
         <value>Paramètres</value>
+    </data>
+    <data name="Settings.Theme.HighContrast" xml:space="preserve">
+        <value>Fort contraste</value>
     </data>
 </root>
