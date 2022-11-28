@@ -4,7 +4,9 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -12,6 +14,7 @@ using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
+using PowerArgs;
 
 namespace GeneaGrab.Views;
 
@@ -66,6 +69,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
         Dispatcher.UIThread.Post(() => NavigationService.OpenTab(NewTab()));
+        
+
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.Startup += (sender, e) =>
+            {
+                Dispatcher.UIThread.Post(() => Args.InvokeMain<LaunchArgs>(e.Args));
+            };
     }
 
     private TabViewItem NewTab() => NavigationService.NewTab(typeof(ProviderList));
@@ -77,11 +87,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void BackRequested(object sender, RoutedEventArgs e) => NavigationService.GoBack();
     private void ForwardRequested(object sender, RoutedEventArgs e) => NavigationService.GoForward();
 
-    public new event PropertyChangedEventHandler PropertyChanged;
+    public new event PropertyChangedEventHandler? PropertyChanged;
     private void FrameChanged()
     {
-        PropertyChanged(this, new PropertyChangedEventArgs(nameof(IsBackEnabled)));
-        PropertyChanged(this, new PropertyChangedEventArgs(nameof(IsForwardEnabled)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsBackEnabled)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsForwardEnabled)));
         UpdateSelectedTitle();
     }
     public static void UpdateSelectedTitle() => UpdateTitle(NavigationService.TabView?.SelectedItem as TabViewItem);
@@ -92,7 +102,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var frameData = frame?.Content as ITabPage;
 
         tab.IconSource = frameData is null ? null : new SymbolIconSource { Symbol = frameData.IconSource };
-        tab.Header = frameData is null ? frame?.SourcePageType.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Tab.{frame?.SourcePageType.Name}", ResourceExtensions.Resource.UI);
+        tab.Header = frameData is null ? frame?.SourcePageType?.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Tab.{frame?.SourcePageType?.Name}", ResourceExtensions.Resource.UI);
         tab.Tag = frameData?.Identifier;
         Debug.WriteLine(tab.Tag);
     }

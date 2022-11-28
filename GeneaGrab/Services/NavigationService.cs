@@ -52,18 +52,19 @@ public static class NavigationService
     }
 
 
+    public static TabViewItem NewTab<T>(object? parameter = null) where T : UserControl => NewTab(typeof(T), parameter);
     public static TabViewItem NewTab(Type page, object? parameter = null)
     {
         var frame = new Frame();
         var tab = new TabViewItem { Content = frame, Header = page.Name };
-        frame.Navigate(page, parameter);
+        Frame = frame;
 
         if (TabView != null)
         {
             (TabView.TabItems as IList)?.Add(tab);
             TabView.SelectedItem = tab;
         }
-        Frame = frame;
+        Frame.Navigate(page, parameter);
         TabAdded?.Invoke(tab);
         return tab;
     }

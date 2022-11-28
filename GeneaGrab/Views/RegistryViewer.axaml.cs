@@ -153,9 +153,9 @@ namespace GeneaGrab.Views
             var inRam = false;
 
             if (parameter is RegistryInfo infos) Info = infos;
-            else if (parameter is Dictionary<string, string> param)
+            else if (parameter is LaunchArgs param)
             {
-                if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
+                if (!string.IsNullOrWhiteSpace(param.Url) && Uri.TryCreate(param.Url, UriKind.Absolute, out var uri))
                 {
                     await LocalData.LoadData().ConfigureAwait(false);
                     Info = await TryGetFromProviders(uri).ConfigureAwait(false);

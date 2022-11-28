@@ -1,11 +1,13 @@
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using GeneaGrab.Helpers;
 using GeneaGrab.Views;
 using Serilog;
+using URIScheme;
 
 namespace GeneaGrab
 {
@@ -48,6 +50,24 @@ namespace GeneaGrab
             {
                 desktop.MainWindow = new MainWindow();
                 desktop.MainWindow.DataContext = desktop.MainWindow;
+            }
+
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                try
+                {
+                    const string scheme = @"geneagrab";
+                    const string args = "--custom-scheme";
+                    var path = Environment.ProcessPath ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    var service = URISchemeServiceFactory.GetURISchemeSerivce(scheme, @$"URL:{scheme} Protocol",
+                        RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $@"{path}"" ""{args}" : $@"{path} {args}");
+                    if (!service.Check()) // Check if the protocol is registered to the current application.
+                        service.Set(); // Register the service.
+                }
+                catch (PlatformNotSupportedException e)
+                {
+                    Log.Warning(e, "Couldn't register Uri Scheme");
+                }
             }
 
             base.OnFrameworkInitializationCompleted();
