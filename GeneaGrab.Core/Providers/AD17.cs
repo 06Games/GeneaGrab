@@ -39,7 +39,7 @@ namespace GeneaGrab.Providers
             var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
             if (!int.TryParse(query["page"], out var _p)) _p = 1;
 
-            var infos = Regex.Match(query["infos"], @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>").Groups; // https://regex101.com/r/Ju2Y1b/3
+            var infos = Regex.Match(query["infos"] ?? "", @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>").Groups; // https://regex101.com/r/Ju2Y1b/3
             if (infos.Count == 0) infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>", RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
             Registry.ID = query["id"] ?? infos["id"]?.Value;
             Registry.CallNumber = infos["cote"]?.Value;
