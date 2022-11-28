@@ -13,7 +13,7 @@ namespace GeneaGrab.Helpers;
 public static class LocalData
 {
     public const string AppName = "GeneaGrab";
-    
+
     /// <summary>Application appdata folder</summary>
     /// <returns>
     /// On Windows: %localappdata%\GeneaGrab
@@ -30,6 +30,7 @@ public static class LocalData
     {
         if (Loaded && !bypassLoadedCheck) return;
         Log.Information("Loading data");
+        Loaded = true;
 
         foreach (var provider in Data.Providers)
         {
@@ -38,12 +39,12 @@ public static class LocalData
             {
                 var data = await File.ReadAllTextAsync(reg);
                 var registry = JsonConvert.DeserializeObject<Registry>(data);
-                if (registry != null) provider.Value.Registries.Add(registry.ID, registry);
-                else Log.Warning("Registry {0} file is empty", registry);
+                if (registry == null) Log.Warning("Registry {Registry} file is empty", registry);
+                else if (!provider.Value.Registries.ContainsKey(registry.ID)) Log.Warning("An registry already has the id {ID}", registry.ID);
+                else provider.Value.Registries.Add(registry.ID, registry);
             }
         }
         Log.Information("Data loaded");
-        Loaded = true;
     }
     public static async Task SaveDataAsync()
     {
