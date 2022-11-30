@@ -56,8 +56,20 @@ namespace GeneaGrab.Providers
                 if (type.Contains("Naissances")) yield return RegistryType.Birth;
                 if (type.Contains("Baptêmes")) yield return RegistryType.Baptism;
 
-                if (type.Contains("Publications de Mariages")) yield return RegistryType.Banns;
-                else if (type.Contains("Mariages")) yield return RegistryType.Marriage; // TODO: Improve detection
+                var bannsIndex = type.IndexOf("Publications de Mariages", StringComparison.InvariantCulture);
+                if (bannsIndex >= 0) {
+                    yield return RegistryType.Banns;
+                    
+                    //Since the term "Mariages" is both a type in itself and a part of "Publications de Mariages", we have to check if there is another occurrence of the term
+                    var pos = -1;
+                    while ((pos=type.IndexOf("Mariages",pos+1, StringComparison.InvariantCulture))!=-1)
+                    {
+                        if (pos == bannsIndex + "Publications de ".Length) continue; // We are in the case where the term "Mariages" belongs to the expression "Publications de Mariages".
+                        yield return RegistryType.Marriage;
+                        break;
+                    }
+                }
+                else if (type.Contains("Mariages")) yield return RegistryType.Marriage; // There are no "Publications de Mariages", so the term corresponds to the type itself
                 if (type.Contains("Divorces")) yield return RegistryType.Divorce;
 
                 if (type.Contains("Décès")) yield return RegistryType.Death;
