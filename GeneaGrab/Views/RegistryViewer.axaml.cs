@@ -302,7 +302,7 @@ namespace GeneaGrab.Views
             };
 
             var tt = new ToolTip { Content = $"{index.FormatedDate} ({index.FormatedType}): {index.District}\n{index.Notes}" };
-            //ToolTipService.SetToolTip(btn, tt); //TODO
+            ToolTip.SetTip(btn, tt);
 
             this.FindControl<Canvas>("ImageCanvas").Children.Add(btn);
             Canvas.SetTop(btn, pos.X);
