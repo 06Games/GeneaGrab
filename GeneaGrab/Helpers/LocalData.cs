@@ -40,7 +40,7 @@ public static class LocalData
                 var data = await File.ReadAllTextAsync(reg);
                 var registry = JsonConvert.DeserializeObject<Registry>(data);
                 if (registry == null) Log.Warning("Registry {Registry} file is empty", registry);
-                else if (!provider.Value.Registries.ContainsKey(registry.ID)) Log.Warning("An registry already has the id {ID}", registry.ID);
+                else if (provider.Value.Registries.ContainsKey(registry.ID)) Log.Warning("An registry already has the id {ID}", registry.ID);
                 else provider.Value.Registries.Add(registry.ID, registry);
             }
         }
@@ -56,7 +56,7 @@ public static class LocalData
                 foreach (var registry in provider.Value.Registries) await SaveRegistryAsync(registry.Value, folder).ConfigureAwait(false);
             }
         }
-        catch (Exception e) { Log.Error(e.Message, e); }
+        catch (Exception e) { Log.Error(e, "Couldn't save data"); }
     }
     public static async Task SaveRegistryAsync(Registry registry)
     {
@@ -84,7 +84,7 @@ public static class LocalData
         }
         catch (Exception e)
         {
-            Log.Error(e.Message, e);
+            Log.Error(e, "Couldn't get image for {ID} page {Number}", registry.ID, page.Number);
             return null;
         }
     }
@@ -112,7 +112,7 @@ public static class LocalData
         }
         catch (Exception e)
         {
-            Log.Error(e.Message, e);
+            Log.Error(e, "Couldn't save image for {ID} page {Number}", registry.ID, page.Number);
             return Path.Combine(RegistriesFolder.FullName, Extensions.GetValidFilename(registry.ProviderID), Extensions.GetValidFilename(registry.ID), $"p{page.Number}.jpg");
         }
     }
