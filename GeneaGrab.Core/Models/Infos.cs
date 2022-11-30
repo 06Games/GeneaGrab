@@ -59,7 +59,7 @@ namespace GeneaGrab
                     new Provider(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" },
                     new Provider(new AD06(), "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
                     new Provider(new CG06(), "CG06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
-                    new Provider(new NiceHistorique(), "NiceHistorique") { URL = "http://www.nicehistorique.org/" },
+                    new Provider(new NiceHistorique(), "NiceHistorique") { URL = "https://www.nicehistorique.org/" },
                     new Provider(new AD17(), "AD17") { URL = "https://www.archinoe.net/v2/ad17/registre.html" },
                     new Provider(new AD79_86(), "AD79-86") { URL = "https://archives-deux-sevres-vienne.fr/" },
                     //TODO: Gironde and Cantal

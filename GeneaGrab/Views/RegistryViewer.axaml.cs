@@ -37,8 +37,8 @@ namespace GeneaGrab.Views
 
 
 
-        public string UrlPath => "registry";
-        /*string ISchemeSupport.GetIdFromParameters(Dictionary<string, string> param)
+        /*public string UrlPath => "registry";
+        string ISchemeSupport.GetIdFromParameters(Dictionary<string, string> param)
         {
             if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
             {
@@ -98,7 +98,7 @@ namespace GeneaGrab.Views
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     if (NavigationService.CanGoBack) NavigationService.GoBack();
-                    else NavigationService.Navigate(typeof(ProviderList));
+                    else NavigationService.CloseTab();
                 });
                 return;
             }
@@ -107,8 +107,10 @@ namespace GeneaGrab.Views
             {
                 RefreshView();
                 MainWindow.UpdateSelectedTitle();
-                if (inRam || Info == null) return;
-
+            });
+            if (inRam || Info == null) return;
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
                 PageNumbers.Clear();
                 Pages.Clear();
 
@@ -148,7 +150,7 @@ namespace GeneaGrab.Views
 
         public List<int> PageNumbers { get; set; } = new();
         public ObservableCollection<PageList> Pages { get; } = new();
-        public async Task<(bool success, bool inRam)> LoadRegistry(object parameter)
+        private async Task<(bool success, bool inRam)> LoadRegistry(object parameter)
         {
             var inRam = false;
 
@@ -194,17 +196,17 @@ namespace GeneaGrab.Views
             await GetIndex();
             RefreshView(image);
         }
-        public void RefreshView(Stream? img = null)
+        private void RefreshView(Stream? img = null)
         {
-            if (Info is null) return;
+            if (Info?.Registry == null) return;
             this.FindControl<NumberBox>("PageNumber").Value = Info.PageNumber;
             this.FindControl<TextBlock>("PageTotal").Text = $"/ {Info.Registry.Pages.Max(p => p.Number)}";
-            SetInfo(this.FindControl<TextBlock>("Info_LocationCity"), Info.Registry?.Location ?? Info.Registry?.LocationID);
-            SetInfo(this.FindControl<TextBlock>("Info_LocationDistrict"), Info.Registry?.District ?? Info.Registry?.DistrictID);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryType"), Info.Registry?.TypeToString);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryDate"), Info.Registry?.Dates);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryNotes"), Info.Registry?.Notes);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryID"), Info.Registry?.CallNumber ?? Info.Registry?.ID);
+            SetInfo(this.FindControl<TextBlock>("Info_LocationCity"), Info.Registry.Location ?? Info.Registry.LocationID);
+            SetInfo(this.FindControl<TextBlock>("Info_LocationDistrict"), Info.Registry!.District ?? Info.Registry.DistrictID);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryType"), Info.Registry!.TypeToString);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryDate"), Info.Registry.Dates);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryNotes"), Info.Registry.Notes);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryID"), Info.Registry.CallNumber ?? Info.Registry.ID);
             void SetInfo(TextBlock block, string? text)
             {
                 block.Text = text ?? "";
@@ -228,11 +230,13 @@ namespace GeneaGrab.Views
         private async void Download(object sender, RoutedEventArgs e) => await Download().ConfigureAwait(false);
         async Task Download()
         {
+            if (Info == null) return;
             await Info.Provider.API.Download(Info.Registry, Info.Page, TrackProgress);
             RefreshView();
         }
         private async void OpenFolder(object sender, RoutedEventArgs e)
         {
+            if (Info == null) return;
             var page = await LocalData.GetFile(Info.Registry, Info.Page);
             //TODO: Needs Avalonia 0.11 to use TopLevel/Window.StorageProvider
             /*var options = new Windows.System.FolderLauncherOptions();
@@ -260,6 +264,7 @@ namespace GeneaGrab.Views
         public ObservableCollection<Index> Index { get; private set; } = new();
         private async Task GetIndex()
         {
+            if (Info == null) return;
             var indexPanel = this.FindControl<StackPanel>("IndexPanel");
             if (!Info.Provider.API.IndexSupport)
             {

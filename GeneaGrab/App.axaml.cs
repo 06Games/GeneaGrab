@@ -18,8 +18,8 @@ namespace GeneaGrab
         {
             AvaloniaXamlLoader.Load(this);
 
-            Log.Logger = new LoggerConfiguration().WriteTo
-                .File(new Serilog.Formatting.Compact.RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.json"))
+            Log.Logger = new LoggerConfiguration()
+                .WriteTo.File(new Serilog.Formatting.Compact.RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.json"))
                 .CreateLogger();
 
             Data.Log = (l, d) =>

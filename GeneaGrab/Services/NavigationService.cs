@@ -68,6 +68,11 @@ public static class NavigationService
         TabAdded?.Invoke(tab);
         return tab;
     }
+    public static bool CloseTab()
+    {
+        if (TabView?.SelectedItem is TabViewItem tab) return CloseTab(tab);
+        return false;
+    } 
     public static bool CloseTab(TabViewItem tab)
     {
         if (!tab.IsClosable || TabView == null) return false;
