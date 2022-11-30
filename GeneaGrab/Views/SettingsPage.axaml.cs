@@ -14,8 +14,8 @@ namespace GeneaGrab.Views
     public partial class SettingsPage : Page, INotifyPropertyChanged, ITabPage
     {
         public Symbol IconSource => Symbol.Setting;
-        public string DynaTabHeader => null;
-        public string Identifier => null;
+        public string? DynaTabHeader => null;
+        public string? Identifier => null;
 
         
         public string? Personalization => ResourceExtensions.GetLocalized("Settings.Personalization", ResourceExtensions.Resource.UI);
@@ -57,19 +57,19 @@ namespace GeneaGrab.Views
             return $"{appName} - {version.Major}.{version.Minor}.{Math.Max(version.Build, 0)}.{Math.Max(version.Revision, 0)}";
         }
 
-        private void ThemeChanged_CheckedAsync(object sender, RoutedEventArgs e)
+        private void ThemeChanged_CheckedAsync(object sender, RoutedEventArgs _)
         {
             var param = (sender as RadioButton)?.CommandParameter;
             if (param != null) ThemeSelectorService.SetTheme((Theme)param);
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
-        private void Set<T>(ref T storage, T value, [CallerMemberName] string propertyName = null)
+        private void Set<T>(ref T storage, T value, [CallerMemberName] string? propertyName = null)
         {
             if (Equals(storage, value)) return;
             storage = value;
             OnPropertyChanged(propertyName);
         }
-        private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        private void OnPropertyChanged(string? propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

@@ -138,7 +138,7 @@ namespace GeneaGrab.Views
                 {
                     var i = PageNumbers.IndexOf(number);
                     var page = Pages[i];
-                    var thumbnail = await func?.Invoke(page.Page);
+                    var thumbnail = await func.Invoke(page.Page);
                     page.Thumbnail = thumbnail.ToBitmap();
                     await Dispatcher.UIThread.InvokeAsync(() => Pages[i] = page);
                     return thumbnail;
@@ -243,7 +243,11 @@ namespace GeneaGrab.Views
             if (page.Exists) options.ItemsToSelect.Add(page);
             await Windows.System.Launcher.LaunchFolderAsync(page.Directory!.FullName, options);*/
         }
-        private async void Ark(object sender, RoutedEventArgs e) => await Application.Current?.Clipboard?.SetTextAsync(await Info.Provider.API.Ark(Info.Registry, Info.Page))!;
+        private async void Ark(object sender, RoutedEventArgs e)
+        {
+            if(Info == null) return;
+            await Application.Current?.Clipboard?.SetTextAsync(await Info.Provider.API.Ark(Info.Registry, Info.Page))!;
+        }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -323,7 +327,7 @@ namespace GeneaGrab.Views
     public class PageList
     {
         public static implicit operator PageList?(RPage? page) => page is null ? null : new PageList { Page = page }.Refresh();
-        public RPage Page { get; set; }
+        public RPage Page { get; init; } = null!;
         public PageList Refresh()
         {
             Number = Page.Number;

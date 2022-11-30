@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 
 namespace GeneaGrab.Views
 {
@@ -12,48 +13,51 @@ namespace GeneaGrab.Views
         public ZoomPanel() => Background = new SolidColorBrush(Colors.Transparent); //Allows interaction with the element
 
         /// <summary>The image component</summary>
-        public Control? Child
+        private Control? Child
         {
             get => _child;
-            private set { _child = value; Initialized = false; }
+            set
+            {
+                _child = value;
+                initialized = false;
+            }
         }
-        private bool Initialized;
+        private bool initialized;
         private Control? _child;
 
         /// <summary>The user has moved the child</summary>
-        public event System.Action<double, double> PositionChanged;
+        public event System.Action<double, double>? PositionChanged;
         /// <summary>The user has changed the zoom</summary>
-        public event System.Action<double> ZoomChanged;
+        public event System.Action<double>? ZoomChanged;
 
         protected override Size ArrangeOverride(Size finalSize)
         {
             Initialize()?.Arrange(new Rect(new Point(), finalSize)); //Initialise the element and place the child in it
             return finalSize;
         }
-        public Control Initialize()
+        private Control? Initialize()
         {
-            if (Initialized && Child != null) return Child;
-            if (!Initialized)
+            if (initialized && Child != null) return Child;
+            if (!initialized)
             {
-                PointerPressed += (s, e) =>
+                PointerPressed += (_, e) =>
                 {
                     var point = e.GetCurrentPoint(this);
-                    if(point.Properties.IsRightButtonPressed) Reset();
+                    if (point.Properties.IsRightButtonPressed) Reset();
                 };
 
                 void SetClip() => Clip = new RectangleGeometry { Rect = new Rect(0, 0, Bounds.Width, Bounds.Height) }; //Prevents the child from being rendered out of the element
-                LayoutUpdated += (s, e) => SetClip();
+                LayoutUpdated += (_, _) => SetClip();
                 SetClip();
-                
             }
 
             Child = Children.FirstOrDefault() as Control;
             if (Child is null) return null;
 
-            TransformGroup group = new TransformGroup();
-            ScaleTransform st = new ScaleTransform();
+            var group = new TransformGroup();
+            var st = new ScaleTransform();
             group.Children.Add(st);
-            TranslateTransform tt = new TranslateTransform();
+            var tt = new TranslateTransform();
             group.Children.Add(tt);
             Child.RenderTransform = group;
             Child.RenderTransformOrigin = new RelativePoint(new Point(0.0, 0.0), RelativeUnit.Absolute);
@@ -62,12 +66,20 @@ namespace GeneaGrab.Views
             Child.PointerReleased += child_MouseLeftButtonUp;
             Child.PointerMoved += child_MouseMove;
 
-            Initialized = true;
+            initialized = true;
             return Child;
         }
 
-        private TranslateTransform GetTranslateTransform(Control element) => (TranslateTransform)((TransformGroup)element.RenderTransform).Children.First(tr => tr is TranslateTransform);
-        private ScaleTransform GetScaleTransform(Control element) => (ScaleTransform)((TransformGroup)element.RenderTransform).Children.First(tr => tr is ScaleTransform);
+        private static TranslateTransform? GetTranslateTransform(IVisual element)
+        {
+            if (element.RenderTransform is TransformGroup group) return (TranslateTransform)group.Children.First(tr => tr is TranslateTransform);
+            return null;
+        }
+        private static ScaleTransform? GetScaleTransform(IVisual element)
+        {
+            if (element.RenderTransform is TransformGroup group) return (ScaleTransform)group.Children.First(tr => tr is ScaleTransform);
+            return null;
+        }
 
         /// <summary>Resets the child's position and zoom</summary>
         public void Reset()
@@ -76,11 +88,11 @@ namespace GeneaGrab.Views
 
             // Reset zoom
             var st = GetScaleTransform(Child);
-            st.ScaleX = st.ScaleY = 1.0;
+            if (st != null) st.ScaleX = st.ScaleY = 1.0;
 
             // Reset position
             var tt = GetTranslateTransform(Child);
-            tt.X = tt.Y = 0.0;
+            if (tt != null) tt.X = tt.Y = 0.0;
         }
 
         #region Child Events
@@ -91,23 +103,21 @@ namespace GeneaGrab.Views
 
             var st = GetScaleTransform(Child);
             var tt = GetTranslateTransform(Child);
-            
+            if (st == null || tt == null) return;
+
             var delta = e.Delta.Y;
             if (delta <= 0 && (st.ScaleX < .4 || st.ScaleY < .4)) return;
-            double zoom = delta > 0 ? .2 : -.2;
+            var zoom = delta > 0 ? .2 : -.2;
 
-            Point relative = e.GetCurrentPoint(Child).Position;
-            double absoluteX;
-            double absoluteY;
-
-            absoluteX = relative.X * st.ScaleX + tt.X;
-            absoluteY = relative.Y * st.ScaleY + tt.Y;
+            var (relativeX, relativeY) = e.GetCurrentPoint(Child).Position;
+            var absoluteX = relativeX * st.ScaleX + tt.X;
+            var absoluteY = relativeY * st.ScaleY + tt.Y;
 
             st.ScaleX += zoom;
             st.ScaleY += zoom;
 
-            tt.X = absoluteX - relative.X * st.ScaleX;
-            tt.Y = absoluteY - relative.Y * st.ScaleY;
+            tt.X = absoluteX - relativeX * st.ScaleX;
+            tt.Y = absoluteY - relativeY * st.ScaleY;
 
             ZoomChanged?.Invoke(st.ScaleX);
         }
@@ -121,6 +131,8 @@ namespace GeneaGrab.Views
             if (Child is null) return;
 
             var tt = GetTranslateTransform(Child);
+            if (tt == null) return;
+
             start = e.GetCurrentPoint(this).Position;
             origin = new Point(tt.X, tt.Y);
             Cursor = new Cursor(StandardCursorType.Hand);
@@ -141,22 +153,23 @@ namespace GeneaGrab.Views
 
             var st = GetScaleTransform(Child);
             var tt = GetTranslateTransform(Child);
-            var v = e.GetCurrentPoint(this).Position;
+            if (st == null || tt == null) return;
+            var (mouseX, mouseY) = e.GetCurrentPoint(this).Position;
 
 
-            var X = origin.X - start.X + v.X;
-            var left = X - Child.Bounds.Width / 2;
+            var x = origin.X - start.X + mouseX;
+            var left = x - Child.Bounds.Width / 2;
             var right = left + Child.Bounds.Width * st.ScaleX;
             var minX = Bounds.Width / -4;
             var maxX = Bounds.Width / 4;
-            if (left < maxX && right > minX) tt.X = X;
+            if (left < maxX && right > minX) tt.X = x;
 
-            var Y = origin.Y - start.Y + v.Y;
-            var top = Y - Child.Bounds.Height / 2;
+            var y = origin.Y - start.Y + mouseY;
+            var top = y - Child.Bounds.Height / 2;
             var bottom = top + Child.Bounds.Height * st.ScaleY;
             var minY = Bounds.Height / -4;
             var maxY = Bounds.Height / 4;
-            if (top < maxY && bottom > minY) tt.Y = Y;
+            if (top < maxY && bottom > minY) tt.Y = y;
 
 
             PositionChanged?.Invoke(tt.X, tt.Y);

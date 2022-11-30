@@ -6,7 +6,7 @@ namespace GeneaGrab.Helpers
 {
     public class EnumToBooleanConverter : IValueConverter
     {
-        public Type EnumType { get; set; }
+        public Type EnumType { get; set; } = null!;
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)         {
             if (parameter is not string enumString) throw new ArgumentException("parameter must be an Enum name!");
