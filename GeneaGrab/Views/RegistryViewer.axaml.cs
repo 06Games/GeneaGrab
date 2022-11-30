@@ -115,8 +115,8 @@ namespace GeneaGrab.Views
                 Pages.Clear();
 
                 var pageNumber = this.FindControl<NumberBox>("PageNumber");
-                pageNumber.Minimum = Info.Registry.Pages.Min(p => p.Number);
-                pageNumber.Maximum = Info.Registry.Pages.Max(p => p.Number);
+                pageNumber.Minimum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Min(p => p.Number) : 0;
+                pageNumber.Maximum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0;
                 PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
                 foreach (var page in Info.Registry.Pages) Pages.Add(page!);
             });
@@ -200,7 +200,7 @@ namespace GeneaGrab.Views
         {
             if (Info?.Registry == null) return;
             this.FindControl<NumberBox>("PageNumber").Value = Info.PageNumber;
-            this.FindControl<TextBlock>("PageTotal").Text = $"/ {Info.Registry.Pages.Max(p => p.Number)}";
+            this.FindControl<TextBlock>("PageTotal").Text = $"/ {(Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0)}";
             SetInfo(this.FindControl<TextBlock>("Info_LocationCity"), Info.Registry.Location ?? Info.Registry.LocationID);
             SetInfo(this.FindControl<TextBlock>("Info_LocationDistrict"), Info.Registry!.District ?? Info.Registry.DistrictID);
             SetInfo(this.FindControl<TextBlock>("Info_RegistryType"), Info.Registry!.TypeToString);
