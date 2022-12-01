@@ -15,7 +15,7 @@ namespace GeneaGrab
         /// <param name="client">HTTP client to use</param>
         public static async Task<(int w, int h, int tileSize, string format)> ImageData(string baseURL, HttpClient client)
         {
-            string data = await client.GetStringAsync($"{baseURL}/image.xml");
+            var data = await client.GetStringAsync($"{baseURL}/image.xml");
             var dataResp = new FileFormat.XML.XML(data);
             var layer = dataResp.RootElement.node;
             var size = layer.FirstChild;
@@ -28,7 +28,7 @@ namespace GeneaGrab
             );
         }
 
-        public static (Point tiles, int diviser) NbTiles(RPage page, double multiplier)
+        public static (Point tiles, int diviser) GetTilesNumber(RPage page, double multiplier)
         {
             var diviser = Math.Pow(2, CalculateIndex(page) - multiplier);
             int NbTiles(int val) => (int)Math.Ceiling(val / diviser / page.TileSize.GetValueOrDefault(256));

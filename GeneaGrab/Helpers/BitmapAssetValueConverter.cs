@@ -35,7 +35,7 @@ public class BitmapAssetValueConverter : IValueConverter
             }
             else
             {
-                string? assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
+                var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
                 uri = new Uri($"avares://{assemblyName}{rawUri}");
             }
 

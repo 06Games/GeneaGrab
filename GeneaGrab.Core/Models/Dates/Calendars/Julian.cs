@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GeneaGrab.Core.Models.Dates.Calendars.Julian
 {
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public class JulianYear : GenericYear
     {
         public override string Long => Value < 0 ? $"Annus {Short} ante Christum natum" : $"Anno Domini {Short}";
         public override string Medium => Value < 0 ? $"{Short} a.C.n." : $"{Short} p.C.n."; // a.C.n. = Ante Christum natum ; p.C.n. = post Christum natum
         public override string Short => (Value < 0 ? "−" : "") + RomanNumerals.Convert.ToRomanNumerals(Math.Abs(Value), RomanNumerals.Numerals.NumeralFlags.Unicode);
     }
+    
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public class JulianMonth : GenericMonth
     {
-        public static readonly string[] Months = new[] {
+        public static readonly string[] Months = {
             "Ianuarius", "Februarius", "Martius",
             "Aprilis", "Maius", "Iunius",
             "Iulius", "Augustus", "September",
@@ -18,8 +22,12 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.Julian
         };
         public override string Medium => Value > 0 && Value <= 12 ? Months[Value-1] : null;
     }
+    
     public class JulianDay : GenericDay { }
+    
     public class JulianHour : GenericHour { }
+    
     public class JulianMinute : GenericMinute { }
+    
     public class JulianSecond : GenericSecond { }
 }

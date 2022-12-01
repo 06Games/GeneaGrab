@@ -70,7 +70,7 @@ namespace GeneaGrab.IIIF
             Json = image;
             Id = image.Value<string>("@id");
             Format = image["resource"].Value<string>("format");
-            ServiceId = image["resource"]["service"].Value<string>("@id");
+            ServiceId = image["resource"]["service"]?.Value<string>("@id");
         }
 
         public JToken Json { get; }

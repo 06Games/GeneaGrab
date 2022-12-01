@@ -8,7 +8,7 @@
     }
     public class FrenchRepublicanMonth : GenericMonth
     {
-        public static readonly string[] Months = new[] {
+        public static readonly string[] Months = {
             "Vendémiaire", "Brumaire", "Frimaire", // Autumn months
             "Nivôse", "Pluviôse", "Ventôse", // Winter months
             "Germinal", "Floréal", "Prairial", // Spring months

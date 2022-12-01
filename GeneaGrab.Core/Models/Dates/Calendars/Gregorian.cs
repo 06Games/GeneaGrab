@@ -1,7 +1,9 @@
-﻿using GeneaGrab.Core.Models.Dates.Calendars.Julian;
+﻿using System.Diagnostics.CodeAnalysis;
+using GeneaGrab.Core.Models.Dates.Calendars.Julian;
 
 namespace GeneaGrab.Core.Models.Dates.Calendars.Gregorian
 {
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public class GregorianYear : GenericYear
     {
         public override string Long => Value < 0 ? $"Annus {Short} ante Christum natum" : $"Anno Domini {Short}";

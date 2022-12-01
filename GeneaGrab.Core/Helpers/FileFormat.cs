@@ -74,7 +74,7 @@ namespace FileFormat
                 else
                 {
                     //Create attribute
-                    System.Xml.XmlAttribute xmlAttribute = node.OwnerDocument.CreateAttribute(key);
+                    var xmlAttribute = node.OwnerDocument.CreateAttribute(key);
                     node.Attributes.Append(xmlAttribute);
                     xmlAttribute.Value = value;
                 }
@@ -86,7 +86,7 @@ namespace FileFormat
 
             public T value<T>()
             {
-                string v = Value;
+                var v = Value;
                 if (v == null) return default;
                 else try { return (T)System.Convert.ChangeType(v, typeof(T)); } catch { return default; }
             }
@@ -106,7 +106,7 @@ namespace FileFormat
             public Item GetItem(string key)
             {
                 if (node == null) return new Item(null);
-                System.Xml.XmlNode xmlNode = node.SelectSingleNode(key);
+                var xmlNode = node.SelectSingleNode(key);
                 if (xmlNode == null) return new Item(null);
                 else return new Item(xmlNode);
             }
@@ -122,18 +122,18 @@ namespace FileFormat
             public Item[] GetItems()
             {
                 if (node == null) return System.Array.Empty<Item>();
-                System.Xml.XmlNodeList list = node.ChildNodes;
-                Item[] items = new Item[list.Count];
-                for (int i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
+                var list = node.ChildNodes;
+                var items = new Item[list.Count];
+                for (var i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
                 if (items.Length > 0) return items;
                 else return System.Array.Empty<Item>();
             }
             public Item[] GetItems(string key)
             {
                 if (node == null) return System.Array.Empty<Item>();
-                System.Xml.XmlNodeList list = node.SelectNodes(key);
-                Item[] items = new Item[list.Count];
-                for (int i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
+                var list = node.SelectNodes(key);
+                var items = new Item[list.Count];
+                for (var i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
                 if (items.Length > 0) return items;
                 else return System.Array.Empty<Item>();
             }
@@ -141,16 +141,16 @@ namespace FileFormat
             public Item GetItemByAttribute(string key, string attribute, string attributeValue = "")
             {
                 if (node == null) return new Item(null);
-                System.Xml.XmlNode xmlNode = node.SelectSingleNode(key + "[@" + attribute + " = \"" + attributeValue + "\"]");
+                var xmlNode = node.SelectSingleNode(key + "[@" + attribute + " = \"" + attributeValue + "\"]");
                 if (xmlNode == null) return new Item(null);
                 else return new Item(xmlNode);
             }
             public Item[] GetItemsByAttribute(string key, string attribute, string attributeValue = "")
             {
                 if (node == null) return new Item[0];
-                System.Xml.XmlNodeList list = node.SelectNodes(key + "[@" + attribute + " = '" + attributeValue + "']");
-                Item[] items = new Item[list.Count];
-                for (int i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
+                var list = node.SelectNodes(key + "[@" + attribute + " = '" + attributeValue + "']");
+                var items = new Item[list.Count];
+                for (var i = 0; i < items.Length; i++) items[i] = new Item(list[i]);
                 if (items.Length > 0) return items;
                 else return null;
             }

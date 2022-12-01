@@ -13,44 +13,44 @@ namespace GeneaGrab.Providers
     {
         public bool IndexSupport => false;
 
-        public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
+        public bool TryGetRegistryID(Uri url, out RegistryInfo info)
         {
             info = null;
-            if (URL.Host != "dam-antenati.san.beniculturali.it" || !URL.AbsolutePath.StartsWith("/antenati/containers/")) return false;
+            if (url.Host != "dam-antenati.san.beniculturali.it" || !url.AbsolutePath.StartsWith("/antenati/containers/")) return false;
 
             info = new RegistryInfo
             {
                 ProviderID = "Antenati",
-                RegistryID = Regex.Match(URL.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value
+                RegistryID = Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value
             };
             return true;
         }
 
-        public async Task<RegistryInfo> Infos(Uri URL)
+        public async Task<RegistryInfo> Infos(Uri url)
         {
-            var Registry = new Registry(Data.Providers["Antenati"]) { ID = Regex.Match(URL.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value };
-            Registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{Registry.ID}";
+            var registry = new Registry(Data.Providers["Antenati"]) { ID = Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value };
+            registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.ID}";
 
             var client = new HttpClient();
-            var iiif = new IIIF.Manifest(await client.GetStringAsync($"{Registry.URL}/manifest"));
+            var iiif = new IIIF.Manifest(await client.GetStringAsync($"{registry.URL}/manifest"));
 
-            Registry.Pages = iiif.Sequences.First().Canvases.Select(p => new RPage
+            registry.Pages = iiif.Sequences.First().Canvases.Select(p => new RPage
             {
                 Number = int.Parse(p.Label.Substring("pag. ".Length)),
                 URL = p.Images.First().ServiceId
             }).ToArray();
 
             var dates = iiif.MetaData["Datazione"].Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
-            Registry.From = Core.Models.Dates.Date.ParseDate(dates[0]);
-            Registry.To = Core.Models.Dates.Date.ParseDate(dates[1]);
-            Registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
+            registry.From = Core.Models.Dates.Date.ParseDate(dates[0]);
+            registry.To = Core.Models.Dates.Date.ParseDate(dates[1]);
+            registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
             var location = iiif.MetaData["Contesto archivistico"].Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries);
-            Registry.Location = location.Last();
-            Registry.LocationDetails = location.Take(location.Length - 1).ToArray();
-            Registry.ArkURL = Regex.Match(iiif.MetaData["Vedi il registro"], "<a .*>(?<url>.*)</a>").Groups["url"]?.Value;
+            registry.Location = location.Last();
+            registry.LocationDetails = location.Take(location.Length - 1).ToArray();
+            registry.ArkURL = Regex.Match(iiif.MetaData["Vedi il registro"], "<a .*>(?<url>.*)</a>").Groups["url"]?.Value;
 
-            Data.AddOrUpdate(Data.Providers["Antenati"].Registries, Registry.ID, Registry);
-            return new RegistryInfo(Registry) { PageNumber = 1 };
+            Data.AddOrUpdate(Data.Providers["Antenati"].Registries, registry.ID, registry);
+            return new RegistryInfo(registry) { PageNumber = 1 };
         }
         IEnumerable<RegistryType> ParseTypes(string[] types)
         {
@@ -62,19 +62,19 @@ namespace GeneaGrab.Providers
             }
         }
 
-        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"{Registry.ArkURL} (p{Page.Number})");
-        public async Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"{registry.ArkURL} (p{page.Number})");
+        public async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
         {
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
             if (success) return stream;
-            return await GetTiles(Registry, page, 0.1F, progress).ConfigureAwait(false);
+            return await GetTiles(registry, page, 0.1F, progress).ConfigureAwait(false);
         }
-        public Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
-        public Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
-        public static async Task<Stream> GetTiles(Registry Registry, RPage page, float scale, Action<Progress> progress)
+        public Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.5F, progress);
+        public Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
+        public static async Task<Stream> GetTiles(Registry registry, RPage page, float scale, Action<Progress> progress)
         {
-            int zoom = (int)(scale * 100);
-            var (success, stream) = await Data.TryGetImageFromDrive(Registry, page, zoom).ConfigureAwait(false);
+            var zoom = (int)(scale * 100);
+            var (success, stream) = await Data.TryGetImageFromDrive(registry, page, zoom).ConfigureAwait(false);
             if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
@@ -83,8 +83,8 @@ namespace GeneaGrab.Providers
             page.Zoom = zoom;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers["Antenati"].Registries[Registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
+            Data.Providers["Antenati"].Registries[registry.ID].Pages[page.Number - 1] = page;
+            await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }
     }

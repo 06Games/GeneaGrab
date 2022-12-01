@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -13,21 +14,21 @@ namespace GeneaGrab.Providers
     {
         public bool IndexSupport => false;
 
-        readonly string[] SupportedServices = new[] { "EC", "CAD", "MAT_ETS", "RP" };
-        delegate void Service(NameValueCollection query, string pageBody, ref Registry Registry);
-        readonly Dictionary<string, Service> Appli = new Dictionary<string, Service> {
+        private readonly string[] supportedServices = { "EC", "CAD", "MAT_ETS", "RP" };
+        private delegate void Service(NameValueCollection query, string pageBody, ref Registry registry);
+        private readonly Dictionary<string, Service> applications = new Dictionary<string, Service> {
             { "ec", EC }, // Etat civil
             { "cad", CAD }, // Cadastre (Plan)
             { "etc_mat", ETC_MAT }, // Cadastre (Etat de section + Matrice)
             { "rp", RP } // Recensements
         };
 
-        public bool TryGetRegistryID(Uri URL, out RegistryInfo info)
+        public bool TryGetRegistryID(Uri url, out RegistryInfo info)
         {
             info = null;
-            if (URL.Host != "www.basesdocumentaires-cg06.fr" || !SupportedServices.Any(s => URL.AbsolutePath.StartsWith($"/archives/ImageZoomViewer{s}.php"))) return false;
+            if (url.Host != "www.basesdocumentaires-cg06.fr" || !supportedServices.Any(s => url.AbsolutePath.StartsWith($"/archives/ImageZoomViewer{s}.php"))) return false;
 
-            var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
+            var query = System.Web.HttpUtility.ParseQueryString(url.Query);
             info = new RegistryInfo
             {
                 RegistryID = query["IDDOC"] ?? query["cote"],
@@ -37,42 +38,45 @@ namespace GeneaGrab.Providers
             return true;
         }
 
-        public async Task<RegistryInfo> Infos(Uri URL)
+        public async Task<RegistryInfo> Infos(Uri url)
         {
-            var Registry = new Registry(Data.Providers["AD06"]) { URL = System.Web.HttpUtility.UrlDecode(URL.OriginalString) };
+            var registry = new Registry(Data.Providers["AD06"]) { URL = System.Web.HttpUtility.UrlDecode(url.OriginalString) };
 
             var client = new HttpClient();
-            string pageBody = await client.GetStringAsync(Registry.URL).ConfigureAwait(false);
+            var pageBody = await client.GetStringAsync(registry.URL).ConfigureAwait(false);
 
             var appli = Regex.Match(pageBody, "<input type=\"hidden\" id=\"appliTag\" name=\"appliTag\" value=\"(?<appli>.*?)\" \\/>").Groups["appli"]?.Value;
             var infos = Regex.Match(pageBody, "<input type=\"hidden\" id=\"infosTag\" name=\"infosTag\" value=\"(?<infos>.*?)\" \\/>").Groups["infos"]?.Value;
             var pages = Regex.Matches(pageBody, "imagesListe\\.push\\('(?<page>.*?)'\\)").Cast<Match>().Select(m => m.Groups["page"]?.Value).ToArray();
-            Registry.Pages = pages.Select((p, i) => new RPage { Number = i + 1, URL = $"http://www.basesdocumentaires-cg06.fr/archives/ImageViewerTargetJP2.php?appli={appli}&imagePath={pages[i]}&infos={infos}" }).ToArray();
+            registry.Pages = pages.Select((p, i) => new RPage { Number = i + 1, URL = $"http://www.basesdocumentaires-cg06.fr/archives/ImageViewerTargetJP2.php?appli={appli}&imagePath={pages[i]}&infos={infos}" }).ToArray();
 
-            var query = System.Web.HttpUtility.ParseQueryString(URL.Query);
-            if (Appli.TryGetValue(appli, out var service)) service(query, pageBody, ref Registry);
-            if (!int.TryParse(query["page"], out var _p)) _p = 1;
+            var query = System.Web.HttpUtility.ParseQueryString(url.Query);
+            if (appli != null && this.applications.TryGetValue(appli, out var service)) service(query, pageBody, ref registry);
+            if (!int.TryParse(query["page"], out var pageNumber)) pageNumber = 1;
 
-            Data.AddOrUpdate(Data.Providers["AD06"].Registries, Registry.ID, Registry);
-            return new RegistryInfo(Registry) { PageNumber = _p };
+            Data.AddOrUpdate(Data.Providers["AD06"].Registries, registry.ID, registry);
+            return new RegistryInfo(registry) { PageNumber = pageNumber };
         }
 
         #region Services
 
-        static void EC(NameValueCollection query, string _, ref Registry Registry)
+        private static void EC(NameValueCollection query, string _, ref Registry registry)
         {
-            Registry.ID = query["IDDOC"];
-            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
-            Registry.LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
-            Registry.District = Registry.DistrictID = string.IsNullOrWhiteSpace(query["PAROISSE"]) ? null : query["PAROISSE"];
+            registry.ID = query["IDDOC"];
+            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
+            registry.LocationID = Array.IndexOf(Cities, query["COMMUNE"]).ToString();
+            registry.District = registry.DistrictID = string.IsNullOrWhiteSpace(query["PAROISSE"]) ? null : query["PAROISSE"];
             var dates = query["DATE"]?.Split(new[] { " à " }, StringSplitOptions.None);
-            Registry.From = Core.Models.Dates.Date.ParseDate(dates.FirstOrDefault());
-            Registry.To = Core.Models.Dates.Date.ParseDate(dates.LastOrDefault());
-            Registry.Types = GetTypes(query["TYPEACTE"]);
-
-            IEnumerable<RegistryType> GetTypes(string TYPEACTE)
+            if (dates != null)
             {
-                foreach (var t in Regex.Split(TYPEACTE, "(?=[A-Z])"))
+                registry.From = Core.Models.Dates.Date.ParseDate(dates.FirstOrDefault());
+                registry.To = Core.Models.Dates.Date.ParseDate(dates.LastOrDefault());
+            }
+            registry.Types = GetTypes(query["TYPEACTE"]);
+
+            IEnumerable<RegistryType> GetTypes(string typeActe)
+            {
+                foreach (var t in Regex.Split(typeActe, "(?=[A-Z])"))
                 {
                     var type = t.Trim(' ');
 
@@ -93,15 +97,15 @@ namespace GeneaGrab.Providers
             }
         }
 
-        static void CAD(NameValueCollection query, string pageBody, ref Registry Registry)
+        private static void CAD(NameValueCollection query, string pageBody, ref Registry registry)
         {
-            Registry.ID = query["cote"];
-            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
-            Registry.LocationID = Array.IndexOf(cities, query["c"]).ToString();
-            Registry.District = Registry.DistrictID = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
-            Registry.From = Registry.To = Core.Models.Dates.Date.ParseDate(query["a"]);
-            Registry.Types = GetTypes(query["t"]);
-            Registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
+            registry.ID = query["cote"];
+            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            registry.LocationID = Array.IndexOf(Cities, query["c"]).ToString();
+            registry.District = registry.DistrictID = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
+            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["a"]);
+            registry.Types = GetTypes(query["t"]);
+            registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
 
             IEnumerable<RegistryType> GetTypes(string type)
             {
@@ -111,15 +115,15 @@ namespace GeneaGrab.Providers
         }
 
 
-        static void ETC_MAT(NameValueCollection query, string _, ref Registry Registry)
+        private static void ETC_MAT(NameValueCollection query, string _, ref Registry registry)
         {
-            Registry.ID = query["IDDOC"];
-            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
-            Registry.LocationID = Array.IndexOf(cities, query["COMMUNE"]).ToString();
-            Registry.District = Registry.DistrictID = query["COMPLEMENTLIEUX"];
-            Registry.From = Registry.To = Core.Models.Dates.Date.ParseDate(query["DATE"]);
-            Registry.Types = GetTypes(query["CHOIX"]).ToList();
-            Registry.Notes = $"{query["NATURE"]}\nCote: {query["COTE"]}";
+            registry.ID = query["IDDOC"];
+            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
+            registry.LocationID = Array.IndexOf(Cities, query["COMMUNE"]).ToString();
+            registry.District = registry.DistrictID = query["COMPLEMENTLIEUX"];
+            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["DATE"]);
+            registry.Types = GetTypes(query["CHOIX"]).ToList();
+            registry.Notes = $"{query["NATURE"]}\nCote: {query["COTE"]}";
 
             IEnumerable<RegistryType> GetTypes(string type)
             {
@@ -128,53 +132,53 @@ namespace GeneaGrab.Providers
             }
         }
 
-        static void RP(NameValueCollection query, string pageBody, ref Registry Registry)
+        private static void RP(NameValueCollection query, string pageBody, ref Registry registry)
         {
-            Registry.ID = $"{query["cote"]}___{query["date"]}";
-            Registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
-            Registry.LocationID = Array.IndexOf(cities, query["c"].ToUpper()).ToString();
-            Registry.From = Registry.To = Core.Models.Dates.Date.ParseDate(query["date"]);
-            Registry.Types = new[] { RegistryType.Census };
-            Registry.Notes = query["cote"];
+            registry.ID = $"{query["cote"]}___{query["date"]}";
+            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            registry.LocationID = Array.IndexOf(Cities, query["c"].ToUpper()).ToString();
+            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["date"]);
+            registry.Types = new[] { RegistryType.Census };
+            registry.Notes = query["cote"];
         }
 
         #endregion
 
-        public Task<string> Ark(Registry Registry, RPage Page) => Task.FromResult($"p{Page.Number}");
-        public async Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress)
+        public Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"p{page.Number}");
+        public async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
         {
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(Registry, page).ConfigureAwait(false);
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
             if (success) return stream;
-            return await GetTiles(Registry, page, 0.1F, progress).ConfigureAwait(false);
+            return await GetTiles(registry, page, 0.1F, progress).ConfigureAwait(false);
         }
-        public Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 0.5F, progress);
-        public Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress) => GetTiles(Registry, page, 1, progress);
-        public static async Task<Stream> GetTiles(Registry Registry, RPage page, float zoom, Action<Progress> progress)
+        public Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.5F, progress);
+        public Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
+        private static async Task<Stream> GetTiles(Registry registry, RPage page, float zoom, Action<Progress> progress)
         {
-            var Zoom = (int)(zoom * 100);
-            var (success, stream) = await Data.TryGetImageFromDrive(Registry, page, Zoom).ConfigureAwait(false);
+            var pageZoom = (int)(zoom * 100);
+            var (success, stream) = await Data.TryGetImageFromDrive(registry, page, pageZoom).ConfigureAwait(false);
             if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            string link = await client.GetStringAsync(page.URL).ConfigureAwait(false);
-            string url = await client.GetStringAsync(Regex.Match(link, "(https?:\\/\\/.*)").Value).ConfigureAwait(false);
+            var link = await client.GetStringAsync(page.URL).ConfigureAwait(false);
+            var url = await client.GetStringAsync(Regex.Match(link, "(https?:\\/\\/.*)").Value).ConfigureAwait(false);
             var id = Regex.Match(url, "location\\.replace\\(\"Fullscreen\\.ics\\?id=(?<id>.*?)&").Groups["id"]?.Value;
             if (string.IsNullOrWhiteSpace(id)) return null;
 
             //We can't track the progress because we don't know the final size
             var image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}", client);
-            page.Zoom = Zoom;
+            page.Zoom = pageZoom;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers["AD06"].Registries[Registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(Registry, page, image, false).ConfigureAwait(false);
+            Data.Providers["AD06"].Registries[registry.ID].Pages[page.Number - 1] = page;
+            await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }
 
 
 
-        static readonly string[] cities = {
+        [SuppressMessage("ReSharper", "StringLiteralTypo")] private static readonly string[] Cities = {
             "Choisissez une commune",
             "AIGLUN",
             "AMIRAT",
