@@ -61,7 +61,7 @@
         <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" BorderThickness="1 0 0 0" BorderBrush="Gray">
             <StackPanel Spacing="15" Margin="15" Name="SidePanel">
                 <StackPanel>
-                    <TextBlock Name="Info_LocationCity" FontSize="18" Text="City" TextWrapping="Wrap" />
+                    <TextBlock Name="Info_LocationCity" FontSize="18" FontWeight="Medium" Text="City" TextWrapping="Wrap" />
                     <TextBlock Name="Info_LocationDistrict" Text="District" TextWrapping="Wrap" />
                     <TextBlock Name="Info_RegistryType" Text="Type" FontSize="18" TextWrapping="Wrap" Margin="0 12 0 0" />
                     <TextBlock Name="Info_RegistryDate" Text="From - To" TextWrapping="Wrap" />
