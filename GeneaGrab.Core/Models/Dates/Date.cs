@@ -34,7 +34,7 @@ namespace GeneaGrab.Core.Models.Dates
         }
 
         public override string ToString() => ToString(Precision);
-        public string ToString(Precision precision)
+        public virtual string ToString(Precision precision)
         {
             var txt = new System.Text.StringBuilder();
             var format = (Precision)Math.Min((int)precision, (int)Precision);

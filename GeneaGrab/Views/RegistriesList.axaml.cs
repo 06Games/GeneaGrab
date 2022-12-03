@@ -64,7 +64,8 @@ namespace GeneaGrab.Views
 
             public override bool Equals(object? obj) => Equals(this, obj as Location);
             public bool Equals(Location? x, Location? y) => !string.IsNullOrEmpty(x?.Id) && !string.IsNullOrEmpty(y?.Id) ? x.Id == y.Id : x?.Name == y?.Name;
-            public override int GetHashCode() => Id.GetHashCode();
+            // ReSharper disable once ConstantNullCoalescingCondition
+            public override int GetHashCode() => (Id ?? Name ?? "").GetHashCode();
             public int GetHashCode(Location obj) => obj.GetHashCode();
         }
 

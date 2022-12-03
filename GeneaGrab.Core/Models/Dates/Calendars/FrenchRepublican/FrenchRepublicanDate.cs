@@ -36,5 +36,8 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
             Precision = precision;
             return this;
         }
+
+        public override string ToString() => Precision == Precision.Years ? Year.Medium : base.ToString();
+        public override string ToString(Precision precision) => precision == Precision.Years || Precision == Precision.Years ? Year.Medium : base.ToString();
     }
 }
