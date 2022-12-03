@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
+using GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican;
+using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
+using GeneaGrab.Core.Models.Dates.Calendars.Julian;
 
 namespace GeneaGrab.Core.Models.Dates
 {
@@ -8,7 +10,7 @@ namespace GeneaGrab.Core.Models.Dates
     public enum Precision { Unknown = -1, Years, Months, Days, Hours, Minutes, Seconds }
 
     [JsonConverter(typeof(DateConverter))]
-    public class Date : IComparable<Date>
+    public abstract class Date : IComparable<Date>
     {
         public IYear Year { get; internal set; }
         public IMonth Month { get; internal set; }
@@ -17,30 +19,17 @@ namespace GeneaGrab.Core.Models.Dates
         public IMinute Minute { get; internal set; }
         public ISecond Second { get; internal set; }
 
-        public Calendar Calendar { get; set; } = Calendar.Gregorian;
+        public abstract Calendar Calendar { get; }
         public Precision Precision { get; set; } = Precision.Seconds;
 
-        public Date() { }
-        public Date(DateTime dt, Precision precision = Precision.Days)
-        {
-            Year = new Calendars.Gregorian.GregorianYear { Value = dt.Year };
-            Month = new Calendars.Gregorian.GregorianMonth { Value = dt.Month };
-            Day = new Calendars.Gregorian.GregorianDay { Value = dt.Day };
-            Hour = new Calendars.Gregorian.GregorianHour { Value = dt.Hour };
-            Minute = new Calendars.Gregorian.GregorianMinute { Value = dt.Minute };
-            Second = new Calendars.Gregorian.GregorianSecond { Value = dt.Second };
-            Precision = precision;
-        }
+        internal abstract Date SetDate(int year, int? month = null, int? day = null, int? hour = null, int? minute = null, int? second = null, Precision precision = Precision.Days);
 
         public static implicit operator Date(string date) => ParseDate(date);
-        public static Date ParseDate(string date) //TODO
+        public static Date ParseDate(string date)
         {
-            var culture = new System.Globalization.CultureInfo("fr-FR");
-            var style = System.Globalization.DateTimeStyles.AssumeLocal;
-
-            if (string.IsNullOrWhiteSpace(date)) return null;
-            else if (DateTime.TryParse(date, culture, style, out var d)) return new Date(d);
-            else if (DateTime.TryParseExact(date, "yyyy", culture, style, out d)) return new Date(d, Precision.Years);
+            if (GregorianDate.TryParse(date, out var gregorianDate)) return gregorianDate;
+            if (JulianDate.TryParse(date, out var julianDate)) return julianDate;
+            if (FrenchRepublicanDate.TryParse(date, out var frenchRepublicanDate)) return frenchRepublicanDate;
             return null;
         }
 
@@ -70,49 +59,6 @@ namespace GeneaGrab.Core.Models.Dates
             return txt.ToString();
         }
 
-        public static Type GetYearType(Calendar calendar)
-        {
-            if (calendar == Calendar.Julian) return typeof(Calendars.Julian.JulianYear);
-            if (calendar == Calendar.Gregorian) return typeof(Calendars.Gregorian.GregorianYear);
-            if (calendar == Calendar.FrenchRepublican) return typeof(Calendars.FrenchRepublican.FrenchRepublicanYear);
-            return null;
-        }
-        public static Type GetMonthType(Calendar calendar)
-        {
-            if (calendar == Calendar.Julian) return typeof(Calendars.Julian.JulianMonth);
-            if (calendar == Calendar.Gregorian) return typeof(Calendars.Gregorian.GregorianMonth);
-            if (calendar == Calendar.FrenchRepublican) return typeof(Calendars.FrenchRepublican.FrenchRepublicanMonth);
-            return null;
-        }
-        public static Type GetDayType(Calendar calendar)
-        {
-            if (calendar == Calendar.Julian) return typeof(Calendars.Julian.JulianDay);
-            if (calendar == Calendar.Gregorian) return typeof(Calendars.Gregorian.GregorianDay);
-            if (calendar == Calendar.FrenchRepublican) return typeof(Calendars.FrenchRepublican.FrenchRepublicanDay);
-            return null;
-        }
-        public static Type GetHourType(Calendar calendar)
-        {
-            if (calendar == Calendar.Julian) return typeof(Calendars.Julian.JulianHour);
-            if (calendar == Calendar.Gregorian) return typeof(Calendars.Gregorian.GregorianHour);
-            if (calendar == Calendar.FrenchRepublican) return typeof(Calendars.FrenchRepublican.FrenchRepublicanHour);
-            return null;
-        }
-        public static Type GetMinuteType(Calendar calendar)
-        {
-            if (calendar == Calendar.Julian) return typeof(Calendars.Julian.JulianMinute);
-            if (calendar == Calendar.Gregorian) return typeof(Calendars.Gregorian.GregorianMinute);
-            if (calendar == Calendar.FrenchRepublican) return typeof(Calendars.FrenchRepublican.FrenchRepublicanMinute);
-            return null;
-        }
-        public static Type GetSecondType(Calendar calendar)
-        {
-            if (calendar == Calendar.Julian) return typeof(Calendars.Julian.JulianSecond);
-            if (calendar == Calendar.Gregorian) return typeof(Calendars.Gregorian.GregorianSecond);
-            if (calendar == Calendar.FrenchRepublican) return typeof(Calendars.FrenchRepublican.FrenchRepublicanSecond);
-            return null;
-        }
-
         public int CompareTo(Date other)
         {
             if (this == other) return 0;
@@ -136,7 +82,7 @@ namespace GeneaGrab.Core.Models.Dates
                 return c != 0;
             }
         }
-        
+
         public static bool operator ==(Date date1, Date date2)
         {
             if (ReferenceEquals(date1, date2)) return true;
@@ -151,66 +97,5 @@ namespace GeneaGrab.Core.Models.Dates
             return date1.Precision < Precision.Seconds || date1.Second?.Value == date2.Second?.Value;
         }
         public static bool operator !=(Date date1, Date date2) => !(date1 == date2);
-    }
-
-    class DateConverter : JsonConverter<Date>
-    {
-        public override Date ReadJson(JsonReader reader, Type objectType, Date existingValue, bool hasExistingValue, JsonSerializer serializer)
-        {
-            if (reader.TokenType == JsonToken.String) return Date.ParseDate((string)reader.Value);
-            if (reader.TokenType != JsonToken.StartObject) return null;
-
-            var jObject = JObject.Load(reader);
-            var calendar = (Calendar)Enum.Parse(typeof(Calendar), jObject.Value<string>("Calendar"));
-
-            serializer.Converters.Add(new DateValueConverter());
-            return new Date
-            {
-                Calendar = calendar,
-                Precision = (Precision)Enum.Parse(typeof(Precision), jObject.Value<string>("Precision")),
-                Year = jObject.GetValue("Year")?.ToObject(Date.GetYearType(calendar), serializer) as IYear,
-                Month = jObject.GetValue("Month")?.ToObject(Date.GetMonthType(calendar), serializer) as IMonth,
-                Day = jObject.GetValue("Day")?.ToObject(Date.GetDayType(calendar), serializer) as IDay,
-                Hour = jObject.GetValue("Hour")?.ToObject(Date.GetHourType(calendar), serializer) as IHour,
-                Minute = jObject.GetValue("Minute")?.ToObject(Date.GetMinuteType(calendar), serializer) as IMinute,
-                Second = jObject.GetValue("Second")?.ToObject(Date.GetSecondType(calendar), serializer) as ISecond
-            };
-        }
-        public override void WriteJson(JsonWriter writer, Date value, JsonSerializer serializer)
-        {
-            writer.WriteStartObject();
-
-            WriteProperty(nameof(value.Calendar), Enum.GetName(typeof(Calendar), value.Calendar));
-            WriteProperty(nameof(value.Precision), Enum.GetName(typeof(Precision), value.Precision));
-
-            if (value.Precision >= Precision.Years) WriteProperty(nameof(value.Year), value.Year.Value);
-            if (value.Precision >= Precision.Months) WriteProperty(nameof(value.Month), value.Month.Value);
-            if (value.Precision >= Precision.Days) WriteProperty(nameof(value.Day), value.Day.Value);
-            if (value.Precision >= Precision.Hours) WriteProperty(nameof(value.Hour), value.Hour.Value);
-            if (value.Precision >= Precision.Minutes) WriteProperty(nameof(value.Minute), value.Minute.Value);
-            if (value.Precision >= Precision.Seconds) WriteProperty(nameof(value.Second), value.Second.Value);
-
-            writer.WriteEndObject();
-
-
-            void WriteProperty(string _name, object _value)
-            {
-                writer.WritePropertyName(_name);
-                writer.WriteValue(_value);
-            }
-        }
-    }
-    class DateValueConverter : JsonConverter
-    {
-        public override bool CanConvert(Type objectType) => objectType.IsSubclassOf(typeof(Generic));
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            var generic = (Generic)Activator.CreateInstance(objectType);
-            generic.Value = (int)(long)reader.Value;
-            return generic;
-        }
-
-        public override bool CanWrite => false;
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) => throw new NotImplementedException();
     }
 }
