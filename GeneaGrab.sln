@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneaGrab", "GeneaGrab\Gene
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeneaGrab.Core", "GeneaGrab.Core\GeneaGrab.Core.csproj", "{971A9EDC-97B8-41E6-8EA2-EA0CACE95527}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneaGrab.Core.Tests", "GeneaGrab.Core.Tests\GeneaGrab.Core.Tests.csproj", "{7A9F9DF4-615C-49CC-8115-4EAC0ED3C99D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{971A9EDC-97B8-41E6-8EA2-EA0CACE95527}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{971A9EDC-97B8-41E6-8EA2-EA0CACE95527}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{971A9EDC-97B8-41E6-8EA2-EA0CACE95527}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A9F9DF4-615C-49CC-8115-4EAC0ED3C99D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A9F9DF4-615C-49CC-8115-4EAC0ED3C99D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A9F9DF4-615C-49CC-8115-4EAC0ED3C99D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A9F9DF4-615C-49CC-8115-4EAC0ED3C99D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
