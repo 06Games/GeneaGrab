@@ -23,5 +23,8 @@ jobs:
         run: dotnet restore
 
       - name: Test
-        run: dotnet test
+        uses: zyborg/dotnet-tests-report@v1
+        with:
+          report_title: Tests
+          github_token: ${{ secrets.GITHUB_TOKEN }}
       
