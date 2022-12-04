@@ -28,7 +28,7 @@ namespace GeneaGrab.Providers
 
         public async Task<RegistryInfo> Infos(Uri url)
         {
-            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/(?<page>\\d*?)/").Groups;
+            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
             var registry = new Registry(Data.Providers["AD79-86"]) { ID = queries["id"]?.Value };
             registry.URL = $"https://archives-deux-sevres-vienne.fr/ark:/{queries["something"]?.Value}/{registry.ID}";
 
@@ -37,9 +37,9 @@ namespace GeneaGrab.Providers
             int.TryParse(queries["seq"]?.Value, out var seq);
             var sequence = iiif.Sequences.ElementAt(seq);
 
-            registry.Pages = sequence.Canvases.Select(p => new RPage
+            registry.Pages = sequence.Canvases.Select((p, i) => new RPage
             {
-                Number = int.Parse(p.Label),
+                Number = int.TryParse(p.Label, out var number) ? number : (i + 1),
                 URL = p.Images.First().ServiceId,
                 DownloadURL = p.Images.First().Id,
                 Extra = p.Json["ligeoClasseur"]
@@ -67,11 +67,12 @@ namespace GeneaGrab.Providers
         }
         private static IEnumerable<RegistryType> ParseTypes(string types)
         {
+            //TODO: Rewrite this function
             foreach (var type in types.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries))
             {
                 if (type == "naissance") yield return RegistryType.Birth;
-                if (type == "mariage") yield return RegistryType.Marriage;
-                if (type == "décès") yield return RegistryType.Death;
+                else if (type == "mariage") yield return RegistryType.Marriage;
+                else if (type == "décès") yield return RegistryType.Death;
             }
         }
 
@@ -92,7 +93,9 @@ namespace GeneaGrab.Providers
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            var image = await Image.LoadAsync(await client.GetStreamAsync(zoom == 100 ? new Uri(page.DownloadURL) : IIIF.IIIF.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
+            var image = await Image
+                .LoadAsync(await client.GetStreamAsync(zoom == 100 ? new Uri(page.DownloadURL) : IIIF.IIIF.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false))
+                .ConfigureAwait(false);
             page.Zoom = zoom;
             progress?.Invoke(Progress.Finished);
 
