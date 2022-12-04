@@ -3,7 +3,7 @@ using GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican;
 using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
 using GeneaGrab.Core.Models.Dates.Calendars.Julian;
 
-namespace GeneaGrab.Core.Tests.Providers;
+namespace GeneaGrab.Core.Tests.Providers.FR_AD17;
 
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
 public class DataAD17 : IEnumerable<object[]>

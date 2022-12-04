@@ -33,7 +33,7 @@ namespace GeneaGrab.IIIF
         {
             Json = sequence;
             Id = sequence.Value<string>("@id");
-            Label = sequence.Value<string>("@label");
+            Label = sequence.Value<string>("@label") ?? sequence.Value<string>("label");
             Canvases = sequence["canvases"].Select(s => new Canvas(s));
         }
 
