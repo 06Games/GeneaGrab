@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -13,6 +15,7 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage.FileIO;
 using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
@@ -242,10 +245,14 @@ namespace GeneaGrab.Views
         {
             if (Info == null) return;
             var page = await LocalData.GetFile(Info.Registry, Info.Page);
-            //TODO: Needs Avalonia 0.11 to use TopLevel/Window.StorageProvider
-            /*var options = new Windows.System.FolderLauncherOptions();
-            if (page.Exists) options.ItemsToSelect.Add(page);
-            await Windows.System.Launcher.LaunchFolderAsync(page.Directory!.FullName, options);*/
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                try { WinExplorer.OpenFolderAndSelectItem(page.FullName); }
+                catch { Process.Start("explorer.exe", "/select,\"" + page.FullName + "\""); }
+            }
+            else if (page.Directory != null && new BclStorageFolder(page.Directory).TryGetUri(out var uri))
+                Process.Start(new ProcessStartInfo { FileName = uri.ToString(), UseShellExecute = true });
         }
         private async void Ark(object sender, RoutedEventArgs e)
         {
