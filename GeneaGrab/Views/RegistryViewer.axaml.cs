@@ -67,19 +67,23 @@ namespace GeneaGrab.Views
         public RegistryViewer()
         {
             InitializeComponent();
-            this.FindControl<NumberBox>("PageNumber").ValueChanged += async (ns, ne) =>
-            {
-                if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
-            };
+            var pageNumber = this.FindControl<NumberBox>("PageNumber");
+            if (pageNumber != null)
+                pageNumber.ValueChanged += async (_, ne) =>
+                {
+                    if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
+                };
 
             var pageNotes = this.FindControl<TextBox>("PageNotes");
-            pageNotes.GetObservable(TextBox.TextProperty).Subscribe(text => //TODO: To be replaced by TextBox.TextChanging when Avalonia v0.11 is released
-            {
-                if (Info == null || !PageNumbers.Contains(Info.PageNumber)) return;
-                Info.Page.Notes = string.IsNullOrWhiteSpace(text) ? null : text;
-                var index = PageNumbers.IndexOf(Info.PageNumber);
-                Pages[index] = Pages[index].Refresh();
-            });
+            if (pageNotes != null)
+                pageNotes.TextChanging += (_, _) =>
+                {
+                    var text = pageNotes.Text;
+                    if (Info == null || !PageNumbers.Contains(Info.PageNumber)) return;
+                    Info.Page.Notes = string.IsNullOrWhiteSpace(text) ? null : text;
+                    var index = PageNumbers.IndexOf(Info.PageNumber);
+                    Pages[index] = Pages[index].Refresh();
+                };
         }
 
         private void InitializeComponent()
@@ -245,7 +249,7 @@ namespace GeneaGrab.Views
         }
         private async void Ark(object sender, RoutedEventArgs e)
         {
-            if(Info == null) return;
+            if (Info == null) return;
             await Application.Current?.Clipboard?.SetTextAsync(await Info.Provider.API.Ark(Info.Registry, Info.Page))!;
         }
 

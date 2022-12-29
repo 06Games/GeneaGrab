@@ -96,28 +96,14 @@
                 </StackPanel>
 
                 <StackPanel Margin="0,25,0,5" x:Name="IndexPanel">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="22" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" FontSize="16">Index</TextBlock>
+                    <Grid ColumnDefinitions="*,22">
+                        <TextBlock Grid.Column="0" FontSize="16" Text="Index" />
                         <Button Grid.Column="1" Content="+" Padding="5,0,5,1" Click="AddIndex" />
                     </Grid>
                     <ListBox Items="{Binding Index}" MaxHeight="500">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="views:Index">
-                                <Grid Width="200">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                        <RowDefinition Height="*" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="100" />
-                                        <ColumnDefinition Width="100" />
-                                    </Grid.ColumnDefinitions>
+                                <Grid Width="200" RowDefinitions="*,*,*,*" ColumnDefinitions="100,100">
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding FormatedDate}" FontSize="12" />
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FormatedType}" FontSize="12" TextAlignment="Right" />
                                     <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding District}" FontSize="13" />
