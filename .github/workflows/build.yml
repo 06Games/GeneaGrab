@@ -44,7 +44,9 @@ jobs:
           # Build everything
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
             dotnet restore -r ${{ matrix.target }}
+            cd ./GeneaGrab
             dotnet msbuild -t:BundleApp -p:RuntimeIdentifier=${{ matrix.target }} -p:UseAppHost=true -property:Configuration=Release -p:PublishDir="$release_name"
+            cd ../
           else
             dotnet publish -r "${{ matrix.target }}" -c Release -o "$release_name" --self-contained
           fi
