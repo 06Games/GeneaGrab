@@ -42,12 +42,18 @@ jobs:
           release_name="GeneaGrab-${{ matrix.target }}"
 
           # Build everything
-          dotnet publish -r "${{ matrix.target }}" -c Release -o "$release_name" --self-contained
+          if [ "${{ matrix.target }}" == "osx-x64" ]; then
+            dotnet msbuild -t:BundleApp -p:RuntimeIdentifier=${{ matrix.target }} -p:UseAppHost=true -property:Configuration=Release -p:PublishDir="$release_name"
+          else
+            dotnet publish -r "${{ matrix.target }}" -c Release -o "$release_name" --self-contained
+          fi
 
           # Pack files
           mkdir output
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             7z a -tzip "output/${release_name}.zip" "./${release_name}/*"
+          elif [ "${{ matrix.target }}" == "osx-x64" ]; then
+            cp -R ./${release_name}/GeneaGrab.app output/
           else
             tar czvf "output/${release_name}.tar.gz" "$release_name"
           fi
