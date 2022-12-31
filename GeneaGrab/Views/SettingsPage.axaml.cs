@@ -19,7 +19,7 @@ namespace GeneaGrab.Views
 
         
         public string? Personalization => ResourceExtensions.GetLocalized("Settings.Personalization", ResourceExtensions.Resource.UI);
-        public string? Theme => ResourceExtensions.GetLocalized("Settings.Theme", ResourceExtensions.Resource.UI);
+        public string? ThemeTitle => ResourceExtensions.GetLocalized("Settings.Theme", ResourceExtensions.Resource.UI);
         public string? LightTheme => ResourceExtensions.GetLocalized("Settings.Theme.Light", ResourceExtensions.Resource.UI);
         public string? DarkTheme => ResourceExtensions.GetLocalized("Settings.Theme.Dark", ResourceExtensions.Resource.UI);
         public string? HighContrastTheme => ResourceExtensions.GetLocalized("Settings.Theme.HighContrast", ResourceExtensions.Resource.UI);

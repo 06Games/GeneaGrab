@@ -15,17 +15,17 @@
         <helpers:EnumToBooleanConverter x:Key="EnumToBooleanConverter" EnumType="services:Theme" />
     </UserControl.Resources>
     <Grid>
-        <StackPanel x:Name="ContentArea">
-            <TextBlock Text="{Binding Personalization}" />
-            <StackPanel>
-                <TextBlock Text="{Binding Theme}" />
+        <StackPanel x:Name="ContentArea" Margin="15">
+            <TextBlock Text="{Binding Personalization}" FontSize="18" FontWeight="Medium" />
+            <StackPanel Margin="15,0,0,0">
+                <TextBlock Text="{Binding ThemeTitle}" FontSize="16" FontWeight="Regular" />
 
                 <StackPanel>
                     <RadioButton 
                         Content="{Binding SystemTheme}"
                         Checked="ThemeChanged_CheckedAsync"
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=System, Mode=OneWay}"
-                        FontSize="15"
+                        FontSize="14"
                         GroupName="AppTheme">
                         <RadioButton.CommandParameter>
                             <services:Theme>System</services:Theme>
@@ -35,7 +35,7 @@
                         Content="{Binding LightTheme}"
                         Checked="ThemeChanged_CheckedAsync" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
-                        FontSize="15"
+                        FontSize="14"
                         GroupName="AppTheme">
                         <RadioButton.CommandParameter>
                             <services:Theme>Light</services:Theme>
@@ -45,7 +45,7 @@
                         Content="{Binding DarkTheme}"
                         Checked="ThemeChanged_CheckedAsync" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
-                        FontSize="15"
+                        FontSize="14"
                         GroupName="AppTheme">
                         <RadioButton.CommandParameter>
                             <services:Theme>Dark</services:Theme>
@@ -55,7 +55,7 @@
                         Content="{Binding HighContrastTheme}"
                         Checked="ThemeChanged_CheckedAsync" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=HighContrast, Mode=OneWay}"
-                        FontSize="15"
+                        FontSize="14"
                         GroupName="AppTheme">
                         <RadioButton.CommandParameter>
                             <services:Theme>HighContrast</services:Theme>
@@ -64,12 +64,11 @@
                 </StackPanel>
             </StackPanel>
 
-            <TextBlock Text="{Binding About}" />
-
-            <StackPanel>
+            <TextBlock Text="{Binding About}" FontSize="18" FontWeight="Medium" Margin="0,15,0,0" />
+            <StackPanel Margin="15,0,0,0">
                 <TextBlock Text="{Binding VersionDescription, Mode=OneWay}" />
                 <TextBlock Text="{Binding AboutDescription}" />
-                <controls:HyperlinkButton NavigateUri="https://github.com/06Games/GeneaGrab" Content="{Binding AboutSourceCode}" />
+                <controls:HyperlinkButton NavigateUri="https://github.com/06Games/GeneaGrab" Content="{Binding AboutSourceCode}" Padding="0" />
             </StackPanel>
         </StackPanel>
     </Grid>
