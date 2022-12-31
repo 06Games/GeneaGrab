@@ -60,7 +60,11 @@ namespace GeneaGrab
                     var path = Environment.ProcessPath ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
                     var service = URISchemeServiceFactory.GetURISchemeSerivce(scheme, @$"URL:{scheme} Protocol",
                         RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $@"{path}"" ""{args}" : $@"{path} {args}");
+ #if DEBUG
+                    if (!service.CheckAny()) // Check if the protocol is registered to any application.
+#else
                     if (!service.Check()) // Check if the protocol is registered to the current application.
+#endif
                         service.Set(); // Register the service.
                 }
                 catch (PlatformNotSupportedException e)
