@@ -5,6 +5,9 @@
              xmlns:views="clr-namespace:GeneaGrab.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="GeneaGrab.Views.RegistriesPage">
+    <Design.DataContext>
+        <views:RegistriesPage />
+    </Design.DataContext>
 
     <Panel>
         <Grid Name="ContentArea">

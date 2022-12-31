@@ -63,19 +63,23 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         NavigationService.TabAdded += UpdateTitle;
         NavigationService.TabRemoved += _ =>
         {
-            if (NavigationService.TabView.TabItems.Count() <= 1) NewTab();
+            if (NavigationService.TabCount <= 1) NewTab();
         };
         NavigationService.SelectionChanged += (s, e) => FrameChanged();
 
         NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
-        Dispatcher.UIThread.Post(() => NavigationService.OpenTab(NewTab()));
         
-
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.Startup += (sender, e) =>
             {
-                Dispatcher.UIThread.Post(() => Args.InvokeMain<LaunchArgs>(e.Args));
+                Dispatcher.UIThread.Post(() =>
+                {
+                    Args.InvokeMain<LaunchArgs>(e.Args);
+                    if (NavigationService.TabCount <= 1) NavigationService.OpenTab(NewTab());
+                });
             };
+        else NavigationService.OpenTab(NewTab());
+        
     }
 
     private TabViewItem NewTab() => NavigationService.NewTab(typeof(ProviderList));

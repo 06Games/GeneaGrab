@@ -45,7 +45,6 @@ namespace GeneaGrab
 
         public override void OnFrameworkInitializationCompleted()
         {
-            _ = LocalData.LoadData();
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 desktop.MainWindow = new MainWindow();

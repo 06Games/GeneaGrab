@@ -1,17 +1,20 @@
 ﻿<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:local="using:GeneaGrab"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:GeneaGrab.Views"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="GeneaGrab.Views.ProviderList">
+    <Design.DataContext>
+        <views:ProviderList />
+    </Design.DataContext>
 
     <Panel>
-        <Grid x:Name="ContentArea">
+        <Grid Name="ContentArea">
             <Grid>
-                <ListBox x:Name="ProvidersList" Items="{Binding Providers}" SelectionChanged="ProvidersList_OnSelectionChanged">
+                <ListBox Name="ProvidersList" Items="{Binding Providers}" SelectionChanged="ProvidersList_OnSelectionChanged">
                     <ListBox.ItemTemplate>
-                        <DataTemplate x:DataType="local:Provider">
+                        <DataTemplate>
                             <Grid RowDefinitions="*,*" ColumnDefinitions="Auto,*">
                                 <Grid Grid.Column="0" Grid.RowSpan="2">
                                     <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{StaticResource ButtonBackground}" />

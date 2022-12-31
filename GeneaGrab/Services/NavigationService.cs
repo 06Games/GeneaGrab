@@ -50,7 +50,7 @@ public static class NavigationService
     {
         if (TabView?.SelectedItem is TabViewItem tab) Frame = tab.Content as Frame;
     }
-
+    public static int TabCount => TabView?.TabItems.Count() ?? 0;
 
     public static TabViewItem NewTab<T>(object? parameter = null) where T : UserControl => NewTab(typeof(T), parameter);
     public static TabViewItem NewTab(Type page, object? parameter = null)

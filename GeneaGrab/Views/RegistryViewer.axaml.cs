@@ -23,7 +23,7 @@ using GeneaGrab.Services;
 
 namespace GeneaGrab.Views
 {
-    public partial class RegistryViewer : Page, INotifyPropertyChanged, ITabPage //, ISchemeSupport
+    public partial class RegistryViewer : Page, INotifyPropertyChanged, ITabPage
     {
         public Symbol IconSource => Symbol.Pictures;
         public string? DynaTabHeader
@@ -37,28 +37,6 @@ namespace GeneaGrab.Views
             }
         }
         public string? Identifier => Info?.RegistryID;
-
-
-
-        /*public string UrlPath => "registry";
-        string ISchemeSupport.GetIdFromParameters(Dictionary<string, string> param)
-        {
-            if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
-            {
-                foreach (var provider in Data.Providers.Values)
-                    if (provider.API.TryGetRegistryID(uri, out var info)) return info.RegistryID;
-            }
-            return null;
-        }
-        async void ISchemeSupport.Load(Dictionary<string, string> param)
-        {
-            if (param.ContainsKey("url") && Uri.TryCreate(param.GetValueOrDefault("url"), UriKind.Absolute, out var uri))
-            {
-                foreach (var provider in Data.Providers.Values)
-                    if (provider.API.TryGetRegistryID(uri, out var info)) await ChangePage(info.PageNumber);
-            }
-        }*/
-
 
 
         protected string? DownloadText => ResourceExtensions.GetLocalized("Registry.Download", ResourceExtensions.Resource.UI);
@@ -161,17 +139,26 @@ namespace GeneaGrab.Views
         {
             var inRam = false;
 
-            if (parameter is RegistryInfo infos) Info = infos;
-            else if (parameter is LaunchArgs param)
+            switch (parameter)
             {
-                if (!string.IsNullOrWhiteSpace(param.Url) && Uri.TryCreate(param.Url, UriKind.Absolute, out var uri))
+                case RegistryInfo infos:
+                    Info = infos;
+                    break;
+                case LaunchArgs param:
                 {
+                    if (string.IsNullOrWhiteSpace(param.Url) || !Uri.TryCreate(param.Url, UriKind.Absolute, out var uri)) break;
+
                     await LocalData.LoadData().ConfigureAwait(false);
                     Info = await TryGetFromProviders(uri).ConfigureAwait(false);
+                    break;
                 }
+                case Uri url:
+                    Info = await TryGetFromProviders(url).ConfigureAwait(false);
+                    break;
+                default:
+                    inRam = true;
+                    break;
             }
-            else if (parameter is Uri url) Info = await TryGetFromProviders(url).ConfigureAwait(false);
-            else inRam = true;
 
             async Task<RegistryInfo?> TryGetFromProviders(Uri uri)
             {
