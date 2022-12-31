@@ -44,20 +44,18 @@ jobs:
           # Build everything
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
             dotnet restore -r ${{ matrix.target }}
-            cd ./GeneaGrab
-            dotnet msbuild -t:BundleApp -p:RuntimeIdentifier=${{ matrix.target }} -p:UseAppHost=true -property:Configuration=Release -p:PublishDir="$release_name"
-            cd ../
+            dotnet msbuild GeneaGrab -t:BundleApp -p:RuntimeIdentifier=${{ matrix.target }} -p:UseAppHost=true -property:Configuration=Release -p:PublishDir="$release_name"
           else
-            dotnet publish -r "${{ matrix.target }}" -c Release -o "$release_name" --self-contained
+            dotnet publish -r "${{ matrix.target }}" -c Release  --self-contained -p:PublishDir="$release_name"
           fi
 
           # Pack files
+          cd GeneaGrab/
           mkdir output
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             7z a -tzip "output/${release_name}.zip" "./${release_name}/*"
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
-            cd GeneaGrab/
-            cp -R ./${release_name}/GeneaGrab.app ../output/
+            cp -R ./${release_name}/GeneaGrab.app output/
           else
             tar czvf "output/${release_name}.tar.gz" "$release_name"
           fi
@@ -69,5 +67,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}
-          path: output/GeneaGrab*
+          path: GeneaGrab/output/GeneaGrab*
       
