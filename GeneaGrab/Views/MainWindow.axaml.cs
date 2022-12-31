@@ -7,10 +7,10 @@ using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using FluentAvalonia.Core;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
@@ -24,15 +24,14 @@ public interface ITabPage
     string? DynaTabHeader { get; }
     string? Identifier { get; }
 }
-    
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
     public bool IsMacOS => RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
     public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     public GridLength WindowsTitleBarWidth => new(IsWindows ? 150 : 15);
-    
+
     protected string? RegistryText => ResourceExtensions.GetLocalized("Registry.Name");
-    
+
     public MainWindow()
     {
         if (IsWindows)
@@ -47,13 +46,19 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         DataContext = this;
         Initialize();
     }
-        
+
     public bool IsBackEnabled => NavigationService.CanGoBack;
     public bool IsForwardEnabled => NavigationService.CanGoForward;
 
     private void Initialize()
     {
         NavigationService.TabView = this.FindControl<TabView>("TabView");
+        if (NavigationService.TabView != null)
+        {
+            NavigationService.TabView.PointerMoved += InputElement_OnPointerMoved;
+            NavigationService.TabView.PointerPressed += InputElement_OnPointerPressed;
+            NavigationService.TabView.PointerReleased += InputElement_OnPointerReleased;
+        }
         NavigationService.Navigated += (s, e) =>
         {
             FrameChanged();
@@ -68,7 +73,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         NavigationService.SelectionChanged += (s, e) => FrameChanged();
 
         NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
-        
+
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.Startup += (sender, e) =>
             {
@@ -79,7 +84,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                 });
             };
         else NavigationService.OpenTab(NewTab());
-        
     }
 
     private TabViewItem NewTab() => NavigationService.NewTab(typeof(ProviderList));
@@ -111,10 +115,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Debug.WriteLine(tab.Tag);
     }
 
+    
+    #region Search
+
     protected void RegistrySearch_TextChanged(object? sender, TextChangedEventArgs _)
     {
         if (sender is not AutoCompleteBox searchBar) return;
-        if(searchBar.Text != searchBar.SelectedItem?.ToString() && !string.IsNullOrWhiteSpace(searchBar.Text)) searchBar.Items = Search(searchBar.Text);
+        if (searchBar.Text != searchBar.SelectedItem?.ToString() && !string.IsNullOrWhiteSpace(searchBar.Text)) searchBar.Items = Search(searchBar.Text);
         searchBar.FilterMode = AutoCompleteFilterMode.None;
     }
     IEnumerable<Result> Search(string query)
@@ -126,9 +133,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => $"{r.Location ?? r.LocationID}: {r.Name}");
 
         var registries = GetRegistries(r => r.URL).ToList() ?? new List<Result>();
-        if (!registries.Any()) 
-            foreach (var (key, value) in Data.Providers) 
-                if (value.API.TryGetRegistryID(uri, out var _)) 
+        if (!registries.Any())
+            foreach (var (key, value) in Data.Providers)
+                if (value.API.TryGetRegistryID(uri, out var _))
                     registries.Add(new Result { Text = $"Online Match: {key}", Value = uri });
         return registries;
     }
@@ -140,8 +147,36 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     }
     private void RegistrySearch_SuggestionChosen(object? sender, SelectionChangedEventArgs args)
     {
-        if(args.AddedItems.Count == 0) return;
+        if (args.AddedItems.Count == 0) return;
         if (args.AddedItems[0] is Result result) NavigationService.Navigate(typeof(RegistryViewer), result.Value);
         if (sender is AutoCompleteBox searchBar) searchBar.Text = string.Empty;
     }
+
+    #endregion
+
+
+    #region MoveWindow
+
+    private bool _mouseDownForWindowMoving;
+    private PointerPoint _originalPoint;
+
+    private void InputElement_OnPointerMoved(object? _, PointerEventArgs e)
+    {
+        if (!_mouseDownForWindowMoving) return;
+
+        var currentPoint = e.GetCurrentPoint(this);
+        Position = new PixelPoint(Position.X + (int)(currentPoint.Position.X - _originalPoint.Position.X), Position.Y + (int)(currentPoint.Position.Y - _originalPoint.Position.Y));
+    }
+
+    private void InputElement_OnPointerPressed(object? _, PointerEventArgs e)
+    {
+        if (WindowState is WindowState.Maximized or WindowState.FullScreen) return;
+
+        _mouseDownForWindowMoving = true;
+        _originalPoint = e.GetCurrentPoint(this);
+    }
+
+    private void InputElement_OnPointerReleased(object? _, PointerReleasedEventArgs e) => _mouseDownForWindowMoving = false;
+
+    #endregion
 }
