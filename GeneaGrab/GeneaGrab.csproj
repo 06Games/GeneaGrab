@@ -6,6 +6,7 @@
         <!--Avalonia doesen't support TrimMode=link currently,but we are working on that https://github.com/AvaloniaUI/Avalonia/issues/6892 -->
         <TrimMode>copyused</TrimMode>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationIcon>Assets\Logo\GeneaGrab.ico</ApplicationIcon>
     </PropertyGroup>
     <PropertyGroup>
         <CFBundleName>GeneaGrab</CFBundleName> <!-- Also defines .app file name -->
