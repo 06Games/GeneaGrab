@@ -251,8 +251,11 @@ namespace GeneaGrab.Views
                 try { WinExplorer.OpenFolderAndSelectItem(page.FullName); }
                 catch { Process.Start("explorer.exe", "/select,\"" + page.FullName + "\""); }
             }
-            else if (page.Directory != null && new BclStorageFolder(page.Directory).TryGetUri(out var uri))
-                Process.Start(new ProcessStartInfo { FileName = uri.ToString(), UseShellExecute = true });
+            else if (page.DirectoryName != null)
+            {
+                var url = $"file://{page.DirectoryName.Replace(" ", "%20")}";
+                Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+            }
         }
         private async void Ark(object sender, RoutedEventArgs e)
         {
