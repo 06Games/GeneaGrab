@@ -56,7 +56,8 @@ jobs:
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             7z a -tzip "output/${release_name}.zip" "./${release_name}/*"
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
-            cp -R ./GeneaGrab/${release_name}/GeneaGrab.app output/
+            cd GeneaGrab/
+            cp -R ./${release_name}/GeneaGrab.app ../output/
           else
             tar czvf "output/${release_name}.tar.gz" "$release_name"
           fi
