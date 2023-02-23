@@ -80,7 +80,7 @@ public static class LocalData
         try
         {
             var file = await GetFile(registry, page, thumbnail: thumbnail).ConfigureAwait(false);
-            return !file.Exists ? null : file.OpenRead();
+            return !file.Exists ? null : file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
         catch (Exception e)
         {
