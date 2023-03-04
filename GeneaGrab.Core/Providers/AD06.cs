@@ -149,7 +149,7 @@ namespace GeneaGrab.Providers
             registry.LocationID = Array.IndexOf(Cities, query["c"].ToUpper()).ToString();
             registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["date"]);
             registry.Types = new[] { RegistryType.Census };
-            registry.Notes = query["cote"];
+            registry.CallNumber = query["cote"];
         }
 
         #endregion
