@@ -121,7 +121,7 @@ namespace GeneaGrab.Providers
             registry.ID = query["IDDOC"];
             registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             registry.LocationID = Array.IndexOf(Cities, query["COMMUNE"]).ToString();
-            registry.District = registry.DistrictID = query["COMPLEMENTLIEUX"];
+            if(!string.IsNullOrWhiteSpace(query["COMPLEMENTLIEUX"])) registry.District = registry.DistrictID = query["COMPLEMENTLIEUX"];
             registry.CallNumber = query["COTE"];
             var dates = query["DATE"]?.Split(new[] { " - " }, StringSplitOptions.None);
             if (dates != null)
