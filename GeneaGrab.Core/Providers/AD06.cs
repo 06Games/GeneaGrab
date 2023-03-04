@@ -103,7 +103,8 @@ namespace GeneaGrab.Providers
             registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
             registry.LocationID = Array.IndexOf(Cities, query["c"]).ToString();
             registry.District = registry.DistrictID = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
-            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["a"]);
+            registry.CallNumber = query["cote"];
+            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["DATE"]);
             registry.Types = GetTypes(query["t"]);
             registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
 
@@ -121,9 +122,18 @@ namespace GeneaGrab.Providers
             registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             registry.LocationID = Array.IndexOf(Cities, query["COMMUNE"]).ToString();
             registry.District = registry.DistrictID = query["COMPLEMENTLIEUX"];
-            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["DATE"]);
+            registry.CallNumber = query["COTE"];
+            var dates = query["DATE"]?.Split(new[] { " - " }, StringSplitOptions.None);
+            if (dates != null)
+            {
+                registry.From = Core.Models.Dates.Date.ParseDate(dates.FirstOrDefault());
+                registry.To = Core.Models.Dates.Date.ParseDate(dates.LastOrDefault());
+            }
             registry.Types = GetTypes(query["CHOIX"]).ToList();
-            registry.Notes = $"{query["NATURE"]}\nCote: {query["COTE"]}";
+
+            registry.Notes = query["NATURE"];
+            var folio = query["FOLIO"];
+            if (!string.IsNullOrWhiteSpace(folio)) registry.Notes += $" ({folio})";
 
             IEnumerable<RegistryType> GetTypes(string type)
             {
