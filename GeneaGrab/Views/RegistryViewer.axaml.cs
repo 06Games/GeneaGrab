@@ -177,7 +177,7 @@ namespace GeneaGrab.Views
         public Task ChangePage(int pageNumber) => ChangePage(Info?.GetPage(pageNumber));
         public async Task ChangePage(PageList? page)
         {
-            if (page is null || Info is null) return;
+            if (page is null || Info is null || Info.PageNumber == page.Number) return;
             Info.PageNumber = page.Number;
             var image = await Info.Provider.API.Preview(Info.Registry, page.Page, TrackProgress);
             var (success, stream) = await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page);
