@@ -14,13 +14,14 @@ namespace GeneaGrab.Providers
     {
         public bool IndexSupport => false;
 
-        private readonly string[] supportedServices = { "EC", "CAD", "MAT_ETS", "RP" };
+        private readonly string[] supportedServices = { "EC", "CAD", "MAT_ETS", "RP", "SI" };
         private delegate void Service(NameValueCollection query, string pageBody, ref Registry registry);
         private readonly Dictionary<string, Service> applications = new Dictionary<string, Service> {
             { "ec", EC }, // Etat civil
             { "cad", CAD }, // Cadastre (Plan)
             { "etc_mat", ETC_MAT }, // Cadastre (Etat de section + Matrice)
-            { "rp", RP } // Recensements
+            { "rp", RP }, // Recensements
+            { "si", SI } // Sources imprimées
         };
 
         public bool TryGetRegistryID(Uri url, out RegistryInfo info)
@@ -150,6 +151,14 @@ namespace GeneaGrab.Providers
             registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["date"]);
             registry.Types = new[] { RegistryType.Census };
             registry.CallNumber = query["cote"];
+        }
+
+        private static void SI(NameValueCollection query, string pageBody, ref Registry registry)
+        {
+            registry.ID = $"{query["cote"]}___{query["repertoire"]}";
+            registry.Types = new[] { RegistryType.Book };
+            registry.CallNumber = query["cote"];
+            registry.Notes = query["d"];
         }
 
         #endregion
