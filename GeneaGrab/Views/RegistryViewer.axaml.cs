@@ -15,7 +15,6 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform.Storage.FileIO;
 using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
@@ -99,7 +98,7 @@ namespace GeneaGrab.Views
                 PageNumbers.Clear();
                 Pages.Clear();
 
-                var pageNumber = this.FindControl<NumberBox>("PageNumber");
+                var pageNumber = this.FindControl<NumberBox>("PageNumber")!;
                 pageNumber.Minimum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Min(p => p.Number) : 0;
                 pageNumber.Maximum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0;
                 PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
@@ -170,6 +169,9 @@ namespace GeneaGrab.Views
             return (Info != null, inRam);
         }
 
+
+        private void GoToPreviousPage(object? _, RoutedEventArgs e) => ChangePage(Info?.PageNumber - 1 ?? -1);
+        private void GoToNextPage(object? _, RoutedEventArgs e) => ChangePage(Info?.PageNumber + 1 ?? -1);
         private async void ChangePage(object _, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
@@ -193,30 +195,34 @@ namespace GeneaGrab.Views
         private void RefreshView(Stream? img = null)
         {
             if (Info?.Registry == null) return;
-            this.FindControl<NumberBox>("PageNumber").Value = Info.PageNumber;
-            this.FindControl<TextBlock>("PageTotal").Text = $"/ {(Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0)}";
-            SetInfo(this.FindControl<TextBlock>("Info_LocationCity"), Info.Registry.Location ?? Info.Registry.LocationID);
-            SetInfo(this.FindControl<TextBlock>("Info_LocationDistrict"), Info.Registry!.District ?? Info.Registry.DistrictID);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryType"), Info.Registry!.TypeToString);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryDate"), Info.Registry.Dates);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryNotes"), Info.Registry.Notes);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryID"), Info.Registry.CallNumber ?? Info.Registry.ID);
+
+            var pageTotal = Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0;
+            this.FindControl<NumberBox>("PageNumber")!.Value = Info.PageNumber;
+            this.FindControl<TextBlock>("PageTotal")!.Text = $"/ {pageTotal}";
+            this.FindControl<Button>("PreviousPage")!.IsEnabled = Info?.PageNumber > 1;
+            this.FindControl<Button>("NextPage")!.IsEnabled = Info?.PageNumber < pageTotal;
+            SetInfo(this.FindControl<TextBlock>("Info_LocationCity")!, Info.Registry.Location ?? Info.Registry.LocationID);
+            SetInfo(this.FindControl<TextBlock>("Info_LocationDistrict")!, Info.Registry!.District ?? Info.Registry.DistrictID);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryType")!, Info.Registry!.TypeToString);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryDate")!, Info.Registry.Dates);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryNotes")!, Info.Registry.Notes);
+            SetInfo(this.FindControl<TextBlock>("Info_RegistryID")!, Info.Registry.CallNumber ?? Info.Registry.ID);
             void SetInfo(TextBlock block, string? text)
             {
                 block.Text = text ?? "";
                 block.IsVisible = !string.IsNullOrWhiteSpace(text);
             }
 
-            this.FindControl<TextBox>("PageNotes").Text = Info.Page?.Notes ?? "";
-            this.FindControl<Canvas>("ImageCanvas").Children.Clear();
+            this.FindControl<TextBox>("PageNotes")!.Text = Info.Page?.Notes ?? "";
+            this.FindControl<Canvas>("ImageCanvas")!.Children.Clear();
             foreach (var index in Index.Where(i => i.Page == Info.PageNumber)) DisplayIndexRectangle(index);
 
-            var image = this.FindControl<Image>("Image");
-            var pageList = this.FindControl<ListBox>("PageList");
+            var image = this.FindControl<Image>("Image")!;
+            var pageList = this.FindControl<ListBox>("PageList")!;
             if (img != null) image.Source = img.ToBitmap();
             pageList.SelectedIndex = Info.PageIndex;
             pageList.ScrollIntoView(pageList.SelectedIndex);
-            this.FindControl<ZoomPanel>("ImagePanel").Reset();
+            this.FindControl<ZoomPanel>("ImagePanel")!.Reset();
             OnPropertyChanged(nameof(image));
             Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));
         }
@@ -257,7 +263,7 @@ namespace GeneaGrab.Views
         {
             Dispatcher.UIThread.Post(() =>
             {
-                var imageProgress = this.FindControl<ProgressBar>("ImageProgress");
+                var imageProgress = this.FindControl<ProgressBar>("ImageProgress")!;
                 imageProgress.IsVisible = !progress.Done;
                 imageProgress.IsIndeterminate = progress.Undetermined;
                 imageProgress.Value = progress.Value;
@@ -270,7 +276,7 @@ namespace GeneaGrab.Views
         private async Task GetIndex()
         {
             if (Info == null) return;
-            var indexPanel = this.FindControl<StackPanel>("IndexPanel");
+            var indexPanel = this.FindControl<StackPanel>("IndexPanel")!;
             if (!Info.Provider.API.IndexSupport)
             {
                 indexPanel.IsVisible = false;
@@ -305,7 +311,7 @@ namespace GeneaGrab.Views
             var tt = new ToolTip { Content = $"{index.FormatedDate} ({index.FormatedType}): {index.District}\n{index.Notes}" };
             ToolTip.SetTip(btn, tt);
 
-            this.FindControl<Canvas>("ImageCanvas").Children.Add(btn);
+            this.FindControl<Canvas>("ImageCanvas")!.Children.Add(btn);
             Canvas.SetTop(btn, pos.X);
             Canvas.SetLeft(btn, pos.Y);
         }
