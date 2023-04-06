@@ -220,8 +220,8 @@ namespace GeneaGrab.Views
             var image = this.FindControl<Image>("Image")!;
             var pageList = this.FindControl<ListBox>("PageList")!;
             if (img != null) image.Source = img.ToBitmap();
-            pageList.SelectedIndex = Info.PageIndex;
-            pageList.ScrollIntoView(pageList.SelectedIndex);
+            pageList.Selection.Select(Info.PageIndex);
+            pageList.ScrollIntoView(Info.PageIndex);
             this.FindControl<ZoomPanel>("ImagePanel")!.Reset();
             OnPropertyChanged(nameof(image));
             Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));

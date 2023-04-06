@@ -34,7 +34,7 @@ namespace GeneaGrab.Providers
             {
                 RegistryID = query["IDDOC"] ?? query["cote"],
                 ProviderID = "AD06",
-                PageNumber = int.TryParse(query["page"], out var _p) ? _p : 1
+                PageNumber = int.TryParse(query["page"], out var p) ? p : 1
             };
             return true;
         }
@@ -105,7 +105,7 @@ namespace GeneaGrab.Providers
             registry.LocationID = Array.IndexOf(Cities, query["c"]).ToString();
             registry.District = registry.DistrictID = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
             registry.CallNumber = query["cote"];
-            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["DATE"]);
+            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["a"]);
             registry.Types = GetTypes(query["t"]);
             registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
 
