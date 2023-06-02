@@ -29,20 +29,18 @@
         <Copy SourceFiles="Assets\Logo\GeneaGrab.icns" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     </Target>
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.0-rc1.1" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-preview4" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-preview4" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0-rc1.1" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0-rc1.1" />
         <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
-        <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-preview4" />
+        <PackageReference Include="FluentAvaloniaUI" Version="2.0.0-rc1" />
         <PackageReference Include="PowerArgs" Version="4.0.0" />
         <PackageReference Include="ResXResourceReader.NetStandard" Version="1.1.0" />
         <PackageReference Include="Serilog" Version="2.12.0" />
         <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
         <PackageReference Include="URISchemeTools" Version="1.0.2" />
-        <PackageReference Include="XamlNameReferenceGenerator" Version="1.5.1" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\GeneaGrab.Core\GeneaGrab.Core.csproj" />

@@ -38,14 +38,13 @@ namespace GeneaGrab.Views
             set => Set(ref _versionDescription, value);
         }
 
-        public SettingsPage() => InitializeComponent();
-        private void InitializeComponent()
+        public SettingsPage()
         {
             ThemeSelectorService.Initialize();
             VersionDescription = GetVersionDescription();
-            
+
+            InitializeComponent();
             DataContext = this;
-            AvaloniaXamlLoader.Load(this);
         }
 
         private string? GetVersionDescription()

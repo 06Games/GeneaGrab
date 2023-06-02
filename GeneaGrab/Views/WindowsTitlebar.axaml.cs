@@ -83,9 +83,4 @@ public partial class WindowsTitleBar : UserControl
             }
         });
     }
-
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
 }

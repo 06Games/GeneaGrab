@@ -47,6 +47,8 @@ namespace GeneaGrab.Views
         public RegistryViewer()
         {
             InitializeComponent();
+            DataContext = this;
+            
             var pageNumber = this.FindControl<NumberBox>("PageNumber");
             if (pageNumber != null)
                 pageNumber.ValueChanged += async (_, ne) =>
@@ -64,12 +66,6 @@ namespace GeneaGrab.Views
                     var index = PageNumbers.IndexOf(Info.PageNumber);
                     Pages[index] = Pages[index].Refresh();
                 };
-        }
-
-        private void InitializeComponent()
-        {
-            DataContext = this;
-            AvaloniaXamlLoader.Load(this);
         }
 
         public RegistryInfo? Info { get; set; }
@@ -253,7 +249,7 @@ namespace GeneaGrab.Views
         private async void Ark(object sender, RoutedEventArgs e)
         {
             if (Info == null) return;
-            await Application.Current?.Clipboard?.SetTextAsync(await Info.Provider.API.Ark(Info.Registry, Info.Page))!;
+            await TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(await Info.Provider.API.Ark(Info.Registry, Info.Page))!;
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;

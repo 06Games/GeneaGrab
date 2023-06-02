@@ -12,7 +12,7 @@
     <Panel>
         <Grid Name="ContentArea">
             <Grid>
-                <TreeView Name="LocationList" Items="{Binding Items}" SelectionChanged="RegisterList_ItemInvoked">
+                <TreeView Name="LocationList" ItemsSource="{Binding Items}" SelectionChanged="RegisterList_ItemInvoked">
                     <TreeView.DataTemplates>
                         <TreeDataTemplate DataType="views:RegistriesTreeStructure" ItemsSource="{Binding Children}">
                             <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*">

@@ -14,12 +14,11 @@ public partial class ProviderList : Page, ITabPage
     public string? DynaTabHeader => null;
     public string? Identifier => null;
 
-    public ProviderList() => InitializeComponent();
-
-    private void InitializeComponent()
+    public ProviderList()
     {
+        InitializeComponent();
         DataContext = this;
-        AvaloniaXamlLoader.Load(this);
+        
         Helpers.LocalData.LoadData().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
         {
             Providers.Clear();

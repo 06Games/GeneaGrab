@@ -70,12 +70,12 @@ namespace GeneaGrab.Views
             return Child;
         }
 
-        private static TranslateTransform? GetTranslateTransform(IVisual element)
+        private static TranslateTransform? GetTranslateTransform(Visual element)
         {
             if (element.RenderTransform is TransformGroup group) return (TranslateTransform)group.Children.First(tr => tr is TranslateTransform);
             return null;
         }
-        private static ScaleTransform? GetScaleTransform(IVisual element)
+        private static ScaleTransform? GetScaleTransform(Visual element)
         {
             if (element.RenderTransform is TransformGroup group) return (ScaleTransform)group.Children.First(tr => tr is ScaleTransform);
             return null;

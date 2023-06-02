@@ -15,12 +15,10 @@ namespace GeneaGrab.Views
         public string? Identifier => Provider?.ID;
         private Provider? Provider { get; set; }
 
-        public RegistriesPage() => InitializeComponent();
-
-        private void InitializeComponent()
+        public RegistriesPage()
         {
+            InitializeComponent();
             DataContext = this;
-            AvaloniaXamlLoader.Load(this);
         }
 
         protected ObservableCollection<RegistriesTreeStructure> Items { get; } = new();

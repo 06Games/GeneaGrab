@@ -12,7 +12,7 @@
     <Panel>
         <Grid Name="ContentArea">
             <Grid>
-                <ListBox Name="ProvidersList" Items="{Binding Providers}" SelectionChanged="ProvidersList_OnSelectionChanged">
+                <ListBox Name="ProvidersList" ItemsSource="{Binding Providers}" SelectionChanged="ProvidersList_OnSelectionChanged">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <Grid RowDefinitions="*,*" ColumnDefinitions="Auto,*">

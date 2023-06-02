@@ -1,5 +1,6 @@
-﻿using System;
+﻿using System.Linq;
 using Avalonia;
+using Avalonia.Styling;
 using FluentAvalonia.Styling;
 
 namespace GeneaGrab.Services
@@ -25,12 +26,18 @@ namespace GeneaGrab.Services
 
         public static void SetRequestedTheme()
         {
-            var faTheme = AvaloniaLocator.Current.GetService<FluentAvaloniaTheme>();
+            if(Application.Current == null) return;
+            var faTheme = Application.Current.Styles.OfType<FluentAvaloniaTheme>().FirstOrDefault();
             if(faTheme == null) return;
 
             faTheme.PreferSystemTheme = Theme == Theme.System;
-            faTheme.RequestedTheme = Theme == Theme.System ? null : Enum.GetName(Theme);
-            if(Theme == Theme.System) faTheme.InvalidateThemingFromSystemThemeChanged();
+            Application.Current.RequestedThemeVariant = Theme switch
+            {
+                Theme.Light => ThemeVariant.Light,
+                Theme.Dark => ThemeVariant.Dark,
+                Theme.HighContrast => FluentAvaloniaTheme.HighContrastTheme,
+                _ => null
+            };
         }
 
         private static void SaveThemeInSettings(Theme theme) => SettingsService.SettingsData.Theme = theme;

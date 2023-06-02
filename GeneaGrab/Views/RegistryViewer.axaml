@@ -44,7 +44,7 @@
                             <controls:SymbolIcon Symbol="ChevronRight" />
                         </Button>
                     </StackPanel>
-                <ListBox Name="PageList" Items="{Binding Pages}" SelectionChanged="ChangePage"
+                <ListBox Name="PageList" ItemsSource="{Binding Pages}" SelectionChanged="ChangePage"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                          RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
                          Margin="0 45 0 0 ">
@@ -110,7 +110,7 @@
                         <TextBlock Grid.Column="0" FontSize="16" Text="Index" />
                         <Button Grid.Column="1" Content="+" Padding="5,0,5,1" Click="AddIndex" />
                     </Grid>
-                    <ListBox Items="{Binding Index}" MaxHeight="500">
+                    <ListBox ItemsSource="{Binding Index}" MaxHeight="500">
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="views:Index">
                                 <Grid Width="200" RowDefinitions="*,*,*,*" ColumnDefinitions="100,100">

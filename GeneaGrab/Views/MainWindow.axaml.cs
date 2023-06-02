@@ -121,7 +121,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     protected void RegistrySearch_TextChanged(object? sender, TextChangedEventArgs _)
     {
         if (sender is not AutoCompleteBox searchBar) return;
-        if (searchBar.Text != searchBar.SelectedItem?.ToString() && !string.IsNullOrWhiteSpace(searchBar.Text)) searchBar.Items = Search(searchBar.Text);
+        if (searchBar.Text != searchBar.SelectedItem?.ToString() && !string.IsNullOrWhiteSpace(searchBar.Text)) searchBar.ItemsSource = Search(searchBar.Text);
         searchBar.FilterMode = AutoCompleteFilterMode.None;
     }
     IEnumerable<Result> Search(string query)
