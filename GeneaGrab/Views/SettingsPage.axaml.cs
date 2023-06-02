@@ -57,8 +57,9 @@ namespace GeneaGrab.Views
 
         private void ThemeChanged_CheckedAsync(object sender, RoutedEventArgs _)
         {
-            var param = (sender as RadioButton)?.CommandParameter;
-            if (param != null) ThemeSelectorService.SetTheme((Theme)param);
+            if (sender is not RadioButton btn) return;
+            var param = btn.CommandParameter;
+            if (param != null && btn.IsChecked.GetValueOrDefault()) ThemeSelectorService.SetTheme((Theme)param);
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;

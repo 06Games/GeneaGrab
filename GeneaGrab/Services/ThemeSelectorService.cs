@@ -30,7 +30,6 @@ namespace GeneaGrab.Services
             var faTheme = Application.Current.Styles.OfType<FluentAvaloniaTheme>().FirstOrDefault();
             if(faTheme == null) return;
 
-            faTheme.PreferSystemTheme = Theme == Theme.System;
             Application.Current.RequestedThemeVariant = Theme switch
             {
                 Theme.Light => ThemeVariant.Light,
@@ -38,6 +37,7 @@ namespace GeneaGrab.Services
                 Theme.HighContrast => FluentAvaloniaTheme.HighContrastTheme,
                 _ => null
             };
+            faTheme.PreferSystemTheme = Theme == Theme.System;
         }
 
         private static void SaveThemeInSettings(Theme theme) => SettingsService.SettingsData.Theme = theme;
