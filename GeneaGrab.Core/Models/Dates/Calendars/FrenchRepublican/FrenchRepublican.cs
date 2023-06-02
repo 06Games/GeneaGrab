@@ -1,4 +1,5 @@
 ﻿using GeneaGrab.Core.Models.Dates.Calendars.Julian;
+using RomanNumerals;
 
 namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
 {
@@ -6,7 +7,7 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
     {
         public override string Long => $"An {Short} de la République Française";
         public override string Medium => $"An {Short}";
-        public override string Short => RomanNumerals.Convert.ToRomanNumerals(Value);
+        public override string Short => Convert.ToRomanNumerals(Value);
         internal override int MinValue => 1;
         internal override int MaxValue => 14;
         public FrenchRepublicanYear(uint value) : base(value) { }

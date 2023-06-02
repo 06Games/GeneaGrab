@@ -1,9 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
+using GeneaGrab.Core.Models;
 using GeneaGrab.Services;
 
 namespace GeneaGrab.Views
@@ -32,7 +33,7 @@ namespace GeneaGrab.Views
             MainWindow.UpdateSelectedTitle();
 
             Items.Clear();
-            foreach (var location in Provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => new Location(r.LocationID, r.Location)).OrderBy(l => l.Key ?? "zZzZ"))
+            foreach (var location in Provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => new Location(r.LocationID, r.Location)).OrderBy(l => l.Key.ToString() ?? "zZzZ"))
             {
                 RegistriesTreeStructure? loc = (string)location.Key;
                 foreach (var district in location.GroupBy(r => r.DistrictID ?? r.District).OrderBy(d => d.Key ?? "zZzZ"))
@@ -49,7 +50,7 @@ namespace GeneaGrab.Views
                 if (loc != null) Items.Add(loc);
             }
         }
-        class Location : System.Collections.Generic.IEqualityComparer<Location>
+        class Location : IEqualityComparer<Location>
         {
             public readonly string Id;
             public readonly string? Name;
@@ -70,8 +71,7 @@ namespace GeneaGrab.Views
         private void RegisterList_ItemInvoked(object? sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count < 1 || sender is not TreeView treeView || e.AddedItems[0] is not RegistriesTreeStructure data) return;
-
-            var node = (TreeViewItem)treeView.ItemContainerGenerator.Index.ContainerFromItem(data);
+            if (treeView.TreeContainerFromItem(data) is not TreeViewItem node) return;
             if (data.Children.Any()) node.IsExpanded = !node.IsExpanded;
             else if (data.Register != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Register));
         }

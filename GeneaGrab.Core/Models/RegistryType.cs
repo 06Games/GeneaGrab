@@ -1,4 +1,4 @@
-﻿namespace GeneaGrab
+﻿namespace GeneaGrab.Core.Models
 {
     /// <summary>The type of data contained in the registry</summary>
     public enum RegistryType

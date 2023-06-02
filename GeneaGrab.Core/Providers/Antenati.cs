@@ -1,13 +1,16 @@
-﻿using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
+using SixLabors.ImageSharp;
 
-namespace GeneaGrab.Providers
+namespace GeneaGrab.Core.Providers
 {
     public class Antenati : ProviderAPI
     {
@@ -32,7 +35,7 @@ namespace GeneaGrab.Providers
             registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.ID}";
 
             var client = new HttpClient();
-            var iiif = new IIIF.Manifest(await client.GetStringAsync($"{registry.URL}/manifest"));
+            var iiif = new IiifManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
 
             registry.Pages = iiif.Sequences.First().Canvases.Select(p => new RPage
             {
@@ -41,8 +44,8 @@ namespace GeneaGrab.Providers
             }).ToArray();
 
             var dates = iiif.MetaData["Datazione"].Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
-            registry.From = Core.Models.Dates.Date.ParseDate(dates[0]);
-            registry.To = Core.Models.Dates.Date.ParseDate(dates[1]);
+            registry.From = Date.ParseDate(dates[0]);
+            registry.To = Date.ParseDate(dates[1]);
             registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
             var location = iiif.MetaData["Contesto archivistico"].Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries);
             registry.Location = location.Last();
@@ -79,7 +82,7 @@ namespace GeneaGrab.Providers
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            var image = await Image.LoadAsync(await client.GetStreamAsync(IIIF.IIIF.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
+            var image = await Image.LoadAsync(await client.GetStreamAsync(Iiif.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
             page.Zoom = zoom;
             progress?.Invoke(Progress.Finished);
 

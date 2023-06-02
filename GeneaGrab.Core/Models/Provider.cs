@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace GeneaGrab
+namespace GeneaGrab.Core.Models
 {
     /// <summary>Interface to communicate with the registry provider</summary>
     public interface ProviderAPI
     {
-        bool TryGetRegistryID(Uri URL, out RegistryInfo info);
-        Task<RegistryInfo> Infos(Uri URL);
-        Task<Stream> Thumbnail(Registry Registry, RPage page, Action<Progress> progress);
-        Task<Stream> Preview(Registry Registry, RPage page, Action<Progress> progress);
-        Task<Stream> Download(Registry Registry, RPage page, Action<Progress> progress);
-        Task<string> Ark(Registry Registry, RPage page);
+        bool TryGetRegistryID(Uri url, out RegistryInfo info);
+        Task<RegistryInfo> Infos(Uri url);
+        Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress);
+        Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress);
+        Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress);
+        Task<string> Ark(Registry registry, RPage page);
 
         bool IndexSupport { get; }
     }
     public interface IndexAPI
     {
-        Task<IEnumerable<Index>> GetIndex(Registry Registry, RPage page);
-        Task AddIndex(Registry Registry, RPage page, Index index);
+        Task<IEnumerable<Index>> GetIndex(Registry registry, RPage page);
+        Task AddIndex(Registry registry, RPage page, Index index);
     }
 
     /// <summary>Data on the registry provider</summary>
@@ -35,7 +35,7 @@ namespace GeneaGrab
             API = api;
         }
 
-        public string ID { get; set; }
+        public string ID { get; }
         public string URL { get; set; }
         public string Name { get; set; }
         public ProviderAPI API { get; set; }
@@ -50,13 +50,13 @@ namespace GeneaGrab
             {
                 var count = Registries.Count;
                 if (count == 0) return "Aucun registre";
-                else if (count == 1) return "1 registre";
-                else return $"{count} registres";
+                if (count == 1) return "1 registre";
+                return $"{count} registres";
             }
         }
 
 
-        public bool Equals(Provider other) => ID == other.ID;
+        public bool Equals(Provider other) => ID == other?.ID;
         public override bool Equals(object obj) => Equals(obj as Provider);
         public static bool operator ==(Provider one, Provider two) => one?.ID == two?.ID;
         public static bool operator !=(Provider one, Provider two) => !(one == two);

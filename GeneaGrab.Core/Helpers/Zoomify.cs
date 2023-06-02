@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using FileFormat.XML;
+using GeneaGrab.Core.Models;
 using SixLabors.ImageSharp;
 
-namespace GeneaGrab
+namespace GeneaGrab.Core.Helpers
 {
     public static class Zoomify
     {
@@ -19,7 +19,7 @@ namespace GeneaGrab
         public static async Task<(int w, int h, int tileSize)> ImageData(string baseURL, HttpClient client)
         {
             var data = await client.GetStringAsync($"{baseURL}ImageProperties.xml");
-            var dataResp = new XML($"<r>{data}</r>");
+            var dataResp = new XML.XML($"<r>{data}</r>");
             var layer = dataResp.RootElement.GetItem("IMAGE_PROPERTIES");
 
             return (

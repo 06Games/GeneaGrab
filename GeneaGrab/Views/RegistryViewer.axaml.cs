@@ -1,5 +1,4 @@
-﻿using GeneaGrab.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -8,16 +7,16 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 
 namespace GeneaGrab.Views
@@ -49,14 +48,14 @@ namespace GeneaGrab.Views
             InitializeComponent();
             DataContext = this;
             
-            var pageNumber = this.FindControl<NumberBox>("PageNumber");
+            var pageNumber = PageNumber;
             if (pageNumber != null)
                 pageNumber.ValueChanged += async (_, ne) =>
                 {
                     if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
                 };
 
-            var pageNotes = this.FindControl<TextBox>("PageNotes");
+            var pageNotes = PageNotes;
             if (pageNotes != null)
                 pageNotes.TextChanging += (_, _) =>
                 {
@@ -94,7 +93,7 @@ namespace GeneaGrab.Views
                 PageNumbers.Clear();
                 Pages.Clear();
 
-                var pageNumber = this.FindControl<NumberBox>("PageNumber")!;
+                var pageNumber = PageNumber;
                 pageNumber.Minimum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Min(p => p.Number) : 0;
                 pageNumber.Maximum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0;
                 PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
@@ -110,7 +109,7 @@ namespace GeneaGrab.Views
                 foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
                 {
                     if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                    tasks.Add(LoadImage(page.Number, _page => Info.Provider.API.Thumbnail(Info.Registry, _page, null)));
+                    tasks.Add(LoadImage(page.Number, rPage => Info.Provider.API.Thumbnail(Info.Registry, rPage, null)));
                 }
                 await Task.WhenAll(tasks).ConfigureAwait(false);
 
@@ -193,32 +192,32 @@ namespace GeneaGrab.Views
             if (Info?.Registry == null) return;
 
             var pageTotal = Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0;
-            this.FindControl<NumberBox>("PageNumber")!.Value = Info.PageNumber;
-            this.FindControl<TextBlock>("PageTotal")!.Text = $"/ {pageTotal}";
-            this.FindControl<Button>("PreviousPage")!.IsEnabled = Info?.PageNumber > 1;
-            this.FindControl<Button>("NextPage")!.IsEnabled = Info?.PageNumber < pageTotal;
-            SetInfo(this.FindControl<TextBlock>("Info_LocationCity")!, Info.Registry.Location ?? Info.Registry.LocationID);
-            SetInfo(this.FindControl<TextBlock>("Info_LocationDistrict")!, Info.Registry!.District ?? Info.Registry.DistrictID);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryType")!, Info.Registry!.TypeToString);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryDate")!, Info.Registry.Dates);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryNotes")!, Info.Registry.Notes);
-            SetInfo(this.FindControl<TextBlock>("Info_RegistryID")!, Info.Registry.CallNumber ?? Info.Registry.ID);
+            PageNumber.Value = Info.PageNumber;
+            PageTotal.Text = $"/ {pageTotal}";
+            PreviousPage.IsEnabled = Info.PageNumber > 1;
+            NextPage.IsEnabled = Info.PageNumber < pageTotal;
+            SetInfo(InfoLocationCity, Info.Registry.Location ?? Info.Registry.LocationID);
+            SetInfo(InfoLocationDistrict, Info.Registry!.District ?? Info.Registry.DistrictID);
+            SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
+            SetInfo(InfoRegistryDate, Info.Registry.Dates);
+            SetInfo(InfoRegistryNotes, Info.Registry.Notes);
+            SetInfo(InfoRegistryId, Info.Registry.CallNumber ?? Info.Registry.ID);
             void SetInfo(TextBlock block, string? text)
             {
                 block.Text = text ?? "";
                 block.IsVisible = !string.IsNullOrWhiteSpace(text);
             }
 
-            this.FindControl<TextBox>("PageNotes")!.Text = Info.Page?.Notes ?? "";
-            this.FindControl<Canvas>("ImageCanvas")!.Children.Clear();
+            PageNotes.Text = Info.Page?.Notes ?? "";
+            ImageCanvas.Children.Clear();
             foreach (var index in Index.Where(i => i.Page == Info.PageNumber)) DisplayIndexRectangle(index);
 
-            var image = this.FindControl<Image>("Image")!;
-            var pageList = this.FindControl<ListBox>("PageList")!;
+            var image = Image;
+            var pageList = PageList;
             if (img != null) image.Source = img.ToBitmap();
             pageList.Selection.Select(Info.PageIndex);
             pageList.ScrollIntoView(Info.PageIndex);
-            this.FindControl<ZoomPanel>("ImagePanel")!.Reset();
+            ImagePanel.Reset();
             OnPropertyChanged(nameof(image));
             Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));
         }
@@ -259,7 +258,7 @@ namespace GeneaGrab.Views
         {
             Dispatcher.UIThread.Post(() =>
             {
-                var imageProgress = this.FindControl<ProgressBar>("ImageProgress")!;
+                var imageProgress = ImageProgress;
                 imageProgress.IsVisible = !progress.Done;
                 imageProgress.IsIndeterminate = progress.Undetermined;
                 imageProgress.Value = progress.Value;
@@ -272,7 +271,7 @@ namespace GeneaGrab.Views
         private async Task GetIndex()
         {
             if (Info == null) return;
-            var indexPanel = this.FindControl<StackPanel>("IndexPanel")!;
+            var indexPanel = IndexPanel;
             if (!Info.Provider.API.IndexSupport)
             {
                 indexPanel.IsVisible = false;
@@ -307,7 +306,7 @@ namespace GeneaGrab.Views
             var tt = new ToolTip { Content = $"{index.FormatedDate} ({index.FormatedType}): {index.District}\n{index.Notes}" };
             ToolTip.SetTip(btn, tt);
 
-            this.FindControl<Canvas>("ImageCanvas")!.Children.Add(btn);
+            ImageCanvas.Children.Add(btn);
             Canvas.SetTop(btn, pos.X);
             Canvas.SetLeft(btn, pos.Y);
         }
@@ -330,11 +329,11 @@ namespace GeneaGrab.Views
     public class PageList
     {
         public static implicit operator PageList?(RPage? page) => page is null ? null : new PageList { Page = page }.Refresh();
-        public RPage Page { get; init; } = null!;
+        public RPage Page { get; private init; } = null!;
         public PageList Refresh()
         {
             Number = Page.Number;
-            Notes = Page.Notes?.Split('\n', '\r')?.FirstOrDefault() ?? "";
+            Notes = Page.Notes?.Split('\n', '\r').FirstOrDefault() ?? "";
             return this;
         }
 

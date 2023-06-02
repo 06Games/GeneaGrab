@@ -1,9 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using DynamicData;
 using FluentAvalonia.UI.Controls;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 
 namespace GeneaGrab.Views;
@@ -19,7 +20,7 @@ public partial class ProviderList : Page, ITabPage
         InitializeComponent();
         DataContext = this;
         
-        Helpers.LocalData.LoadData().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+        LocalData.LoadData().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
         {
             Providers.Clear();
             Providers.Add(Data.Providers.Values);

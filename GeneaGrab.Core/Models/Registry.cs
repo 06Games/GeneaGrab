@@ -6,7 +6,7 @@ using GeneaGrab.Core.Models.Dates;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace GeneaGrab
+namespace GeneaGrab.Core.Models
 {
     /// <summary>Data on the registry</summary>
     public class Registry : IEquatable<Registry>
@@ -93,7 +93,7 @@ namespace GeneaGrab
     {
         public override RPage[] ReadJson(JsonReader reader, Type objectType, RPage[] existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            return serializer.Deserialize<Dictionary<int, RPage>>(reader).Select(kv =>
+            return serializer.Deserialize<Dictionary<int, RPage>>(reader)?.Select(kv =>
             {
                 kv.Value.Number = kv.Key;
                 return kv.Value;

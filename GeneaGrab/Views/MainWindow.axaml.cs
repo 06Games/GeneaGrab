@@ -12,6 +12,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Threading;
 using FluentAvalonia.UI.Controls;
+using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 using PowerArgs;
@@ -52,30 +53,30 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void Initialize()
     {
-        NavigationService.TabView = this.FindControl<TabView>("TabView");
+        NavigationService.TabView = TabView;
         if (NavigationService.TabView != null)
         {
             NavigationService.TabView.PointerMoved += InputElement_OnPointerMoved;
             NavigationService.TabView.PointerPressed += InputElement_OnPointerPressed;
             NavigationService.TabView.PointerReleased += InputElement_OnPointerReleased;
         }
-        NavigationService.Navigated += (s, e) =>
+        NavigationService.Navigated += (_, e) =>
         {
             FrameChanged();
             if (e.Content is Page page) page.OnNavigatedTo(e);
         };
-        NavigationService.NavigationFailed += (s, e) => throw e.Exception;
+        NavigationService.NavigationFailed += (_, e) => throw e.Exception;
         NavigationService.TabAdded += UpdateTitle;
         NavigationService.TabRemoved += _ =>
         {
             if (NavigationService.TabCount <= 1) NewTab();
         };
-        NavigationService.SelectionChanged += (s, e) => FrameChanged();
+        NavigationService.SelectionChanged += (_, _) => FrameChanged();
 
         NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.Startup += (sender, e) =>
+            desktop.Startup += (_, e) =>
             {
                 Dispatcher.UIThread.Post(() =>
                 {
@@ -103,7 +104,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         UpdateSelectedTitle();
     }
     public static void UpdateSelectedTitle() => UpdateTitle(NavigationService.TabView?.SelectedItem as TabViewItem);
-    static void UpdateTitle(TabViewItem? tab)
+    private static void UpdateTitle(TabViewItem? tab)
     {
         if (tab is null) return;
         var frame = tab.Content as Frame;
@@ -124,15 +125,15 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (searchBar.Text != searchBar.SelectedItem?.ToString() && !string.IsNullOrWhiteSpace(searchBar.Text)) searchBar.ItemsSource = Search(searchBar.Text);
         searchBar.FilterMode = AutoCompleteFilterMode.None;
     }
-    IEnumerable<Result> Search(string query)
+    private IEnumerable<Result> Search(string query)
     {
-        IEnumerable<Result> GetRegistries(Func<Registry, string> contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
+        IEnumerable<Result> GetRegistries(Func<Registry, string?>? contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
             .Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
             .Select(r => new Result { Text = $"{r.Location ?? r.LocationID}: {r.Name}", Value = new RegistryInfo(r) }));
 
         if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => $"{r.Location ?? r.LocationID}: {r.Name}");
 
-        var registries = GetRegistries(r => r.URL).ToList() ?? new List<Result>();
+        var registries = GetRegistries(r => r.URL).ToList();
         if (!registries.Any())
             foreach (var (key, value) in Data.Providers)
                 if (value.API.TryGetRegistryID(uri, out var _))

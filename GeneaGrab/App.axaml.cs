@@ -1,12 +1,15 @@
 using System;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Views;
 using Serilog;
+using Serilog.Formatting.Compact;
 using URIScheme;
 
 namespace GeneaGrab
@@ -19,7 +22,7 @@ namespace GeneaGrab
             AvaloniaXamlLoader.Load(this);
 
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(new Serilog.Formatting.Compact.RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.json"))
+                .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.json"))
                 .CreateLogger();
 
             Data.Log = (l, d) =>
@@ -57,7 +60,7 @@ namespace GeneaGrab
                 {
                     const string scheme = @"geneagrab";
                     const string args = "--custom-scheme";
-                    var path = Environment.ProcessPath ?? System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    var path = Environment.ProcessPath ?? Assembly.GetExecutingAssembly().Location;
                     var service = URISchemeServiceFactory.GetURISchemeSerivce(scheme, @$"URL:{scheme} Protocol",
                         RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $@"{path}"" ""{args}" : $@"{path} {args}");
  #if DEBUG

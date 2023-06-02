@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using GeneaGrab.Core.Models;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Bmp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace GeneaGrab
+namespace GeneaGrab.Core.Helpers
 {
     public static class Grabber
     {

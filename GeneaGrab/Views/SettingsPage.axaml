@@ -23,7 +23,7 @@
                 <StackPanel>
                     <RadioButton 
                         Content="{Binding SystemTheme}"
-                        Checked="ThemeChanged_CheckedAsync"
+                        IsCheckedChanged="ThemeChanged_CheckedAsync"
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=System, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">
@@ -33,7 +33,7 @@
                     </RadioButton>
                     <RadioButton 
                         Content="{Binding LightTheme}"
-                        Checked="ThemeChanged_CheckedAsync" 
+                        IsCheckedChanged="ThemeChanged_CheckedAsync" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">
@@ -43,7 +43,7 @@
                     </RadioButton>
                     <RadioButton 
                         Content="{Binding DarkTheme}"
-                        Checked="ThemeChanged_CheckedAsync" 
+                        IsCheckedChanged="ThemeChanged_CheckedAsync" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">
@@ -53,7 +53,7 @@
                     </RadioButton>
                     <RadioButton 
                         Content="{Binding HighContrastTheme}"
-                        Checked="ThemeChanged_CheckedAsync" 
+                        IsCheckedChanged="ThemeChanged_CheckedAsync" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=HighContrast, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">

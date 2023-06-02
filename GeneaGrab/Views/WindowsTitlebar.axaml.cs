@@ -4,16 +4,12 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using FluentAvalonia.UI.Controls;
-using Button = Avalonia.Controls.Button;
 
 namespace GeneaGrab.Views;
 
 public partial class WindowsTitleBar : UserControl
 {
-    private readonly SymbolIcon? maximizeIcon;
-    private readonly ToolTip? maximizeToolTip;
 
     public WindowsTitleBar()
     {
@@ -25,18 +21,9 @@ public partial class WindowsTitleBar : UserControl
             return;
         }
 
-        var minimizeButton = this.FindControl<Button>("MinimizeButton");
-        var maximizeButton = this.FindControl<Button>("MaximizeButton");
-        maximizeIcon = this.FindControl<SymbolIcon>("MaximizeIcon");
-        maximizeToolTip = this.FindControl<ToolTip>("MaximizeToolTip");
-        var closeButton = this.FindControl<Button>("CloseButton");
-
-        minimizeButton.Click += MinimizeWindow;
-        maximizeButton.Click += MaximizeWindow;
-        closeButton.Click += CloseWindow;
-
-        this.FindControl<DockPanel>("TitleBar");
-        this.FindControl<DockPanel>("TitleBarBackground");
+        MinimizeButton.Click += MinimizeWindow;
+        MaximizeButton.Click += MaximizeWindow;
+        CloseButton.Click += CloseWindow;
 
         SubscribeToWindowState();
     }
@@ -71,15 +58,15 @@ public partial class WindowsTitleBar : UserControl
         {
             if (s != WindowState.Maximized)
             {
-                if (maximizeIcon != null) maximizeIcon.Symbol = Symbol.FullScreenMaximize;
+                if (MaximizeIcon != null) MaximizeIcon.Symbol = Symbol.FullScreenMaximize;
                 hostWindow.Padding = new Thickness(0,0,0,0);
-                if (maximizeToolTip != null) maximizeToolTip.Content = "Maximize";
+                if (MaximizeToolTip != null) MaximizeToolTip.Content = "Maximize";
             }
             else
             {
-                if (maximizeIcon != null) maximizeIcon.Symbol = Symbol.FullScreenMinimize;
+                if (MaximizeIcon != null) MaximizeIcon.Symbol = Symbol.FullScreenMinimize;
                 hostWindow.Padding = new Thickness(7, 7, 7, 7);
-                if (maximizeToolTip != null) maximizeToolTip.Content = "Restore Down";
+                if (MaximizeToolTip != null) MaximizeToolTip.Content = "Restore Down";
             }
         });
     }

@@ -1,7 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Threading.Tasks;
+using GeneaGrab.Core.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace GeneaGrab
 {
@@ -9,7 +12,7 @@ namespace GeneaGrab
     {
         public string Id { get; set; }
         public int Page { get; set; }
-        public System.Drawing.Rectangle Position { get; set; }
+        public Rectangle Position { get; set; }
 
         public DateTime? Date { get; set; }
         public RegistryType Type { get; set; }
@@ -34,7 +37,7 @@ namespace GeneaGrab
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Surname { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Nickname { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Profession { get; set; }
-        [JsonProperty(ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))] public RelationType Relation { get; set; }
+        [JsonProperty(ItemConverterType = typeof(StringEnumConverter))] public RelationType Relation { get; set; }
         public enum RelationType
         {
             Main,

@@ -6,8 +6,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
 
-namespace GeneaGrab.Providers
+namespace GeneaGrab.Core.Providers
 {
     public class AD17 : ProviderAPI
     {
@@ -16,9 +20,9 @@ namespace GeneaGrab.Providers
         public bool TryGetRegistryID(Uri url, out RegistryInfo info)
         {
             info = null;
-            if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith($"/v2/ad17/")) return false;
+            if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith("/v2/ad17/")) return false;
 
-            var query = System.Web.HttpUtility.ParseQueryString(url.Query);
+            var query = HttpUtility.ParseQueryString(url.Query);
             info = new RegistryInfo
             {
                 RegistryID = query["id"],
@@ -30,25 +34,26 @@ namespace GeneaGrab.Providers
 
         public async Task<RegistryInfo> Infos(Uri url)
         {
-            var registry = new Registry(Data.Providers["AD17"]) { URL = System.Web.HttpUtility.UrlDecode(url.OriginalString) };
+            var registry = new Registry(Data.Providers["AD17"]) { URL = HttpUtility.UrlDecode(url.OriginalString) };
 
             var client = new HttpClient();
             var pageBody = await client.GetStringAsync(registry.URL).ConfigureAwait(false);
 
             var pages = Regex.Matches(pageBody, @"<img src="".*?"" width=""1px"" height=""1px"" id=""visu_image_(?<num>\d*?)""(.|\n)*?data-original=""(?<original>.*?)"".*?\/>").Cast<Match>(); // https://regex101.com/r/muCsZx/2
             registry.Pages = pages.Select((p, i) => new RPage { Number = i + 1, DownloadURL = p.Groups["original"].Value }).ToArray();
-            var query = System.Web.HttpUtility.ParseQueryString(url.Query);
+            var query = HttpUtility.ParseQueryString(url.Query);
             if (!int.TryParse(query["page"], out var pageNumber)) pageNumber = 1;
             
-            var infos = Regex.Match(query["infos"] ?? "", @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>").Groups; // https://regex101.com/r/Ju2Y1b/3
+            var infos = Regex.Match(query["infos"], @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>").Groups; // https://regex101.com/r/Ju2Y1b/3
             if (infos.Count == 0) infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>", RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
+            if (infos.Count == 0) return null;
             registry.ID = query["id"] ?? infos["id"]?.Value;
             registry.CallNumber = infos["cote"]?.Value;
             registry.Location = infos["commune"]?.Value;
             registry.LocationID = registry.Location == null ? null : Cities.TryGetValue(registry.Location, out var location) ? location.ToString() : null;
             registry.Notes = infos["type"].Success ? $"{infos["type"]?.Value}: {infos["collection"]?.Value}" : null;
-            registry.From = Core.Models.Dates.Date.ParseDate(infos["date_debut"]?.Value);
-            registry.To = Core.Models.Dates.Date.ParseDate(infos["date_fin"]?.Value) ?? registry.From;
+            registry.From = Date.ParseDate(infos["date_debut"]?.Value);
+            registry.To = Date.ParseDate(infos["date_fin"]?.Value) ?? registry.From;
             registry.Types = GetTypes(infos["actes"]?.Value);
 
             IEnumerable<RegistryType> GetTypes(string type)

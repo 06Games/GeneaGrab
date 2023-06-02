@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using RomanNumerals.Numerals;
 
 namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
 {
@@ -9,10 +10,11 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
         public static bool TryParse(string dateString, out FrenchRepublicanDate date)
         {
             date = null;
+            if (string.IsNullOrWhiteSpace(dateString)) return false;
             var regex = Regex.Match(dateString, @"an (?<year>.*)", RegexOptions.IgnoreCase);
             if (!regex.Success) return false;
             date = new FrenchRepublicanDate();
-            if (regex.Groups["year"].Success && RomanNumerals.Numerals.NumeralParser.TryParse(regex.Groups["year"].Value, out var year))
+            if (regex.Groups["year"].Success && NumeralParser.TryParse(regex.Groups["year"].Value, out var year))
             {
                 date.Year = new FrenchRepublicanYear(year);
                 date.Precision = Precision.Years;

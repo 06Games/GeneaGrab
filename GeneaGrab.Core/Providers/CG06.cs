@@ -2,10 +2,15 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
 
-namespace GeneaGrab.Providers
+namespace GeneaGrab.Core.Providers
 {
     public class CG06 : ProviderAPI
     {
@@ -27,7 +32,7 @@ namespace GeneaGrab.Providers
         private static async Task<RegistryInfo> GetInfos(Uri url)
         {
             var client = new HttpClient();
-            var pageBody = Regex.Replace(System.Text.CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(await client.GetByteArrayAsync(url).ConfigureAwait(false)).Replace("\n", "").Replace("\r", "").Replace("\t", ""), "<font color=#0000FF><b>(?<content>.*)<\\/b><\\/font>", m => m.Groups["content"]?.Value, RegexOptions.IgnoreCase);
+            var pageBody = Regex.Replace(CodePagesEncodingProvider.Instance.GetEncoding(1252).GetString(await client.GetByteArrayAsync(url).ConfigureAwait(false)).Replace("\n", "").Replace("\r", "").Replace("\t", ""), "<font color=#0000FF><b>(?<content>.*)<\\/b><\\/font>", m => m.Groups["content"]?.Value, RegexOptions.IgnoreCase);
             var form = Regex.Match(pageBody, @"document\.write\(\""<input type=\\\""hidden\\\"" name=\\\""c\\\"" value=\\\""(?<c>.*)\\\"">\""\);.*document\.write\(\""<input type=\\\""hidden\\\"" name=\\\""l\\\"" value=\\\""(?<l>.*?)\\\"">\""\);.*document\.write\(\""<input type=\\\""hidden\\\"" name=\\\""t\\\"" value=\\\""(?<t>.*)\\\"">\""\);.*document\.write\(\""<\/form>\""\);").Groups;
             var body = Regex.Match(pageBody, @"<!-- CORPS DU DOCUMENT -->.*?<body style=\""text-align=justify\"">(.*?<h2 align=\""center\"">(?<title>.*?)<\/h2>)?(?<type>.*?)<b>.*?<\/b>.*?du (?<from>.*?)au (?<to>.*?)(<br>(?<source>.*?))?(<br> *?(?<pers>.*?))?<p>(.*?<p>)?(?<details>.*?)(.*?<p>.*?<hr.*?>(?<notes>.*))?(.*?)?<!-- Affichage des images -->", RegexOptions.IgnoreCase).Groups;
 
@@ -36,14 +41,14 @@ namespace GeneaGrab.Providers
                 URL = url.OriginalString,
                 ID = form["c"]?.Value,
                 CallNumber = form["c"]?.Value,
-                From = Core.Models.Dates.Date.ParseDate(body["from"]?.Value),
-                To = Core.Models.Dates.Date.ParseDate(body["to"]?.Value),
+                From = Date.ParseDate(body["from"]?.Value),
+                To = Date.ParseDate(body["to"]?.Value),
                 Pages = form["l"]?.Value.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries).Select((p, i) => new RPage { Number = i + 1, URL = p }).ToArray()
             };
 
             //Additional analysis
             ModuleExtractor(GetModuleName(url), ref registry);
-            string GetModuleName(Uri uri) => System.Web.HttpUtility.ParseQueryString(uri.Query)["fnmq"].Split('/').FirstOrDefault();
+            string GetModuleName(Uri uri) => HttpUtility.ParseQueryString(uri.Query)["fnmq"].Split('/').FirstOrDefault();
             void ModuleExtractor(string module, ref Registry reg)
             {
                 if (module == "arno") //Archives notariales

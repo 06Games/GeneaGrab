@@ -1,9 +1,10 @@
-﻿using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using GeneaGrab.Core.Models;
+using SixLabors.ImageSharp;
 
-namespace GeneaGrab
+namespace GeneaGrab.Core.Helpers
 {
     public static class DeepZoom
     {
@@ -16,7 +17,7 @@ namespace GeneaGrab
         public static async Task<(int w, int h, int tileSize, string format)> ImageData(string baseURL, HttpClient client)
         {
             var data = await client.GetStringAsync($"{baseURL}/image.xml");
-            var dataResp = new FileFormat.XML.XML(data);
+            var dataResp = new XML.XML(data);
             var layer = dataResp.RootElement.node;
             var size = layer.FirstChild;
 

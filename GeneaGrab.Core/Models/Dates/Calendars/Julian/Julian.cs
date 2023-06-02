@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using Convert = RomanNumerals.Convert;
 
 namespace GeneaGrab.Core.Models.Dates.Calendars.Julian
 {
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public class JulianYear : GenericYear
     {
-        public override string Long => Value < 0 ? $"Annus {RomanNumerals.Convert.ToRomanNumerals(Math.Abs(Value))} ante Christum natum" : $"Anno Domini {Short}";
+        public override string Long => Value < 0 ? $"Annus {Convert.ToRomanNumerals(Math.Abs(Value))} ante Christum natum" : $"Anno Domini {Short}";
         public override string Medium => Value < 0 ? $"{Short} a.C.n." : $"{Short} p.C.n."; // a.C.n. = Ante Christum natum ; p.C.n. = post Christum natum
         public override string Short => Value.ToString();
         internal override int MinValue => int.MinValue;

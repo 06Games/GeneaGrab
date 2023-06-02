@@ -2,13 +2,19 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
 
-namespace GeneaGrab.Providers
+namespace GeneaGrab.Core.Providers
 {
     public class AD06 : ProviderAPI
     {
@@ -29,7 +35,7 @@ namespace GeneaGrab.Providers
             info = null;
             if (url.Host != "www.basesdocumentaires-cg06.fr" || !supportedServices.Any(s => url.AbsolutePath.StartsWith($"/archives/ImageZoomViewer{s}.php"))) return false;
 
-            var query = System.Web.HttpUtility.ParseQueryString(url.Query);
+            var query = HttpUtility.ParseQueryString(url.Query);
             info = new RegistryInfo
             {
                 RegistryID = query["IDDOC"] ?? query["cote"],
@@ -41,7 +47,7 @@ namespace GeneaGrab.Providers
 
         public async Task<RegistryInfo> Infos(Uri url)
         {
-            var registry = new Registry(Data.Providers["AD06"]) { URL = System.Web.HttpUtility.UrlDecode(url.OriginalString) };
+            var registry = new Registry(Data.Providers["AD06"]) { URL = HttpUtility.UrlDecode(url.OriginalString) };
 
             var client = new HttpClient();
             var pageBody = await client.GetStringAsync(registry.URL).ConfigureAwait(false);
@@ -51,8 +57,8 @@ namespace GeneaGrab.Providers
             var pages = Regex.Matches(pageBody, "imagesListe\\.push\\('(?<page>.*?)'\\)").Cast<Match>().Select(m => m.Groups["page"]?.Value).ToArray();
             registry.Pages = pages.Select((p, i) => new RPage { Number = i + 1, URL = $"http://www.basesdocumentaires-cg06.fr/archives/ImageViewerTargetJP2.php?appli={appli}&imagePath={pages[i]}&infos={infos}" }).ToArray();
 
-            var query = System.Web.HttpUtility.ParseQueryString(url.Query);
-            if (appli != null && this.applications.TryGetValue(appli, out var service)) service(query, pageBody, ref registry);
+            var query = HttpUtility.ParseQueryString(url.Query);
+            if (appli != null && applications.TryGetValue(appli, out var service)) service(query, pageBody, ref registry);
             if (!int.TryParse(query["page"], out var pageNumber)) pageNumber = 1;
 
             Data.AddOrUpdate(Data.Providers["AD06"].Registries, registry.ID, registry);
@@ -64,14 +70,14 @@ namespace GeneaGrab.Providers
         private static void EC(NameValueCollection query, string _, ref Registry registry)
         {
             registry.ID = query["IDDOC"];
-            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
+            registry.Location = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             registry.LocationID = Array.IndexOf(Cities, query["COMMUNE"]).ToString();
             registry.District = registry.DistrictID = string.IsNullOrWhiteSpace(query["PAROISSE"]) ? null : query["PAROISSE"];
             var dates = query["DATE"]?.Split(new[] { " à " }, StringSplitOptions.None);
             if (dates != null)
             {
-                registry.From = Core.Models.Dates.Date.ParseDate(dates.FirstOrDefault());
-                registry.To = Core.Models.Dates.Date.ParseDate(dates.LastOrDefault());
+                registry.From = Date.ParseDate(dates.FirstOrDefault());
+                registry.To = Date.ParseDate(dates.LastOrDefault());
             }
             registry.Types = GetTypes(query["TYPEACTE"]);
 
@@ -101,11 +107,11 @@ namespace GeneaGrab.Providers
         private static void CAD(NameValueCollection query, string pageBody, ref Registry registry)
         {
             registry.ID = query["cote"];
-            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            registry.Location = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
             registry.LocationID = Array.IndexOf(Cities, query["c"]).ToString();
             registry.District = registry.DistrictID = query["l"] == "TA - Tableau d'assemblage" ? null : query["l"];
             registry.CallNumber = query["cote"];
-            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["a"]);
+            registry.From = registry.To = Date.ParseDate(query["a"]);
             registry.Types = GetTypes(query["t"]);
             registry.Notes = $"{Regex.Match(pageBody, "<td colspan=\"3\">Analyse : <b>(?<analyse>.*?)<\\/b><\\/td>").Groups["analyse"]?.Value}\nÉchelle: {query["e"]}";
 
@@ -120,15 +126,15 @@ namespace GeneaGrab.Providers
         private static void ETC_MAT(NameValueCollection query, string _, ref Registry registry)
         {
             registry.ID = query["IDDOC"];
-            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
+            registry.Location = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["COMMUNE"].ToLower());
             registry.LocationID = Array.IndexOf(Cities, query["COMMUNE"]).ToString();
             if(!string.IsNullOrWhiteSpace(query["COMPLEMENTLIEUX"])) registry.District = registry.DistrictID = query["COMPLEMENTLIEUX"];
             registry.CallNumber = query["COTE"];
             var dates = query["DATE"]?.Split(new[] { " - " }, StringSplitOptions.None);
             if (dates != null)
             {
-                registry.From = Core.Models.Dates.Date.ParseDate(dates.FirstOrDefault());
-                registry.To = Core.Models.Dates.Date.ParseDate(dates.LastOrDefault());
+                registry.From = Date.ParseDate(dates.FirstOrDefault());
+                registry.To = Date.ParseDate(dates.LastOrDefault());
             }
             registry.Types = GetTypes(query["CHOIX"]).ToList();
 
@@ -146,9 +152,9 @@ namespace GeneaGrab.Providers
         private static void RP(NameValueCollection query, string pageBody, ref Registry registry)
         {
             registry.ID = $"{query["cote"]}___{query["date"]}";
-            registry.Location = System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
+            registry.Location = Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(query["c"].ToLower());
             registry.LocationID = Array.IndexOf(Cities, query["c"].ToUpper()).ToString();
-            registry.From = registry.To = Core.Models.Dates.Date.ParseDate(query["date"]);
+            registry.From = registry.To = Date.ParseDate(query["date"]);
             registry.Types = new[] { RegistryType.Census };
             registry.CallNumber = query["cote"];
         }
@@ -186,7 +192,7 @@ namespace GeneaGrab.Providers
             if (string.IsNullOrWhiteSpace(id)) return null;
 
             //We can't track the progress because we don't know the final size
-            var image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(System.Globalization.CultureInfo.InvariantCulture)}", client);
+            var image = await Grabber.GetImage($"http://www.basesdocumentaires-cg06.fr:8080/ics/Converter?id={id}&s={zoom.ToString(CultureInfo.InvariantCulture)}", client);
             page.Zoom = pageZoom;
             progress?.Invoke(Progress.Finished);
 

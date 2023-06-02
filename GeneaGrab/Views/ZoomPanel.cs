@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Media;
-using Avalonia.VisualTree;
 
 namespace GeneaGrab.Views
 {
@@ -26,9 +26,9 @@ namespace GeneaGrab.Views
         private Control? _child;
 
         /// <summary>The user has moved the child</summary>
-        public event System.Action<double, double>? PositionChanged;
+        public event Action<double, double>? PositionChanged;
         /// <summary>The user has changed the zoom</summary>
-        public event System.Action<double>? ZoomChanged;
+        public event Action<double>? ZoomChanged;
 
         protected override Size ArrangeOverride(Size finalSize)
         {
@@ -51,7 +51,7 @@ namespace GeneaGrab.Views
                 SetClip();
             }
 
-            Child = Children.FirstOrDefault() as Control;
+            Child = Children.FirstOrDefault();
             if (Child is null) return null;
 
             var group = new TransformGroup();

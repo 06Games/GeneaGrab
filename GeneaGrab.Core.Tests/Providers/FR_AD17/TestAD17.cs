@@ -1,4 +1,6 @@
-﻿namespace GeneaGrab.Core.Tests.Providers.FR_AD17;
+﻿using GeneaGrab.Core.Providers;
+
+namespace GeneaGrab.Core.Tests.Providers.FR_AD17;
 
 public class TestAD17
 {

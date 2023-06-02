@@ -1,58 +1,58 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
-namespace GeneaGrab.IIIF
+namespace GeneaGrab.Core.Helpers
 {
-    public static class IIIF
+    public static class Iiif
     {
         public static Uri GenerateImageRequestUri(string imageURL, string region = "full", string size = "max", string rotation = "0", string quality = "default", string format = "jpg")
             => new Uri($"{imageURL}/{region}/{size}/{rotation}/{quality}.{format}");
     }
 
-    internal class Manifest
+    internal class IiifManifest
     {
-        public Manifest(string manifest) => Parse(JObject.Parse(manifest));
-        internal Manifest(JObject manifest) => Parse(manifest);
+        public IiifManifest(string manifest) => Parse(JObject.Parse(manifest));
+        internal IiifManifest(JObject manifest) => Parse(manifest);
         private void Parse(JObject manifest)
         {
             Json = manifest;
             MetaData = manifest["metadata"].ToDictionary(m => m.Value<string>("label"), m => m.Value<string>("value"));
-            Sequences = manifest["sequences"].Select(s => new Sequence(s));
+            Sequences = manifest["sequences"].Select(s => new IiifSequence(s));
         }
 
         public JToken Json { get; private set; }
         public Dictionary<string, string> MetaData { get; private set; }
-        public IEnumerable<Sequence> Sequences { get; private set; }
+        public IEnumerable<IiifSequence> Sequences { get; private set; }
     }
 
-    internal class Sequence
+    internal class IiifSequence
     {
-        internal Sequence(JToken sequence)
+        internal IiifSequence(JToken sequence)
         {
             Json = sequence;
             Id = sequence.Value<string>("@id");
             Label = sequence.Value<string>("@label") ?? sequence.Value<string>("label");
-            Canvases = sequence["canvases"].Select(s => new Canvas(s));
+            Canvases = sequence["canvases"].Select(s => new IiifCanvas(s));
         }
 
         public JToken Json { get; }
         public string Id { get; }
         public string Label { get; }
-        public IEnumerable<Canvas> Canvases { get; }
+        public IEnumerable<IiifCanvas> Canvases { get; }
     }
 
-    internal class Canvas
+    internal class IiifCanvas
     {
-        internal Canvas(JToken canvas)
+        internal IiifCanvas(JToken canvas)
         {
             Json = canvas;
             Id = canvas.Value<string>("@id");
             Label = canvas.Value<string>("label") ?? canvas.Value<string>("@label");
             Ark = canvas.Value<string>("ligeoPermalink");
             Thumbnail = canvas["thumbnail"].HasValues ? canvas["thumbnail"].Value<string>("@id") : canvas.Value<string>("thumbnail");
-            Images = canvas["images"].Select(s => new Image(s));
+            Images = canvas["images"].Select(s => new IiifImage(s));
         }
 
         public JToken Json { get; }
@@ -60,12 +60,12 @@ namespace GeneaGrab.IIIF
         public string Label { get; }
         public string Ark { get; }
         public string Thumbnail { get; }
-        public IEnumerable<Image> Images { get; }
+        public IEnumerable<IiifImage> Images { get; }
     }
 
-    internal class Image
+    internal class IiifImage
     {
-        internal Image(JToken image)
+        internal IiifImage(JToken image)
         {
             Json = image;
             Id = image.Value<string>("@id");

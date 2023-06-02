@@ -4,8 +4,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Web;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
 
-namespace GeneaGrab.Providers
+namespace GeneaGrab.Core.Providers
 {
     public class NiceHistorique : ProviderAPI
     {
@@ -31,7 +35,7 @@ namespace GeneaGrab.Providers
             var pageBody = await client.GetStringAsync(url).ConfigureAwait(false);
 
             var data = Regex.Match(pageBody, "<h2>R&eacute;f&eacute;rence :  (?<title>.* (?<number>\\d*)) de l'ann&eacute;e (?<year>\\d*).*<\\/h2>").Groups;
-            var date = Core.Models.Dates.Date.ParseDate(data["year"]?.Value);
+            var date = Date.ParseDate(data["year"]?.Value);
 
             var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";").Groups;
             Uri.TryCreate(url, pageData["path"].Value, out var path);
@@ -45,12 +49,12 @@ namespace GeneaGrab.Providers
                 Types = new[] { RegistryType.Periodical },
                 ProviderID = ProviderID,
                 ID = data["number"]?.Value,
-                CallNumber = System.Web.HttpUtility.HtmlDecode(data["title"]?.Value),
+                CallNumber = HttpUtility.HtmlDecode(data["title"]?.Value),
                 From = date,
                 To = date,
                 Pages = pagesTable.Select(page =>
                 {
-                    var pData = System.Web.HttpUtility.UrlDecode(pages[int.Parse(page.Groups["index"].Value) - 1]).Trim('"', ' ');
+                    var pData = HttpUtility.UrlDecode(pages[int.Parse(page.Groups["index"].Value) - 1]).Trim('"', ' ');
                     return new RPage
                     {
                         Number = int.Parse(page.Groups["number"].Value),

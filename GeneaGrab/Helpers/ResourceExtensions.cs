@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Globalization;
 using Avalonia.Data.Converters;
+using GeneaGrab.Strings;
 
 namespace GeneaGrab.Helpers;
 
@@ -15,7 +16,7 @@ public static class ResourceExtensions
         var manager = src switch
         {
             Resource.Core => Strings.Core.ResourceManager,
-            Resource.UI => Strings.UI.ResourceManager,
+            Resource.UI => UI.ResourceManager,
             _ => throw new ArgumentOutOfRangeException(nameof(src), src, null)
         };
 
@@ -31,20 +32,16 @@ public class ResourceConverter : IValueConverter
 
         var res = ResourceExtensions.Resource.UI;
         var cat = string.Empty;
-        if (parameter is string param)
+        if (parameter is not string param) return ResourceExtensions.GetLocalized($"{cat}.{value}", culture, res);
+        if (param.Contains('@'))
         {
-            if (param.Contains('@'))
-            {
-                var parameters = param.Split('@');
-                if (parameters.Length == 2)
-                {
-                    if (Enum.TryParse(parameters[0], out ResourceExtensions.Resource parsedRes)) res = parsedRes;
-                    cat = parameters[1];
-                }
-            }
-            else cat = param;
+            var parameters = param.Split('@');
+            if (parameters.Length != 2) return ResourceExtensions.GetLocalized($"{cat}.{value}", culture, res);
+            if (Enum.TryParse(parameters[0], out ResourceExtensions.Resource parsedRes)) res = parsedRes;
+            cat = parameters[1];
         }
+        else cat = param;
         return ResourceExtensions.GetLocalized($"{cat}.{value}", culture, res);
     }
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
 }

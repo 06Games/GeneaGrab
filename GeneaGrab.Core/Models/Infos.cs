@@ -1,13 +1,15 @@
-﻿using GeneaGrab.Providers;
-using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Providers;
+using SixLabors.ImageSharp;
 
-namespace GeneaGrab
+namespace GeneaGrab.Core.Models
 {
     public class RegistryInfo : IEquatable<RegistryInfo>
     {
@@ -42,9 +44,9 @@ namespace GeneaGrab
         public static Func<Registry, RPage, bool, Task<Stream>> GetImage { get; set; } = (r, p, t) => Task.CompletedTask as Task<Stream>;
         public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (r, p, i, t) => Task.CompletedTask as Task<string>;
         public static Func<Image, Task<Image>> ToThumbnail { get; set; } = Task.FromResult;
-        public static Action<string, Exception> Log { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
-        public static Action<string, Exception> Warn { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
-        public static Action<string, Exception> Error { get; set; } = (l, d) => System.Diagnostics.Debug.WriteLine($"{l}: {d}");
+        public static Action<string, Exception> Log { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
+        public static Action<string, Exception> Warn { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
+        public static Action<string, Exception> Error { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
 
         private static ReadOnlyDictionary<string, Provider> _providers;
         public static ReadOnlyDictionary<string, Provider> Providers

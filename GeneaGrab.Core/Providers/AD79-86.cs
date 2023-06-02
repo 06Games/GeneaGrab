@@ -1,13 +1,16 @@
-﻿using SixLabors.ImageSharp;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
+using SixLabors.ImageSharp;
 
-namespace GeneaGrab.Providers
+namespace GeneaGrab.Core.Providers
 {
     public class AD79_86 : ProviderAPI
     {
@@ -33,7 +36,7 @@ namespace GeneaGrab.Providers
             registry.URL = $"https://archives-deux-sevres-vienne.fr/ark:/{queries["something"]?.Value}/{registry.ID}";
 
             var client = new HttpClient();
-            var iiif = new IIIF.Manifest(await client.GetStringAsync($"{registry.URL}/manifest"));
+            var iiif = new IiifManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
             int.TryParse(queries["seq"]?.Value, out var seq);
             var sequence = iiif.Sequences.ElementAt(seq);
 
@@ -46,8 +49,8 @@ namespace GeneaGrab.Providers
             }).ToArray();
 
             var dates = sequence.Label.Split(new[] { "- (" }, StringSplitOptions.RemoveEmptyEntries).Last().Replace(") ", "").Split('-');
-            registry.From = Core.Models.Dates.Date.ParseDate(dates.First());
-            registry.To = Core.Models.Dates.Date.ParseDate(dates.Last());
+            registry.From = Date.ParseDate(dates.First());
+            registry.To = Date.ParseDate(dates.Last());
             registry.Types = ParseTypes(iiif.MetaData["Type de document"]);
             registry.CallNumber = iiif.MetaData["Cote"];
             registry.Notes = GenerateNotes(iiif.MetaData);
@@ -94,7 +97,7 @@ namespace GeneaGrab.Providers
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
             var image = await Image
-                .LoadAsync(await client.GetStreamAsync(zoom == 100 ? new Uri(page.DownloadURL) : IIIF.IIIF.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false))
+                .LoadAsync(await client.GetStreamAsync(zoom == 100 ? new Uri(page.DownloadURL) : Iiif.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false))
                 .ConfigureAwait(false);
             page.Zoom = zoom;
             progress?.Invoke(Progress.Finished);

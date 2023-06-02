@@ -1,14 +1,12 @@
-﻿using Xunit.Abstractions;
+﻿using GeneaGrab.Core.Providers;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD79_86;
 
 public class TestAD79_86
 {
     private readonly AD79_86 instance;
-    private readonly ITestOutputHelper _output;
-    public TestAD79_86(ITestOutputHelper output) {
+    public TestAD79_86() {
         instance = new AD79_86();
-        _output = output;
     }
 
     [Theory(DisplayName = "Check information retriever")]

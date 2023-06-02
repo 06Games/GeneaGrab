@@ -1,7 +1,6 @@
-﻿using GeneaGrab.Core.Models.Dates;
-using GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican;
+﻿using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
 using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
-using GeneaGrab.Core.Models.Dates.Calendars.Julian;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 

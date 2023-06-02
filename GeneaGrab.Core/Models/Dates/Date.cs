@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
+using System.Text;
 using GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican;
 using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
 using GeneaGrab.Core.Models.Dates.Calendars.Julian;
+using Newtonsoft.Json;
 
 namespace GeneaGrab.Core.Models.Dates
 {
@@ -36,7 +37,7 @@ namespace GeneaGrab.Core.Models.Dates
         public override string ToString() => ToString(Precision);
         public virtual string ToString(Precision precision)
         {
-            var txt = new System.Text.StringBuilder();
+            var txt = new StringBuilder();
             var format = (Precision)Math.Min((int)precision, (int)Precision);
 
             txt.Append(Year.Short);
@@ -97,5 +98,14 @@ namespace GeneaGrab.Core.Models.Dates
             return date1.Precision < Precision.Seconds || date1.Second?.Value == date2.Second?.Value;
         }
         public static bool operator !=(Date date1, Date date2) => !(date1 == date2);
+
+        private bool Equals(Date other) => this == other;
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            return obj.GetType() == GetType() && Equals((Date)obj);
+        }
+        public override int GetHashCode() => HashCode.Combine(Year, Month, Day, Hour, Minute, Second, (int)Calendar, (int)Precision);
     }
 }

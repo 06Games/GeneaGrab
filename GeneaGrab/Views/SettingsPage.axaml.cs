@@ -1,13 +1,12 @@
 ﻿using System;
-using GeneaGrab.Helpers;
-using GeneaGrab.Services;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 using FluentAvalonia.UI.Controls;
+using GeneaGrab.Helpers;
+using GeneaGrab.Services;
 
 namespace GeneaGrab.Views
 {

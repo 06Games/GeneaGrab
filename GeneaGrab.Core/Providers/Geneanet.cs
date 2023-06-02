@@ -1,15 +1,18 @@
-﻿using Newtonsoft.Json.Linq;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
+using Newtonsoft.Json.Linq;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
-namespace GeneaGrab.Providers
+namespace GeneaGrab.Core.Providers
 {
     public class Geneanet : ProviderAPI
     {
@@ -50,8 +53,8 @@ namespace GeneaGrab.Providers
             registry.Notes = notes;
             registry.District = registry.DistrictID = string.IsNullOrWhiteSpace(location) ? null : location;
 
-            registry.From = Core.Models.Dates.Date.ParseDate(infos.Groups["from"].Value);
-            registry.To = Core.Models.Dates.Date.ParseDate(infos.Groups["to"].Value);
+            registry.From = Date.ParseDate(infos.Groups["from"].Value);
+            registry.To = Date.ParseDate(infos.Groups["to"].Value);
 
             registry = await UpdateInfos(registry, client);
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var pageNumber);
@@ -163,7 +166,7 @@ namespace GeneaGrab.Providers
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (var y = 0; y < tiles.Y; y++)
                 for (var x = 0; x < tiles.X; x++)
-                    tasks.Add(Grabber.GetImage($"{page.DownloadURL}TileGroup0/{page.Zoom}-{x}-{y}.jpg", client).ContinueWith((task) =>
+                    tasks.Add(Grabber.GetImage($"{page.DownloadURL}TileGroup0/{page.Zoom}-{x}-{y}.jpg", client).ContinueWith(task =>
                     {
                         progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
                         return task.Result;
