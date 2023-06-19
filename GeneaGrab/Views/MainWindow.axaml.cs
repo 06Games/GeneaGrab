@@ -11,6 +11,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using DiscordRPC;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
@@ -109,11 +110,23 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (tab is null) return;
         var frame = tab.Content as Frame;
         var frameData = frame?.Content as ITabPage;
+        var defaultName = ResourceExtensions.GetLocalized($"Tab.{frame?.SourcePageType?.Name}", ResourceExtensions.Resource.UI) ?? frame?.SourcePageType?.Name;
 
         tab.IconSource = frameData is null ? null : new SymbolIconSource { Symbol = frameData.IconSource };
-        tab.Header = frameData is null ? frame?.SourcePageType?.Name : frameData.DynaTabHeader ?? ResourceExtensions.GetLocalized($"Tab.{frame?.SourcePageType?.Name}", ResourceExtensions.Resource.UI);
+        tab.Header = frameData?.DynaTabHeader ?? defaultName;
         tab.Tag = frameData?.Identifier;
         Debug.WriteLine(tab.Tag);
+        
+        (Application.Current as App)?.Discord.SetPresence(new RichPresence
+        {
+            Details = defaultName,
+            State = frameData?.DynaTabHeader,
+            Assets = new Assets
+            {
+                LargeImageKey = "logo",
+                SmallImageKey = frameData is null ? null : Enum.GetName(frameData.IconSource)?.ToLower()
+            }
+        });
     }
 
     

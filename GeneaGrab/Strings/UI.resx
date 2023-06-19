@@ -69,9 +69,6 @@
     <data name="Tab.RegistriesPage" xml:space="preserve">
     <value>Registers</value>
   </data>
-    <data name="Tab.Registry" xml:space="preserve">
-    <value>Consulting a register</value>
-  </data>
     <data name="Tab.SettingsPage" xml:space="preserve">
     <value>Settings</value>
   </data>
@@ -83,5 +80,8 @@
   </data>
     <data name="Settings.Theme.HighContrast" xml:space="preserve">
         <value>High Contrast</value>
+    </data>
+    <data name="Tab.RegistryViewer" xml:space="preserve">
+        <value>Registry Viewer</value>
     </data>
 </root>

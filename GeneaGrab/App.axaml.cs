@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using DiscordRPC;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Views;
@@ -17,6 +18,8 @@ namespace GeneaGrab
     public partial class App : Application
     {
         public Version Version { get; } = new(2, 0);
+        public DiscordRpcClient Discord { get; } = new ("1120393636455129229");
+        
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
@@ -44,6 +47,13 @@ namespace GeneaGrab
             Data.GetImage = LocalData.GetImageAsync;
             Data.SaveImage = LocalData.SaveImageAsync;
             Data.ToThumbnail = LocalData.ToThumbnail;
+            
+            
+            Discord.Initialize(); //Connect to the RPC
+            // Refresh Discord RPC every 500 ms
+            var timer = new System.Timers.Timer(500); 
+            timer.Elapsed += (_, _) => { if (!Discord.IsDisposed) Discord.Invoke(); };
+            timer.Start();
         }
 
         public override void OnFrameworkInitializationCompleted()
@@ -52,6 +62,7 @@ namespace GeneaGrab
             {
                 desktop.MainWindow = new MainWindow();
                 desktop.MainWindow.DataContext = desktop.MainWindow;
+                desktop.Exit += (_, _) => Discord.Dispose();
             }
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

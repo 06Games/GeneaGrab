@@ -59,13 +59,13 @@
     <data name="Tab.RegistriesPage" xml:space="preserve">
         <value>Registres</value>
     </data>
-    <data name="Tab.Registry" xml:space="preserve">
-        <value>Consultation d'un registre</value>
-    </data>
     <data name="Tab.SettingsPage" xml:space="preserve">
         <value>Paramètres</value>
     </data>
     <data name="Settings.Theme.HighContrast" xml:space="preserve">
         <value>Fort contraste</value>
+    </data>
+    <data name="Tab.RegistryViewer" xml:space="preserve">
+        <value>Visionneuse de registre</value>
     </data>
 </root>
