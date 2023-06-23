@@ -16,10 +16,10 @@
                         <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
                     </Button.Resources>
                     <Button.Styles>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                        <Style Selector="Button:pointerover">
                             <Setter Property="Background" Value="#44AAAAAA" />
                         </Style>
-                        <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                        <Style Selector="Button:not(:pointerover)">
                             <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Button.Styles>
@@ -37,10 +37,10 @@
                         <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
                     </Button.Resources>
                     <Button.Styles>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                        <Style Selector="Button:pointerover">
                             <Setter Property="Background" Value="#44AAAAAA" />
                         </Style>
-                        <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                        <Style Selector="Button:not(:pointerover)">
                             <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Button.Styles>
@@ -53,17 +53,11 @@
                         <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
                     </Button.Resources>
                     <Button.Styles>
-                        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                        <Style Selector="Button:pointerover">
                             <Setter Property="Background" Value="Red" />
                         </Style>
-                        <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                        <Style Selector="Button:not(:pointerover)">
                             <Setter Property="Background" Value="Transparent" />
-                        </Style>
-                        <Style Selector="Button:pointerover > Path">
-                            <Setter Property="Fill" Value="White" />
-                        </Style>
-                        <Style Selector="Button:not(:pointerover) > Path">
-                            <Setter Property="Fill" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
                         </Style>
                     </Button.Styles>
                     <controls:SymbolIcon Symbol="Dismiss" />

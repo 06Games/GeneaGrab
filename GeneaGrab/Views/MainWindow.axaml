@@ -21,10 +21,10 @@
                     <Button IsEnabled="{Binding IsBackEnabled}" Click="BackRequested" BorderThickness="0">
                         <controls:SymbolIcon Symbol="Back" />
                         <Button.Styles>
-                            <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Style Selector="Button">
                                 <Setter Property="Background" Value="Transparent" />
                             </Style>
-                            <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                            <Style Selector="Button:disabled > controls|FABorder">
                                 <Setter Property="Background" Value="Transparent" />
                             </Style>
                         </Button.Styles>
@@ -32,10 +32,10 @@
                     <Button IsEnabled="{Binding IsForwardEnabled}" Click="ForwardRequested" RenderTransformOrigin="0.5,0.5" BorderThickness="0">
                         <controls:SymbolIcon Symbol="Forward" />
                         <Button.Styles>
-                            <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                            <Style Selector="Button">
                                 <Setter Property="Background" Value="Transparent" />
                             </Style>
-                            <Style Selector="Button:not(:pointerover) /template/ ContentPresenter#PART_ContentPresenter">
+                            <Style Selector="Button:disabled > controls|FABorder">
                                 <Setter Property="Background" Value="Transparent" />
                             </Style>
                         </Button.Styles>
