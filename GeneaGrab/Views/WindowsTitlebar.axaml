@@ -16,10 +16,7 @@
                         <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
                     </Button.Resources>
                     <Button.Styles>
-                        <Style Selector="Button:pointerover">
-                            <Setter Property="Background" Value="#44AAAAAA" />
-                        </Style>
-                        <Style Selector="Button:not(:pointerover)">
+                        <Style Selector="Button:not(:pointerover) > controls|FABorder">
                             <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Button.Styles>
@@ -37,10 +34,10 @@
                         <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
                     </Button.Resources>
                     <Button.Styles>
-                        <Style Selector="Button:pointerover">
+                        <Style Selector="Button:pointerover > controls|FABorder">
                             <Setter Property="Background" Value="#44AAAAAA" />
                         </Style>
-                        <Style Selector="Button:not(:pointerover)">
+                        <Style Selector="Button:not(:pointerover) > controls|FABorder">
                             <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Button.Styles>
@@ -53,10 +50,10 @@
                         <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
                     </Button.Resources>
                     <Button.Styles>
-                        <Style Selector="Button:pointerover">
-                            <Setter Property="Background" Value="Red" />
+                        <Style Selector="Button:pointerover > controls|FABorder">
+                            <Setter Property="Background" Value="DarkRed" />
                         </Style>
-                        <Style Selector="Button:not(:pointerover)">
+                        <Style Selector="Button:not(:pointerover) > controls|FABorder">
                             <Setter Property="Background" Value="Transparent" />
                         </Style>
                     </Button.Styles>
