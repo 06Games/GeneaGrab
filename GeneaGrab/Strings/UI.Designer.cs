@@ -115,6 +115,15 @@ namespace GeneaGrab.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} pages.
+        /// </summary>
+        internal static string Registry_PageCount {
+            get {
+                return ResourceManager.GetString("Registry.PageCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to About this application.
         /// </summary>
         internal static string Settings_About {

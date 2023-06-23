@@ -84,4 +84,7 @@
     <data name="Tab.RegistryViewer" xml:space="preserve">
         <value>Registry Viewer</value>
     </data>
+    <data name="Registry.PageCount" xml:space="preserve">
+        <value>{0} pages</value>
+    </data>
 </root>

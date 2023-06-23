@@ -1,11 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Avalonia.Controls;
+using DynamicData;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Services;
+using GeneaGrab.Strings;
 
 namespace GeneaGrab.Views
 {
@@ -33,40 +36,31 @@ namespace GeneaGrab.Views
             MainWindow.UpdateSelectedTitle();
 
             Items.Clear();
-            foreach (var location in Provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => new Location(r.LocationID, r.Location)).OrderBy(l => l.Key ?? "zZzZ"))
+            foreach (var registry in Provider.Registries.Values)
             {
-                RegistriesTreeStructure? loc = (string)location.Key;
-                foreach (var district in location.GroupBy(r => r.DistrictID ?? r.District).OrderBy(d => d.Key ?? "zZzZ"))
+                var parent = Items;
+                foreach (var location in Array.Empty<string?>().Append(registry.Location).Append(registry.District)) // To add LocationDetails in the structure, replace the empty array
                 {
-                    RegistriesTreeStructure? dis = district.Key;
-                    foreach (var registry in district.OrderBy(r => r.From))
+                    if (string.IsNullOrWhiteSpace(location)) continue;
+                    var container = parent.FirstOrDefault(c => c.Title == location);
+                    if (container is null)
                     {
-                        if (dis is null && loc is null) Items.Add(registry);
-                        else if (dis is null) loc!.Children.Add(registry);
-                        else dis.Children.Add(registry);
+                        container = new RegistriesTreeStructure(location,
+                            location != registry.Location || registry.LocationDetails == null ? null
+                                : string.Join(", ", registry.LocationDetails)); // We uses LocationDetails as subtitle of the Location
+                        InsertInPlace(parent, container);
                     }
-                    if (dis != null) loc?.Children.Add(dis);
+                    parent = container.Children;
                 }
-                if (loc != null) Items.Add(loc);
+                InsertInPlace(parent, registry);
             }
-        }
-        class Location : IEqualityComparer<Location>
-        {
-            public readonly string Id;
-            public readonly string? Name;
-            public Location(string id, string? name)
-            {
-                Id = id;
-                Name = name;
-            }
-            public static implicit operator string(Location l) => l.ToString();
-            public override string ToString() => Name ?? Id;
 
-            public override bool Equals(object? obj) => Equals(this, obj as Location);
-            public bool Equals(Location? x, Location? y) => !string.IsNullOrEmpty(x?.Id) && !string.IsNullOrEmpty(y?.Id) ? x.Id == y.Id : x?.Name == y?.Name;
-            // ReSharper disable once ConstantNullCoalescingCondition
-            public override int GetHashCode() => (Id ?? Name ?? "").GetHashCode();
-            public int GetHashCode(Location obj) => obj.GetHashCode();
+            void InsertInPlace<T>(IList<T> list, T item) where T : IComparable<T>
+            {
+                var index = list.BinarySearch(item);
+                if (index < 0) index = ~index;
+                list.Insert(index, item);
+            }
         }
 
         private void RegisterList_ItemInvoked(object? sender, SelectionChangedEventArgs e)
@@ -74,38 +68,39 @@ namespace GeneaGrab.Views
             if (e.AddedItems.Count < 1 || sender is not TreeView treeView || e.AddedItems[0] is not RegistriesTreeStructure data) return;
             if (treeView.TreeContainerFromItem(data) is not TreeViewItem node) return;
             if (data.Children.Any()) node.IsExpanded = !node.IsExpanded;
-            else if (data.Register != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Register));
+            else if (data.Registry != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Registry));
         }
     }
 
-    public class RegistriesTreeStructure
+    public class RegistriesTreeStructure : IComparable<RegistriesTreeStructure>
     {
         public string Title { get; }
-        public string? SubTitle { get; }
+        public string? Subtitle { get; }
         public ObservableCollection<RegistriesTreeStructure> Children { get; } = new();
 
-        public Registry? Register { get; }
+        public Registry? Registry { get; }
 
-        public static implicit operator RegistriesTreeStructure?(string? title) => title is null ? null : new RegistriesTreeStructure(title);
         public RegistriesTreeStructure(string title, string? subtitle = null)
         {
             Title = title;
-            SubTitle = subtitle;
+            Subtitle = subtitle;
+        }
+        private RegistriesTreeStructure(Registry registry) : this(registry.Name, string.Format(UI.Registry_PageCount, registry.Pages.Length))
+        {
+            Registry = registry;
         }
 
         public static implicit operator RegistriesTreeStructure(Registry registry) => new(registry);
-        public RegistriesTreeStructure(Registry register)
+
+        public int CompareTo(RegistriesTreeStructure? other)
         {
-            Title = register.Name;
-            SubTitle = PageCount(register);
-            Register = register;
-        }
-        string PageCount(Registry register)
-        {
-            var count = register.Pages.Length;
-            if (count == 0) return "Aucune page";
-            if (count == 1) return "1 page";
-            return $"{count} pages";
+            if (other is null) return 1;
+
+            var compare = 0;
+            if (Registry?.From != null && other.Registry?.From != null) compare += Registry.From.CompareTo(other.Registry.From) * 10;
+            else if (Registry == null && other.Registry != null) compare += -10;
+            else if (Registry != null && other.Registry == null) compare += 10;
+            return compare + string.Compare(Title, other.Title, StringComparison.CurrentCulture);
         }
     }
 }

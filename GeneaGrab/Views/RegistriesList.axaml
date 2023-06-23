@@ -17,7 +17,7 @@
                         <TreeDataTemplate DataType="views:RegistriesTreeStructure" ItemsSource="{Binding Children}">
                             <Grid ColumnDefinitions="Auto,*" RowDefinitions="*,*">
                                 <TextBlock Grid.Column="1" Text="{Binding Title}" Margin="12,6,0,0" />
-                                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding SubTitle}" Margin="12,0,0,6" />
+                                <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding Subtitle}" Margin="12,0,0,6" />
                             </Grid>
                         </TreeDataTemplate>
                     </TreeView.DataTemplates>
