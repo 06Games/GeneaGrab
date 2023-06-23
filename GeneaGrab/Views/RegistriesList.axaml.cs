@@ -33,7 +33,7 @@ namespace GeneaGrab.Views
             MainWindow.UpdateSelectedTitle();
 
             Items.Clear();
-            foreach (var location in Provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => new Location(r.LocationID, r.Location)).OrderBy(l => l.Key.ToString() ?? "zZzZ"))
+            foreach (var location in Provider.Registries.Values.OrderBy(r => r.From).GroupBy(r => new Location(r.LocationID, r.Location)).OrderBy(l => l.Key ?? "zZzZ"))
             {
                 RegistriesTreeStructure? loc = (string)location.Key;
                 foreach (var district in location.GroupBy(r => r.DistrictID ?? r.District).OrderBy(d => d.Key ?? "zZzZ"))
@@ -59,7 +59,8 @@ namespace GeneaGrab.Views
                 Id = id;
                 Name = name;
             }
-            public static implicit operator string(Location l) => l.Name ?? l.Id;
+            public static implicit operator string(Location l) => l.ToString();
+            public override string ToString() => Name ?? Id;
 
             public override bool Equals(object? obj) => Equals(this, obj as Location);
             public bool Equals(Location? x, Location? y) => !string.IsNullOrEmpty(x?.Id) && !string.IsNullOrEmpty(y?.Id) ? x.Id == y.Id : x?.Name == y?.Name;
