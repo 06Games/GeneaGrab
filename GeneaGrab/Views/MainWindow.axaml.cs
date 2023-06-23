@@ -17,6 +17,7 @@ using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 using PowerArgs;
+using Serilog;
 
 namespace GeneaGrab.Views;
 
@@ -116,17 +117,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         tab.Header = frameData?.DynaTabHeader ?? defaultName;
         tab.Tag = frameData?.Identifier;
         Debug.WriteLine(tab.Tag);
-        
-        (Application.Current as App)?.Discord.SetPresence(new RichPresence
+
+        try
         {
-            Details = defaultName,
-            State = frameData?.DynaTabHeader,
-            Assets = new Assets
+            (Application.Current as App)?.Discord.SetPresence(new RichPresence
             {
-                LargeImageKey = "logo",
-                SmallImageKey = frameData is null ? null : Enum.GetName(frameData.IconSource)?.ToLower()
-            }
-        });
+                Details = defaultName?[..Math.Min(defaultName.Length, 96)],
+                State = frameData?.DynaTabHeader?[..Math.Min(frameData.DynaTabHeader.Length, 96)],
+                Assets = new Assets
+                {
+                    LargeImageKey = "logo",
+                    SmallImageKey = frameData is null ? null : Enum.GetName(frameData.IconSource)?.ToLower()
+                }
+            });
+        }
+        catch(Exception e) { Log.Warning(e, "Couldn't update Discord RPC"); }
     }
 
     
