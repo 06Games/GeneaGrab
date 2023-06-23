@@ -66,6 +66,7 @@ namespace GeneaGrab.Views
         private void RegisterList_ItemInvoked(object? sender, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count < 1 || sender is not TreeView treeView || e.AddedItems[0] is not RegistriesTreeStructure data) return;
+            treeView.UnselectAll();
             if (treeView.TreeContainerFromItem(data) is not TreeViewItem node) return;
             if (data.Children.Any()) node.IsExpanded = !node.IsExpanded;
             else if (data.Registry != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Registry));
