@@ -94,8 +94,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void AddTab(TabView sender, EventArgs args) => NewTab();
     /// <summary>Remove the requested tab from the TabView</summary>
     private void CloseTab(TabView sender, TabViewTabCloseRequestedEventArgs args) => NavigationService.CloseTab(args.Tab);
-    private void BackRequested(object sender, RoutedEventArgs e) => NavigationService.GoBack();
-    private void ForwardRequested(object sender, RoutedEventArgs e) => NavigationService.GoForward();
+    private void GoBack(object sender, RoutedEventArgs e) => NavigationService.GoBack();
+    private void GoForward(object sender, RoutedEventArgs e) => NavigationService.GoForward();
 
     public new event PropertyChangedEventHandler? PropertyChanged;
     private void FrameChanged()
