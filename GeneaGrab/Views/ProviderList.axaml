@@ -17,7 +17,7 @@
                         <DataTemplate>
                             <Grid RowDefinitions="*,*" ColumnDefinitions="Auto,*">
                                 <Grid Grid.Column="0" Grid.RowSpan="2">
-                                    <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="{StaticResource ButtonBackground}" />
+                                    <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="#0FFFFFFF" />
                                     <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <Ellipse.Fill>
                                             <ImageBrush Source="{Binding Icon, Converter={StaticResource VariableImage}}" />
