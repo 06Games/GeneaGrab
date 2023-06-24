@@ -2,21 +2,27 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using DiscordRPC;
+using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Views;
+using PowerArgs;
 using Serilog;
 using Serilog.Formatting.Compact;
+using SingleInstance;
 using URIScheme;
 
 namespace GeneaGrab
 {
     public partial class App : Application
     {
+        public ISingleInstanceService SingleInstance { get; private set; } = null!;
         public Version Version { get; } = new(2, 0);
         public DiscordRpcClient Discord { get; } = new ("1120393636455129229");
         
@@ -49,6 +55,30 @@ namespace GeneaGrab
             Data.ToThumbnail = LocalData.ToThumbnail;
             
             
+            
+            SingleInstance = new SingleInstanceService("GeneaGrab");
+            SingleInstance.TryStartSingleInstance();
+            if(SingleInstance.IsFirstInstance)
+            {
+                SingleInstance.StartListenServer();
+                Log.Information("This is the first instance");
+
+                SingleInstance.Received.Subscribe(receive => Task.Run(async () =>
+                {
+                    var (message, response) = receive;
+                    var args = await Json.ToObjectAsync<string[]>(message);
+                    Dispatcher.UIThread.Post(() => Args.InvokeMain<LaunchArgs>(args));
+                    
+                    response("success"); // Send response
+                }));
+            }
+            else {
+                Log.Information("This is not the first instance");
+                
+                _ = Task.Run(async () => await SingleInstance.SendMessageToFirstInstanceAsync(await Json.StringifyAsync(((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime).Args)));
+            }
+            
+            
             Discord.Initialize(); //Connect to the RPC
             // Refresh Discord RPC every 500 ms
             var timer = new System.Timers.Timer(500); 
@@ -62,7 +92,11 @@ namespace GeneaGrab
             {
                 desktop.MainWindow = new MainWindow();
                 desktop.MainWindow.DataContext = desktop.MainWindow;
-                desktop.Exit += (_, _) => Discord.Dispose();
+                desktop.Exit += (_, _) =>
+                {
+                    Discord.Dispose();
+                    SingleInstance.Dispose();
+                };
             }
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
