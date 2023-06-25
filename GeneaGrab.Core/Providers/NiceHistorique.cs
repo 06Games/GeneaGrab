@@ -79,7 +79,7 @@ namespace GeneaGrab.Core.Providers
         public Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTile(registry, page, 1, progress);
         private async Task<Stream> GetTile(Registry registry, RPage page, int zoom, Action<Progress> progress)
         {
-            var (success, stream) = await Data.TryGetImageFromDrive(registry, page, zoom).ConfigureAwait(false);
+            var (success, stream) = Data.TryGetImageFromDrive(registry, page, zoom);
             if (success) return stream;
             var index = Array.IndexOf(registry.Pages, page);
 

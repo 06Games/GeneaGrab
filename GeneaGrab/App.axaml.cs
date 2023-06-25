@@ -50,9 +50,9 @@ namespace GeneaGrab
                 else Log.Error(d, l);
             };
             Data.Translate = (id, fallback) => ResourceExtensions.GetLocalized(id) ?? fallback;
-            Data.GetImage = LocalData.GetImageAsync;
+            Data.GetImage = LocalData.GetImage;
             Data.SaveImage = LocalData.SaveImageAsync;
-            Data.ToThumbnail = LocalData.ToThumbnail;
+            Data.ToThumbnail = LocalData.ToThumbnailAsync;
             
             
             
@@ -74,8 +74,8 @@ namespace GeneaGrab
             }
             else {
                 Log.Information("This is not the first instance");
-                
-                _ = Task.Run(async () => await SingleInstance.SendMessageToFirstInstanceAsync(await Json.StringifyAsync(((IClassicDesktopStyleApplicationLifetime)ApplicationLifetime).Args)));
+                if(ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop) 
+                    _ = Task.Run(async () => await SingleInstance.SendMessageToFirstInstanceAsync(await Json.StringifyAsync(desktop.Args)));
             }
             
             

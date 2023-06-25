@@ -142,7 +142,7 @@ namespace GeneaGrab.Views
                 {
                     if (string.IsNullOrWhiteSpace(param.Url) || !Uri.TryCreate(param.Url, UriKind.Absolute, out var uri)) break;
 
-                    await LocalData.LoadData().ConfigureAwait(false);
+                    await LocalData.LoadDataAsync().ConfigureAwait(false);
                     Info = await TryGetFromProviders(uri).ConfigureAwait(false);
                     break;
                 }
@@ -219,20 +219,19 @@ namespace GeneaGrab.Views
             pageList.ScrollIntoView(Info.PageIndex);
             ImagePanel.Reset();
             OnPropertyChanged(nameof(image));
-            Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));
+            _ = Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));
         }
 
-        private async void Download(object sender, RoutedEventArgs e) => await Download().ConfigureAwait(false);
-        async Task Download()
+        private async void Download(object sender, RoutedEventArgs e)
         {
             if (Info == null) return;
             await Info.Provider.API.Download(Info.Registry, Info.Page, TrackProgress);
             RefreshView();
         }
-        private async void OpenFolder(object sender, RoutedEventArgs e)
+        private void OpenFolder(object sender, RoutedEventArgs e)
         {
             if (Info == null) return;
-            var page = await LocalData.GetFile(Info.Registry, Info.Page);
+            var page = LocalData.GetFile(Info.Registry, Info.Page);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -279,7 +278,7 @@ namespace GeneaGrab.Views
             }
 
             indexPanel.IsVisible = true;
-            IEnumerable<GeneaGrab.Index>? index = null;
+            IEnumerable<Core.Models.Index>? index = null;
             if (Info.Provider.API is IndexAPI indexAPI)
                 index = await indexAPI.GetIndex(Info.Registry, Info.Page);
             if (index is null) Index.Clear();
@@ -314,7 +313,7 @@ namespace GeneaGrab.Views
         #endregion
     }
 
-    public class Index : GeneaGrab.Index
+    public class Index : Core.Models.Index
     {
         public string? FormatedDate => Date?.ToString("d");
         public string? FormatedType

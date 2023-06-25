@@ -181,7 +181,7 @@ namespace GeneaGrab.Core.Providers
         private static async Task<Stream> GetTiles(Registry registry, RPage page, float zoom, Action<Progress> progress)
         {
             var pageZoom = (int)(zoom * 100);
-            var (success, stream) = await Data.TryGetImageFromDrive(registry, page, pageZoom).ConfigureAwait(false);
+            var (success, stream) = Data.TryGetImageFromDrive(registry, page, pageZoom);
             if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);

@@ -20,7 +20,7 @@ public partial class ProviderList : Page, ITabPage
         InitializeComponent();
         DataContext = this;
         
-        LocalData.LoadData().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+        LocalData.LoadDataAsync().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
         {
             Providers.Clear();
             Providers.Add(Data.Providers.Values);
