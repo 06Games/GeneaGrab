@@ -55,7 +55,7 @@ namespace GeneaGrab.Views
             return $"{appName} - {version.Major}.{version.Minor}.{Math.Max(version.Build, 0)}.{Math.Max(version.Revision, 0)}";
         }
 
-        private void ThemeChanged_CheckedAsync(object sender, RoutedEventArgs _)
+        private void ThemeChanged_Checked(object sender, RoutedEventArgs _)
         {
             if (sender is not RadioButton btn) return;
             var param = btn.CommandParameter;

@@ -13,18 +13,17 @@ namespace GeneaGrab.Core.Helpers
 
     internal class IiifManifest
     {
-        public IiifManifest(string manifest) => Parse(JObject.Parse(manifest));
-        internal IiifManifest(JObject manifest) => Parse(manifest);
-        private void Parse(JObject manifest)
+        public IiifManifest(string manifest) : this(JObject.Parse(manifest)) { }
+        private IiifManifest(JObject manifest)
         {
             Json = manifest;
             MetaData = manifest["metadata"].ToDictionary(m => m.Value<string>("label"), m => m.Value<string>("value"));
             Sequences = manifest["sequences"].Select(s => new IiifSequence(s));
         }
 
-        public JToken Json { get; private set; }
-        public Dictionary<string, string> MetaData { get; private set; }
-        public IEnumerable<IiifSequence> Sequences { get; private set; }
+        public JToken Json { get; }
+        public Dictionary<string, string> MetaData { get; }
+        public IEnumerable<IiifSequence> Sequences { get; }
     }
 
     internal class IiifSequence

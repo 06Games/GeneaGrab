@@ -25,7 +25,7 @@ public partial class WindowsTitleBar : UserControl
         MaximizeButton.Click += MaximizeWindow;
         CloseButton.Click += CloseWindow;
 
-        SubscribeToWindowState();
+        _ = SubscribeToWindowStateAsync();
     }
 
     private void CloseWindow(object? sender, RoutedEventArgs e)
@@ -44,15 +44,10 @@ public partial class WindowsTitleBar : UserControl
         if (VisualRoot is Window hostWindow) hostWindow.WindowState = WindowState.Minimized;
     }
 
-    private async void SubscribeToWindowState()
+    private async Task SubscribeToWindowStateAsync()
     {
-        var hostWindow = VisualRoot as Window;
-
-        while (hostWindow == null)
-        {
-            hostWindow = VisualRoot as Window;
-            await Task.Delay(50);
-        }
+        Window? hostWindow;
+        while ((hostWindow = VisualRoot as Window) == null) await Task.Delay(50);
 
         hostWindow.GetObservable(Window.WindowStateProperty).Subscribe(s =>
         {

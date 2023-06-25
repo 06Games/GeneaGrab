@@ -40,9 +40,9 @@ namespace GeneaGrab.Core.Models
 
     public static class Data
     {
-        public static Func<string, string, string> Translate { get; set; } = (id, fallback) => fallback;
-        public static Func<Registry, RPage, bool, Stream> GetImage { get; set; } = (r, p, t) => null;
-        public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (r, p, i, t) => Task.CompletedTask as Task<string>;
+        public static Func<string, string, string> Translate { get; set; } = (_, fallback) => fallback;
+        public static Func<Registry, RPage, bool, Stream> GetImage { get; set; } = (_, _, _) => null;
+        public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (_, _, _, _) => Task.CompletedTask as Task<string>;
         public static Func<Image, Task<Image>> ToThumbnail { get; set; } = Task.FromResult;
         public static Action<string, Exception> Log { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
         public static Action<string, Exception> Warn { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
@@ -58,16 +58,16 @@ namespace GeneaGrab.Core.Models
                 var providers = new List<Provider>
                 {
                     // France
-                    new Provider(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" },
-                    new Provider(new AD06(), "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
-                    new Provider(new CG06(), "CG06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
-                    new Provider(new NiceHistorique(), "NiceHistorique") { URL = "https://www.nicehistorique.org/" },
-                    new Provider(new AD17(), "AD17") { URL = "https://www.archinoe.net/v2/ad17/registre.html" },
-                    new Provider(new AD79_86(), "AD79-86") { URL = "https://archives-deux-sevres-vienne.fr/" },
+                    new(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" },
+                    new(new AD06(), "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
+                    new(new CG06(), "CG06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
+                    new(new NiceHistorique(), "NiceHistorique") { URL = "https://www.nicehistorique.org/" },
+                    new(new AD17(), "AD17") { URL = "https://www.archinoe.net/v2/ad17/registre.html" },
+                    new(new AD79_86(), "AD79-86") { URL = "https://archives-deux-sevres-vienne.fr/" },
                     //TODO: Gironde and Cantal
 
                     // Italy
-                    new Provider(new Antenati(), "Antenati") { URL = "https://www.antenati.san.beniculturali.it/" },
+                    new(new Antenati(), "Antenati") { URL = "https://www.antenati.san.beniculturali.it/" },
                 };
                 return _providers = new ReadOnlyDictionary<string, Provider>(providers.ToDictionary(k => k.ID, v => v));
             }

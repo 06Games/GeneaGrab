@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Threading.Tasks;
-using GeneaGrab.Core.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace GeneaGrab
+namespace GeneaGrab.Core.Models
 {
     public class Index : IEquatable<Index>
     {

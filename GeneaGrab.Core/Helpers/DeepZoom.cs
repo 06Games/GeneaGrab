@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Xml;
 using GeneaGrab.Core.Models;
 using SixLabors.ImageSharp;
 
@@ -17,15 +18,16 @@ namespace GeneaGrab.Core.Helpers
         public static async Task<(int w, int h, int tileSize, string format)> ImageData(string baseURL, HttpClient client)
         {
             var data = await client.GetStringAsync($"{baseURL}/image.xml");
-            var dataResp = new XML.XML(data);
-            var layer = dataResp.RootElement.node;
-            var size = layer.FirstChild;
+            var dataResp = new XmlDocument();
+            if (!string.IsNullOrEmpty(data)) dataResp.LoadXml(data);
+            var layer = dataResp.DocumentElement;
+            var size = layer?.FirstChild;
 
             return (
-                int.TryParse(size.Attributes["Width"].Value, out var w) ? w : 0,
-                int.TryParse(size.Attributes["Height"].Value, out var h) ? h : 0,
-                int.TryParse(layer.Attributes["TileSize"]?.Value ?? "256", out var tileSize) ? tileSize : 256,
-                layer.Attributes["Format"]?.Value ?? "jpg"
+                int.TryParse(size?.Attributes?["Width"]?.Value, out var w) ? w : 0,
+                int.TryParse(size?.Attributes?["Height"]?.Value, out var h) ? h : 0,
+                int.TryParse(layer?.Attributes["TileSize"]?.Value ?? "256", out var tileSize) ? tileSize : 256,
+                layer?.Attributes?["Format"]?.Value ?? "jpg"
             );
         }
 

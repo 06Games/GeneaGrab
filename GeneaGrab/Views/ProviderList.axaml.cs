@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using DynamicData;
@@ -19,12 +20,12 @@ public partial class ProviderList : Page, ITabPage
     {
         InitializeComponent();
         DataContext = this;
-        
-        LocalData.LoadDataAsync().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
+
+        _ = LocalData.LoadDataAsync().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
         {
             Providers.Clear();
             Providers.Add(Data.Providers.Values);
-        }));
+        }), TaskScheduler.Current);
     }
 
     public ObservableCollection<Provider> Providers { get; } = new(Data.Providers.Values);

@@ -23,7 +23,7 @@
                 <StackPanel>
                     <RadioButton 
                         Content="{Binding SystemTheme}"
-                        IsCheckedChanged="ThemeChanged_CheckedAsync"
+                        IsCheckedChanged="ThemeChanged_Checked"
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=System, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">
@@ -33,7 +33,7 @@
                     </RadioButton>
                     <RadioButton 
                         Content="{Binding LightTheme}"
-                        IsCheckedChanged="ThemeChanged_CheckedAsync" 
+                        IsCheckedChanged="ThemeChanged_Checked" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">
@@ -43,7 +43,7 @@
                     </RadioButton>
                     <RadioButton 
                         Content="{Binding DarkTheme}"
-                        IsCheckedChanged="ThemeChanged_CheckedAsync" 
+                        IsCheckedChanged="ThemeChanged_Checked" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">
@@ -53,7 +53,7 @@
                     </RadioButton>
                     <RadioButton 
                         Content="{Binding HighContrastTheme}"
-                        IsCheckedChanged="ThemeChanged_CheckedAsync" 
+                        IsCheckedChanged="ThemeChanged_Checked" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=HighContrast, Mode=OneWay}"
                         FontSize="14"
                         GroupName="AppTheme">
