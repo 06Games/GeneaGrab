@@ -59,8 +59,7 @@ namespace GeneaGrab.Core.Models
                 {
                     // France
                     new(new Geneanet(), "Geneanet") { URL = "https://www.geneanet.org/" },
-                    new(new AD06(), "AD06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
-                    new(new CG06(), "CG06") { URL = "https://www.departement06.fr/archives-departementales/outils-de-recherche-et-archives-numerisees-2895.html" },
+                    new(new AD06(), "AD06") { URL = "https://archives06.fr/" },
                     new(new NiceHistorique(), "NiceHistorique") { URL = "https://www.nicehistorique.org/" },
                     new(new AD17(), "AD17") { URL = "https://www.archinoe.net/v2/ad17/registre.html" },
                     new(new AD79_86(), "AD79-86") { URL = "https://archives-deux-sevres-vienne.fr/" },
