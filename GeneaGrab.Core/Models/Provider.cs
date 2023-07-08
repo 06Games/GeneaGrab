@@ -26,24 +26,24 @@ namespace GeneaGrab.Core.Models
     /// <summary>Data on the registry provider</summary>
     public class Provider : IEquatable<Provider>
     {
-        public Provider(ProviderAPI api) => API = api;
         public Provider(ProviderAPI api, string id)
         {
-            ID = id;
-            Name = Data.Translate($"Provider.{ID}", ID);
-            Icon = $"/Assets/Providers/{ID}.png";
-            API = api;
+            Id = id;
+            Name = Data.Translate($"Provider.{Id}", Id);
+            Icon = $"/Assets/Providers/{Id}.png";
+            Api = api;
         }
+        
 
-        public string ID { get; }
-        public string URL { get; set; }
+        public string Id { get; }
+        public string Url { get; set; }
         public string Name { get; set; }
-        public ProviderAPI API { get; set; }
+        public ProviderAPI Api { get; }
         public override string ToString() => Name;
 
         public string Icon { get; set; }
 
-        public Dictionary<string, Registry> Registries { get; } = new Dictionary<string, Registry>();
+        public Dictionary<string, Registry> Registries { get; } = new();
         public string RegisterCount
         {
             get
@@ -56,23 +56,23 @@ namespace GeneaGrab.Core.Models
         }
 
 
-        public bool Equals(Provider other) => ID == other?.ID;
+        public bool Equals(Provider other) => Id == other?.Id;
         public override bool Equals(object obj) => Equals(obj as Provider);
-        public static bool operator ==(Provider one, Provider two) => one?.ID == two?.ID;
+        public static bool operator ==(Provider one, Provider two) => one?.Id == two?.Id;
         public static bool operator !=(Provider one, Provider two) => !(one == two);
-        public override int GetHashCode() => ID.GetHashCode();
+        public override int GetHashCode() => Id.GetHashCode();
     }
 
 
     public class Progress
     {
-        public static readonly Progress Finished = new Progress { Value = 1, Done = true };
-        public static readonly Progress Unknown = new Progress { Undetermined = true };
+        public static readonly Progress Finished = new() { Value = 1, Done = true };
+        public static readonly Progress Unknown = new() { Undetermined = true };
         private Progress() { }
 
-        public static implicit operator Progress(int v) => new Progress(v);
-        public static implicit operator Progress(float v) => new Progress(v);
-        public static implicit operator Progress(decimal v) => new Progress((float)v);
+        public static implicit operator Progress(int v) => new(v);
+        public static implicit operator Progress(float v) => new(v);
+        public static implicit operator Progress(decimal v) => new((float)v);
         public Progress(float value) => Value = value;
 
         public static implicit operator float(Progress p) => p.Value;

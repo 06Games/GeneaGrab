@@ -154,7 +154,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var registries = GetRegistries(r => r.URL).ToList();
         if (!registries.Any())
             foreach (var (key, value) in Data.Providers)
-                if (value.API.TryGetRegistryID(uri, out var _))
+                if (value.Api.TryGetRegistryID(uri, out var _))
                     registries.Add(new Result { Text = $"Online Match: {key}", Value = uri });
         return registries;
     }

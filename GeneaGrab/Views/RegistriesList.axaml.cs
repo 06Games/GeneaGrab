@@ -16,7 +16,7 @@ namespace GeneaGrab.Views
     {
         public Symbol IconSource => Symbol.Library;
         public string? DynaTabHeader => Provider?.Name;
-        public string? Identifier => Provider?.ID;
+        public string? Identifier => Provider?.Id;
         private Provider? Provider { get; set; }
 
         public RegistriesPage()

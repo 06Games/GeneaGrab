@@ -12,7 +12,7 @@ namespace GeneaGrab.Core.Models
     public class Registry : IEquatable<Registry>
     {
         public Registry() { }
-        public Registry(Provider provider) => ProviderID = provider.ID;
+        public Registry(Provider provider) => ProviderID = provider.Id;
         public string ProviderID { get; set; }
         [JsonIgnore] public Provider Provider => Data.Providers[ProviderID];
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string[] LocationDetails { get; set; }
