@@ -35,7 +35,7 @@ namespace GeneaGrab.Core.Providers
             registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.ID}";
 
             var client = new HttpClient();
-            var iiif = new IiifManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
+            var iiif = new Iiif(await client.GetStringAsync($"{registry.URL}/manifest"));
 
             registry.Pages = iiif.Sequences.First().Canvases.Select(p => new RPage
             {

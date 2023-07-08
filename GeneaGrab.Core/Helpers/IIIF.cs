@@ -5,76 +5,72 @@ using Newtonsoft.Json.Linq;
 
 namespace GeneaGrab.Core.Helpers
 {
-    public static class Iiif
+    public class Iiif : IiifManifest<IiifSequence<IiifCanvas<IiifImage>>>
     {
+        public Iiif(string manifest) : base(manifest) { }
         public static Uri GenerateImageRequestUri(string imageURL, string region = "full", string size = "max", string rotation = "0", string quality = "default", string format = "jpg")
-            => new Uri($"{imageURL}/{region}/{size}/{rotation}/{quality}.{format}");
+            => new($"{imageURL}/{region}/{size}/{rotation}/{quality}.{format}");
     }
 
-    internal class IiifManifest
+    public class IiifManifest<TSequence>
     {
         public IiifManifest(string manifest) : this(JObject.Parse(manifest)) { }
-        private IiifManifest(JObject manifest)
+        internal IiifManifest(JToken manifest)
         {
-            Json = manifest;
             MetaData = manifest["metadata"].ToDictionary(m => m.Value<string>("label"), m => m.Value<string>("value"));
-            Sequences = manifest["sequences"].Select(s => new IiifSequence(s));
+            Sequences = manifest["sequences"].Select(s => (TSequence)Activator.CreateInstance(typeof(TSequence), s));
         }
 
-        public JToken Json { get; }
         public Dictionary<string, string> MetaData { get; }
-        public IEnumerable<IiifSequence> Sequences { get; }
+        public IEnumerable<TSequence> Sequences { get; }
     }
 
-    internal class IiifSequence
+    public class IiifSequence<TCanvas>
     {
-        internal IiifSequence(JToken sequence)
+        public IiifSequence(JToken sequence)
         {
-            Json = sequence;
             Id = sequence.Value<string>("@id");
             Label = sequence.Value<string>("@label") ?? sequence.Value<string>("label");
-            Canvases = sequence["canvases"].Select(s => new IiifCanvas(s));
+            Canvases = sequence["canvases"].Select(s => (TCanvas)Activator.CreateInstance(typeof(TCanvas), s));
         }
 
-        public JToken Json { get; }
         public string Id { get; }
         public string Label { get; }
-        public IEnumerable<IiifCanvas> Canvases { get; }
+        public IEnumerable<TCanvas> Canvases { get; }
     }
 
-    internal class IiifCanvas
+    public class IiifCanvas<TImage>
     {
-        internal IiifCanvas(JToken canvas)
+        public IiifCanvas(JToken canvas)
         {
-            Json = canvas;
             Id = canvas.Value<string>("@id");
             Label = canvas.Value<string>("label") ?? canvas.Value<string>("@label");
-            Ark = canvas.Value<string>("ligeoPermalink");
             Thumbnail = canvas["thumbnail"].HasValues ? canvas["thumbnail"].Value<string>("@id") : canvas.Value<string>("thumbnail");
-            Images = canvas["images"].Select(s => new IiifImage(s));
+            Images = canvas["images"].Select(s => (TImage)Activator.CreateInstance(typeof(TImage), s));
         }
 
-        public JToken Json { get; }
         public string Id { get; }
         public string Label { get; }
-        public string Ark { get; }
         public string Thumbnail { get; }
-        public IEnumerable<IiifImage> Images { get; }
+        public IEnumerable<TImage> Images { get; }
     }
 
-    internal class IiifImage
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class IiifImage
     {
-        internal IiifImage(JToken image)
+        public IiifImage(JToken image)
         {
-            Json = image;
             Id = image.Value<string>("@id");
             Format = image["resource"].Value<string>("format");
+            Width = image["resource"].Value<int>("width");
+            Height = image["resource"].Value<int>("height");
             ServiceId = image["resource"]["service"]?.Value<string>("@id");
         }
 
-        public JToken Json { get; }
         public string Id { get; }
         public string Format { get; }
+        public int Width { get; }
+        public int Height { get; }
         public string ServiceId { get; }
     }
 }

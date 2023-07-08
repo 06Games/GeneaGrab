@@ -36,7 +36,7 @@ namespace GeneaGrab.Core.Providers
             registry.URL = $"https://archives-deux-sevres-vienne.fr/ark:/{queries["something"]?.Value}/{registry.ID}";
 
             var client = new HttpClient();
-            var iiif = new IiifManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
+            var iiif = new LigeoManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
             int.TryParse(queries["seq"]?.Value, out var seq);
             var sequence = iiif.Sequences.ElementAt(seq);
 
@@ -45,7 +45,7 @@ namespace GeneaGrab.Core.Providers
                 Number = int.TryParse(p.Label, out var number) ? number : (i + 1),
                 URL = p.Images.First().ServiceId,
                 DownloadURL = p.Images.First().Id,
-                Extra = p.Json["ligeoClasseur"]
+                Extra = p.Classeur
             }).ToArray();
 
             var dates = sequence.Label.Split(new[] { "- (" }, StringSplitOptions.RemoveEmptyEntries).Last().Replace(") ", "").Split('-');
