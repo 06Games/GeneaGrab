@@ -7,135 +7,240 @@ namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
 public class DataAD06 : IEnumerable<object[]>
 {
-    // How to add data:
-    // 1. Go to https://www.archinoe.net/v2/ad17/registre.html and open a registry
-    // 2. In the console, execute
-    // >>     window.location.href + "&infos=" + encodeURIComponent($("option:selected").prop('outerHTML')) + "&page=" + $("#visu_pagination").text().split('/')[0]
     private readonly List<object[]> _data = new()
     {
         // Etat civil
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerEC.php?HR=1&IDDOC=2003116181420696967&COMMUNE=LANTOSQUE&PAROISSE=&TYPEACTE=S%C3%A9pultures&DATE=1781%20%C3%A0%201784&page=3",
-            Id = "2003116181420696967",
+            URL = @"https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/daogrp/0/3",
+            Id = "ece981d3d12d06e97f5012a67ab768508e",
+            Cote = "5 Mi 75/1",
             Ville = "Lantosque",
-            Types = new [] { RegistryType.Burial },
+            Types = new[] { RegistryType.Burial },
             From = new GregorianDate(1781, precision: Precision.Years),
             To = new GregorianDate(1784, precision: Precision.Years),
             Page = 3
         },
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerEC.php?HR=1&IDDOC=2004012016534450751946&COMMUNE=NICE&PAROISSE=Sainte-H%C3%A9l%C3%A8ne&TYPEACTE=S%C3%A9pultures%20des%20enfants%20d%C3%A9c%C3%A9d%C3%A9s%20sans%20bapt%C3%AAmes&DATE=1840%20%C3%A0%201870&page=35",
-            Id = "2004012016534450751946",
+            URL = @"https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/daogrp/0/35",
+            Id = "ecbbce420b017f540479f25c97ff2c266a",
+            Cote = "5 Mi 89/26",
             Ville = "Nice",
             Paroisse = "Sainte-Hélène",
-            Types = new [] { RegistryType.Burial },
+            Types = new[] { RegistryType.Burial },
             From = new GregorianDate(1840, precision: Precision.Years),
             To = new GregorianDate(1870, precision: Precision.Years),
             Page = 35
         },
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerEC.php?HR=1&IDDOC=2016071815353524951886&COMMUNE=NICE&PAROISSE=Notre-Dame%20du%20Port&TYPEACTE=Bapt%C3%AAmes%20Tables%20des%20bapt%C3%AAmes&DATE=1823%20%C3%A0%201824&page=1",
-            Id = "2016071815353524951886",
+            URL = @"https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/daogrp/0/layout:table/idsearch:RECH_2616c589cede9aef5f50348ea29ef354",
+            Id = "ecebe99656ed10bbc4f90577557b5db67c",
+            Cote = "5 Mi 89/80",
             Ville = "Nice",
             Paroisse = "Notre-Dame du Port",
-            Types = new [] { RegistryType.Baptism, RegistryType.BaptismTable },
+            Types = new[] { RegistryType.Baptism, RegistryType.BaptismTable },
             From = new GregorianDate(1823, precision: Precision.Years),
             To = new GregorianDate(1824, precision: Precision.Years),
             Page = 1
         },
-        
-        // Cadastres
+
+        // Plans cadastraux
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerCAD.php?e=1/2000&c=BERRE-LES-ALPES&l=D1%20-%20Sena&t=S&cote=25FI%20015/1/D1/COM&a=1866&che=25Fi/015/015_1_D1_COM.jp2&ana=undefined",
-            Id = "25FI 015/1/D1/COM",
-            Cote = "25FI 015/1/D1/COM",
+            URL = @"https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/dao/0/layout:table/idsearch:RECH_8bd2b6be1f4d9dee88dd728c3f7365e6",
+            Id = "e5f3d1e196cf2c2c3fbcb9770bb85548",
+            Cote = "25 Fi 15/1/A0",
             Ville = "Berre-Les-Alpes",
-            Paroisse = "D1 - Sena",
-            Types = new [] { RegistryType.CadastralMap },
+            Paroisse = "Tableau d'assemblage.",
+            Types = new[] { RegistryType.CadastralMap },
             From = new GregorianDate(1866, precision: Precision.Years),
             To = new GregorianDate(1866, precision: Precision.Years),
             Page = 1
         },
-        
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/dao/0",
+            Id = "c2ca249edd8bc5100f8a389e12389285",
+            Cote = "25 Fi 15/1/D1/COM",
+            Ville = "Berre-Les-Alpes",
+            Paroisse = "Sena.",
+            Types = new[] { RegistryType.CadastralMap },
+            From = new GregorianDate(1866, precision: Precision.Years),
+            To = new GregorianDate(1866, precision: Precision.Years),
+            Page = 1
+        },
+
+        // Etat des sections
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/daogrp/0/30/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+            Id = "efe090d2498239ccfd227216e5211a09",
+            Cote = "3 P 1503",
+            Ville = "Utelle",
+            Types = new[] { RegistryType.CadastralSectionStates },
+            From = new GregorianDate(1875, precision: Precision.Years),
+            To = new GregorianDate(1875, precision: Precision.Years),
+            Page = 30
+        },
+
         // Matrices cadastrales
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerMAT_ETS.php?IDDOC=2011055132655345658831&COMMUNE=UTELLE&COMPLEMENTLIEUX=&COTE=03P_1503&NATURE=Etat%20des%20sections%20A%20%C3%A0%20M&DATE=1875&CHOIX=ETS&CODECOM=154&page=30",
-            Id = "2011055132655345658831",
-            Cote = "03P_1503",
+            URL = @"https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/daogrp/0/158/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+            Id = "c9b59a423e101f278296bb4526a2e15c",
+            Cote = "3 P 1511",
             Ville = "Utelle",
-            Types = new [] { RegistryType.CadastralSectionStates },
-            From = new GregorianDate(1875, precision: Precision.Years),
-            To = new GregorianDate(1875, precision: Precision.Years),
-            Notes = "Etat des sections A à M",
-            Page = 30
-        },
-        new Data
-        {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerMAT_ETS.php?IDDOC=2010122144614149114846&COMMUNE=UTELLE&COMPLEMENTLIEUX=&COTE=03P_1511&NATURE=Matrice%20cadastrale%20des%20propri%C3%A9t%C3%A9s%20non%20b%C3%A2ties&DATE=1913%20-%201969&CHOIX=MAT&CODECOM=154&FOLIO=folios%201489%20%C3%A0%201988&page=158",
-            Id = "2010122144614149114846",
-            Cote = "03P_1511",
-            Ville = "Utelle",
-            Types = new [] { RegistryType.CadastralMatrix },
+            Types = new[] { RegistryType.CadastralMatrix },
             From = new GregorianDate(1913, precision: Precision.Years),
             To = new GregorianDate(1969, precision: Precision.Years),
-            Notes = "Matrice cadastrale des propriétés non bâties (folios 1489 à 1988)",
             Page = 158
         },
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerMAT_ETS.php?IDDOC=2010122143545357252600&COMMUNE=NICE&COMPLEMENTLIEUX=Nice-Est%20:%20quartier%20Saint-Roch&COTE=03P_0828&NATURE=Matrice%20cadastrale%20des%20propri%C3%A9t%C3%A9s%20fonci%C3%A8res,%20b%C3%A2ties%20et%20non%20b%C3%A2ties,%20sections%20A%20%C3%A0%20E&DATE=1872%20-%201913&CHOIX=MAT&CODECOM=90&FOLIO=folios%201%20%C3%A0%20680",
-            Id = "2010122143545357252600",
-            Cote = "03P_0828",
+            URL = @"https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/daogrp/0",
+            Id = "2fece3eabbcab939c1f84def0316487c",
+            Cote = "3 P 828",
             Ville = "Nice",
-            Paroisse = "Nice-Est : quartier Saint-Roch",
-            Types = new [] { RegistryType.CadastralMatrix },
+            Paroisse = "Nice-Est (Quartier Saint-Roch)",
+            Types = new[] { RegistryType.CadastralMatrix },
             From = new GregorianDate(1872, precision: Precision.Years),
             To = new GregorianDate(1913, precision: Precision.Years),
-            Notes = "Matrice cadastrale des propriétés foncières, bâties et non bâties, sections A à E (folios 1 à 680)",
             Page = 1
         },
-        
+
         // Recensements
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerRP.php?cote=06M%200112&date=1891&c=Lantosque&page=7",
-            Id = "06M 0112___1891",
-            Cote = "06M 0112",
+            URL = @"https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/daogrp/0/7/layout:table/idsearch:RECH_2486f937f76e40e6df864a4708967f91",
+            Id = "9b56a6d2e75f3d28e97044e9f373f5bb",
+            Cote = "6 M 112",
             Ville = "Lantosque",
-            Types = new [] { RegistryType.Census },
+            Types = new[] { RegistryType.Census },
             From = new GregorianDate(1891, precision: Precision.Years),
             To = new GregorianDate(1891, precision: Precision.Years),
             Page = 7
-        }, 
+        },
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerRP.php?cote=06M%200149&date=1911,%20canton%20ouest%20(d%C3%83%C2%A9but)&c=Nice&page=62",
-            Id = "06M 0149___1911",
-            Cote = "06M 0149",
+            URL = @"https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/daogrp/0/62/",
+            Id = "cb9d2442564ee9b717d681ea3af12a03",
+            Cote = "6 M 149",
             Ville = "Nice",
-            Paroisse = "Canton ouest",
-            Types = new [] { RegistryType.Census },
+            Paroisse = "canton ouest (début)",
+            Types = new[] { RegistryType.Census },
             From = new GregorianDate(1911, precision: Precision.Years),
             To = new GregorianDate(1911, precision: Precision.Years),
-            Notes = "début",
             Page = 62
         },
-        
+
+        // Notaires
+        // TODO : Pas encore disponible sur le nouveau site
+
+        // Armoiries
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/dao/0/layout:table/idsearch:RECH_c8a1303621a60e2782b150cef417305b",
+            Id = "b0f71497f90be8cb192bb0c77acac139",
+            Cote = "1 J 57",
+            Ville = "Turin (Italie", // Yes, the closing parenthesis is missing
+            Types = new[] { RegistryType.Other },
+            From = new GregorianDate(1704, 1, 1, precision: Precision.Days),
+            To = new GregorianDate(1704, 1, 1, precision: Precision.Days),
+            Page = 1
+        },
+
+        // Ouvrages
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/1213862.2781873/dao/1/12",
+            Id = "1213862.2781873",
+            Cote = "1 Num 48",
+            Types = new[] { RegistryType.Book },
+            From = new GregorianDate(1937, precision: Precision.Years),
+            To = new GregorianDate(1937, precision: Precision.Years),
+            Page = 12
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/649576.2781893/dao/1",
+            Id = "649576.2781893",
+            Cote = "4 Mi 18/1",
+            Types = new[] { RegistryType.Book },
+            From = new GregorianDate(1682, precision: Precision.Years),
+            To = new GregorianDate(1682, precision: Precision.Years),
+            Page = 1
+        },
+
         // Sources imprimées
         new Data
         {
-            URL = @"http://www.basesdocumentaires-cg06.fr/archives/ImageZoomViewerSI.php?cote=II755&repertoire=II_755&d=MANTEYER+(Georges+de),+La+Provence+du+premier+au+douzième+siècle+:+études+d'histoire+et+de+géographie+politique+:+tables,+Gap,+1926,+985+p.",
-            Id = "II755___II_755",
-            Cote = "II755",
-            Types = new [] { RegistryType.Book },
-            From = new GregorianDate(1926, precision: Precision.Years),
-            To = new GregorianDate(1926, precision: Precision.Years),
-            Notes = "MANTEYER (Georges de), La Provence du premier au douzième siècle : études d'histoire et de géographie politique : tables, Gap, 1926, 985 p.",
+            URL = @"https://archives06.fr/ark:/79346/183240acb98b2d8fd7ae085215e55c5e/dao/0",
+            Id = "183240acb98b2d8fd7ae085215e55c5e",
+            Cote = "BB FP 12",
+            Ville = "Nizza",
+            Types = new[] { RegistryType.Book },
+            From = new GregorianDate(1784, precision: Precision.Years),
+            To = new GregorianDate(1784, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/bd982026f20b65ec3b1636ba15d9141c/dao/0/425",
+            Id = "bd982026f20b65ec3b1636ba15d9141c",
+            Cote = "GF 209/2",
+            Ville = "Aix-En-Provence",
+            Types = new[] { RegistryType.Book },
+            From = new GregorianDate(1694, precision: Precision.Years),
+            To = new GregorianDate(1694, precision: Precision.Years),
+            Page = 425
+        },
+
+        // Annuaires
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/daogrp/0/279",
+            Id = "2231f2886f84620708c0eceab9d6b9b7",
+            Types = new[] { RegistryType.Other },
+            From = new GregorianDate(1830, precision: Precision.Years),
+            To = new GregorianDate(1830, precision: Precision.Years),
+            Page = 279
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/daogrp/0/425",
+            Id = "3eaf8e3ad6a4d0fa88add0385faf26ce",
+            Types = new[] { RegistryType.Other },
+            From = new GregorianDate(1873, precision: Precision.Years),
+            To = new GregorianDate(1873, precision: Precision.Years),
+            Page = 425
+        },
+
+        // Délibérations
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/daogrp/0/layout:table/idsearch:RECH_61e8e38e23201aa701187c8e647f7c96",
+            Id = "6c992c340bba967a24a29e352ac60851",
+            Types = new[] { RegistryType.Book },
+            Cote = "1 N 3",
+            From = new GregorianDate(1863, precision: Precision.Years),
+            To = new GregorianDate(1863, precision: Precision.Years),
+            Page = 1
+        },
+        
+        // Audiovisuel
+        // Not sure if there are any documents available online
+        
+        // Iconographie
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/703610.2544066/dao/0",
+            Id = "703610.2544066",
+            Types = new[] { RegistryType.Other },
+            Cote = "10 Fi 1",
+            From = new GregorianDate(1940, precision: Precision.Years),
+            To = new GregorianDate(1960, precision: Precision.Years),
             Page = 1
         }
     };
@@ -144,7 +249,6 @@ public class DataAD06 : IEnumerable<object[]>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
-
 public class Data
 {
     public string URL = null!;
