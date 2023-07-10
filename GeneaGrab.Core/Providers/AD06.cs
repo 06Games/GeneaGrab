@@ -31,7 +31,7 @@ namespace GeneaGrab.Core.Providers
 
         public async Task<RegistryInfo> Infos(Uri url)
         {
-            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/(?<tag>.*?)/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
+            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/(?<tag>.*?)/(?<seq>\\d*)(/(?<page>\\d*))?").Groups;
             var registry = new Registry(Data.Providers["AD06"]) { ID = queries["id"].Value };
             registry.URL = $"https://archives06.fr/ark:/{queries["something"].Value}/{registry.ID}";
 
@@ -50,7 +50,7 @@ namespace GeneaGrab.Core.Providers
             }).ToArray();
 
             var classeur = sequence.Canvases.First().Classeur;
-            registry.CallNumber = classeur.UnitId;
+            registry.CallNumber = string.IsNullOrWhiteSpace(classeur.UnitId) ? null : classeur.UnitId;
             registry.ArkURL = sequence.Id;
 
             // ReSharper disable StringLiteralTypo
@@ -62,9 +62,11 @@ namespace GeneaGrab.Core.Providers
                     case "Commune":
                     case "Commune d’exercice du notaire":
                     case "Lieu":
+                    case "Lieu d'édition":
                         registry.Location = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(metadata.Value.ToLower());
                         break;
                     case "Paroisse":
+                    case "Complément de lieu":
                         registry.District = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(metadata.Value.ToLower());
                         break;
                     case "Date":
@@ -73,53 +75,58 @@ namespace GeneaGrab.Core.Providers
                     {
                         var dates = metadata.Value.Split('-');
                         registry.From = dates.FirstOrDefault()?.Trim();
-                        registry.To = dates.Length == 2 ? dates.Last().Trim() : null;
+                        registry.To = dates.LastOrDefault()?.Trim();
                         break;
                     }
                     case "Typologie":
                     case "Type de document":
                     case "Type d'acte":
-                        registry.Types = registry.Types.Concat(GetTypes(metadata.Value));
+                        registry.Types = registry.Types.Union(GetTypes(metadata.Value));
                         break;
                     default:
                         notes.Add($"{metadata.Key}: {metadata.Value}");
                         break;
                 }
             }
-            
-            var labelRegexExp = classeur.EncodedArchivalDescriptionId.ToUpperInvariant() switch
+
+            var (labelRegexExp, type) = classeur.EncodedArchivalDescriptionId.ToUpperInvariant() switch
             {
-                "FRAD006_ETAT_CIVIL" => "(?<callnum>.+) +- +(?<type>.*?) *?- *?\\((?<from>.+) à (?<to>.+)\\)",
-                "FRAD006_CADASTRE_MATRICE" => "(?<callnum>.+) +- +(?<title>.*?) *?-",
-                "FRAD006_CADASTRE_ETAT_SECTION" => "(?<callnum>.+) +- +(?<title>.*?) *?-",
-                "FRAD006_RECENSEMENT_POPULATION" => "(?<city>.+) +- +(?<from>.+)(, (?<title>.*))",
-                "FRAD006_REPERTOIRE_NOTAIRES" => "(?<callnum>.+) +- +(?<title>.+)",
-                "FRAD006_ARMOIRIES" => "(?<callnum>.+) +- +(?<title>.+)",
-                "FRAD006_OUVRAGES" => "(?<callnum>.+) +- +(?<title>.+)",
-                "FRAD006_BN_SOURCES_IMPRIMES" => "(?<title>.+)",
-                "FRAD006_ANNUAIRES" => "(?<title>.+)",
-                "FRAD006_DELIBERATIONS_CONSEIL_GENERAL" => "(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$",
-                "FRAD006_11AV" => "(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$", // Audiovisuel
-                "FRAD006_10FI" => "(?<callnum>.+) +- +(?<title>.+) +- +\\((?<from>.+?)(?<to>.+)\\)", // Iconographie
-                _ => null
+                "FRAD006_ETAT_CIVIL" => ("(?<callnum>.+) +- +(?<type>.*?) *?- *?\\((?<from>.+) à (?<to>.+)\\)", null),
+                "FRAD006_CADASTRE_PLAN" => ("(?<callnum>.+) +- +(?<district>.*?) +- +(?<title>.*?) +- +(?<from>.+?)", new[] { RegistryType.CadastralMap }),
+                "FRAD006_CADASTRE_MATRICE" => ("(?<callnum>.+) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralMatrix }),
+                "FRAD006_CADASTRE_ETAT_SECTION" => ("(?<callnum>.+) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralSectionStates }),
+                "FRAD006_RECENSEMENT_POPULATION" => ("(?<city>.+) +- +(?<from>.+)(, (?<district>.*))", new[] { RegistryType.Census }),
+                "FRAD006_REPERTOIRE_NOTAIRES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Notarial }),
+                "FRAD006_ARMOIRIES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Other }),
+                "FRAD006_OUVRAGES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Book }),
+                "FRAD006_BN_SOURCES_IMPRIMES" => ("(?<title>.+)", new[] { RegistryType.Book }),
+                "FRAD006_ANNUAIRES" => ("(?<title>.+)", new[] { RegistryType.Other }),
+                "FRAD006_DELIBERATIONS_CONSEIL_GENERAL" => ("(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Book }),
+                "FRAD006_11AV" => ("(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Other }), // Audiovisuel
+                "FRAD006_10FI" => ("(?<callnum>.+) +- +(?<title>.+) +- +\\((?<from>.+?)-(?<to>.+)\\)", new[] { RegistryType.Other }), // Iconographie
+                _ => (null, null)
             };
             // ReSharper restore StringLiteralTypo
 
             if (labelRegexExp != null)
             {
                 var data = Regex.Match(sequence.Label, labelRegexExp).Groups;
-                registry.CallNumber ??= data["callnum"].Value;
-                registry.Location ??= data["city"].Value;
-                registry.From ??= data["from"].Value;
-                registry.To ??= data["to"].Value;
-                if (data.ContainsKey("title")) notes.Insert(0, data["title"].Value);
-                if (data.ContainsKey("type")) registry.Types = registry.Types.Concat(GetTypes(data["type"].Value));
+                registry.CallNumber ??= GetRegexValue("callnum");
+                registry.Location ??= GetRegexValue("city");
+                registry.District ??= GetRegexValue("district");
+                registry.From ??= GetRegexValue("from");
+                registry.To ??= GetRegexValue(data["to"].Success ? "to" : "from");
+                if (data["title"].Success) notes.Insert(0, GetRegexValue("title"));
+                if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(GetRegexValue("type")));
+                if (type?.Length > 0) registry.Types = registry.Types.Union(type);
+
+                string GetRegexValue(string key) => data[key].Success ? data[key].Value : null;
             }
             registry.Notes = string.Join("\n", notes);
 
 
             Data.AddOrUpdate(Data.Providers["AD06"].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = 1 };
+            return new RegistryInfo(registry) { PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1 };
         }
 
         private static IEnumerable<RegistryType> GetTypes(string typeActe) // TODO
