@@ -35,21 +35,21 @@ namespace GeneaGrab.Core.Providers
             var pageBody = await client.GetStringAsync(url).ConfigureAwait(false);
 
             var data = Regex.Match(pageBody, "<h2>R&eacute;f&eacute;rence :  (?<title>.* (?<number>\\d*)) de l'ann&eacute;e (?<year>\\d*).*<\\/h2>").Groups;
-            var date = Date.ParseDate(data["year"]?.Value);
+            var date = Date.ParseDate(data["year"].Value);
 
             var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";").Groups;
             Uri.TryCreate(url, pageData["path"].Value, out var path);
             var pages = pageData["pages"].Value.Split(new[] { ", " }, StringSplitOptions.None);
 
-            var pagesTable = Regex.Matches(pageBody, "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>").Cast<Match>().ToArray();
+            var pagesTable = Regex.Matches(pageBody, "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>").ToArray();
 
             var registry = new Registry(Data.Providers[ProviderID])
             {
                 URL = url.OriginalString,
                 Types = new[] { RegistryType.Periodical },
                 ProviderID = ProviderID,
-                ID = data["number"]?.Value,
-                CallNumber = HttpUtility.HtmlDecode(data["title"]?.Value),
+                ID = data["number"].Value,
+                CallNumber = HttpUtility.HtmlDecode(data["title"].Value),
                 From = date,
                 To = date,
                 Pages = pagesTable.Select(page =>
@@ -58,13 +58,13 @@ namespace GeneaGrab.Core.Providers
                     return new RPage
                     {
                         Number = int.Parse(page.Groups["number"].Value),
-                        URL = $"{path.AbsoluteUri}{pData}"
+                        URL = $"{path?.AbsoluteUri}{pData}"
                     };
                 }).ToArray()
             };
 
             Data.AddOrUpdate(Data.Providers[ProviderID].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = int.Parse(pagesTable.FirstOrDefault(p => p.Groups["class"]?.Value == "current")?.Groups["index"]?.Value ?? "1") };
+            return new RegistryInfo(registry) { PageNumber = int.Parse(pagesTable.FirstOrDefault(p => p.Groups["class"].Value == "current")?.Groups["index"]?.Value ?? "1") };
         }
 
 

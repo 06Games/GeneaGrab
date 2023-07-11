@@ -21,10 +21,12 @@ namespace GeneaGrab.Core.Providers
             info = null;
             if (url.Host != "archives06.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return false;
 
+            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/(?<tag>.*?)/(?<seq>\\d*)(/(?<page>\\d*))?").Groups;
             info = new RegistryInfo
             {
                 ProviderID = "AD06",
-                RegistryID = Regex.Match(url.AbsolutePath, "$/ark:/").Groups["id"].Value
+                RegistryID = queries["id"].Value,
+                PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
             };
             return true;
         }

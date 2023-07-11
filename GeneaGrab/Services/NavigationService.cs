@@ -80,6 +80,7 @@ public static class NavigationService
         TabRemoved?.Invoke(tab);
         return true;
     }
+    public static TabViewItem? CurrentTab => TabView?.SelectedItem as TabViewItem;
     public static TabViewItem OpenTab(TabViewItem tab)
     {
         if (TabView != null) TabView.SelectedItem = tab;

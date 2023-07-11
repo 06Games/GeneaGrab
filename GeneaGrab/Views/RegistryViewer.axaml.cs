@@ -47,7 +47,7 @@ namespace GeneaGrab.Views
         {
             InitializeComponent();
             DataContext = this;
-            
+
             var pageNumber = PageNumber;
             if (pageNumber != null)
                 pageNumber.ValueChanged += async (_, ne) =>
@@ -71,8 +71,8 @@ namespace GeneaGrab.Views
         public override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            var (success, inRam) = await LoadRegistry(e.Parameter).ConfigureAwait(false);
-            if (!success)
+            var (keepTabOpened, noRefresh) = await LoadRegistry(e.Parameter).ConfigureAwait(false);
+            if (!keepTabOpened)
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -82,12 +82,27 @@ namespace GeneaGrab.Views
                 return;
             }
 
+            var tab = Info == null ? null : await Dispatcher.UIThread.InvokeAsync(() => NavigationService.TryGetTabWithId(Info.RegistryID, out var tab) ? tab : null);
+            if (tab != null)
+            {
+                var currentTab = NavigationService.CurrentTab;
+                NavigationService.OpenTab(tab);
+                if(NavigationService.Frame?.Content is not RegistryViewer viewer) return;
+                await viewer.ChangePage(Info!.PageNumber);
+                keepTabOpened = ReferenceEquals(viewer, this);
+                if (!ReferenceEquals(viewer, this))
+                {
+                    await Dispatcher.UIThread.InvokeAsync(() => NavigationService.CloseTab(currentTab!));
+                    return;
+                }
+            }
+            
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 RefreshView();
                 MainWindow.UpdateSelectedTitle();
             });
-            if (inRam || Info == null) return;
+            if (noRefresh || Info == null) return;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 PageNumbers.Clear();

@@ -24,7 +24,7 @@ namespace GeneaGrab.Core.Providers
             info = new RegistryInfo
             {
                 ProviderID = "Antenati",
-                RegistryID = Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value
+                RegistryID = Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"].Value
             };
             return true;
         }

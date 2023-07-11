@@ -21,10 +21,12 @@ namespace GeneaGrab.Core.Providers
             info = null;
             if (url.Host != "archives-deux-sevres-vienne.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return false;
 
+            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
             info = new RegistryInfo
             {
                 ProviderID = "AD79-86",
-                RegistryID = Regex.Match(url.AbsolutePath, "$/ark:/").Groups["id"]?.Value
+                RegistryID = queries["id"].Value,
+                PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
             };
             return true;
         }
@@ -59,7 +61,7 @@ namespace GeneaGrab.Core.Providers
             registry.ArkURL = sequence.Id;
 
             Data.AddOrUpdate(Data.Providers["AD79-86"].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = 1 };
+            return new RegistryInfo(registry) { PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1 };
         }
         private static string GenerateNotes(IReadOnlyDictionary<string, string> metaData)
         {
