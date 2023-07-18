@@ -89,7 +89,6 @@ namespace GeneaGrab.Views
                 NavigationService.OpenTab(tab);
                 if(NavigationService.Frame?.Content is not RegistryViewer viewer) return;
                 await viewer.ChangePage(Info!.PageNumber);
-                keepTabOpened = ReferenceEquals(viewer, this);
                 if (!ReferenceEquals(viewer, this))
                 {
                     await Dispatcher.UIThread.InvokeAsync(() => NavigationService.CloseTab(currentTab!));

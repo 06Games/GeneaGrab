@@ -14,7 +14,7 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
             var regex = Regex.Match(dateString, @"an (?<year>.*)", RegexOptions.IgnoreCase);
             if (!regex.Success) return false;
             date = new FrenchRepublicanDate();
-            if (regex.Groups["year"].Success && NumeralParser.TryParse(regex.Groups["year"].Value, out var year))
+            if (regex.Groups["year"].Success && NumeralParser.Default.TryParse(regex.Groups["year"].Value, out var year))
             {
                 date.Year = new FrenchRepublicanYear(year);
                 date.Precision = Precision.Years;

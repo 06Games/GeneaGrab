@@ -8,10 +8,10 @@
 
    <ItemGroup>
      <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
-     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-     <PackageReference Include="Roman-Numerals" Version="1.0.3" />
+     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+     <PackageReference Include="Roman-Numerals" Version="2.0.0" />
      <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
-     <PackageReference Include="System.Net.Http.Json" Version="7.0.0" />
+     <PackageReference Include="System.Net.Http.Json" Version="7.0.1" />
      <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
    </ItemGroup>
 </Project>
