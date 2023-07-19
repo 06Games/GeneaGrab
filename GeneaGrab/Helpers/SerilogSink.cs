@@ -11,14 +11,14 @@ public class SerilogSink: ILogSink
     {
         Serilog.Log
             .ForContext("Area", area)
-            .ForContext("Source", source)
+            .ForContext("Source", source == null ? null : $"{source.GetType().Name}#{source.GetHashCode()}")
             .Write((Serilog.Events.LogEventLevel)level, messageTemplate);
     }
     public void Log(LogEventLevel level, string area, object? source, string messageTemplate, params object?[] propertyValues)
     {
         Serilog.Log
             .ForContext("Area", area)
-            .ForContext("Source", source)
+            .ForContext("Source", source == null ? null : $"{source.GetType().Name}#{source.GetHashCode()}")
             .Write((Serilog.Events.LogEventLevel)level, messageTemplate, propertyValues);
     }
 }
