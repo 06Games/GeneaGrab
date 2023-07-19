@@ -87,7 +87,7 @@ namespace GeneaGrab.Views
             {
                 var currentTab = NavigationService.CurrentTab;
                 NavigationService.OpenTab(tab);
-                if(NavigationService.Frame?.Content is not RegistryViewer viewer) return;
+                if (NavigationService.Frame?.Content is not RegistryViewer viewer) return;
                 await viewer.ChangePage(Info!.PageNumber);
                 if (!ReferenceEquals(viewer, this))
                 {
@@ -95,7 +95,7 @@ namespace GeneaGrab.Views
                     return;
                 }
             }
-            
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 RefreshView();
@@ -152,28 +152,16 @@ namespace GeneaGrab.Views
                 case RegistryInfo infos:
                     Info = infos;
                     break;
-                case LaunchArgs param:
-                {
-                    if (string.IsNullOrWhiteSpace(param.Url) || !Uri.TryCreate(param.Url, UriKind.Absolute, out var uri)) break;
-
-                    await LocalData.LoadDataAsync().ConfigureAwait(false);
-                    Info = await TryGetFromProviders(uri).ConfigureAwait(false);
-                    break;
-                }
                 case Uri url:
-                    Info = await TryGetFromProviders(url).ConfigureAwait(false);
+                    await LocalData.LoadDataAsync().ConfigureAwait(false);
+                    
+                    RegistryInfo? info = null;
+                    var provider = Data.Providers.Values.FirstOrDefault(p => p.Api.TryGetRegistryID(url, out info));
+                    if (provider != null && info != null) Info = provider.Registries.ContainsKey(info.RegistryID) ? info : await provider.Api.Infos(url);
                     break;
                 default:
                     inRam = true;
                     break;
-            }
-
-            async Task<RegistryInfo?> TryGetFromProviders(Uri uri)
-            {
-                foreach (var provider in Data.Providers.Values)
-                    if (provider.Api.TryGetRegistryID(uri, out var info))
-                        return provider.Registries.ContainsKey(info.RegistryID) ? info : await provider.Api.Infos(uri);
-                return null;
             }
             return (Info != null, inRam);
         }

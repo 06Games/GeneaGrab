@@ -16,7 +16,6 @@ using FluentAvalonia.UI.Controls;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
-using PowerArgs;
 using Serilog;
 
 namespace GeneaGrab.Views;
@@ -82,7 +81,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             {
                 Dispatcher.UIThread.Post(() =>
                 {
-                    Args.InvokeMain<LaunchArgs>(e.Args);
                     if (NavigationService.TabCount <= 1) NavigationService.OpenTab(NewTab());
                 });
             };

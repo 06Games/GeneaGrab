@@ -1,6 +1,8 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.ReactiveUI;
-using System;
 
 namespace GeneaGrab
 {
@@ -11,7 +13,11 @@ namespace GeneaGrab
         // yet and stuff might break.
         [STAThread]
         public static void Main(string[] args) => BuildAvaloniaApp()
-            .StartWithClassicDesktopLifetime(args);
+            .SetupWithLifetime(new ClassicDesktopStyleApplicationLifetime
+            {
+                Args = args,
+                ShutdownMode = ShutdownMode.OnLastWindowClose
+            });
 
         // Avalonia configuration, don't remove; also used by visual designer.
         public static AppBuilder BuildAvaloniaApp()
