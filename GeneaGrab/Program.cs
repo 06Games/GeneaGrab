@@ -23,7 +23,6 @@ namespace GeneaGrab
         public static AppBuilder BuildAvaloniaApp()
             => AppBuilder.Configure<App>()
                 .UsePlatformDetect()
-                .LogToTrace()
                 .UseReactiveUI();
     }
 }

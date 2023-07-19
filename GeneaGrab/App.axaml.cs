@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Logging;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -16,7 +17,6 @@ using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 using GeneaGrab.Views;
-using PowerArgs;
 using Serilog;
 using Serilog.Formatting.Compact;
 using SingleInstance;
@@ -33,8 +33,10 @@ namespace GeneaGrab
         public override void Initialize()
         {
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.json"))
+                .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.ndjson"))
+                .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Area} {Source}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
+            Logger.Sink = new SerilogSink();
 
             Data.Log = (l, d) =>
             {
