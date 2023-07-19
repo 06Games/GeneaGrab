@@ -11,25 +11,25 @@ using GeneaGrab.Core.Models.Dates;
 
 namespace GeneaGrab.Core.Providers
 {
-    public class NiceHistorique : ProviderAPI
+    public class NiceHistorique : Provider
     {
-        public string ProviderID => "NiceHistorique";
-        public bool IndexSupport => false;
+        public override string Id => "NiceHistorique";
+        public override string Url => "https://www.nicehistorique.org/";
+        public override bool IndexSupport => false;
 
-        public bool TryGetRegistryID(Uri url, out RegistryInfo info)
+        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
         {
             info = null;
             if (url.Host != "www.nicehistorique.org" || !url.AbsolutePath.StartsWith("/vwr")) return false;
 
             //TODO: Find a way to do this without having to make a request
-            var task = GetInfos(url);
+            var task = Infos(url);
             task.Wait();
             info = task.Result;
             return true;
         }
 
-        public Task<RegistryInfo> Infos(Uri url) => GetInfos(url);
-        async Task<RegistryInfo> GetInfos(Uri url)
+        public override async Task<RegistryInfo> Infos(Uri url)
         {
             var client = new HttpClient();
             var pageBody = await client.GetStringAsync(url).ConfigureAwait(false);
@@ -43,11 +43,11 @@ namespace GeneaGrab.Core.Providers
 
             var pagesTable = Regex.Matches(pageBody, "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>").ToArray();
 
-            var registry = new Registry(Data.Providers[ProviderID])
+            var registry = new Registry(Data.Providers[Id])
             {
                 URL = url.OriginalString,
                 Types = new[] { RegistryType.Periodical },
-                ProviderID = ProviderID,
+                ProviderID = Id,
                 ID = data["number"].Value,
                 CallNumber = HttpUtility.HtmlDecode(data["title"].Value),
                 From = date,
@@ -63,20 +63,20 @@ namespace GeneaGrab.Core.Providers
                 }).ToArray()
             };
 
-            Data.AddOrUpdate(Data.Providers[ProviderID].Registries, registry.ID, registry);
+            Data.AddOrUpdate(Data.Providers[Id].Registries, registry.ID, registry);
             return new RegistryInfo(registry) { PageNumber = int.Parse(pagesTable.FirstOrDefault(p => p.Groups["class"].Value == "current")?.Groups["index"]?.Value ?? "1") };
         }
 
 
-        public Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"p{page.Number}");
-        public async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
+        public override Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"p{page.Number}");
+        public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
         {
             var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
             if (success) return stream;
             return null;
         }
-        public Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTile(registry, page, 1, progress);
-        public Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTile(registry, page, 1, progress);
+        public override Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTile(registry, page, 1, progress);
+        public override Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTile(registry, page, 1, progress);
         private async Task<Stream> GetTile(Registry registry, RPage page, int zoom, Action<Progress> progress)
         {
             var (success, stream) = Data.TryGetImageFromDrive(registry, page, zoom);
@@ -89,7 +89,7 @@ namespace GeneaGrab.Core.Providers
             page.Zoom = 1;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers[ProviderID].Registries[registry.ID].Pages[index] = page;
+            Data.Providers[Id].Registries[registry.ID].Pages[index] = page;
             await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }

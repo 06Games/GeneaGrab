@@ -116,14 +116,14 @@ namespace GeneaGrab.Views
 
             _ = Task.Run(async () =>
             {
-                var img = await LoadImage(Info.PageNumber, page => Info.Provider.Api.Preview(Info.Registry, page, TrackProgress));
+                var img = await LoadImage(Info.PageNumber, page => Info.Provider.Preview(Info.Registry, page, TrackProgress));
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
 
                 var tasks = new List<Task>();
                 foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
                 {
                     if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                    tasks.Add(LoadImage(page.Number, rPage => Info.Provider.Api.Thumbnail(Info.Registry, rPage, null)));
+                    tasks.Add(LoadImage(page.Number, rPage => Info.Provider.Thumbnail(Info.Registry, rPage, null)));
                 }
                 await Task.WhenAll(tasks).ConfigureAwait(false);
 
@@ -156,8 +156,8 @@ namespace GeneaGrab.Views
                     await LocalData.LoadDataAsync().ConfigureAwait(false);
                     
                     RegistryInfo? info = null;
-                    var provider = Data.Providers.Values.FirstOrDefault(p => p.Api.TryGetRegistryID(url, out info));
-                    if (provider != null && info != null) Info = provider.Registries.ContainsKey(info.RegistryID) ? info : await provider.Api.Infos(url);
+                    var provider = Data.Providers.Values.FirstOrDefault(p => p.TryGetRegistryId(url, out info));
+                    if (provider != null && info != null) Info = provider.Registries.ContainsKey(info.RegistryID) ? info : await provider.Infos(url);
                     break;
                 default:
                     inRam = true;
@@ -178,7 +178,7 @@ namespace GeneaGrab.Views
         {
             if (page is null || Info is null || Info.PageNumber == page.Number) return;
             Info.PageNumber = page.Number;
-            var image = await Info.Provider.Api.Preview(Info.Registry, page.Page, TrackProgress);
+            var image = await Info.Provider.Preview(Info.Registry, page.Page, TrackProgress);
             var (success, stream) = await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page);
             if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && success)
                 Dispatcher.UIThread.Post(() =>
@@ -227,7 +227,7 @@ namespace GeneaGrab.Views
         private async void Download(object sender, RoutedEventArgs e)
         {
             if (Info == null) return;
-            await Info.Provider.Api.Download(Info.Registry, Info.Page, TrackProgress);
+            await Info.Provider.Download(Info.Registry, Info.Page, TrackProgress);
             RefreshView();
         }
         private void OpenFolder(object sender, RoutedEventArgs e)
@@ -249,7 +249,7 @@ namespace GeneaGrab.Views
         private async void Ark(object sender, RoutedEventArgs e)
         {
             if (Info == null) return;
-            await TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(await Info.Provider.Api.Ark(Info.Registry, Info.Page))!;
+            await TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(await Info.Provider.Ark(Info.Registry, Info.Page))!;
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
@@ -273,7 +273,7 @@ namespace GeneaGrab.Views
         {
             if (Info == null) return;
             var indexPanel = IndexPanel;
-            if (!Info.Provider.Api.IndexSupport)
+            if (!Info.Provider.IndexSupport)
             {
                 indexPanel.IsVisible = false;
                 return;
@@ -281,14 +281,14 @@ namespace GeneaGrab.Views
 
             indexPanel.IsVisible = true;
             IEnumerable<Core.Models.Index>? index = null;
-            if (Info.Provider.Api is IndexAPI indexAPI)
+            if (Info.Provider is IndexAPI indexAPI)
                 index = await indexAPI.GetIndex(Info.Registry, Info.Page);
             if (index is null) Index.Clear();
             else Index = new ObservableCollection<Index>(index.Cast<Index>());
         }
         private void AddIndex(object sender, RoutedEventArgs e)
         {
-            if (!(Info?.Provider.Api.IndexSupport ?? false)) return;
+            if (!(Info?.Provider.IndexSupport ?? false)) return;
             /* TODO */
         }
         private void DisplayIndexRectangle(Index? index)

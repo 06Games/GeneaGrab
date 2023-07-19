@@ -12,11 +12,13 @@ using SixLabors.ImageSharp;
 
 namespace GeneaGrab.Core.Providers
 {
-    public class Antenati : ProviderAPI
+    public class Antenati : Provider
     {
-        public bool IndexSupport => false;
+        public override string Id => "Antenati";
+        public override string Url => "https://www.antenati.san.beniculturali.it/";
+        public override bool IndexSupport => false;
 
-        public bool TryGetRegistryID(Uri url, out RegistryInfo info)
+        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
         {
             info = null;
             if (url.Host != "dam-antenati.san.beniculturali.it" || !url.AbsolutePath.StartsWith("/antenati/containers/")) return false;
@@ -29,7 +31,7 @@ namespace GeneaGrab.Core.Providers
             return true;
         }
 
-        public async Task<RegistryInfo> Infos(Uri url)
+        public override async Task<RegistryInfo> Infos(Uri url)
         {
             var registry = new Registry(Data.Providers["Antenati"]) { ID = Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value };
             registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.ID}";
@@ -65,16 +67,16 @@ namespace GeneaGrab.Core.Providers
             }
         }
 
-        public Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"{registry.ArkURL} (p{page.Number})");
-        public async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
+        public override Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"{registry.ArkURL} (p{page.Number})");
+        public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
         {
             var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
             if (success) return stream;
             return await GetTiles(registry, page, 0.1F, progress).ConfigureAwait(false);
         }
-        public Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.5F, progress);
-        public Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
-        public static async Task<Stream> GetTiles(Registry registry, RPage page, float scale, Action<Progress> progress)
+        public override Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.5F, progress);
+        public override Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
+        private static async Task<Stream> GetTiles(Registry registry, RPage page, float scale, Action<Progress> progress)
         {
             var zoom = (int)(scale * 100);
             var (success, stream) = Data.TryGetImageFromDrive(registry, page, zoom);

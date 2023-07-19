@@ -14,11 +14,13 @@ using Serilog;
 
 namespace GeneaGrab.Core.Providers
 {
-    public class AD17 : ProviderAPI
+    public class AD17 : Provider
     {
-        public bool IndexSupport => false;
+        public override string Id => "AD17";
+        public override string Url => "https://www.archinoe.net/v2/ad17/registre.html";
+        public override bool IndexSupport => false;
 
-        public bool TryGetRegistryID(Uri url, out RegistryInfo info)
+        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
         {
             info = null;
             if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith("/v2/ad17/")) return false;
@@ -33,7 +35,7 @@ namespace GeneaGrab.Core.Providers
             return true;
         }
 
-        public async Task<RegistryInfo> Infos(Uri url)
+        public override async Task<RegistryInfo> Infos(Uri url)
         {
             var registry = new Registry(Data.Providers["AD17"]) { URL = HttpUtility.UrlDecode(url.OriginalString) };
 
@@ -96,7 +98,7 @@ namespace GeneaGrab.Core.Providers
             return new RegistryInfo(registry) { PageNumber = pageNumber };
         }
 
-        public async Task<string> Ark(Registry registry, RPage page)
+        public override async Task<string> Ark(Registry registry, RPage page)
         {
             if (page.URL != null) return page.URL;
 
@@ -111,14 +113,14 @@ namespace GeneaGrab.Core.Providers
             Data.Providers["AD17"].Registries[registry.ID].Pages[page.Number - 1] = page;
             return link;
         }
-        public async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
+        public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
         {
             var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
             if (success) return stream;
             return await GetTiles(registry, page, 0.1F, progress).ConfigureAwait(false);
         }
-        public Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.75F, progress);
-        public Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
+        public override Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.75F, progress);
+        public override Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
         private static async Task<Stream> GetTiles(Registry registry, RPage page, float zoom, Action<Progress> progress)
         {
             var pageZoom = (int)(zoom * 100);

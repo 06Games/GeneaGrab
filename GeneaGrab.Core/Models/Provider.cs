@@ -5,43 +5,30 @@ using System.Threading.Tasks;
 
 namespace GeneaGrab.Core.Models
 {
-    /// <summary>Interface to communicate with the registry provider</summary>
-    public interface ProviderAPI
-    {
-        bool TryGetRegistryID(Uri url, out RegistryInfo info);
-        Task<RegistryInfo> Infos(Uri url);
-        Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress);
-        Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress);
-        Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress);
-        Task<string> Ark(Registry registry, RPage page);
-
-        bool IndexSupport { get; }
-    }
     public interface IndexAPI
     {
         Task<IEnumerable<Index>> GetIndex(Registry registry, RPage page);
         Task AddIndex(Registry registry, RPage page, Index index);
     }
 
-    /// <summary>Data on the registry provider</summary>
-    public class Provider : IEquatable<Provider>
+    /// <summary>Registry provider</summary>
+    public abstract class Provider : IEquatable<Provider>
     {
-        public Provider(ProviderAPI api, string id)
-        {
-            Id = id;
-            Name = Data.Translate($"Provider.{Id}", Id);
-            Icon = $"/Assets/Providers/{Id}.png";
-            Api = api;
-        }
-        
-
-        public string Id { get; }
-        public string Url { get; set; }
-        public string Name { get; set; }
-        public ProviderAPI Api { get; }
+        public abstract string Id { get; }
+        public abstract string Url { get; }
+        public abstract bool IndexSupport { get; }
+        public string Name => Data.Translate($"Provider.{Id}", Id);
+        public string Icon => $"/Assets/Providers/{Id}.png";
         public override string ToString() => Name;
 
-        public string Icon { get; set; }
+        
+        public abstract bool TryGetRegistryId(Uri url, out RegistryInfo info);
+        public abstract Task<RegistryInfo> Infos(Uri url);
+        public abstract Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress);
+        public abstract Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress);
+        public abstract  Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress);
+        public abstract Task<string> Ark(Registry registry, RPage page);
+        
 
         public Dictionary<string, Registry> Registries { get; } = new();
         public string RegisterCount

@@ -56,15 +56,15 @@ namespace GeneaGrab.Core.Models
                 var providers = new List<Provider>
                 {
                     // France
-                    new(new Geneanet(), "Geneanet") { Url = "https://www.geneanet.org/" },
-                    new(new AD06(), "AD06") { Url = "https://archives06.fr/" },
-                    new(new NiceHistorique(), "NiceHistorique") { Url = "https://www.nicehistorique.org/" },
-                    new(new AD17(), "AD17") { Url = "https://www.archinoe.net/v2/ad17/registre.html" },
-                    new(new AD79_86(), "AD79-86") { Url = "https://archives-deux-sevres-vienne.fr/" },
+                    new Geneanet(),
+                    new AD06(),
+                    new NiceHistorique(),
+                    new AD17(),
+                    new AD79_86(),
                     //TODO: Gironde and Cantal
 
                     // Italy
-                    new(new Antenati(), "Antenati") { Url = "https://www.antenati.san.beniculturali.it/" },
+                    new Antenati(),
                 };
                 return _providers = new ReadOnlyDictionary<string, Provider>(providers.ToDictionary(k => k.Id, v => v));
             }
