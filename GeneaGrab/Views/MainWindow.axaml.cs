@@ -11,6 +11,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using DiscordRPC;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Core.Models;
@@ -55,12 +56,15 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void Initialize()
     {
         NavigationService.TabView = TabView;
-        if (NavigationService.TabView != null)
+
+        Dispatcher.UIThread.Post(() =>
         {
-            NavigationService.TabView.PointerMoved += InputElement_OnPointerMoved;
-            NavigationService.TabView.PointerPressed += InputElement_OnPointerPressed;
-            NavigationService.TabView.PointerReleased += InputElement_OnPointerReleased;
-        }
+            if (NavigationService.TabView.GetVisualDescendants().FirstOrDefault(d => d.Name == "TabContainerGrid") is not InputElement titlebar) return;
+            titlebar.PointerMoved += InputElement_OnPointerMoved;
+            titlebar.PointerPressed += InputElement_OnPointerPressed;
+            titlebar.PointerReleased += InputElement_OnPointerReleased;
+        });
+        
         NavigationService.Navigated += (_, e) =>
         {
             FrameChanged();
