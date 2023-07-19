@@ -32,27 +32,12 @@ namespace GeneaGrab
 
         public override void Initialize()
         {
-            Log.Logger = new LoggerConfiguration()
+            Data.Logger = Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.ndjson"))
                 .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Area} {Source}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
             Logger.Sink = new SerilogSink();
 
-            Data.Log = (l, d) =>
-            {
-                if (d is null) Log.Information(l);
-                else Log.Information(d, l);
-            };
-            Data.Warn = (l, d) =>
-            {
-                if (d is null) Log.Warning(l);
-                else Log.Warning(d, l);
-            };
-            Data.Error = (l, d) =>
-            {
-                if (d is null) Log.Error(l);
-                else Log.Error(d, l);
-            };
             Data.Translate = (id, fallback) => ResourceExtensions.GetLocalized(id) ?? fallback;
             Data.GetImage = LocalData.GetImage;
             Data.SaveImage = LocalData.SaveImageAsync;

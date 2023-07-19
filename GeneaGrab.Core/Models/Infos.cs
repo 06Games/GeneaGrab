@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Providers;
+using Serilog;
 using SixLabors.ImageSharp;
 
 namespace GeneaGrab.Core.Models
@@ -44,9 +44,7 @@ namespace GeneaGrab.Core.Models
         public static Func<Registry, RPage, bool, Stream> GetImage { get; set; } = (_, _, _) => null;
         public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (_, _, _, _) => Task.CompletedTask as Task<string>;
         public static Func<Image, Task<Image>> ToThumbnail { get; set; } = Task.FromResult;
-        public static Action<string, Exception> Log { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
-        public static Action<string, Exception> Warn { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
-        public static Action<string, Exception> Error { get; set; } = (l, d) => Debug.WriteLine($"{l}: {d}");
+        public static ILogger Logger { set => Log.Logger = value; }
 
         private static ReadOnlyDictionary<string, Provider> _providers;
         public static ReadOnlyDictionary<string, Provider> Providers

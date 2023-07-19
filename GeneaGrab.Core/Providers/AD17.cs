@@ -10,6 +10,7 @@ using System.Web;
 using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Models.Dates;
+using Serilog;
 
 namespace GeneaGrab.Core.Providers
 {
@@ -104,7 +105,7 @@ namespace GeneaGrab.Core.Providers
             var ark = await client.GetStringAsync($"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadURL}&desc={desc}&id={registry.ID}&ir=&vue=1&ajax=true").ConfigureAwait(false);
             var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups["link"]?.Value;
 
-            if (string.IsNullOrWhiteSpace(link)) { Data.Error("AD17: Couldn't parse ark url", new ArgumentException(ark)); return $"p{page.Number}"; }
+            if (string.IsNullOrWhiteSpace(link)) { Log.Error("AD17: Couldn't parse ark url ({Ark})", ark); return $"p{page.Number}"; }
 
             page.URL = link;
             Data.Providers["AD17"].Registries[registry.ID].Pages[page.Number - 1] = page;

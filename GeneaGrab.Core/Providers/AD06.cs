@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Models;
+using Serilog;
 using SixLabors.ImageSharp;
 
 namespace GeneaGrab.Core.Providers
@@ -39,7 +40,7 @@ namespace GeneaGrab.Core.Providers
 
             var client = new HttpClient();
             var manifest = new LigeoManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
-            if (!int.TryParse(queries["seq"].Value, out var seq)) Data.Warn($"Couldn't parse sequence ({queries["seq"].Value}), using default one", null);
+            if (!int.TryParse(queries["seq"].Value, out var seq)) Log.Warning("Couldn't parse sequence ({SequenceValue}), using default one", queries["seq"].Value);
             var sequence = manifest.Sequences.ElementAt(seq);
 
             registry.Pages = sequence.Canvases.Select((p, i) => new RPage

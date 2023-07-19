@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using GeneaGrab.Core.Models.Dates.Calendars.Julian;
+using Serilog;
 
 namespace GeneaGrab.Core.Models.Dates.Calendars.Gregorian
 {
@@ -36,7 +37,7 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.Gregorian
         {
             if (year < 1582)
             {
-                Data.Warn($"The year (${Year}) is prior to the creation of the gregorian calendar (1582), using the Julian calendar instead.", null); 
+                Log.Warning("The year ({Year}) is prior to the creation of the gregorian calendar (1582), using the Julian calendar instead", Year); 
                 return new JulianDate(year, month, day, hour, minute, second, precision);
             }
             Year = new GregorianYear(year);
