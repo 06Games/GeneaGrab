@@ -20,29 +20,12 @@ public class BitmapAssetValueConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value == null)
-            return null;
+        if (value == null) return null;
+        if (value is not string rawUri || !targetType.IsAssignableFrom(typeof(Bitmap))) throw new NotSupportedException();
 
-        if (value is string rawUri && targetType.IsAssignableFrom(typeof(Bitmap)))
-        {
-            Uri uri;
-
-            // Allow for assembly overrides
-            if (rawUri.StartsWith("avares://"))
-            {
-                uri = new Uri(rawUri);
-            }
-            else
-            {
-                var assemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
-                uri = new Uri($"avares://{assemblyName}{rawUri}");
-            }
-
-            var asset = AssetLoader.Open(uri);
-            return new Bitmap(asset);
-        }
-
-        throw new NotSupportedException();
+        var uri = new Uri(rawUri.StartsWith("avares://") ? rawUri : $"avares://{Assembly.GetEntryAssembly()?.GetName().Name}{rawUri}");
+        var asset = AssetLoader.Open(uri);
+        return new Bitmap(asset);
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();

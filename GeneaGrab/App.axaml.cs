@@ -43,9 +43,9 @@ namespace GeneaGrab
             Data.SaveImage = LocalData.SaveImageAsync;
             Data.ToThumbnail = LocalData.ToThumbnailAsync;
 
-            UrlsOpened += (s, e) =>
+            UrlsOpened += (_, e) =>
             {
-                Log.Information("Opened by Url: {0}", string.Join(", ", e.Urls));
+                Log.Information("Opened by Url: {Urls}", e.Urls);
                 foreach (var url in e.Urls)
                 {
                     if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) continue;
@@ -81,10 +81,12 @@ namespace GeneaGrab
             {
                 Log.Information("This is not the first instance");
                 if (desktop != null)
-                {
-                    Task.Run(async () => await SingleInstance.SendMessageToFirstInstanceAsync(await Json.StringifyAsync(desktop.Args))).Wait();
-                    if (urls.Length > 0) return;
-                }
+                    try
+                    {
+                        Task.Run(async () => await SingleInstance.SendMessageToFirstInstanceAsync(await Json.StringifyAsync(desktop.Args))).Wait();
+                        if (urls.Length > 0) return;
+                    }
+                    catch (Exception e) { Log.Error(e, "Error in pipe"); }
             }
             AvaloniaXamlLoader.Load(this);
             if (urls.Length > 0) ((IApplicationPlatformEvents)this).RaiseUrlsOpened(urls);
