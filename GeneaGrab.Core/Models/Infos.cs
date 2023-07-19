@@ -44,7 +44,7 @@ namespace GeneaGrab.Core.Models
         public static Func<Registry, RPage, bool, Stream> GetImage { get; set; } = (_, _, _) => null;
         public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (_, _, _, _) => Task.CompletedTask as Task<string>;
         public static Func<Image, Task<Image>> ToThumbnail { get; set; } = Task.FromResult;
-        public static ILogger Logger { set => Log.Logger = value; }
+        public static void SetLogger(ILogger value) => Log.Logger = value;
 
         private static ReadOnlyDictionary<string, Provider> _providers;
         public static ReadOnlyDictionary<string, Provider> Providers

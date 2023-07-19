@@ -22,20 +22,23 @@ using Serilog.Formatting.Compact;
 using SingleInstance;
 using URIScheme;
 
+// IApplicationPlatformEvents.RaiseUrlsOpened is not obsolete, it's just an unstable API
+#pragma warning disable CS0618
+
 namespace GeneaGrab
 {
     public partial class App : Application
     {
-        public ISingleInstanceService SingleInstance { get; private set; } = null!;
+        private ISingleInstanceService SingleInstance { get; set; } = null!;
         public Version Version { get; } = new(2, 0);
         public DiscordRpcClient Discord { get; } = new("1120393636455129229");
 
         public override void Initialize()
         {
-            Data.Logger = Log.Logger = new LoggerConfiguration()
+            Data.SetLogger(Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.ndjson"))
                 .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Area} {Source}] {Message:lj}{NewLine}{Exception}")
-                .CreateLogger();
+                .CreateLogger());
             Logger.Sink = new SerilogSink();
 
             Data.Translate = (id, fallback) => ResourceExtensions.GetLocalized(id) ?? fallback;
@@ -83,10 +86,13 @@ namespace GeneaGrab
                 if (desktop != null)
                     try
                     {
+#pragma warning disable VSTHRD002
+                        // This instance is not intended to be displayed, so it's not really a problem if the main thread freezes for a while
                         Task.Run(async () => await SingleInstance.SendMessageToFirstInstanceAsync(await Json.StringifyAsync(desktop.Args))).Wait();
+#pragma warning restore VSTHRD002
                         if (urls.Length > 0) return;
                     }
-                    catch (Exception e) { Log.Error(e, "Error in pipe"); }
+                    catch (Exception e) { Log.Error(e, "Communication error with first instance"); }
             }
             AvaloniaXamlLoader.Load(this);
             if (urls.Length > 0) ((IApplicationPlatformEvents)this).RaiseUrlsOpened(urls);
