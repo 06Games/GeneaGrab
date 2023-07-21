@@ -33,7 +33,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Install dependencies
-        run: dotnet restore
+        shell: bash
+        run: |
+          dotnet restore
+          
+          if [ "${{ matrix.target }}" == "osx-x64" ]; then
+            brew install create-dmg
+          fi
 
       - name: Build
         shell: bash
@@ -73,7 +79,7 @@ jobs:
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             7z a -tzip "output/${release_name}.zip" "./${release_name}/*"
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
-            7z a -tzip "output/${release_name}.zip" "./GeneaGrab.app"
+            create-dmg --volname "GeneaGrab Installer" --volicon "GeneaGrab.app/Contents/Resources/GeneaGrab.icns" --icon-size 100 --icon "GeneaGrab.app" 100 100 --hide-extension "GeneaGrab.app" --app-drop-link 375 100 "output/${release_name}.dmg" "./GeneaGrab.app/"
           else
             tar czvf "output/${release_name}.tar.gz" "$release_name"
           fi
