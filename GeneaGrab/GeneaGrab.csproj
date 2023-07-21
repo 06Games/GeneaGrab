@@ -8,25 +8,6 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationIcon>Assets\Logo\GeneaGrab.ico</ApplicationIcon>
     </PropertyGroup>
-    <PropertyGroup>
-        <CFBundleName>GeneaGrab</CFBundleName> <!-- Also defines .app file name -->
-        <CFBundleDisplayName>GeneaGrab</CFBundleDisplayName>
-        <CFBundleIdentifier>com.06games.geneagrab</CFBundleIdentifier>
-        <CFBundleVersion>2.0.0</CFBundleVersion>
-        <CFBundleShortVersionString>2.0.0</CFBundleShortVersionString>
-        <CFBundlePackageType>APPL</CFBundlePackageType>
-        <CFBundleSignature>????</CFBundleSignature>
-        <CFBundleExecutable>GeneaGrab</CFBundleExecutable>
-        <CFBundleIconFile>GeneaGrab.icns</CFBundleIconFile> <!-- Will be copied from output directory -->
-        <NSPrincipalClass>NSApplication</NSPrincipalClass>
-        <NSHighResolutionCapable>true</NSHighResolutionCapable>
-    </PropertyGroup>
-    <ItemGroup>
-        <CFBundleURLTypes Include="dummy">
-            <CFBundleURLName>OpenInGeneaGrabURL</CFBundleURLName>
-            <CFBundleURLSchemes>geneagrab://</CFBundleURLSchemes>
-        </CFBundleURLTypes>
-    </ItemGroup>
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
         <None Remove=".gitignore" />
@@ -41,7 +22,6 @@
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0" />
         <PackageReference Include="FluentAvaloniaUI" Version="2.0.0" />
         <PackageReference Include="DiscordRichPresence" Version="1.1.4.20" />
-        <PackageReference Include="DotNet.Bundle" Version="0.9.13" />
         <PackageReference Include="HMBSbige.SingleInstance" Version="6.0.1" />
         <PackageReference Include="ResXResourceReader.NetStandard" Version="1.1.0" />
         <PackageReference Include="Serilog" Version="3.0.1" />

@@ -43,10 +43,28 @@ jobs:
 
           # Build everything
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
-            dotnet restore -r ${{ matrix.target }}
-            dotnet msbuild GeneaGrab -t:BundleApp -p:RuntimeIdentifier=${{ matrix.target }} -p:UseAppHost=true -property:Configuration=Release -p:PublishDir="$release_name"
+            dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name" -p:UseAppHost=true
+          
+            APP_NAME="GeneaGrab/GeneaGrab.app"
+            PUBLISH_OUTPUT_DIRECTORY="GeneaGrab/${release_name}/."
+            INFO_PLIST="GeneaGrab/Info.plist"
+            ICON_FILE="GeneaGrab/Assets/Logo/GeneaGrab.icns"
+            
+            if [ -d "$APP_NAME" ]; then
+              rm -rf "$APP_NAME"
+            fi
+            
+            mkdir "$APP_NAME"
+            
+            mkdir "$APP_NAME/Contents"
+            mkdir "$APP_NAME/Contents/MacOS"
+            mkdir "$APP_NAME/Contents/Resources"
+            
+            cp "$INFO_PLIST" "$APP_NAME/Contents/Info.plist"
+            cp "$ICON_FILE" "$APP_NAME/Contents/Resources/$(basename $ICON_FILE)"
+            cp -a "$PUBLISH_OUTPUT_DIRECTORY" "$APP_NAME/Contents/MacOS"
           else
-            dotnet publish -r "${{ matrix.target }}" -c Release  --self-contained -p:PublishDir="$release_name"
+            dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name"
           fi
 
           # Pack files
@@ -55,7 +73,7 @@ jobs:
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             7z a -tzip "output/${release_name}.zip" "./${release_name}/*"
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
-            7z a -tzip "output/${release_name}.zip" "./${release_name}/GeneaGrab.app"
+            7z a -tzip "output/${release_name}.zip" "./GeneaGrab.app"
           else
             tar czvf "output/${release_name}.tar.gz" "$release_name"
           fi

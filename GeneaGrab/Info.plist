@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleName</key>
+    <string>GeneaGrab</string>
+    <key>CFBundleDisplayName</key>
+    <string>GeneaGrab</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.06games.geneagrab</string>
+    <key>CFBundleVersion</key>
+    <string>2.2.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>2.2.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleExecutable</key>
+    <string>GeneaGrab</string>
+    <key>CFBundleIconFile</key>
+    <string>GeneaGrab.icns</string>
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+    <key>NSHighResolutionCapable</key>
+    <true />
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>geneagrab</string>
+    </array>
+  </dict>
+</plist>
