@@ -22,6 +22,12 @@
         <NSHighResolutionCapable>true</NSHighResolutionCapable>
     </PropertyGroup>
     <ItemGroup>
+        <CFBundleURLTypes Include="dummy">
+            <CFBundleURLName>OpenInGeneaGrabURL</CFBundleURLName>
+            <CFBundleURLSchemes>geneagrab://</CFBundleURLSchemes>
+        </CFBundleURLTypes>
+    </ItemGroup>
+    <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
         <None Remove=".gitignore" />
     </ItemGroup>
