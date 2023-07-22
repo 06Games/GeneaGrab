@@ -106,6 +106,7 @@ namespace GeneaGrab.Core.Providers
                 "FRAD006_OUVRAGES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Book }),
                 "FRAD006_BN_SOURCES_IMPRIMES" => ("(?<title>.+)", new[] { RegistryType.Book }),
                 "FRAD006_ANNUAIRES" => ("(?<title>.+)", new[] { RegistryType.Other }),
+                "FRAD006_PRESSE" => (@"(?<title>.+) \(\d*-\d*\), .*? +- +(?<from>(\d|\/)+)(-(?<to>(\d|\/)+))?", new[] { RegistryType.Newspaper }),
                 "FRAD006_DELIBERATIONS_CONSEIL_GENERAL" => ("(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Book }),
                 "FRAD006_11AV" => ("(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Other }), // Audiovisuel
                 "FRAD006_10FI" => ("(?<callnum>.+) +- +(?<title>.+) +- +\\((?<from>.+?)-(?<to>.+)\\)", new[] { RegistryType.Other }), // Iconographie

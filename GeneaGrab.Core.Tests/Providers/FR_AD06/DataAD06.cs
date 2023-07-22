@@ -217,6 +217,38 @@ public class DataAD06 : IEnumerable<object[]>
             Page = 425
         },
 
+        // Presse
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/dao/0",
+            Id = "1a061a78007faccd7f9125c2869ca143",
+            Types = new[] { RegistryType.Newspaper },
+            Titre = "Cannes (The) Advertiser",
+            From = new GregorianDate(1891, 11, 6, precision: Precision.Days),
+            To = new GregorianDate(1891, 11, 6, precision: Precision.Days),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/dao/0/5?id=https%3A%2F%2Farchives06.fr%2Fark%3A%2F79346%2Fa3fbfbacbda3ab24338625a01b000e5c%2Fcanvas%2F0%2F5",
+            Id = "a3fbfbacbda3ab24338625a01b000e5c",
+            Types = new[] { RegistryType.Newspaper },
+            Titre = "Eclaireur (L')",
+            From = new GregorianDate(1937, 12, 30, precision: Precision.Days),
+            To = new GregorianDate(1937, 12, 30, precision: Precision.Days),
+            Page = 5
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/dao/0/2",
+            Id = "35d236db0bd7183dbf75ab2486e6d240",
+            Types = new[] { RegistryType.Newspaper },
+            Titre = "Lou Ficanas",
+            From = new GregorianDate(1891, 8, 16, precision: Precision.Days),
+            To = new GregorianDate(1891, 8, 16, precision: Precision.Days),
+            Page = 2
+        },
+
         // Délibérations
         new Data
         {
@@ -228,10 +260,10 @@ public class DataAD06 : IEnumerable<object[]>
             To = new GregorianDate(1863, precision: Precision.Years),
             Page = 1
         },
-        
+
         // Audiovisuel
         // Not sure if there are any documents available online
-        
+
         // Iconographie
         new Data
         {
@@ -259,6 +291,8 @@ public class Data
     public string? Paroisse;
     public RegistryType[] Types = null!;
     public Date From = null!;
+    public string? Titre;
+    public string? Auteur;
     public string? Notes;
     public Date To = null!;
 
