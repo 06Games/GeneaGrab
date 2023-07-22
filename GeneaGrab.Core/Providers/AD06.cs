@@ -88,6 +88,17 @@ namespace GeneaGrab.Core.Providers
                     case "Type d'acte":
                         registry.Types = registry.Types.Union(GetTypes(metadata.Value));
                         break;
+                    case "Analyse":
+                        registry.Title = metadata.Value;
+                        break;
+                    case "Folio":
+                        registry.Subtitle = metadata.Value;
+                        break;
+                    case "Auteur":
+                    case "Photographe":
+                    case "Sigillant":
+                        registry.Author = metadata.Value;
+                        break;
                     default:
                         notes.Add($"{metadata.Key}: {metadata.Value}");
                         break;
@@ -97,8 +108,8 @@ namespace GeneaGrab.Core.Providers
             var (labelRegexExp, type) = classeur.EncodedArchivalDescriptionId.ToUpperInvariant() switch
             {
                 "FRAD006_ETAT_CIVIL" => ("(?<callnum>.+) +- +(?<type>.*?) *?- *?\\((?<from>.+) à (?<to>.+)\\)", null),
-                "FRAD006_CADASTRE_PLAN" => ("(?<callnum>.+) +- +(?<district>.*?) +- +(?<title>.*?) +- +(?<from>.+?)", new[] { RegistryType.CadastralMap }),
-                "FRAD006_CADASTRE_MATRICE" => ("(?<callnum>.+) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralMatrix }),
+                "FRAD006_CADASTRE_PLAN" => ("(?<callnum>.+) +- +(?<district>.*?) +- +(?<subtitle>.*?) +- +(?<from>.+?)", new[] { RegistryType.CadastralMap }),
+                "FRAD006_CADASTRE_MATRICE" => ("(?<callnum>.+?) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralMatrix }),
                 "FRAD006_CADASTRE_ETAT_SECTION" => ("(?<callnum>.+) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralSectionStates }),
                 "FRAD006_RECENSEMENT_POPULATION" => ("(?<city>.+) +- +(?<from>.+)(, (?<district>.*))", new[] { RegistryType.Census }),
                 "FRAD006_REPERTOIRE_NOTAIRES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Notarial }),
@@ -122,7 +133,9 @@ namespace GeneaGrab.Core.Providers
                 registry.District ??= GetRegexValue("district");
                 registry.From ??= GetRegexValue("from");
                 registry.To ??= GetRegexValue(data["to"].Success ? "to" : "from");
-                if (data["title"].Success) notes.Insert(0, GetRegexValue("title"));
+                registry.Title ??= GetRegexValue("title");
+                registry.Subtitle ??= GetRegexValue("subtitle");
+                registry.Author ??= GetRegexValue("author");
                 if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(GetRegexValue("type")));
                 if (type?.Length > 0) registry.Types = registry.Types.Union(type);
 

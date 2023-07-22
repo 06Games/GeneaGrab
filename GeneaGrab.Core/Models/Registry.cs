@@ -33,6 +33,9 @@ namespace GeneaGrab.Core.Models
             return Data.Translate($"Registry/Type/{type}", type);
         })) : null;
 
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Title { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Subtitle { get; set; }
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Author { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
 
         public Date From { get; set; }
@@ -64,15 +67,19 @@ namespace GeneaGrab.Core.Models
         {
             get
             {
-                //Type
+                // Type
                 var name = TypeToString ?? "";
 
-                //Dates
+                // Dates
                 var dates = Dates;
                 if (!string.IsNullOrEmpty(dates)) name += $" ({dates})";
 
-                //Notes
-                if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes.Split('\n').FirstOrDefault()}";
+                // Title
+                if (!string.IsNullOrEmpty(Title)) name += $" - {Title}";
+                else if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes.Split('\n').FirstOrDefault()}";
+                
+                if (!string.IsNullOrEmpty(Subtitle)) name += $" ({Subtitle})";
+                if (!string.IsNullOrEmpty(Author)) name += $"- {Author}";
 
                 return name;
             }

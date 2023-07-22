@@ -202,6 +202,9 @@ namespace GeneaGrab.Views
             SetInfo(InfoLocationDistrict, Info.Registry!.District ?? Info.Registry.DistrictID);
             SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
             SetInfo(InfoRegistryDate, Info.Registry.Dates);
+            SetInfo(InfoRegistryTitle, Info.Registry.Title);
+            SetInfo(InfoRegistrySubtitle, Info.Registry.Subtitle);
+            SetInfo(InfoRegistryAuthor, Info.Registry.Author);
             SetInfo(InfoRegistryNotes, Info.Registry.Notes);
             SetInfo(InfoRegistryId, Info.Registry.CallNumber ?? Info.Registry.ID);
             void SetInfo(TextBlock block, string? text)
