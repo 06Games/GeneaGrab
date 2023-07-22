@@ -54,6 +54,8 @@ public class DataAD06 : IEnumerable<object[]>
             Cote = "25 Fi 15/1/A0",
             Ville = "Berre-Les-Alpes",
             Paroisse = "Tableau d'assemblage.",
+            Titre = "Tableau d'assemblage des sections A à D.",
+            SousTitre = "TA",
             Types = new[] { RegistryType.CadastralMap },
             From = new GregorianDate(1866, precision: Precision.Years),
             To = new GregorianDate(1866, precision: Precision.Years),
@@ -66,6 +68,8 @@ public class DataAD06 : IEnumerable<object[]>
             Cote = "25 Fi 15/1/D1/COM",
             Ville = "Berre-Les-Alpes",
             Paroisse = "Sena.",
+            Titre = "Plan parcellaire : section D dite de Sena, 1ère feuille.",
+            SousTitre = "Plan de section, D1",
             Types = new[] { RegistryType.CadastralMap },
             From = new GregorianDate(1866, precision: Precision.Years),
             To = new GregorianDate(1866, precision: Precision.Years),
@@ -79,6 +83,7 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "efe090d2498239ccfd227216e5211a09",
             Cote = "3 P 1503",
             Ville = "Utelle",
+            Titre = "Etat des sections A à M",
             Types = new[] { RegistryType.CadastralSectionStates },
             From = new GregorianDate(1875, precision: Precision.Years),
             To = new GregorianDate(1875, precision: Precision.Years),
@@ -92,6 +97,8 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "c9b59a423e101f278296bb4526a2e15c",
             Cote = "3 P 1511",
             Ville = "Utelle",
+            Titre = "Matrice cadastrale des propriétés non bâties",
+            SousTitre = "folios 1489 à 1988",
             Types = new[] { RegistryType.CadastralMatrix },
             From = new GregorianDate(1913, precision: Precision.Years),
             To = new GregorianDate(1969, precision: Precision.Years),
@@ -104,6 +111,8 @@ public class DataAD06 : IEnumerable<object[]>
             Cote = "3 P 828",
             Ville = "Nice",
             Paroisse = "Nice-Est (Quartier Saint-Roch)",
+            Titre = "Matrice cadastrale des propriétés foncières (bâties et non bâties), sections A à E",
+            SousTitre = "folios 1 à 680",
             Types = new[] { RegistryType.CadastralMatrix },
             From = new GregorianDate(1872, precision: Precision.Years),
             To = new GregorianDate(1913, precision: Precision.Years),
@@ -145,6 +154,8 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "b0f71497f90be8cb192bb0c77acac139",
             Cote = "1 J 57",
             Ville = "Turin (Italie", // Yes, the closing parenthesis is missing
+            Titre = "Investiture du fief et juridiction de Puget (Puget-Théniers) en faveur du comte Nicolas Grimaldi de Busca (Nicolo Grimaldi di Busca).",
+            Auteur = "Chambre des comptes de Turin pour Victor Amédée II, duc de Savoie",
             Types = new[] { RegistryType.Other },
             From = new GregorianDate(1704, 1, 1, precision: Precision.Days),
             To = new GregorianDate(1704, 1, 1, precision: Precision.Days),
@@ -157,6 +168,7 @@ public class DataAD06 : IEnumerable<object[]>
             URL = @"https://archives06.fr/ark:/79346/1213862.2781873/dao/1/12",
             Id = "1213862.2781873",
             Cote = "1 Num 48",
+            Titre = "Album du Carnaval 1937. Album illustré des Chars, Cavalcades, Groupes, Isolés de S. M. Carnaval de Nice 1937",
             Types = new[] { RegistryType.Book },
             From = new GregorianDate(1937, precision: Precision.Years),
             To = new GregorianDate(1937, precision: Precision.Years),
@@ -167,6 +179,7 @@ public class DataAD06 : IEnumerable<object[]>
             URL = @"https://archives06.fr/ark:/79346/649576.2781893/dao/1",
             Id = "649576.2781893",
             Cote = "4 Mi 18/1",
+            Titre = "THEATRUM STATUUM REGIAE CELSITUDINIS SABAUDIAE DUCIS, PEDEMONTII PRINCIPIS CYPRI REGIS. PARS PRIMA EXHIBENS PEDEMONTIUM, E IN EO AUGUSTAM TAURINORUM E LOCA VICINIORA. TOME 1 ET 2",
             Types = new[] { RegistryType.Book },
             From = new GregorianDate(1682, precision: Precision.Years),
             To = new GregorianDate(1682, precision: Precision.Years),
@@ -180,6 +193,8 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "183240acb98b2d8fd7ae085215e55c5e",
             Cote = "BB FP 12",
             Ville = "Nizza",
+            Titre = "Statuti della città di Nizza.",
+            Auteur = "s.n.",
             Types = new[] { RegistryType.Book },
             From = new GregorianDate(1784, precision: Precision.Years),
             To = new GregorianDate(1784, precision: Precision.Years),
@@ -191,6 +206,8 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "bd982026f20b65ec3b1636ba15d9141c",
             Cote = "GF 209/2",
             Ville = "Aix-En-Provence",
+            Titre = "Histoire de Provence. Tome 2 : 1536-1599.",
+            Auteur = "GAUFRIDI, Jean-François (de)",
             Types = new[] { RegistryType.Book },
             From = new GregorianDate(1694, precision: Precision.Years),
             To = new GregorianDate(1694, precision: Precision.Years),
@@ -202,6 +219,7 @@ public class DataAD06 : IEnumerable<object[]>
         {
             URL = @"https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/daogrp/0/279",
             Id = "2231f2886f84620708c0eceab9d6b9b7",
+            Titre = "Calendario generale pe' regii stati de 1830.",
             Types = new[] { RegistryType.Other },
             From = new GregorianDate(1830, precision: Precision.Years),
             To = new GregorianDate(1830, precision: Precision.Years),
@@ -211,6 +229,7 @@ public class DataAD06 : IEnumerable<object[]>
         {
             URL = @"https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/daogrp/0/425",
             Id = "3eaf8e3ad6a4d0fa88add0385faf26ce",
+            Titre = "Annuaire des Alpes-Maritimes de 1873.",
             Types = new[] { RegistryType.Other },
             From = new GregorianDate(1873, precision: Precision.Years),
             To = new GregorianDate(1873, precision: Precision.Years),
@@ -254,6 +273,7 @@ public class DataAD06 : IEnumerable<object[]>
         {
             URL = @"https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/daogrp/0/layout:table/idsearch:RECH_61e8e38e23201aa701187c8e647f7c96",
             Id = "6c992c340bba967a24a29e352ac60851",
+            Titre = "Délibérations du conseil général (1863)",
             Types = new[] { RegistryType.Book },
             Cote = "1 N 3",
             From = new GregorianDate(1863, precision: Precision.Years),
@@ -269,6 +289,8 @@ public class DataAD06 : IEnumerable<object[]>
         {
             URL = @"https://archives06.fr/ark:/79346/703610.2544066/dao/0",
             Id = "703610.2544066",
+            Titre = "Sibylla Persica.",
+            Auteur = "Non déterminé",
             Types = new[] { RegistryType.Other },
             Cote = "10 Fi 1",
             From = new GregorianDate(1940, precision: Precision.Years),
@@ -292,6 +314,7 @@ public class Data
     public RegistryType[] Types = null!;
     public Date From = null!;
     public string? Titre;
+    public string? SousTitre;
     public string? Auteur;
     public string? Notes;
     public Date To = null!;
