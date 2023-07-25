@@ -148,6 +148,54 @@ public class DataAD06 : IEnumerable<object[]>
 
         // Notaires
         // TODO : Pas encore disponible sur le nouveau site
+        
+        // Hypothèques
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/2974578/dao/0/1/",
+            Id = "2974578",
+            Cote = "1262 W 2",
+            Titre = "Table des noms",
+            SousTitre = "Bon à Dumistrescu",
+            Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
+            Types = new[] { RegistryType.Catalogue },
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/2974596/dao/0/200",
+            Id = "2974596",
+            Cote = "1262 W 21",
+            Titre = "Table des prénoms",
+            SousTitre = "Volume 016",
+            Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
+            Types = new[] { RegistryType.Catalogue },
+            Page = 200
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/2974490/dao/0/120",
+            Id = "2974490",
+            Cote = "1262 W 156",
+            Titre = "Répertoire des formalités",
+            SousTitre = "Volume 066",
+            Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
+            Types = new[] { RegistryType.Catalogue },
+            Page = 120
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/2978304/dao/0/5",
+            Id = "2978304",
+            Cote = "402 Q 6/400",
+            Titre = "Actes translatifs de propriétés d'immeubles, volume 298, 24 mai-13 juin 1932",
+            SousTitre = "Volume 298 (24 mai-13 juin 1932)",
+            Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
+            Types = new[] { RegistryType.Engrossments },
+            From = new GregorianDate(1932, 5, 24, precision: Precision.Days),
+            To = new GregorianDate(1932, 6, 13, precision: Precision.Days),
+            Page = 5
+        },
 
         // Armoiries
         new Data
