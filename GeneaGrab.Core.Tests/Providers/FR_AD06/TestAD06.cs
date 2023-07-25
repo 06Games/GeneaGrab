@@ -6,11 +6,10 @@ namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 public class TestAD06
 {
     private readonly AD06 instance;
-    private int timeoutCount;
+    private static int timeoutCount;
     
     public TestAD06() {
         instance = new AD06();
-        timeoutCount = 0;
     }
 
     [Theory(DisplayName = "Check information retriever")]
