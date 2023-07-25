@@ -4,6 +4,8 @@ using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 
+
+/// <remarks>As of 2023-07-25, archives06.fr is geo-restricted to France (and maybe some other countries)</remarks>
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
 public class DataAD06 : IEnumerable<object[]>
 {

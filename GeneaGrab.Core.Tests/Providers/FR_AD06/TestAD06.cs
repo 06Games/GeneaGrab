@@ -1,19 +1,33 @@
-﻿using GeneaGrab.Core.Providers;
+﻿using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Providers;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 
 public class TestAD06
 {
     private readonly AD06 instance;
+    private int timeoutCount;
+    
     public TestAD06() {
         instance = new AD06();
+        timeoutCount = 0;
     }
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD06))]
     public async void CheckInfos(Data data)
     {
-        var registryInfo = await instance.Infos(new Uri(data.URL));
+        if(timeoutCount >= 3) return; // AD06 is geo-restricted, so if the API times out 3 times, we assume it's because the location is blocked.
+        RegistryInfo registryInfo;
+        try { registryInfo = await instance.Infos(new Uri(data.URL)); }
+        catch (Exception? e)
+        {
+            while (e is not TimeoutException or TaskCanceledException or null)
+                e = e?.InnerException;
+            if (e is TimeoutException or TaskCanceledException) timeoutCount++;
+            throw;
+        }
+        
         Assert.Equal(instance.GetType().Name, registryInfo.ProviderID);
         Assert.Equal(data.Id, registryInfo.RegistryID);
         Assert.Equal(data.Page, registryInfo.PageNumber);
