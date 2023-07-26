@@ -79,7 +79,7 @@ namespace GeneaGrab.Core.Models
                 else if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes.Split('\n').FirstOrDefault()}";
                 
                 if (!string.IsNullOrEmpty(Subtitle)) name += $" ({Subtitle})";
-                if (!string.IsNullOrEmpty(Author)) name += $"- {Author}";
+                if (!string.IsNullOrEmpty(Author)) name += $" - {Author}";
 
                 return name;
             }
