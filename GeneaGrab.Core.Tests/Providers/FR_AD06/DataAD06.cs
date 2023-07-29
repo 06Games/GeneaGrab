@@ -41,10 +41,87 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "ecebe99656ed10bbc4f90577557b5db67c",
             Cote = "5 Mi 89/80",
             Ville = "Nice",
-            Paroisse = "Notre-Dame du Port",
+            Paroisse = "Notre-Dame Du Port",
             Types = new[] { RegistryType.Baptism, RegistryType.BaptismTable },
             From = new GregorianDate(1823, precision: Precision.Years),
             To = new GregorianDate(1824, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/daogrp/0/layout:table/idsearch:RECH_b8eed04fe2a98dd5bf1fe2452dbc1b8e",
+            Id = "eca80928a80f578297aa1382ce096dd10e",
+            Cote = "5 Mi 17/1",
+            Ville = "Bezaudun-Les-Alpes",
+            Types = new[] { RegistryType.Birth, RegistryType.Marriage, RegistryType.Banns, RegistryType.Death },
+            From = new GregorianDate(1728, precision: Precision.Years),
+            To = new GregorianDate(1768, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/daogrp/0/layout:table/idsearch:RECH_c99248cfe88969cc390bdb768dc1de70",
+            Id = "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
+            Cote = "1 E 3",
+            Ville = "Cannes",
+            Types = new[] { RegistryType.Divorce },
+            From = new GregorianDate(1803, precision: Precision.Years),
+            To = new GregorianDate(1803, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/ec6f5e3a7e2cbde236ef1c70629240c15d",
+            Id = "ec6f5e3a7e2cbde236ef1c70629240c15d",
+            Cote = "5 Mi 27/1",
+            Ville = "Cabris",
+            Types = new[] { RegistryType.Catalogue },
+            From = new GregorianDate(1750, precision: Precision.Years),
+            To = new GregorianDate(1795, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1",
+            Id = "eca462a76104f3e90edbdcaac70e14fec1",
+            Cote = "5 Mi 84/2",
+            Ville = "Menton",
+            Types = new[] { RegistryType.Other },
+            From = new GregorianDate(1750, precision: Precision.Years),
+            To = new GregorianDate(1800, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc",
+            Id = "ec1eb5b16de1632496bf6d65113d1d73fc",
+            Cote = "5 Mi 84/3",
+            Ville = "Menton",
+            Types = new[] { RegistryType.Birth, RegistryType.Baptism, RegistryType.Confirmation },
+            From = new GregorianDate(1577, precision: Precision.Years),
+            To = new GregorianDate(1607, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e",
+            Id = "ec0269f0e601136679d5332be8edc7262e",
+            Cote = "5 Mi 74/1",
+            Ville = "Isola",
+            Types = new[] { RegistryType.Communion },
+            From = new GregorianDate(1880, precision: Precision.Years),
+            To = new GregorianDate(1929, precision: Precision.Years),
+            Page = 1
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055",
+            Id = "ecc93946f2a961d4131c537524ca92d055",
+            Cote = "2 E 985",
+            Ville = "Antibes",
+            Types = new[] { RegistryType.MarriageTable },
+            From = new GregorianDate(1934, precision: Precision.Years),
+            To = new GregorianDate(1934, precision: Precision.Years),
             Page = 1
         },
 
@@ -55,7 +132,7 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "e5f3d1e196cf2c2c3fbcb9770bb85548",
             Cote = "25 Fi 15/1/A0",
             Ville = "Berre-Les-Alpes",
-            Paroisse = "Tableau d'assemblage.",
+            Paroisse = "Tableau D'Assemblage.",
             Titre = "Tableau d'assemblage des sections A à D.",
             SousTitre = "TA",
             Types = new[] { RegistryType.CadastralMap },
@@ -139,7 +216,7 @@ public class DataAD06 : IEnumerable<object[]>
             Id = "cb9d2442564ee9b717d681ea3af12a03",
             Cote = "6 M 149",
             Ville = "Nice",
-            Paroisse = "canton ouest (début)",
+            Paroisse = "Canton Ouest (Début)",
             Types = new[] { RegistryType.Census },
             From = new GregorianDate(1911, precision: Precision.Years),
             To = new GregorianDate(1911, precision: Precision.Years),
