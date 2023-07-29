@@ -115,7 +115,9 @@ namespace GeneaGrab
                 if (!Discord.IsDisposed) Discord.Invoke();
             };
             timer.Start();
-            desktop?.Start(desktop.Args ?? Array.Empty<string>());
+
+            try { desktop?.Start(desktop.Args ?? Array.Empty<string>()); }
+            catch (Exception e) { Log.Fatal(e, "A fatal error occured"); }
         }
 
         public override void OnFrameworkInitializationCompleted()
