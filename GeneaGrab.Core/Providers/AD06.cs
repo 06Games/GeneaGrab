@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -24,7 +23,7 @@ namespace GeneaGrab.Core.Providers
             info = null;
             if (url.Host != "archives06.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return false;
 
-            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/(?<tag>.*?)/(?<seq>\\d*)(/(?<page>\\d*))?").Groups;
+            var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
             info = new RegistryInfo
             {
                 ProviderID = "AD06",
@@ -36,7 +35,7 @@ namespace GeneaGrab.Core.Providers
 
         public override async Task<RegistryInfo> Infos(Uri url)
         {
-            var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/(?<tag>.*?)/(?<seq>\\d*)(/(?<page>\\d*))?").Groups;
+            var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
             var registry = new Registry(Data.Providers["AD06"]) { ID = queries["id"].Value };
             registry.URL = $"https://archives06.fr/ark:/{queries["something"].Value}/{registry.ID}";
 
@@ -68,11 +67,11 @@ namespace GeneaGrab.Core.Providers
                     case "Commune d’exercice du notaire":
                     case "Lieu":
                     case "Lieu d'édition":
-                        registry.Location = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(metadata.Value.ToLower());
+                        registry.Location = ToTitleCase(metadata.Value.ToLower());
                         break;
                     case "Paroisse":
                     case "Complément de lieu":
-                        registry.District = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(metadata.Value.ToLower());
+                        registry.District = ToTitleCase(metadata.Value.ToLower());
                         break;
                     case "Date":
                     case "Date de l'acte":
@@ -110,7 +109,7 @@ namespace GeneaGrab.Core.Providers
 
             var (labelRegexExp, type) = classeur.EncodedArchivalDescriptionId.ToUpperInvariant() switch
             {
-                "FRAD006_ETAT_CIVIL" => ("(?<callnum>.+) +- +(?<type>.*?) *?- *?\\((?<from>.+) à (?<to>.+)\\)", null),
+                "FRAD006_ETAT_CIVIL" => (@"(?<callnum>.+) +- +(?<type>.*?) *?- *?\((?<from>.+?)( à (?<to>.+))?\)", null),
                 "FRAD006_CADASTRE_PLAN" => ("(?<callnum>.+) +- +(?<district>.*?) +- +(?<subtitle>.*?) +- +(?<from>.+?)", new[] { RegistryType.CadastralMap }),
                 "FRAD006_CADASTRE_MATRICE" => ("(?<callnum>.+?) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralMatrix }),
                 "FRAD006_CADASTRE_ETAT_SECTION" => ("(?<callnum>.+) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralSectionStates }),
@@ -134,18 +133,23 @@ namespace GeneaGrab.Core.Providers
             if (labelRegexExp != null)
             {
                 var data = Regex.Match(sequence.Label, labelRegexExp).Groups;
-                registry.CallNumber ??= GetRegexValue("callnum");
-                registry.Location ??= GetRegexValue("city");
-                registry.District ??= GetRegexValue("district");
-                registry.From ??= GetRegexValue("from");
-                registry.To ??= GetRegexValue(data["to"].Success ? "to" : "from");
-                registry.Title ??= GetRegexValue("title");
-                registry.Subtitle ??= GetRegexValue("subtitle");
-                registry.Author ??= GetRegexValue("author");
-                if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(GetRegexValue("type")));
+                registry.CallNumber ??= GetRegexValue(data, "callnum");
+                registry.Location ??= ToTitleCase(GetRegexValue(data, "city"));
+                registry.District ??= ToTitleCase(GetRegexValue(data, "district"));
+                registry.From ??= GetRegexValue(data, "from");
+                registry.To ??= GetRegexValue(data, data["to"].Success ? "to" : "from");
+                registry.Title ??= GetRegexValue(data, "title");
+                registry.Subtitle ??= GetRegexValue(data, "subtitle");
+                registry.Author ??= GetRegexValue(data, "author");
+                if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(GetRegexValue(data, "type")));
                 if (type?.Length > 0) registry.Types = registry.Types.Union(type);
 
-                string GetRegexValue(string key) => data[key].Success ? data[key].Value : null;
+                if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_ETAT_CIVIL") // The civil registry collection only provides the city through the analysis page
+                {
+                    var analyse = await client.GetStringAsync(registry.URL);
+                    var regex = Regex.Match(analyse, "<ul><li><a href=.*?>.*?<ul><li><a href=.*?><span>(?<city>.*?)</span></a></li></ul>").Groups;
+                    registry.Location ??= ToTitleCase(GetRegexValue(regex, "city"));
+                }
             }
             registry.Notes = string.Join("\n", notes);
 
@@ -154,28 +158,38 @@ namespace GeneaGrab.Core.Providers
             return new RegistryInfo(registry) { PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1 };
         }
 
-        private static IEnumerable<RegistryType> GetTypes(string typeActe) // TODO
+        private static string GetRegexValue(GroupCollection data, string key) => data[key].Success ? data[key].Value : null;
+        private static string ToTitleCase(string text) => text is null ? null : Regex.Replace(text, @"\p{L}+", match => match.Value[..1].ToUpper() + match.Value[1..].ToLower());
+
+        private static IEnumerable<RegistryType> GetTypes(string typeActe)
         {
             foreach (var t in Regex.Split(typeActe, "(?=[A-Z])"))
             {
                 var type = t.Trim(' ');
 
-                if (type == "Naissances") yield return RegistryType.Birth;
-                else if (type == "Tables décennales des naissances") yield return RegistryType.BirthTable;
-                else if (type == "Baptêmes") yield return RegistryType.Baptism;
-                else if (type == "Tables des baptêmes") yield return RegistryType.BaptismTable;
+                if (type is "Naissances") yield return RegistryType.Birth;
+                else if (type is "Tables décennales des naissances" or "Tables alphabétiques des naissances") yield return RegistryType.BirthTable;
+                else if (type is "Baptêmes") yield return RegistryType.Baptism;
+                else if (type is "Tables des baptêmes") yield return RegistryType.BaptismTable;
+                
+                else if (type is "Confirmations") yield return RegistryType.Confirmation;
+                else if (type is "Tables des communions") yield return RegistryType.Communion;
 
                 else if (type is "Publications" or "Publications de mariages") yield return RegistryType.Banns;
-                else if (type == "Mariages") yield return RegistryType.Marriage;
-                else if (type is "Tables des mariages" or "Tables décennales des mariages") yield return RegistryType.MarriageTable;
+                else if (type is "Mariages") yield return RegistryType.Marriage;
+                else if (type is "Tables des mariages" or "Tables décennales des mariages" or "Tables alphabétiques des mariages") yield return RegistryType.MarriageTable;
+                else if (type is "Divorces") yield return RegistryType.Divorce;
 
-                else if (type == "Décès") yield return RegistryType.Death;
-                else if (type == "Tables décennales des décès") yield return RegistryType.DeathTable;
-                else if (type == "Sépultures") yield return RegistryType.Burial;
-                else if (type == "Tables des sépultures") yield return RegistryType.BurialTable;
+                else if (type is "Décès") yield return RegistryType.Death;
+                else if (type is "Tables décennales des décès" or "Tables alphabétiques des décès") yield return RegistryType.DeathTable;
+                else if (type is "Sépultures" or  "Sépultures des enfants décédés sans baptêmes") yield return RegistryType.Burial;
+                else if (type is "Tables des sépultures") yield return RegistryType.BurialTable;
+                
+                else if (type is "Répertoire") yield return RegistryType.Catalogue;
+                else if (type is "Inventaire") yield return RegistryType.Other;
 
-                else if (type == "matrice cadastrale") yield return RegistryType.CadastralMatrix;
-                else if (type == "état de section") yield return RegistryType.CadastralSectionStates;
+                else if (type is "matrice cadastrale") yield return RegistryType.CadastralMatrix;
+                else if (type is "état de section") yield return RegistryType.CadastralSectionStates;
             }
         }
 
