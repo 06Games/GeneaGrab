@@ -117,7 +117,7 @@ namespace GeneaGrab.Core.Providers
                 "FRAD006_HYPOTHEQUES" => (@"(?<callnum>.+) +- +(?<title>.+) +-", new[] { RegistryType.Catalogue }),
                 "FRAD006_HYPOTHEQUES_ACTES_TRANSLATIFS" => (@"(?<callnum>.+?) ?- +(?<author>.+?) ?\.?- +(?<title>.+?) ?- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Engrossments }),
                 "FRAD006_REPERTOIRE_NOTAIRES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Notarial }),
-                "FRAD006_3E" => (@"(?<callnum>3 E (\d| )+) (?<title>.*)\. (?<from>.*)-(?<to>.*))", new[] { RegistryType.Notarial }), // Notaire
+                "FRAD006_3E" => (@"(?<callnum>3 E [\d ]+) (?<title>.*)\. (?<from>.*)-(?<to>.*)", new[] { RegistryType.Notarial }), // Notaire
                 "FRAD006_ARMOIRIES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Other }),
                 "FRAD006_OUVRAGES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Book }),
                 "FRAD006_BN_SOURCES_IMPRIMES" => ("(?<title>.+)", new[] { RegistryType.Book }),
@@ -149,6 +149,12 @@ namespace GeneaGrab.Core.Providers
                     var analyse = await client.GetStringAsync(registry.URL);
                     var regex = Regex.Match(analyse, "<ul><li><a href=.*?>.*?<ul><li><a href=.*?><span>(?<city>.*?)</span></a></li></ul>").Groups;
                     registry.Location ??= ToTitleCase(GetRegexValue(regex, "city"));
+                }
+                else if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && GetRegexValue(data, "title") == $"{GetRegexValue(data, "from")}-{GetRegexValue(data, "to")}")
+                {
+                    var analyse = await client.GetStringAsync(registry.URL);
+                    var regex = Regex.Match(analyse, "<ul><li><a href=[^>]+?><span>(?<title>[^>]+?).</span></a></li></ul></li></ul></li></ul></div>").Groups;
+                    registry.Title = GetRegexValue(regex, "title");
                 }
             }
             registry.Notes = string.Join("\n", notes);
