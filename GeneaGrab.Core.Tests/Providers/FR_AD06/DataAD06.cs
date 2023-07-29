@@ -224,7 +224,31 @@ public class DataAD06 : IEnumerable<object[]>
         },
 
         // Notaires
-        // TODO : Pas encore disponible sur le nouveau site
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/674341.2453955/dao/0/50",
+            Id = "674341.2453955",
+            Cote = "3 E 19 83",
+            Ville = "Lantosque",
+            Titre = "Protocoles du notaire Joseph Buffonio, à Lantosque",
+            Types = new[] { RegistryType.Notarial },
+            From = new GregorianDate(1744, 11, 15, precision: Precision.Days),
+            To = new GregorianDate(1760, 03, 14, precision: Precision.Days),
+            Page = 50
+        },
+        new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/674248.2453940/dao/0",
+            Id = "674248.2453940",
+            Cote = "3 E 19 70",
+            Ville = "Lantosque",
+            Titre = "Protocole du notaire Pierre Malaussena, à Lantosque",
+            Auteur = "MALAUSSENA, Pierre",
+            Types = new[] { RegistryType.Notarial },
+            From = new GregorianDate(1673, 11, 01, precision: Precision.Days),
+            To = new GregorianDate(1703, 06, 30, precision: Precision.Days),
+            Page = 1
+        },
         
         // Hypothèques
         new Data
