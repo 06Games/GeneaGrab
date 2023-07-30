@@ -19,7 +19,14 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.Gregorian
             if (string.IsNullOrWhiteSpace(dateString)) return false;
 
             Precision precision;
-            if (DateTime.TryParse(dateString, culture, style, out var d)) precision = Precision.Days;
+            if (DateTime.TryParse(dateString, culture, style, out var d))
+            {
+                if (d.Second != 0) precision = Precision.Seconds;
+                else if (d.Minute != 0) precision = Precision.Minutes;
+                else if (d.Hour != 0) precision = Precision.Hours;
+                else if (d.Day != 1) precision = Precision.Days;
+                else precision = Precision.Months;
+            }
             else if (DateTime.TryParseExact(dateString, "yyyy", culture, style, out d)) precision = Precision.Years;
             else return false;
 
@@ -37,7 +44,7 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.Gregorian
         {
             if (year < 1582)
             {
-                Log.Warning("The year ({Year}) is prior to the creation of the gregorian calendar (1582), using the Julian calendar instead", Year); 
+                Log.Warning("The year ({Year}) is prior to the creation of the gregorian calendar (1582), using the Julian calendar instead", Year);
                 return new JulianDate(year, month, day, hour, minute, second, precision);
             }
             Year = new GregorianYear(year);
@@ -48,6 +55,11 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.Gregorian
             if (second.HasValue) Second = new GregorianSecond(second.Value);
             Precision = precision;
             return this;
+        }
+
+        public double ToJulianDay()
+        {
+            return new DateTime(Year.Value, Month.Value, Day.Value, Hour.Value, Minute.Value, Second.Value).ToOADate() + 2415018.5;
         }
     }
 }
