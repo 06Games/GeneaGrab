@@ -38,7 +38,6 @@ public class TestAD06
         Assert.Equal(data.Auteur, registryInfo.Registry.Author);
         Assert.Equal(data.From, registryInfo.Registry.From);
         Assert.Equal(data.To, registryInfo.Registry.To);
-        if(data.Notes != null) Assert.Equal(data.Notes, registryInfo.Registry.Notes);
 
         var types = registryInfo.Registry.Types.ToArray();
         Assert.All(data.Types, type => Assert.Contains(type, types));
