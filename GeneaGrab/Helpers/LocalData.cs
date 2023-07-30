@@ -92,7 +92,8 @@ public static class LocalData
         try
         {
             var file = GetFile(registry, page, true, thumbnail);
-            await img.SaveAsJpegAsync(file.Open(FileMode.OpenOrCreate, FileAccess.ReadWrite)).ConfigureAwait(false);
+            await using var stream = file.Open(FileMode.OpenOrCreate, FileAccess.Write);
+            await img.SaveAsJpegAsync(stream).ConfigureAwait(false);
             return file.FullName;
         }
         catch (Exception e)

@@ -7,10 +7,12 @@ namespace GeneaGrab.Helpers;
 
 public static class Extensions
 {
-    public static Bitmap ToBitmap(this Stream stream)
+    public static Bitmap ToBitmap(this Stream stream, bool close = true)
     {
         stream.Seek(0, SeekOrigin.Begin);
-        return new Bitmap(stream);
+        var bitmap = new Bitmap(stream);
+        if(close) stream.Close();
+        return bitmap;
     }
     
     public static DirectoryInfo CreateFolder(this DirectoryInfo folder, string name)

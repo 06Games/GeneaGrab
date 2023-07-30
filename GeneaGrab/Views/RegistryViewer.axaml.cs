@@ -116,7 +116,7 @@ namespace GeneaGrab.Views
 
             _ = Task.Run(async () =>
             {
-                var img = await LoadImage(Info.PageNumber, page => Info.Provider.Preview(Info.Registry, page, TrackProgress));
+                var img = await LoadImage(Info.PageNumber, page => Info.Provider.Preview(Info.Registry, page, TrackProgress), false);
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
 
                 var tasks = new List<Task>();
@@ -127,12 +127,12 @@ namespace GeneaGrab.Views
                 }
                 await Task.WhenAll(tasks).ConfigureAwait(false);
 
-                async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func)
+                async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func, bool close = true)
                 {
                     var i = PageNumbers.IndexOf(number);
                     var page = Pages[i];
                     var thumbnail = await func.Invoke(page.Page);
-                    page.Thumbnail = thumbnail.ToBitmap();
+                    page.Thumbnail = thumbnail.ToBitmap(close);
                     await Dispatcher.UIThread.InvokeAsync(() => Pages[i] = page);
                     return thumbnail;
                 }
@@ -183,7 +183,7 @@ namespace GeneaGrab.Views
             if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && success)
                 Dispatcher.UIThread.Post(() =>
                 {
-                    page.Thumbnail = stream.ToBitmap();
+                    page.Thumbnail = stream.ToBitmap(false);
                     Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
             await GetIndex();
@@ -230,8 +230,8 @@ namespace GeneaGrab.Views
         private async void Download(object sender, RoutedEventArgs e)
         {
             if (Info == null) return;
-            await Info.Provider.Download(Info.Registry, Info.Page, TrackProgress);
-            RefreshView();
+            var stream = await Info.Provider.Download(Info.Registry, Info.Page, TrackProgress);
+            RefreshView(stream);
         }
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
