@@ -6,6 +6,7 @@ using GeneaGrab.Core.Models;
 using Newtonsoft.Json;
 using Serilog;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Metadata.Profiles.Exif;
 using SixLabors.ImageSharp.Processing;
 
 namespace GeneaGrab.Helpers;
@@ -91,6 +92,16 @@ public static class LocalData
     {
         try
         {
+            img.Metadata.ExifProfile ??= new ExifProfile();
+            img.Metadata.ExifProfile.SetValue(ExifTag.DigitalZoomRatio, new Rational((uint)page.Zoom, page.MaxZoom <= 0 ? 100 : (uint)page.MaxZoom, false));
+            if (page.TileSize > 0) img.Metadata.ExifProfile.SetValue(ExifTag.TileWidth, (uint)page.TileSize);
+            if (page.Width > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageWidth, page.Width);
+            if (page.Height > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageLength, page.Height);
+            if (page.Number > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageNumber, (uint)page.Number);
+            if (string.IsNullOrWhiteSpace(page.Notes)) img.Metadata.ExifProfile.RemoveValue(ExifTag.UserComment);
+            else img.Metadata.ExifProfile.SetValue(ExifTag.UserComment, page.Notes);
+
+
             var file = GetFile(registry, page, true, thumbnail);
             await using var stream = file.Open(FileMode.OpenOrCreate, FileAccess.Write);
             await img.SaveAsJpegAsync(stream).ConfigureAwait(false);
