@@ -7,7 +7,7 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
     {
         public override string Long => $"An {Short} de la République Française";
         public override string Medium => $"An {Short}";
-        public override string Short => Convert.ToRomanNumerals(Value);
+        public override string Short => Value.ToRomanNumerals();
         internal override int MinValue => 1;
         internal override int MaxValue => 14;
         public FrenchRepublicanYear(uint value) : base(value) { }
@@ -22,8 +22,8 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
             "Messidor", "Thermidor", "Fructidor", // Summer months
             "Jours complémentaires" // Sans-culottides (Epagomenal days)
         };
-        public override string Long => Months[Value];
-        public override string Medium => Long.Substring(0,4).ToUpper();
+        public override string Long => Months[Value-1];
+        public override string Medium => Long[..4].ToUpperInvariant();
         internal override int MinValue => 1;
         internal override int MaxValue => 13;
         public FrenchRepublicanMonth(uint value) : base(value) { }

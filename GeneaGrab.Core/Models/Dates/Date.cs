@@ -37,26 +37,26 @@ namespace GeneaGrab.Core.Models.Dates
         public override string ToString() => ToString(Precision);
         public virtual string ToString(Precision precision)
         {
-            if (Year is null) return null;
+            if (Year is null) return string.Empty;
             var txt = new StringBuilder();
             var format = (Precision)Math.Min((int)precision, (int)Precision);
 
             txt.Append(Year.Short);
             if (format == Precision.Years) return txt.ToString();
-            txt.Append("-");
+            txt.Append('-');
             txt.Append(Month.Short);
             if (format == Precision.Months) return txt.ToString();
-            txt.Append("-");
+            txt.Append('-');
             txt.Append(Day.Short);
             if (format == Precision.Days) return txt.ToString();
 
-            txt.Append(" ");
+            txt.Append(' ');
             txt.Append(Hour.Short);
             if (format == Precision.Hours) return txt.ToString();
-            txt.Append(":");
+            txt.Append(':');
             txt.Append(Minute.Short);
             if (format == Precision.Minutes) return txt.ToString();
-            txt.Append(":");
+            txt.Append(':');
             txt.Append(Second.Short);
             return txt.ToString();
         }
@@ -107,6 +107,10 @@ namespace GeneaGrab.Core.Models.Dates
             if (ReferenceEquals(this, obj)) return true;
             return obj.GetType() == GetType() && Equals((Date)obj);
         }
+        public static bool operator <(Date date1, Date date2) => date1?.CompareTo(date2) < 0;
+        public static bool operator <=(Date date1, Date date2) => date1?.CompareTo(date2) <= 0;
+        public static bool operator >(Date date1, Date date2) => date1?.CompareTo(date2) > 0;
+        public static bool operator >=(Date date1, Date date2) => date1?.CompareTo(date2) >= 0;
         public override int GetHashCode() => HashCode.Combine(Year, Month, Day, Hour, Minute, Second, (int)Calendar, (int)Precision);
     }
 }

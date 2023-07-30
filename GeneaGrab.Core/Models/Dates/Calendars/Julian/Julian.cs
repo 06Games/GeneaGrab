@@ -26,7 +26,7 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.Julian
             "October", "November", "December"
         };
         public override string Long => Months[Value-1];
-        public override string Medium => Long.Substring(0,3).ToUpper();
+        public override string Medium => Long[..3].ToUpperInvariant();
         internal override int MinValue => 1;
         internal override int MaxValue => 12;
         public JulianMonth(uint value) : base(value) { }
