@@ -30,7 +30,7 @@ namespace GeneaGrab
     public partial class App : Application
     {
         private ISingleInstanceService SingleInstance { get; set; } = null!;
-        public Version Version { get; } = new(2, 0);
+        public Version Version { get; } = new(2, 2);
         public DiscordRpcClient Discord { get; } = new("1120393636455129229");
 
         public override void Initialize()
