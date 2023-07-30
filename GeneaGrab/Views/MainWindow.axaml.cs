@@ -81,13 +81,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         NavigationService.NewTab(typeof(SettingsPage)).IsClosable = false;
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.Startup += (_, e) =>
-            {
-                Dispatcher.UIThread.Post(() =>
+            desktop.Startup += (_, _) => Dispatcher.UIThread.Post(() =>
                 {
                     if (NavigationService.TabCount <= 1) NavigationService.OpenTab(NewTab());
                 });
-            };
         else NavigationService.OpenTab(NewTab());
     }
 

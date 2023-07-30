@@ -11,7 +11,7 @@ public class TestAD17
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD17))]
-    public async void CheckInfos(Data data)
+    public async Task CheckInfos(Data data)
     {
         var registryInfo = await instance.Infos(new Uri(data.URL));
         Assert.Equal(instance.GetType().Name, registryInfo.ProviderID);

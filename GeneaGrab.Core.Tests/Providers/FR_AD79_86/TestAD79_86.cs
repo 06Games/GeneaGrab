@@ -11,7 +11,7 @@ public class TestAD79_86
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD79_86))]
-    public async void CheckInfos(Data data)
+    public async Task CheckInfos(Data data)
     {
         var registryInfo = await instance.Infos(new Uri(data.URL));
         Assert.Equal("AD79-86", registryInfo.ProviderID);

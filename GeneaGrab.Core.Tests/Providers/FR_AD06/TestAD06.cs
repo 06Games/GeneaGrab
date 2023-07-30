@@ -14,7 +14,7 @@ public class TestAD06
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD06))]
-    public async void CheckInfos(Data data)
+    public async Task CheckInfos(Data data)
     {
         if(timeoutCount >= 3) return; // AD06 is geo-restricted, so if the API times out 3 times, we assume it's because the location is blocked.
         RegistryInfo registryInfo;
