@@ -1,4 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Globalization;
+using System.Linq;
+using System.Text.RegularExpressions;
 using RomanNumerals.Numerals;
 
 namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
@@ -11,16 +14,37 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
         {
             date = null;
             if (string.IsNullOrWhiteSpace(dateString)) return false;
-            var regex = Regex.Match(dateString, @"an (?<year>.*)", RegexOptions.IgnoreCase);
+            var regex = Regex.Match(dateString, @"((?<day>\d+) )?((?<month>\p{L}+) )?an (?<year>[IVX\d]+)", RegexOptions.IgnoreCase);
             if (!regex.Success) return false;
+            
             date = new FrenchRepublicanDate();
-            if (regex.Groups["year"].Success && NumeralParser.Default.TryParse(regex.Groups["year"].Value, out var year))
-            {
-                date.Year = new FrenchRepublicanYear(year);
-                date.Precision = Precision.Years;
-            }
-            else return false;
+            if (!TryGet("year", out var year)) return false;
+            
+            date.Year = new FrenchRepublicanYear(year);
+            date.Precision = Precision.Years;
+            if (!TryGet("month", out var month)) return true;
+            
+            date.Month = new FrenchRepublicanMonth(month);
+            date.Precision = Precision.Months;
+            if (!TryGet("day", out var day)) return true;
+            
+            date.Day = new FrenchRepublicanDay(day);
+            date.Precision = Precision.Days;
             return true;
+
+            bool TryGet(string key, out int value)
+            {
+                value = -1;
+                if (!regex.Groups[key].Success) return false;
+                if(int.TryParse(regex.Groups[key].Value, out var intVal)) value = intVal;
+                else if (NumeralParser.Default.TryParse(regex.Groups[key].Value, out var uintVal)) value = (int)uintVal;
+                else
+                {
+                    var monthName = FrenchRepublicanMonth.Months.FirstOrDefault(m => string.Compare(m, regex.Groups[key].Value, CultureInfo.InvariantCulture, CompareOptions.IgnoreNonSpace | CompareOptions.IgnoreCase) == 0);
+                    if (monthName != null) value = Array.IndexOf(FrenchRepublicanMonth.Months, monthName) + 1;
+                }
+                return value != -1;
+            }
         }
 
         internal FrenchRepublicanDate() { }
@@ -39,7 +63,6 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican
             return this;
         }
 
-        public override string ToString() => Precision == Precision.Years ? Year.Medium : base.ToString();
-        public override string ToString(Precision precision) => precision == Precision.Years || Precision == Precision.Years ? Year.Medium : base.ToString();
+        public override string ToString(Precision precision) => precision == Precision.Years || Precision == Precision.Years ? Year.Medium : base.ToString(Precision);
     }
 }
