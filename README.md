@@ -15,3 +15,14 @@
 ### :it: Italy
 
 * [<img src="GeneaGrab/Assets/Providers/Antenati.svg" width="20" height="20" /> Antenati](https://www.antenati.san.beniculturali.it/)
+
+## Screenshots
+
+| ![Provider list](https://github.com/06Games/GeneaGrab/assets/24252743/b9063e6c-5326-4db1-9866-0f8091b0f6d4) <br /> Provider list |
+|:---:|
+
+| ![Registry list](https://github.com/06Games/GeneaGrab/assets/24252743/3697481f-40ef-4c87-a40b-d5fc9b005706) <br /> Registry list |
+|:---:|
+
+| ![Registry viewer](https://github.com/06Games/GeneaGrab/assets/24252743/806cc732-2a68-4994-b085-c97b02421507) <br /> Registry viewer |
+|:---:|
