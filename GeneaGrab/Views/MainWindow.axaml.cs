@@ -139,11 +139,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     protected void RegistrySearch_TextChanged(object? sender, TextChangedEventArgs _)
     {
         if (sender is not AutoCompleteBox searchBar) return;
-        if (searchBar.Text != searchBar.SelectedItem?.ToString() && !string.IsNullOrWhiteSpace(searchBar.Text)) searchBar.ItemsSource = Search(searchBar.Text);
+        if (searchBar.Text != searchBar.SelectedItem?.ToString()) searchBar.ItemsSource = Search(searchBar.Text);
         searchBar.FilterMode = AutoCompleteFilterMode.None;
     }
-    private IEnumerable<Result> Search(string query)
+    private static IEnumerable<Result> Search(string? query)
     {
+        if (string.IsNullOrWhiteSpace(query)) return Enumerable.Empty<Result>();
         IEnumerable<Result> GetRegistries(Func<Registry, string?>? contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
             .Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
             .Select(r => new Result { Text = $"{r.Location ?? r.LocationID}: {r.Name}", Value = new RegistryInfo(r) }));
@@ -167,7 +168,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         if (args.AddedItems.Count == 0) return;
         if (args.AddedItems[0] is Result result) NavigationService.Navigate(typeof(RegistryViewer), result.Value);
-        if (sender is AutoCompleteBox searchBar) searchBar.Text = string.Empty;
+        if (sender is AutoCompleteBox searchBar) Dispatcher.UIThread.Post(() => searchBar.Text = string.Empty);
     }
 
     #endregion
