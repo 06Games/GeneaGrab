@@ -48,9 +48,11 @@ jobs:
           release_name="GeneaGrab-${{ matrix.target }}"
 
           # Build everything
+          echo "[INFO] Publishing the project"
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name" -p:UseAppHost=true
           
+            echo "[INFO] Generating .app package"
             APP_NAME="GeneaGrab/GeneaGrab.app"
             PUBLISH_OUTPUT_DIRECTORY="GeneaGrab/${release_name}/."
             INFO_PLIST="GeneaGrab/Info.plist"
@@ -69,11 +71,30 @@ jobs:
             cp "$INFO_PLIST" "$APP_NAME/Contents/Info.plist"
             cp "$ICON_FILE" "$APP_NAME/Contents/Resources/$(basename $ICON_FILE)"
             cp -a "$PUBLISH_OUTPUT_DIRECTORY" "$APP_NAME/Contents/MacOS"
+          
+          
+          
+            ENTITLEMENTS=GeneaGrab.entitlements
+            SIGNING_IDENTITY="Developer ID: maryvonne Ozanne"
+            
+            find "$APP_NAME/Contents/MacOS/"|while read fname; do
+              if [[ -f $fname ]]; then
+                echo "[INFO] Signing $fname"
+                codesign --force --deep --timestamp --options=runtime --entitlements "$ENTITLEMENTS" --sign - "$fname"
+              fi
+            done
+            
+            echo "[INFO] Signing app file"
+            codesign --force --timestamp --options=runtime --entitlements "$ENTITLEMENTS" --sign - "$APP_NAME"
+          
+            echo "[INFO] Verifing signature"
+            codesign --verify --verbose "$APP_NAME"
           else
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name"
           fi
 
           # Pack files
+          echo "[INFO] Packing for distribution"
           cd GeneaGrab/
           mkdir output
           if [ "${{ matrix.target }}" == "win-x64" ]; then
@@ -85,6 +106,7 @@ jobs:
           fi
 
           # Delete output directory
+          echo "[INFO] Cleaning"
           rm -r "$release_name"
           
       - name: Upload artifact
