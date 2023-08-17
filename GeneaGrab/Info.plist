@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
   <dict>
@@ -24,9 +24,16 @@
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>
     <true />
-    <key>CFBundleURLSchemes</key>
+    <key>CFBundleURLTypes</key>
     <array>
-      <string>geneagrab</string>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>GeneaGrabURL</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>geneagrab</string>
+            </array>
+        </dict>
     </array>
   </dict>
 </plist>
