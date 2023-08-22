@@ -49,7 +49,7 @@ jobs:
 
           # Build everything
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
-            dotnet publish -r "${{ matrix.target }}" -c Release -p:PublishDir="$release_name" -p:UseAppHost=true
+            dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name" -p:UseAppHost=true
           
             APP_NAME="GeneaGrab/GeneaGrab.app"
             PUBLISH_OUTPUT_DIRECTORY="GeneaGrab/${release_name}/."
@@ -70,7 +70,7 @@ jobs:
             cp "$ICON_FILE" "$APP_NAME/Contents/Resources/$(basename $ICON_FILE)"
             cp -a "$PUBLISH_OUTPUT_DIRECTORY" "$APP_NAME/Contents/MacOS"
           else
-            dotnet publish -r "${{ matrix.target }}" -c Release -p:PublishDir="$release_name"
+            dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name"
           fi
 
           # Pack files

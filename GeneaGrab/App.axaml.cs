@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
@@ -127,7 +126,8 @@ namespace GeneaGrab
                 try
                 {
                     const string scheme = @"geneagrab";
-                    var path = Environment.ProcessPath ?? Assembly.GetExecutingAssembly().Location;
+                    var path = Environment.ProcessPath;
+                    if (path is null) return;
                     var service = URISchemeServiceFactory.GetURISchemeSerivce(scheme, @$"URL:{scheme} Protocol", path);
 #if DEBUG
                     if (!service.CheckAny()) // Check if the protocol is registered to any application.
