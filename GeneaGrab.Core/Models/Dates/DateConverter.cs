@@ -41,12 +41,12 @@ namespace GeneaGrab.Core.Models.Dates
             WriteProperty(nameof(value.Calendar), Enum.GetName(typeof(Calendar), value.Calendar));
             WriteProperty(nameof(value.Precision), Enum.GetName(typeof(Precision), value.Precision));
 
-            if (value.Precision >= Precision.Years) WriteProperty(nameof(value.Year), value.Year.Value);
-            if (value.Precision >= Precision.Months) WriteProperty(nameof(value.Month), value.Month.Value);
-            if (value.Precision >= Precision.Days) WriteProperty(nameof(value.Day), value.Day.Value);
-            if (value.Precision >= Precision.Hours) WriteProperty(nameof(value.Hour), value.Hour.Value);
-            if (value.Precision >= Precision.Minutes) WriteProperty(nameof(value.Minute), value.Minute.Value);
-            if (value.Precision >= Precision.Seconds) WriteProperty(nameof(value.Second), value.Second.Value);
+            if (value.Precision >= Precision.Years) WriteProperty(nameof(value.Year), value.Year?.Value);
+            if (value.Precision >= Precision.Months) WriteProperty(nameof(value.Month), value.Month?.Value);
+            if (value.Precision >= Precision.Days) WriteProperty(nameof(value.Day), value.Day?.Value);
+            if (value.Precision >= Precision.Hours) WriteProperty(nameof(value.Hour), value.Hour?.Value);
+            if (value.Precision >= Precision.Minutes) WriteProperty(nameof(value.Minute), value.Minute?.Value);
+            if (value.Precision >= Precision.Seconds) WriteProperty(nameof(value.Second), value.Second?.Value);
 
             writer.WriteEndObject();
 
