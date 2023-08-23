@@ -1,6 +1,7 @@
 ﻿using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Models.Dates;
 using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
+using GeneaGrab.Core.Models.Dates.Calendars.Julian;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 
@@ -97,7 +98,7 @@ public class DataAD06 : IEnumerable<object[]>
             Cote = "5 Mi 84/3",
             Ville = "Menton",
             Types = new[] { RegistryType.Birth, RegistryType.Baptism, RegistryType.Confirmation },
-            From = new GregorianDate(1577, precision: Precision.Years),
+            From = new JulianDate(1577, precision: Precision.Years),
             To = new GregorianDate(1607, precision: Precision.Years),
             Page = 1
         };
