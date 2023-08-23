@@ -1,5 +1,7 @@
 ﻿using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Providers;
+using Newtonsoft.Json;
+using Xunit.Abstractions;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 
@@ -7,10 +9,11 @@ public class TestAD06
 {
     private readonly AD06 instance;
     private static int timeoutCount;
+    private readonly ITestOutputHelper output;
     
-    public TestAD06() {
+    public TestAD06(ITestOutputHelper output) { 
         instance = new AD06();
-    }
+        this.output = output; }
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD06))]
@@ -21,11 +24,15 @@ public class TestAD06
         try { registryInfo = await instance.Infos(new Uri(data.URL)); }
         catch (Exception? e)
         {
-            while (e is not TimeoutException or TaskCanceledException or null)
-                e = e?.InnerException;
-            if (e is TimeoutException or TaskCanceledException) timeoutCount++;
+            while (e is not TimeoutException or TaskCanceledException or null) e = e?.InnerException;
+            if (e is not (TimeoutException or TaskCanceledException)) throw;
+            
+            timeoutCount++;
+            output.WriteLine($"Timed-out ({timeoutCount})");
             throw;
         }
+        
+        output.WriteLine(JsonConvert.SerializeObject(registryInfo.Registry, Formatting.Indented));
         
         Assert.Equal(instance.GetType().Name, registryInfo.ProviderID);
         Assert.Equal(data.Id, registryInfo.RegistryID);
