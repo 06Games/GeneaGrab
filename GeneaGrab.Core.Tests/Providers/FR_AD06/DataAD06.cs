@@ -268,6 +268,62 @@ public class DataAD06 : IEnumerable<object[]>
             To = new GregorianDate(1703, 06, 30, precision: Precision.Days),
             Page = 1
         };
+        yield return new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/765909.2436493",
+            Id = "765909.2436493",
+            Cote = "3 E 113 2",
+            Details = new[]
+            {
+                "Instrument de recherche des versements d'archives notariales (3 E)",
+                "Répertoire du versement d'archives notariales concernant les territoires d'Aiglun, Ascros, Aspremont, Gilette, Lantosque, Malaussène, Rosquestéron, Sigale et Toudon, de 1580 à 1822",
+                "Protocole avec répertoire du notaire Jean Auda, à Lantosque"
+            },
+            Ville = "Lantosque",
+            Titre = "Protocole avec répertoire du notaire Jean Auda, à Lantosque",
+            Types = new[] { RegistryType.Notarial },
+            From = new GregorianDate(1610, 09, 01, precision: Precision.Days),
+            To = new GregorianDate(1621, 12, 20, precision: Precision.Days),
+            Page = 1
+        };
+
+        // Archives anciennes
+        yield return new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/952271.2415676",
+            Id = "952271.2415676",
+            Cote = "C 1125",
+            Details = new[] { "Instrument de recherche des archives anciennes, série C", "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Sospel" },
+            Titre = "1641",
+            Types = new[] { RegistryType.Other },
+            From = new GregorianDate(1641, precision: Precision.Years),
+            To = new GregorianDate(1641, precision: Precision.Years),
+            Page = 1
+        };
+        yield return new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/951070.2415509/dao/0/5",
+            Id = "951070.2415509",
+            Cote = "C 965",
+            Details = new[] { "Instrument de recherche des archives anciennes, série C", "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Moulinet" },
+            Titre = "1742-1753",
+            Types = new[] { RegistryType.Other },
+            From = new GregorianDate(1742, precision: Precision.Years),
+            To = new GregorianDate(1753, precision: Precision.Years),
+            Page = 5
+        };
+        yield return new Data
+        {
+            URL = @"https://archives06.fr/ark:/79346/944655.2414623",
+            Id = "944655.2414623",
+            Cote = "C 104",
+            Details = new[] { "Instrument de recherche des archives anciennes, série C", "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Tables", "1610 à 1721" },
+            Titre = "Lettres A-B",
+            Types = new[] { RegistryType.Other },
+            From = new GregorianDate(1610, precision: Precision.Years),
+            To = new GregorianDate(1721, precision: Precision.Years),
+            Page = 1
+        };
 
         // Hypothèques
         yield return new Data
