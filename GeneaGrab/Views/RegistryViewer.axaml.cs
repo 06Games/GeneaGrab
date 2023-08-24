@@ -198,7 +198,7 @@ namespace GeneaGrab.Views
             PageTotal.Text = $"/ {pageTotal}";
             PreviousPage.IsEnabled = Info.PageNumber > 1;
             NextPage.IsEnabled = Info.PageNumber < pageTotal;
-            SetInfo(InfoLocationCity, Info.Registry.Location ?? Info.Registry.LocationID);
+            SetInfo(InfoLocationCity, Info.Registry.Location ?? Info.Registry.LocationID ?? Info.Registry.LocationDetails?.LastOrDefault());
             SetInfo(InfoLocationDistrict, Info.Registry!.District ?? Info.Registry.DistrictID);
             SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
             SetInfo(InfoRegistryDate, Info.Registry.Dates);
