@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AD06
 // @icon         https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png
-// @version      2.1.1
+// @version      2.1.2
 // @grant        none
 // @include      https://archives06.fr/*
 // @updateURL    https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD06.user.js
@@ -14,15 +14,16 @@ window.addEventListener("load", function () {
 }, false);
 
 function notice() {
-	for (let addToBinder of document.getElementsByClassName("addToBinder")) {
-		let openInGeneagrab = addToBinder.cloneNode(true);
-		addToBinder.parentElement.lastElementChild.after(openInGeneagrab);
+	for (let noticeAction of document.querySelectorAll(".arc_vignette_sel > .actions")) {
+		let openInGeneagrab = document.createElement("li");
+		openInGeneagrab.classList.add("action", "type-1", "geneagrab");
+		noticeAction.lastElementChild.after(openInGeneagrab);
 
-		openInGeneagrab.classList.replace("addToBinder", "geneagrab");
-		let openInGeneagrabBtn = openInGeneagrab.getElementsByClassName("btn")[0];
+		let openInGeneagrabBtn = openInGeneagrab.appendChild(document.createElement("a"));
+		openInGeneagrabBtn.classList.add("btn");
 		openInGeneagrabBtn.setAttribute("title", "Ouvrir dans GeneaGrab");
 		openInGeneagrabBtn.innerHTML = '<span><span class="text">Ouvrir dans GeneaGrab</span><span class="icon"><img src="https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png" alt="Ouvrir dans GeneaGrab" style="width:28px"></span></span>';
-		openInGeneagrabBtn.setAttribute("href", "geneagrab:registry?url=" + encodeURIComponent(getUrl(addToBinder.parentElement.querySelector(".arc_arklink")?.getAttribute("href"))));
+		openInGeneagrabBtn.setAttribute("href", "geneagrab:registry?url=" + encodeURIComponent(getUrl(noticeAction.querySelector(".arc_arklink")?.getAttribute("href"))));
 	}
 }
 
