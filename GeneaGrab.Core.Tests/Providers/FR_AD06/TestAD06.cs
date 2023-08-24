@@ -40,6 +40,7 @@ public class TestAD06
         Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
         Assert.Equal(data.Ville, registryInfo.Registry.Location);
         Assert.Equal(data.Paroisse, registryInfo.Registry.District);
+        Assert.Equal(data.Details, registryInfo.Registry.LocationDetails);
         Assert.Equal(data.Titre, registryInfo.Registry.Title);
         Assert.Equal(data.SousTitre, registryInfo.Registry.Subtitle);
         Assert.Equal(data.Auteur, registryInfo.Registry.Author);

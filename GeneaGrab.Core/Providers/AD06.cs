@@ -144,18 +144,17 @@ namespace GeneaGrab.Core.Providers
                 if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(GetRegexValue(data, "type")));
                 if (type?.Length > 0) registry.Types = registry.Types.Union(type);
 
+
+                var analyse = await client.GetStringAsync(registry.URL);
+                registry.LocationDetails ??= Regex
+                    .Matches(analyse, @"<ul><li><a href=[^>]+?><span>(?<archivePath>[^>]+?)\.?</span></a>")
+                    .Select(m => GetRegexValue(m.Groups, "archivePath"))
+                    .ToArray();
+
                 if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_ETAT_CIVIL") // The civil registry collection only provides the city through the analysis page
-                {
-                    var analyse = await client.GetStringAsync(registry.URL);
-                    var regex = Regex.Match(analyse, "<ul><li><a href=.*?>.*?<ul><li><a href=.*?><span>(?<city>.*?)</span></a></li></ul>").Groups;
-                    registry.Location ??= ToTitleCase(GetRegexValue(regex, "city"));
-                }
-                else if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && GetRegexValue(data, "title") == $"{GetRegexValue(data, "from")}-{GetRegexValue(data, "to")}")
-                {
-                    var analyse = await client.GetStringAsync(registry.URL);
-                    var regex = Regex.Match(analyse, "<ul><li><a href=[^>]+?><span>(?<title>[^>]+?).</span></a></li></ul></li></ul></li></ul></div>").Groups;
-                    registry.Title = GetRegexValue(regex, "title");
-                }
+                    registry.Location ??= ToTitleCase(registry.LocationDetails.LastOrDefault());
+                else if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && GetRegexValue(data, "title") == $"{GetRegexValue(data, "from")}-{GetRegexValue(data, "to")}") 
+                    registry.Title = registry.LocationDetails.LastOrDefault();
             }
             registry.Notes = string.Join("\n", notes);
 
@@ -177,7 +176,7 @@ namespace GeneaGrab.Core.Providers
                 else if (type is "Tables décennales des naissances" or "Tables alphabétiques des naissances") yield return RegistryType.BirthTable;
                 else if (type is "Baptêmes") yield return RegistryType.Baptism;
                 else if (type is "Tables des baptêmes") yield return RegistryType.BaptismTable;
-                
+
                 else if (type is "Confirmations") yield return RegistryType.Confirmation;
                 else if (type is "Tables des communions") yield return RegistryType.Communion;
 
@@ -188,9 +187,9 @@ namespace GeneaGrab.Core.Providers
 
                 else if (type is "Décès") yield return RegistryType.Death;
                 else if (type is "Tables décennales des décès" or "Tables alphabétiques des décès") yield return RegistryType.DeathTable;
-                else if (type is "Sépultures" or  "Sépultures des enfants décédés sans baptêmes") yield return RegistryType.Burial;
+                else if (type is "Sépultures" or "Sépultures des enfants décédés sans baptêmes") yield return RegistryType.Burial;
                 else if (type is "Tables des sépultures") yield return RegistryType.BurialTable;
-                
+
                 else if (type is "Répertoire") yield return RegistryType.Catalogue;
                 else if (type is "Inventaire") yield return RegistryType.Other;
 
