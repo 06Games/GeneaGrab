@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         AD06
+// @description  Addon GeneaGrab pour le site des archives départementales des Alpes-Maritimes
 // @icon         https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png
-// @version      2.1.2
+// @version      2.1.3
 // @grant        none
-// @include      https://archives06.fr/*
+// @match        https://archives06.fr/**
 // @updateURL    https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD06.user.js
 // @downloadURL  https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD06.user.js
 // ==/UserScript==
@@ -15,9 +16,8 @@ window.addEventListener("load", function () {
 
 function notice() {
 	for (let noticeAction of document.querySelectorAll(".arc_vignette_sel > .actions")) {
-		let openInGeneagrab = document.createElement("li");
-		openInGeneagrab.classList.add("action", "type-1", "geneagrab");
-		noticeAction.lastElementChild.after(openInGeneagrab);
+		let openInGeneagrab = noticeAction.appendChild(document.createElement("li"));
+		openInGeneagrab.classList.add("action", "geneagrab");
 
 		let openInGeneagrabBtn = openInGeneagrab.appendChild(document.createElement("a"));
 		openInGeneagrabBtn.classList.add("btn");
@@ -46,13 +46,13 @@ function getUrl(currentUrl, page) {
 	currentUrl ??= window.location;
 	const regex = /\/ark:\/(?<something>[\w\.]+)(\/(?<id>[\w\.]+))?(\/(?<tag>[\w\.]+))?(\/(?<seq>\d+))?(\/(?<page>\d+))?/;
 	let matches = regex.exec(currentUrl).groups;
-	let url = "https://archives06.fr/ark:/" + matches["something"];
-	if (!matches["id"]) return url;
-	url += "/" + matches["id"];
-	if (!matches["tag"]) return url;
-	url += "/" + matches["tag"];
-	if (!matches["seq"]) return url;
-	url += "/" + matches["seq"];
-	if (page ?? matches["page"]) url += "/" + (page ?? matches["page"]);
+	let url = "https://archives06.fr/ark:/" + matches.something;
+	if (!matches.id) return url;
+	url += "/" + matches.id;
+	if (!matches.tag) return url;
+	url += "/" + matches.tag;
+	if (!matches.seq) return url;
+	url += "/" + matches.seq;
+	if (page ?? matches.page) url += "/" + (page ?? matches.page);
 	return url;
 }
