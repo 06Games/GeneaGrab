@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         AD06
 // @icon         https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png
-// @version      2.1.0
+// @version      2.1.1
 // @grant        none
-// @include      https://archives06.fr/ark:/*
+// @include      https://archives06.fr/*
 // @updateURL    https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD06.user.js
 // @downloadURL  https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD06.user.js
 // ==/UserScript==
@@ -14,15 +14,16 @@ window.addEventListener("load", function () {
 }, false);
 
 function notice() {
-	let book = document.getElementsByClassName("booking")[0];
-	let openInGeneagrab = book.cloneNode(true);
-	book.after(openInGeneagrab);
+	for (let addToBinder of document.getElementsByClassName("addToBinder")) {
+		let openInGeneagrab = addToBinder.cloneNode(true);
+		addToBinder.parentElement.lastElementChild.after(openInGeneagrab);
 
-	openInGeneagrab.classList.replace("booking", "geneagrab");
-	let openInGeneagrabBtn = openInGeneagrab.getElementsByClassName("btn")[0];
-	openInGeneagrabBtn.setAttribute("title", "Ouvrir dans GeneaGrab");
-	openInGeneagrabBtn.innerHTML = '<span><span class="text">Ouvrir dans GeneaGrab</span><span class="icon"><img src="https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png" alt="Ouvrir dans GeneaGrab" style="width:28px"></span></span>';
-	openInGeneagrabBtn.setAttribute("href", "geneagrab:registry?url=" + encodeURIComponent(getUrl()));
+		openInGeneagrab.classList.replace("addToBinder", "geneagrab");
+		let openInGeneagrabBtn = openInGeneagrab.getElementsByClassName("btn")[0];
+		openInGeneagrabBtn.setAttribute("title", "Ouvrir dans GeneaGrab");
+		openInGeneagrabBtn.innerHTML = '<span><span class="text">Ouvrir dans GeneaGrab</span><span class="icon"><img src="https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png" alt="Ouvrir dans GeneaGrab" style="width:28px"></span></span>';
+		openInGeneagrabBtn.setAttribute("href", "geneagrab:registry?url=" + encodeURIComponent(getUrl(addToBinder.parentElement.querySelector(".arc_arklink")?.getAttribute("href"))));
+	}
 }
 
 function viewer() {
@@ -36,21 +37,21 @@ function viewer() {
 	openInGeneagrab.addEventListener("click", function (e) {
 		e.preventDefault();
 		let page = document.querySelector(".monocle-PageNav input.rea11y-NumberInput-value").value;
-		window.location = "geneagrab:registry?url=" + encodeURIComponent(getUrl(page));
+		window.location = "geneagrab:registry?url=" + encodeURIComponent(getUrl(null, page));
 	});
 }
 
-function getUrl(page) {
-	let currentUrl = window.location;
+function getUrl(currentUrl, page) {
+	currentUrl ??= window.location;
 	const regex = /\/ark:\/(?<something>[\w\.]+)(\/(?<id>[\w\.]+))?(\/(?<tag>[\w\.]+))?(\/(?<seq>\d+))?(\/(?<page>\d+))?/;
 	let matches = regex.exec(currentUrl).groups;
 	let url = "https://archives06.fr/ark:/" + matches["something"];
-	if(!matches["id"]) return url;
+	if (!matches["id"]) return url;
 	url += "/" + matches["id"];
-	if(!matches["tag"]) return url;
+	if (!matches["tag"]) return url;
 	url += "/" + matches["tag"];
-	if(!matches["seq"]) return url;
+	if (!matches["seq"]) return url;
 	url += "/" + matches["seq"];
-	if(page ?? matches["page"]) url += "/" + (page ?? matches["page"]);
+	if (page ?? matches["page"]) url += "/" + (page ?? matches["page"]);
 	return url;
 }
