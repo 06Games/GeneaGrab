@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 100
+          fetch-depth: 0
           fetch-tags: true
 
       - name: Setup .NET Core
@@ -46,15 +46,16 @@ jobs:
             brew install create-dmg
           fi
 
-      - name: Build
+      - name: Define some variables
         shell: bash
         run: |
-          # Define some variables for things we need
-          release_name="GeneaGrab-${{ matrix.target }}"
-          version=$(git describe --tags --abbrev=0 | cut -c2- | cut -d '.' -f -3)
-          build=$(git rev-list --all --count)
-          
-          echo "[INFO] Setting app version"
+          echo "release_name="GeneaGrab-${{ matrix.target }}"" >> "$GITHUB_ENV"
+          echo "version=$(git describe --tags --abbrev=0 | cut -c2- | cut -d '.' -f -3)" >> "$GITHUB_ENV"
+          echo "build=$(git rev-list --all --count)" >> "$GITHUB_ENV"
+
+      - name: Set app version
+        shell: bash
+        run: |
           if [ `echo -n ${version//[^.]} | wc -c` -ne 2 ]; then 
             echo "::error title={Invalid version}::{$version isn't a valid version, versions are expected to follow the format #.#.#}"
             exit 1
@@ -65,40 +66,48 @@ jobs:
           fi
           sed -i -r "s/= new\(.*?\)/= new(${version//./,},$build)/" "GeneaGrab/App.cs"
 
-          echo "[INFO] Publishing the project"
+      - name: Publish the project
+        shell: bash
+        run: |
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name" -p:UseAppHost=true
-          
-            echo "[INFO] Generating .app package"
-            APP_NAME="GeneaGrab/GeneaGrab.app"
-            PUBLISH_OUTPUT_DIRECTORY="GeneaGrab/${release_name}/."
-            INFO_PLIST="GeneaGrab/Info.plist"
-            ICON_FILE="GeneaGrab/Assets/Logo/GeneaGrab.icns"
-            
-            if [ -d "$APP_NAME" ]; then
-              rm -rf "$APP_NAME"
-            fi
-            
-            mkdir "$APP_NAME"
-            
-            mkdir "$APP_NAME/Contents"
-            mkdir "$APP_NAME/Contents/MacOS"
-            mkdir "$APP_NAME/Contents/Resources"
-            
-            cp "$INFO_PLIST" "$APP_NAME/Contents/Info.plist"
-            cp "$ICON_FILE" "$APP_NAME/Contents/Resources/$(basename $ICON_FILE)"
-            cp -a "$PUBLISH_OUTPUT_DIRECTORY" "$APP_NAME/Contents/MacOS"
           else
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name"
           fi
 
-          echo "[INFO] Packing for distribution"
+      - name: Generating .app package
+        if: ${{ matrix.target == 'osx-x64' }}
+        shell: bash
+        run: |
+          APP_NAME="GeneaGrab/GeneaGrab.app"
+          PUBLISH_OUTPUT_DIRECTORY="GeneaGrab/${release_name}/."
+          INFO_PLIST="GeneaGrab/Info.plist"
+          ICON_FILE="GeneaGrab/Assets/Logo/GeneaGrab.icns"
+          
+          if [ -d "$APP_NAME" ]; then
+            rm -rf "$APP_NAME"
+          fi
+          
+          mkdir "$APP_NAME"
+          
+          mkdir "$APP_NAME/Contents"
+          mkdir "$APP_NAME/Contents/MacOS"
+          mkdir "$APP_NAME/Contents/Resources"
+          
+          cp "$INFO_PLIST" "$APP_NAME/Contents/Info.plist"
+          cp "$ICON_FILE" "$APP_NAME/Contents/Resources/$(basename $ICON_FILE)"
+          cp -a "$PUBLISH_OUTPUT_DIRECTORY" "$APP_NAME/Contents/MacOS"
+
+      - name: Pack for distribution
+        shell: bash
+        run: |
           cd GeneaGrab/
           mkdir output
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             echo "[INFO] Generating installer"
             wix extension add WixToolset.UI.wixext
             wix build -ext WixToolset.UI.wixext -d Version=${version}.${build} -arch x64 -out "output/${release_name}-installer.msi" geneagrab.wxs
+            rm "output/${release_name}-installer.wixpdb"
           
             echo "[INFO] Generating portable archive"
             7z a -tzip "output/${release_name}-portable.zip" "./${release_name}/*"
@@ -108,15 +117,18 @@ jobs:
             tar czvf "output/${release_name}.tar.gz" "$release_name"
           fi
 
+      - name: Cleaning
+        shell: bash
+        run: |
           # Delete output directory
           rm -r "$release_name"
-          
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.target }}
           path: GeneaGrab/output/*
-          
+
       - name: Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
