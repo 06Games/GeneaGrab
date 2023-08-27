@@ -57,14 +57,10 @@ jobs:
             echo "::error title={Invalid version}::{$version isn't a valid version, versions are expected to follow the format #.#.#}"
             exit 1
           fi
-          sed -i -E '/<key>CFBundleShortVersionString<\/key>/{
-              N
-              s/(<string>).*(<\/string>)/\1'"$version"'\2/
-            }
-              /<key>CFBundleVersion<\/key>/{
-              N
-              s/(<string>).*(<\/string>)/\1'"$build"'\2/
-            }' "GeneaGrab/Info.plist"
+          if [ "${{ matrix.target }}" == "osx-x64" ]; then
+            plutil -replace CFBundleShortVersionString -string "$version" "GeneaGrab/Info.plist"
+            plutil -replace CFBundleVersion -string "$build" "GeneaGrab/Info.plist"
+          fi
           sed -i -r "s/= new\(.*?\)/= new(${version//./,},$build)/" "GeneaGrab/App.cs"
 
           echo "[INFO] Publishing the project"
