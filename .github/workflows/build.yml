@@ -40,7 +40,9 @@ jobs:
         run: |
           dotnet restore
           
-          if [ "${{ matrix.target }}" == "osx-x64" ]; then
+          if [ "${{ matrix.target }}" == "win-x64" ]; then
+            dotnet tool install --global wix
+          elif [ "${{ matrix.target }}" == "osx-x64" ]; then
             brew install create-dmg
           fi
 
@@ -94,7 +96,12 @@ jobs:
           cd GeneaGrab/
           mkdir output
           if [ "${{ matrix.target }}" == "win-x64" ]; then
-            7z a -tzip "output/${release_name}.zip" "./${release_name}/*"
+            echo "[INFO] Generating installer"
+            wix extension add WixToolset.UI.wixext
+            wix build -ext WixToolset.UI.wixext -d Version=${version}.${build} -arch x64 -out "output/${release_name}-installer.msi" geneagrab.wxs
+          
+            echo "[INFO] Generating portable archive"
+            7z a -tzip "output/${release_name}-portable.zip" "./${release_name}/*"
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
             create-dmg --volname "GeneaGrab Installer" --volicon "GeneaGrab.app/Contents/Resources/GeneaGrab.icns" --icon-size 100 --icon "GeneaGrab.app" 100 100 --hide-extension "GeneaGrab.app" --app-drop-link 375 100 "output/${release_name}.dmg" "./GeneaGrab.app/"
           else

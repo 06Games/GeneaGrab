@@ -9,9 +9,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.06games.geneagrab</string>
     <key>CFBundleVersion</key>
-    <string>2.2.0</string>
+    <string>1</string>
     <key>CFBundleShortVersionString</key>
-    <string>2.2.0</string>
+    <string>0.0.0</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleSignature</key>
