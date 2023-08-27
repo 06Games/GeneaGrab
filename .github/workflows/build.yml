@@ -117,12 +117,6 @@ jobs:
             tar czvf "output/${release_name}.tar.gz" "$release_name"
           fi
 
-      - name: Cleaning
-        shell: bash
-        run: |
-          # Delete output directory
-          rm -r "$release_name"
-
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
