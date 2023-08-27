@@ -46,11 +46,29 @@ jobs:
         run: |
           # Define some variables for things we need
           release_name="GeneaGrab-${{ matrix.target }}"
+          version=$(git describe --tags --abbrev=0 | cut -c2- | cut -d '.' -f -3)
+          build=$(git rev-list --all --count)
+          
+          echo "[INFO] Setting app version"
+          if [ `echo -n ${version//[^.]} | wc -c` -ne 2 ]; then 
+            echo "::error title={Invalid version}::{$version isn't a valid version, versions are expected to follow the format #.#.#}"
+            exit 1
+          fi
+          sed -i -E '/<key>CFBundleShortVersionString<\/key>/{
+              N
+              s/(<string>).*(<\/string>)/\1'"$version"'\2/
+            }
+              /<key>CFBundleVersion<\/key>/{
+              N
+              s/(<string>).*(<\/string>)/\1'"$build"'\2/
+            }' "GeneaGrab/Info.plist"
+          sed -i -r "s/= new\(.*?\)/= new(${version//./,},$build)/" "GeneaGrab/App.cs"
 
-          # Build everything
+          echo "[INFO] Publishing the project"
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name" -p:UseAppHost=true
           
+            echo "[INFO] Generating .app package"
             APP_NAME="GeneaGrab/GeneaGrab.app"
             PUBLISH_OUTPUT_DIRECTORY="GeneaGrab/${release_name}/."
             INFO_PLIST="GeneaGrab/Info.plist"
@@ -73,7 +91,7 @@ jobs:
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name"
           fi
 
-          # Pack files
+          echo "[INFO] Packing for distribution"
           cd GeneaGrab/
           mkdir output
           if [ "${{ matrix.target }}" == "win-x64" ]; then
