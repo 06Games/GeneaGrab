@@ -4,12 +4,14 @@
 
 ## Supported archive services
 
+> For some services, UserScripts (🧰) are available to make GeneaGrab easier to use. To install them, you can use [Tampermonkey](https://www.tampermonkey.net/) or any other alternative.
+
 ### :fr: France
 
-* [<img src="GeneaGrab/Assets/Providers/Geneanet.svg" width="20" height="20" /> Geneanet](https://www.geneanet.org/)
+* [<img src="GeneaGrab/Assets/Providers/Geneanet.svg" width="20" height="20" /> Geneanet](https://www.geneanet.org/) ([🧰](GeneaGrab.WebScripts/Geneanet.user.js?raw=1))
 * [<img src="GeneaGrab/Assets/Providers/NiceHistorique.svg" width="20" height="20" /> Nice Historique](http://www.nicehistorique.org/)
-* [<img src="GeneaGrab/Assets/Providers/AD06.svg" width="20" height="20" /> Archives départementales des Alpes-Maritimes](https://archives06.fr/)
-* [<img src="GeneaGrab/Assets/Providers/AD17.svg" width="20" height="20" /> Archives départementales de la Charente-Maritime](https://www.archinoe.net/v2/ad17/registre.html)
+* [<img src="GeneaGrab/Assets/Providers/AD06.svg" width="20" height="20" /> Archives départementales des Alpes-Maritimes](https://archives06.fr/) ([🧰](GeneaGrab.WebScripts/AD06.user.js?raw=1))
+* [<img src="GeneaGrab/Assets/Providers/AD17.svg" width="20" height="20" /> Archives départementales de la Charente-Maritime](https://www.archinoe.net/v2/ad17/registre.html) ([🧰](GeneaGrab.WebScripts/AD17.user.js?raw=1))
 * [<img src="GeneaGrab/Assets/Providers/AD79-86.png" width="20" height="20" /> Archives départementales des Deux-Sèvres et de la Vienne](https://archives-deux-sevres-vienne.fr/)
 
 ### :it: Italy

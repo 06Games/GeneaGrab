@@ -75,7 +75,7 @@ jobs:
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name"
           fi
 
-      - name: Generating .app package
+      - name: Generate .app package
         if: ${{ matrix.target == 'osx-x64' }}
         shell: bash
         run: |
