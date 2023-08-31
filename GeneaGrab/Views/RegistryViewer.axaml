@@ -13,7 +13,7 @@
     <Grid x:Name="LayoutRoot">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
-            <RowDefinition MaxHeight="225" />
+            <RowDefinition MaxHeight="235" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
@@ -30,7 +30,7 @@
             </views:ZoomPanel>
             <ProgressBar Name="ImageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" IsVisible="False" Maximum="1" />
         </RelativePanel>
-        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0" BorderBrush="Gray">
+        <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0" BorderThickness="0 1 0 0" BorderBrush="#FF383838">
             <RelativePanel Margin="15">
                     <StackPanel Orientation="Horizontal">
                         <controls:NumberBox Name="PageNumber" PlaceholderText="Page" Minimum="1" Width="90" Height="32.5" />
@@ -68,7 +68,7 @@
             </RelativePanel>
         </Border>
 
-        <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" BorderThickness="1 0 0 0" BorderBrush="Gray">
+        <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" BorderThickness="1 0 0 0" BorderBrush="#FF383838">
             <StackPanel Spacing="15" Margin="15" Name="SidePanel">
                 <StackPanel>
                     <TextBlock Name="InfoLocationCity" FontSize="18" FontWeight="Medium" Text="City" TextWrapping="Wrap" />
