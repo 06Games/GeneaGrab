@@ -75,11 +75,11 @@ namespace GeneaGrab.Core.Models
                 if (!string.IsNullOrEmpty(dates)) name += $" ({dates})";
 
                 // Title
-                if (!string.IsNullOrEmpty(Title)) name += $" - {Title}";
-                else if (!string.IsNullOrEmpty(Notes)) name += $" - {Notes.Split('\n').FirstOrDefault()}";
+                if (!string.IsNullOrEmpty(Title)) name += $"\n{Title}";
+                else if (!string.IsNullOrEmpty(Notes)) name += $"\n{Notes.Split('\n').FirstOrDefault()}";
                 
                 if (!string.IsNullOrEmpty(Subtitle)) name += $" ({Subtitle})";
-                if (!string.IsNullOrEmpty(Author)) name += $" - {Author}";
+                if (!string.IsNullOrEmpty(Author)) name += $"\n{Author}";
 
                 return name;
             }

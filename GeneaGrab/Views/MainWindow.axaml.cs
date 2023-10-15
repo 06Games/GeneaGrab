@@ -110,10 +110,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         if (tab is null) return;
         var frame = tab.Content as Frame;
         var frameData = frame?.Content as ITabPage;
+        var name = frameData?.DynaTabHeader?.Split('\n');
         var defaultName = ResourceExtensions.GetLocalized($"Tab.{frame?.SourcePageType?.Name}", ResourceExtensions.Resource.UI) ?? frame?.SourcePageType?.Name;
 
         tab.IconSource = frameData is null ? null : new SymbolIconSource { Symbol = frameData.IconSource };
-        tab.Header = frameData?.DynaTabHeader ?? defaultName;
+        tab.Header = name == null ? defaultName : string.Join(" - ", name);
         tab.Tag = frameData?.Identifier;
         Debug.WriteLine(tab.Tag);
 
