@@ -64,7 +64,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             titlebar.PointerPressed += InputElement_OnPointerPressed;
             titlebar.PointerReleased += InputElement_OnPointerReleased;
         });
-        
+
         NavigationService.Navigated += (_, e) =>
         {
             FrameChanged();
@@ -82,9 +82,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.Startup += (_, _) => Dispatcher.UIThread.Post(() =>
-                {
-                    if (NavigationService.TabCount <= 1) NavigationService.OpenTab(NewTab());
-                });
+            {
+                if (NavigationService.TabCount <= 1) NavigationService.OpenTab(NewTab());
+            });
         else NavigationService.OpenTab(NewTab());
     }
 
@@ -122,19 +122,20 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             (Application.Current as App)?.Discord.SetPresence(new RichPresence
             {
-                Details = defaultName?[..Math.Min(defaultName.Length, 96)],
-                State = frameData?.DynaTabHeader?[..Math.Min(frameData.DynaTabHeader.Length, 96)],
+                Details = name is not { Length: > 0 } ? null : name[0][..Math.Min(name[0].Length, 96)],
+                State = name is not { Length: > 1 } ? null : name[1][..Math.Min(name[1].Length, 96)],
                 Assets = new Assets
                 {
                     LargeImageKey = "logo",
-                    SmallImageKey = frameData is null ? null : Enum.GetName(frameData.IconSource)?.ToLower()
+                    SmallImageKey = frameData is null ? null : Enum.GetName(frameData.IconSource)?.ToLower(),
+                    SmallImageText = defaultName?[..Math.Min(defaultName.Length, 96)]
                 }
             });
         }
-        catch(Exception e) { Log.Warning(e, "Couldn't update Discord RPC"); }
+        catch (Exception e) { Log.Warning(e, "Couldn't update Discord RPC"); }
     }
 
-    
+
     #region Search
 
     protected void RegistrySearch_TextChanged(object? sender, TextChangedEventArgs _)
