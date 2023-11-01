@@ -46,6 +46,7 @@ jobs:
             brew install create-dmg
           elif [ "${{ matrix.target }}" == "linux-x64" ]; then
             dotnet tool install -g KuiperZone.PupNet
+            sudo apt update & sudo apt install libfuse2
           fi
 
       - name: Define some variables
