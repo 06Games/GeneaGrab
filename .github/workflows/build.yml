@@ -44,6 +44,11 @@ jobs:
             dotnet tool install --global wix
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
             brew install create-dmg
+          elif [ "${{ matrix.target }}" == "linux-x64" ]; then
+            dotnet tool install -g KuiperZone.PupNet
+            apt update & apt install -y flatpak flatpak-builder dpkg rpm
+            flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+            flatpak install flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
           fi
 
       - name: Define some variables
@@ -71,6 +76,11 @@ jobs:
         run: |
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name" -p:UseAppHost=true
+          elif [ "${{ matrix.target }}" == "linux-x64" ]; then
+            for kind in appimage deb rpm flatpak zip
+            do
+                pupnet --runtime "${{ matrix.target }}" -y --kind $kind --app-version "$version[$build]"
+            done
           else
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name"
           fi
@@ -114,7 +124,7 @@ jobs:
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
             create-dmg --volname "GeneaGrab Installer" --volicon "GeneaGrab.app/Contents/Resources/GeneaGrab.icns" --icon-size 100 --icon "GeneaGrab.app" 100 100 --hide-extension "GeneaGrab.app" --app-drop-link 375 100 "output/${release_name}.dmg" "./GeneaGrab.app/"
           else
-            tar czvf "output/${release_name}.tar.gz" "$release_name"
+            mv ../.out/* "output/"
           fi
 
       - name: Upload artifact

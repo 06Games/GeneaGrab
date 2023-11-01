@@ -368,6 +368,7 @@ FodyWeavers.xsd
 # .NET Core build folders
 bin/
 obj/
+.out/
 
 # Common node modules locations
 /node_modules
