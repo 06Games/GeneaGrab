@@ -41,14 +41,11 @@ jobs:
           dotnet restore
           
           if [ "${{ matrix.target }}" == "win-x64" ]; then
-            dotnet tool install --global wix
+            dotnet tool install -g  wix
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
             brew install create-dmg
           elif [ "${{ matrix.target }}" == "linux-x64" ]; then
             dotnet tool install -g KuiperZone.PupNet
-            sudo apt update & sudo apt install -y flatpak flatpak-builder dpkg rpm
-            sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-            sudo flatpak install flathub org.freedesktop.Platform//23.08 org.freedesktop.Sdk//23.08
           fi
 
       - name: Define some variables
@@ -77,7 +74,7 @@ jobs:
           if [ "${{ matrix.target }}" == "osx-x64" ]; then
             dotnet publish -r "${{ matrix.target }}" -c Release --self-contained -p:PublishDir="$release_name" -p:UseAppHost=true
           elif [ "${{ matrix.target }}" == "linux-x64" ]; then
-            for kind in appimage deb rpm flatpak zip
+            for kind in appimage deb rpm zip
             do
                 pupnet --runtime "${{ matrix.target }}" -y --kind $kind --app-version "$version[$build]"
             done
