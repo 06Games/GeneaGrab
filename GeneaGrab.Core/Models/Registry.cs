@@ -38,6 +38,10 @@ namespace GeneaGrab.Core.Models
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Author { get; set; }
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string Notes { get; set; }
 
+
+        /// <summary>Any additional information that might be needed</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public object Extra { get; set; }
+
         public Date From { get; set; }
         public Date To { get; set; }
         [JsonIgnore]

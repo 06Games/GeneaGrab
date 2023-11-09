@@ -134,27 +134,27 @@ namespace GeneaGrab.Core.Providers
             if (labelRegexExp != null)
             {
                 var data = Regex.Match(sequence.Label, labelRegexExp).Groups;
-                registry.CallNumber ??= GetRegexValue(data, "callnum");
-                registry.Location ??= ToTitleCase(GetRegexValue(data, "city"));
-                registry.District ??= ToTitleCase(GetRegexValue(data, "district"));
-                registry.From ??= GetRegexValue(data, "from");
-                registry.To ??= GetRegexValue(data, data["to"].Success ? "to" : "from");
-                registry.Title ??= GetRegexValue(data, "title");
-                registry.Subtitle ??= GetRegexValue(data, "subtitle");
-                registry.Author ??= GetRegexValue(data, "author");
-                if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(GetRegexValue(data, "type")));
+                registry.CallNumber ??= data.TryGetValue("callnum");
+                registry.Location ??= ToTitleCase(data.TryGetValue("city"));
+                registry.District ??= ToTitleCase(data.TryGetValue("district"));
+                registry.From ??= data.TryGetValue("from");
+                registry.To ??= data.TryGetValue(data["to"].Success ? "to" : "from");
+                registry.Title ??= data.TryGetValue("title");
+                registry.Subtitle ??= data.TryGetValue("subtitle");
+                registry.Author ??= data.TryGetValue("author");
+                if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(data.TryGetValue("type")));
                 if (type?.Length > 0) registry.Types = registry.Types.Union(type);
 
 
                 var analyse = await client.GetStringAsync(registry.URL);
                 registry.LocationDetails ??= Regex
                     .Matches(analyse, @"<ul><li><a href=[^>]+?><span>(?<archivePath>[^>]+?)\.?</span></a>")
-                    .Select(m => GetRegexValue(m.Groups, "archivePath"))
+                    .Select(m => m.Groups.TryGetValue("archivePath"))
                     .ToArray();
 
                 if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_ETAT_CIVIL") // The civil registry collection only provides the city through the analysis page
                     registry.Location ??= ToTitleCase(registry.LocationDetails.LastOrDefault());
-                else if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && GetRegexValue(data, "title") == $"{GetRegexValue(data, "from")}-{GetRegexValue(data, "to")}") 
+                else if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && data.TryGetValue("title") == $"{data.TryGetValue("from")}-{data.TryGetValue("to")}")
                     registry.Title = registry.LocationDetails.LastOrDefault();
             }
             registry.Notes = string.Join("\n", notes);
@@ -164,7 +164,6 @@ namespace GeneaGrab.Core.Providers
             return new RegistryInfo(registry) { PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1 };
         }
 
-        private static string GetRegexValue(GroupCollection data, string key) => data[key].Success ? data[key].Value : null;
         private static string ToTitleCase(string text) => text is null ? null : Regex.Replace(text, @"\p{L}+", match => match.Value[..1].ToUpper() + match.Value[1..].ToLower());
 
         private static IEnumerable<RegistryType> GetTypes(string typeActe)
