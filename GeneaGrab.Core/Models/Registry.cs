@@ -9,7 +9,7 @@ using Newtonsoft.Json.Converters;
 namespace GeneaGrab.Core.Models
 {
     /// <summary>Data on the registry</summary>
-    public class Registry : IEquatable<Registry>
+    public sealed class Registry : IEquatable<Registry>
     {
         public Registry() { }
         public Registry(Provider provider) => ProviderID = provider.Id;
@@ -27,7 +27,7 @@ namespace GeneaGrab.Core.Models
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)] public string ArkURL { get; set; }
         [JsonProperty(ItemConverterType = typeof(StringEnumConverter))] public IEnumerable<RegistryType> Types { get; set; } = Array.Empty<RegistryType>();
         [JsonIgnore]
-        public string TypeToString => Types.Any() ? string.Join(", ", Types.Select(t =>
+        public string TypeToString => Types != null && Types.Any() ? string.Join(", ", Types.Select(t =>
         {
             var type = Enum.GetName(typeof(RegistryType), t);
             return Data.Translate($"Registry/Type/{type}", type);
@@ -77,7 +77,7 @@ namespace GeneaGrab.Core.Models
                 // Title
                 if (!string.IsNullOrEmpty(Title)) name += $"\n{Title}";
                 else if (!string.IsNullOrEmpty(Notes)) name += $"\n{Notes.Split('\n').FirstOrDefault()}";
-                
+
                 if (!string.IsNullOrEmpty(Subtitle)) name += $" ({Subtitle})";
                 if (!string.IsNullOrEmpty(Author)) name += $"\n{Author}";
 
@@ -95,7 +95,10 @@ namespace GeneaGrab.Core.Models
         public static bool operator !=(Registry one, Registry two) => !(one == two);
         public override int GetHashCode() => ID.GetHashCode();
     }
-    public class DateFormatConverter : IsoDateTimeConverter { public DateFormatConverter(string format) => DateTimeFormat = format; }
+    public class DateFormatConverter : IsoDateTimeConverter
+    {
+        public DateFormatConverter(string format) => DateTimeFormat = format;
+    }
     public class PagesConverter : JsonConverter<RPage[]>
     {
         public override RPage[] ReadJson(JsonReader reader, Type objectType, RPage[] existingValue, bool hasExistingValue, JsonSerializer serializer)
