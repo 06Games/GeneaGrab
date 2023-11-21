@@ -159,7 +159,7 @@ namespace GeneaGrab.Core.Helpers
             var registry = new Registry
             {
                 URL = ead.DocLink,
-                Types = null,
+                Types = docPageInfo.TryGetValue("Mot matière thésaurus", out var thesaurus) ? ParseTypes(thesaurus) : null,
                 ProviderID = Id,
                 ID = ead.DocId,
                 CallNumber = ead.UnitId,
@@ -171,14 +171,16 @@ namespace GeneaGrab.Core.Helpers
                 Pages = pages.Select((pageImage, pageIndex) => new RPage
                 {
                     Number = pageIndex + 1,
-                    URL = pageImage,
-                    Extra = pageIndex + 1 == info.Position ? ead : null
+                    URL = pageImage
                 }).ToArray(),
                 Extra = series
             };
             Data.AddOrUpdate(Data.Providers[Id].Registries, registry.ID, registry);
             return new RegistryInfo(registry) { PageNumber = info.Position };
         }
+
+        protected IEnumerable<RegistryType> ParseTypes(IEnumerable<string> thesaurus) => thesaurus.Select(ParseTag).Where(type => type != RegistryType.Unknown);
+        protected abstract RegistryType ParseTag(string tag);
 
         #region API Models
 

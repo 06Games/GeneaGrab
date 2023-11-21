@@ -22,5 +22,13 @@ namespace GeneaGrab.Core.Providers
             if (url.Host != "recherche.archives.nicecotedazur.org" || !url.AbsolutePath.StartsWith("/viewer/series/")) return null;
             return await base.GetRegistryFromUrlAsync(url);
         }
+
+        protected override RegistryType ParseTag(string tag) => tag switch
+        {
+            "naissance" => RegistryType.Birth,
+            "mariage" => RegistryType.Marriage,
+            "décès" => RegistryType.Death,
+            _ => RegistryType.Unknown
+        };
     }
 }
