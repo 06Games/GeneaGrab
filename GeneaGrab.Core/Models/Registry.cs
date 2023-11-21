@@ -49,19 +49,10 @@ namespace GeneaGrab.Core.Models
         {
             get
             {
-                if (From != null && To != null && From == To) return From.ToString(Precision.Days);
-                if (From != null && To != null)
-                {
-                    var from = From;
-                    var to = To;
-                    var format = Precision.Years;
-                    if (from.Precision >= Precision.Days && to.Precision >= Precision.Days && (from.Day != to.Day || from.Day.Value != 1)) format = Precision.Days;
-                    else if (from.Precision >= Precision.Months && to.Precision >= Precision.Months && (from.Month != to.Month || from.Month.Value != 1)) format = Precision.Months;
-                    return $"{from.ToString(format)} - {to.ToString(format)}";
-                }
-                if (From != null) return $"{From.ToString(Precision.Days)} - ?";
-                if (To != null) return $"? - {To.ToString(Precision.Days)}";
-                return null;
+                if (From != null && To != null && From == To) return From.ToString();
+                if (From != null && To != null) return $"{From} - {To}";
+                if (From != null) return $"{From} - ?";
+                return To != null ? $"? - {To}" : null;
             }
         }
 
