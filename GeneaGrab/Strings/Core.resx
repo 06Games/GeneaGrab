@@ -170,4 +170,8 @@
     <value>Departmental Archives of Charente-Maritime</value>
         <comment>archives.charente-maritime.fr</comment>
   </data>
+    <data name="Provider.AMNice" xml:space="preserve">
+        <value>Municipal Archives of Nice</value>
+        <comment>archives.nicecotedazur.org</comment>
+    </data>
 </root>

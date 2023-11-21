@@ -58,6 +58,7 @@ namespace GeneaGrab.Core.Models
                     // France
                     new Geneanet(),
                     new AD06(),
+                    new Nice(),
                     new NiceHistorique(),
                     new AD17(),
                     new AD79_86(),

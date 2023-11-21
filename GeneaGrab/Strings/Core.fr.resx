@@ -119,4 +119,7 @@
     <data name="Provider.AD17" xml:space="preserve">
         <value>Archives départementales de la Charente-Maritime</value>
     </data>
+    <data name="Provider.AMNice" xml:space="preserve">
+        <value>Archives Nice Côte d'Azur</value>
+    </data>
 </root>
