@@ -67,22 +67,29 @@ namespace GeneaGrab.Core.Helpers
             return (dates?.FirstOrDefault(), dates?.LastOrDefault());
         }
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
-        protected static Dictionary<string, string> ParsePhysDescFromDocPage(string docWebPage)
-            => ParseKeyValues(docWebPage, @"<section class=""physdesc"">.*?<\/header>.*?(<span><h4>(?<key>[^<>]*?)( :)?<\/h4> (?<value>[^<>]*?)\.?<\/span>.*?)+</section>");
-        protected static Dictionary<string, string> ParseLegalFromDocPage(string docWebPage)
+        protected static Dictionary<string, string[]> ParsePhysDescFromDocPage(string docWebPage) => ParseKeyValues(docWebPage,
+            @"<span><h4>(?<key>[^<>]*?)( :)?<\/h4> (?<value>[^<>]*?)\.?<\/span>",
+            @"<section class=""physdesc"">.*?<\/header>(?<dico>.*?)</section>");
+        [SuppressMessage("ReSharper", "StringLiteralTypo")]
+        protected static Dictionary<string, string[]> ParseLegalFromDocPage(string docWebPage)
             => ParseKeyValues(docWebPage, @"<section class=""accessrestrict"">\s*<header><h3>(?<key>[^<>]*?)</h3><\/header>\s*?<section .*?>(?<value>[^<>]*?)</section>\s*?</section>");
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
-        protected static Dictionary<string, string> ParseAltFormFromDocPage(string docWebPage)
+        protected static Dictionary<string, string[]> ParseAltFormFromDocPage(string docWebPage)
             => ParseKeyValues(docWebPage, @"<section class=""altformavail"">\s*<header><h3>(?<key>[^<>]*?)</h3><\/header>\s*<p>(?<value>[^<>]*?)</p>.*?</section>");
         [SuppressMessage("ReSharper", "StringLiteralTypo")]
-        protected static Dictionary<string, string> ParseDescriptorsFromDocPage(string docWebPage) => ParseKeyValues(docWebPage,
-            @"<section class=""controlaccess"">.*?<\/header>.*?(<div>.*?<strong>(?<key>[^<>]*?)( :)?<\/strong> (<a.*?>(?<value>[^<>]*?)\.?</a>( • )?)+.*?<\/div>.*?)+</section>");
-        protected static Dictionary<string, string> ParseKeyValues(string docWebPage, string pattern, RegexOptions options = RegexOptions.Singleline)
-            => Regex
-                .Matches(docWebPage, pattern, options)
-                .GroupBy(kv => kv.Groups.TryGetValue("key"))
-                .ToDictionary(kv => kv.Key, kv => string.Join(", ", kv.Select(v => v.Groups.TryGetValue("value"))));
-        protected static Dictionary<string, string> ParseDocPage(string docWebPage)
+        protected static Dictionary<string, string[]> ParseDescriptorsFromDocPage(string docWebPage) => ParseKeyValues(docWebPage,
+            @"<div>.*?<strong>(?<key>[^<>]*?)( :)?<\/strong> (<a.*?>(?<value>[^<>]*?)\.?</a>( • )?)+.*?<\/div>",
+            @"<section class=""controlaccess"">.*?<\/header>(?<dico>.*?)</section>");
+        protected static Dictionary<string, string[]> ParseKeyValues(string docWebPage, string pattern, string sectionPattern = null, RegexOptions options = RegexOptions.Singleline)
+        {
+            var section = sectionPattern == null ? docWebPage : Regex.Match(docWebPage, sectionPattern, options).Groups.TryGetValue("dico");
+            if (section == null) return new Dictionary<string, string[]>();
+            return Regex.Matches(section, pattern, options)
+                .Select(match => match.Groups)
+                .GroupBy(kv => kv.TryGetValue("key"), kv => kv["value"].Captures)
+                .ToDictionary(kv => kv.Key, kv => kv.SelectMany(values => values.Select(v => v.Value)).ToArray());
+        }
+        protected static Dictionary<string, string[]> ParseDocPage(string docWebPage)
             => ParsePhysDescFromDocPage(docWebPage)
                 .Union(ParseLegalFromDocPage(docWebPage))
                 .Union(ParseAltFormFromDocPage(docWebPage))
@@ -95,7 +102,7 @@ namespace GeneaGrab.Core.Helpers
             var webpage = await HttpClient.GetStringAsync(url.OriginalString);
             var (series, pages) = ParseViewerPage(webpage);
 
-            var info = await RetrievePageInfo(series, page);
+            var info = await RetrievePageInfo(series, string.IsNullOrEmpty(page) ? pages.FirstOrDefault() : page);
             var ead = info.Remote.EncodedArchivalDescription;
 
             var docWebPage = await HttpClient.GetStringAsync(DocInfoUrl(ead.DocId));
@@ -110,10 +117,10 @@ namespace GeneaGrab.Core.Helpers
                 ID = ead.DocId,
                 CallNumber = ead.UnitId,
                 Title = ead.UnitTitle,
-                Author = docPageInfo.TryGetValue("Personne", out var personne) && docPageInfo.Remove("Personne") ? personne : null,
+                Author = docPageInfo.TryGetValue("Personne", out var personne) && docPageInfo.Remove("Personne") ? string.Join(", ", personne) : null,
                 From = from,
                 To = to,
-                Notes = string.Join("\n", docPageInfo.Select(kv => $"{kv.Key}: {kv.Value}")),
+                Notes = string.Join("\n", docPageInfo.Select(kv => $"{kv.Key}: {string.Join(", ", kv.Value)}")),
                 Pages = pages.Select((pageImage, pageIndex) => new RPage
                 {
                     Number = pageIndex + 1,
