@@ -51,7 +51,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <!-- ReSharper disable once Xaml.BindingWithContextNotResolved -->
-                        <AutoCompleteBox Name="SearchBox" TextChanged="RegistrySearch_TextChanged" ValueMemberBinding="{Binding Text}" SelectionChanged="RegistrySearch_SuggestionChosen" Watermark="{Binding RegistryText}" />
+                        <AutoCompleteBox Name="SearchBox" AsyncPopulator="PopulateAsync" FilterMode="None" ValueMemberBinding="{Binding Text}" SelectionChanged="RegistrySearch_SuggestionChosen" Watermark="{Binding RegistryText}" />
                     </StackPanel>
                     <views:WindowsTitleBar Grid.Column="2" VerticalAlignment="Stretch" />
                 </Grid>

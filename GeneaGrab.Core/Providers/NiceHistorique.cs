@@ -17,16 +17,12 @@ namespace GeneaGrab.Core.Providers
         public override string Url => "https://www.nicehistorique.org/";
         public override bool IndexSupport => false;
 
-        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
+        public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
-            info = null;
-            if (url.Host != "www.nicehistorique.org" || !url.AbsolutePath.StartsWith("/vwr")) return false;
+            if (url.Host != "www.nicehistorique.org" || !url.AbsolutePath.StartsWith("/vwr")) return null;
 
             //TODO: Find a way to do this without having to make a request
-            var task = Infos(url);
-            task.Wait();
-            info = task.Result;
-            return true;
+            return await Infos(url);
         }
 
         public override async Task<RegistryInfo> Infos(Uri url)

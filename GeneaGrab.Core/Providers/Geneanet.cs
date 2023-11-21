@@ -20,22 +20,21 @@ namespace GeneaGrab.Core.Providers
         public override string Url => "https://www.geneanet.org/";
         public override bool IndexSupport => false;
 
-        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
+        public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
-            info = null;
-            if (url.Host != "www.geneanet.org" || !url.AbsolutePath.StartsWith("/registres/view")) return false;
+            if (url.Host != "www.geneanet.org" || !url.AbsolutePath.StartsWith("/registres/view")) return null;
 
             var regex = Regex.Match(url.OriginalString, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
-            info = new RegistryInfo
+            return new RegistryInfo
             {
                 RegistryID = regex.Groups["col"]?.Value,
                 ProviderID = "Geneanet",
                 PageNumber = int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var pageNumber) ? pageNumber : 1
             };
-            return true;
         }
 
         #region Infos
+
         public override async Task<RegistryInfo> Infos(Uri url)
         {
             var registry = new Registry(Data.Providers["Geneanet"]) { URL = url.OriginalString };
@@ -46,10 +45,12 @@ namespace GeneaGrab.Core.Providers
 
             var client = new HttpClient();
             var page = await client.GetStringAsync(registry.URL);
-            var infos = Regex.Match(page, "Informations sur le document.*?<p>(\\[.*\\] - )?(?<location>.*) \\((?<locationDetails>.*?)\\) - (?<globalType>.*?)( \\((?<type>.*?)\\))?( - .*)? *\\| (?<from>.*) - (?<to>.*?)<\\/p>.*?<p>(?<cote>.*)</p>(.*<p>(?<notaire>.*)</p>)?.*<p class=\\\"no-margin-bottom\\\">(?<betterType>.*?)(\\..*| -.*)?</p>.*<p>(?<note>.*)</p>.*<strong>Lien permanent : </strong>", RegexOptions.Multiline | RegexOptions.Singleline); //https://regex101.com/r/3Ou7DP/5
+            var infos = Regex.Match(page,
+                "Informations sur le document.*?<p>(\\[.*\\] - )?(?<location>.*) \\((?<locationDetails>.*?)\\) - (?<globalType>.*?)( \\((?<type>.*?)\\))?( - .*)? *\\| (?<from>.*) - (?<to>.*?)<\\/p>.*?<p>(?<cote>.*)</p>(.*<p>(?<notaire>.*)</p>)?.*<p class=\\\"no-margin-bottom\\\">(?<betterType>.*?)(\\..*| -.*)?</p>.*<p>(?<note>.*)</p>.*<strong>Lien permanent : </strong>",
+                RegexOptions.Multiline | RegexOptions.Singleline); //https://regex101.com/r/3Ou7DP/5
             registry.Location = registry.LocationID = infos.Groups["location"].Value.Trim(' ');
             registry.LocationDetails = infos.Groups["locationDetails"]?.Value.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Reverse().ToArray() ?? Array.Empty<string>();
-            
+
             var (types, location, notes) = TryParseNotes(page, infos);
             registry.Types = types;
             registry.Notes = notes;
@@ -97,7 +98,8 @@ namespace GeneaGrab.Core.Providers
             var types = new List<RegistryType>();
             var global = (infos.Groups["globalType"] ?? infos.Groups["type"])?.Value.Trim(' ').ToLowerInvariant();
             foreach (var t in (infos.Groups["betterType"] ?? infos.Groups["type"])?.Value.Split(',') ?? Array.Empty<string>())
-                if (TryGetType(t.Trim(' ').ToLowerInvariant(), out var type)) types.Add(type);
+                if (TryGetType(t.Trim(' ').ToLowerInvariant(), out var type))
+                    types.Add(type);
 
             bool TryGetType(string type, out RegistryType t)
             {
@@ -130,9 +132,11 @@ namespace GeneaGrab.Core.Providers
 
             return (types, location, note);
         }
+
         #endregion
 
         #region Page
+
         public override Task<string> Ark(Registry registry, RPage page) => Task.FromResult(page.URL);
         public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
         {
@@ -182,6 +186,7 @@ namespace GeneaGrab.Core.Providers
             await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }
+
         #endregion
     }
 }

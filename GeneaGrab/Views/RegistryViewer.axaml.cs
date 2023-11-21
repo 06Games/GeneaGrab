@@ -154,9 +154,15 @@ namespace GeneaGrab.Views
                     break;
                 case Uri url:
                     await LocalData.LoadDataAsync().ConfigureAwait(false);
-                    
+
                     RegistryInfo? info = null;
-                    var provider = Data.Providers.Values.FirstOrDefault(p => p.TryGetRegistryId(url, out info));
+                    Provider? provider = null;
+                    foreach (var p in Data.Providers.Values)
+                        if ((info = await p.GetRegistryFromUrlAsync(url)) != null)
+                        {
+                            provider = p;
+                            break;
+                        }
                     if (provider != null && info != null) Info = provider.Registries.ContainsKey(info.RegistryID) ? info : await provider.Infos(url);
                     break;
                 default:

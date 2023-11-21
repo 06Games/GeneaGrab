@@ -21,14 +21,14 @@ namespace GeneaGrab.Core.Models
         public string Icon => $"/Assets/Providers/{Id}.png";
         public override string ToString() => Name;
 
-        
-        public abstract bool TryGetRegistryId(Uri url, out RegistryInfo info);
+
+        public abstract Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url);
         public abstract Task<RegistryInfo> Infos(Uri url);
         public abstract Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress);
         public abstract Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress);
-        public abstract  Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress);
+        public abstract Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress);
         public abstract Task<string> Ark(Registry registry, RPage page);
-        
+
 
         public Dictionary<string, Registry> Registries { get; } = new();
         public string RegisterCount

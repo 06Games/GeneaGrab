@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -116,7 +118,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         tab.IconSource = frameData is null ? null : new SymbolIconSource { Symbol = frameData.IconSource };
         tab.Header = name == null ? defaultName : string.Join(" - ", name);
         tab.Tag = frameData?.Identifier;
-        Debug.WriteLine(tab.Tag);
 
         try
         {
@@ -138,34 +139,38 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     #region Search
 
-    protected void RegistrySearch_TextChanged(object? sender, TextChangedEventArgs _)
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
+    public static async Task<IEnumerable<object>> PopulateAsync(string? query, CancellationToken _)
     {
-        if (sender is not AutoCompleteBox searchBar) return;
-        if (searchBar.Text != searchBar.SelectedItem?.ToString()) searchBar.ItemsSource = Search(searchBar.Text);
-        searchBar.FilterMode = AutoCompleteFilterMode.None;
-    }
-    private static IEnumerable<Result> Search(string? query)
-    {
-        if (string.IsNullOrWhiteSpace(query)) return Enumerable.Empty<Result>();
+        var searchResults = new List<Result>();
+        if (string.IsNullOrWhiteSpace(query)) return searchResults;
+
+        if (!Uri.TryCreate(query, UriKind.Absolute, out var uri))
+            searchResults.AddRange(GetRegistries(r => $"{r.Location ?? r.LocationID}: {r.Name}"));
+
+        searchResults.AddRange(GetRegistries(r => r.URL).ToList());
+        if (searchResults.Any()) return searchResults;
+
+        foreach (var (key, value) in Data.Providers)
+        {
+            var info = await value.GetRegistryFromUrlAsync(uri);
+            if (info == null) continue;
+            searchResults.Add(new Result { Text = $"Online Match: {key} ({(info.RegistryID.Length > 18 ? $"{info.RegistryID[..15]}..." : info.RegistryID)})", Value = uri });
+        }
+        return searchResults;
+
         IEnumerable<Result> GetRegistries(Func<Registry, string?>? contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
             .Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
             .Select(r => new Result { Text = $"{r.Location ?? r.LocationID}: {r.Name}", Value = new RegistryInfo(r) }));
-
-        if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return GetRegistries(r => $"{r.Location ?? r.LocationID}: {r.Name}");
-
-        var registries = GetRegistries(r => r.URL).ToList();
-        if (!registries.Any())
-            foreach (var (key, value) in Data.Providers)
-                if (value.TryGetRegistryId(uri, out var info))
-                    registries.Add(new Result { Text = $"Online Match: {key} ({(info.RegistryID.Length > 18 ? $"{info.RegistryID[..15]}..." : info.RegistryID)})", Value = uri });
-        return registries;
     }
-    private class Result
+
+    private sealed class Result
     {
         public object? Value { get; init; }
         public string? Text { get; init; }
         public override string? ToString() => Text;
     }
+
     private void RegistrySearch_SuggestionChosen(object? sender, SelectionChangedEventArgs args)
     {
         if (args.AddedItems.Count == 0) return;

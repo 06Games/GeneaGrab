@@ -20,19 +20,17 @@ namespace GeneaGrab.Core.Providers
         public override string Url => "https://www.archinoe.net/v2/ad17/registre.html";
         public override bool IndexSupport => false;
 
-        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
+        public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
-            info = null;
-            if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith("/v2/ad17/")) return false;
+            if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith("/v2/ad17/")) return null;
 
             var query = HttpUtility.ParseQueryString(url.Query);
-            info = new RegistryInfo
+            return new RegistryInfo
             {
                 RegistryID = query["id"],
                 ProviderID = "AD17",
                 PageNumber = int.TryParse(query["page"], out var p) ? p : 1
             };
-            return true;
         }
 
         public override async Task<RegistryInfo> Infos(Uri url)
@@ -42,13 +40,18 @@ namespace GeneaGrab.Core.Providers
             var client = new HttpClient();
             var pageBody = await client.GetStringAsync(registry.URL).ConfigureAwait(false);
 
-            var pages = Regex.Matches(pageBody, @"<img src="".*?"" width=""1px"" height=""1px"" id=""visu_image_(?<num>\d*?)""(.|\n)*?data-original=""(?<original>.*?)"".*?\/>").Cast<Match>(); // https://regex101.com/r/muCsZx/2
+            var pages = Regex.Matches(pageBody, @"<img src="".*?"" width=""1px"" height=""1px"" id=""visu_image_(?<num>\d*?)""(.|\n)*?data-original=""(?<original>.*?)"".*?\/>")
+                .Cast<Match>(); // https://regex101.com/r/muCsZx/2
             registry.Pages = pages.Select((p, i) => new RPage { Number = i + 1, DownloadURL = p.Groups["original"].Value }).ToArray();
             var query = HttpUtility.ParseQueryString(url.Query);
             if (!int.TryParse(query["page"], out var pageNumber)) pageNumber = 1;
-            
-            var infos = Regex.Match(query["infos"], @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>").Groups; // https://regex101.com/r/Ju2Y1b/3
-            if (infos.Count == 0) infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>", RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
+
+            var infos = Regex.Match(query["infos"],
+                    @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>")
+                .Groups; // https://regex101.com/r/Ju2Y1b/3
+            if (infos.Count == 0)
+                infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>",
+                    RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
             if (infos.Count == 0) return null;
             registry.ID = query["id"] ?? infos["id"]?.Value;
             registry.CallNumber = infos["cote"]?.Value;
@@ -65,12 +68,13 @@ namespace GeneaGrab.Core.Providers
                 if (type.Contains("Baptêmes")) yield return RegistryType.Baptism;
 
                 var bannsIndex = type.IndexOf("Publications de Mariages", StringComparison.InvariantCulture);
-                if (bannsIndex >= 0) {
+                if (bannsIndex >= 0)
+                {
                     yield return RegistryType.Banns;
-                    
+
                     //Since the term "Mariages" is both a type in itself and a part of "Publications de Mariages", we have to check if there is another occurrence of the term
                     var pos = -1;
-                    while ((pos=type.IndexOf("Mariages",pos+1, StringComparison.InvariantCulture))!=-1)
+                    while ((pos = type.IndexOf("Mariages", pos + 1, StringComparison.InvariantCulture)) != -1)
                     {
                         if (pos == bannsIndex + "Publications de ".Length) continue; // We are in the case where the term "Mariages" belongs to the expression "Publications de Mariages".
                         yield return RegistryType.Marriage;
@@ -107,7 +111,11 @@ namespace GeneaGrab.Core.Providers
             var ark = await client.GetStringAsync($"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadURL}&desc={desc}&id={registry.ID}&ir=&vue=1&ajax=true").ConfigureAwait(false);
             var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups["link"]?.Value;
 
-            if (string.IsNullOrWhiteSpace(link)) { Log.Error("AD17: Couldn't parse ark url ({Ark})", ark); return $"p{page.Number}"; }
+            if (string.IsNullOrWhiteSpace(link))
+            {
+                Log.Error("AD17: Couldn't parse ark url ({Ark})", ark);
+                return $"p{page.Number}";
+            }
 
             page.URL = link;
             Data.Providers["AD17"].Registries[registry.ID].Pages[page.Number - 1] = page;
@@ -133,7 +141,8 @@ namespace GeneaGrab.Core.Providers
             string generate = null;
             if (page.Width < 1 || page.Height < 1)
             {
-                generate = await client.GetStringAsync($"https://www.archinoe.net/v2/images/genereImage.html?r=0&n=0&b=0&c=0&o=IMG&id=visu_image_${page.Number}&image={page.DownloadURL}").ConfigureAwait(false);
+                generate = await client.GetStringAsync($"https://www.archinoe.net/v2/images/genereImage.html?r=0&n=0&b=0&c=0&o=IMG&id=visu_image_${page.Number}&image={page.DownloadURL}")
+                    .ConfigureAwait(false);
                 var data = generate.Split('\t');
                 page.Width = int.TryParse(data[4], out var w) ? w : 0;
                 page.Height = int.TryParse(data[5], out var h) ? h : 0;
@@ -141,7 +150,11 @@ namespace GeneaGrab.Core.Providers
 
             var wantedW = (int)(page.Width * zoom);
             var wantedH = (int)(page.Height * zoom);
-            if (Math.Max(wantedW, wantedH) > 1800 || generate is null) generate = await client.GetStringAsync($"https://www.archinoe.net/v2/images/genereImage.html?l={page.Width}&h={page.Height}&x=0&y=0&r=0&n=0&b=0&c=0&o=TILE&id=tuile_20_2_2_3&image={page.DownloadURL}&ol={page.Width * zoom}&oh={page.Height * zoom}").ConfigureAwait(false);
+            if (Math.Max(wantedW, wantedH) > 1800 || generate is null)
+                generate = await client
+                    .GetStringAsync(
+                        $"https://www.archinoe.net/v2/images/genereImage.html?l={page.Width}&h={page.Height}&x=0&y=0&r=0&n=0&b=0&c=0&o=TILE&id=tuile_20_2_2_3&image={page.DownloadURL}&ol={page.Width * zoom}&oh={page.Height * zoom}")
+                    .ConfigureAwait(false);
 
             //We can't track the progress because we don't know the final size
             var image = await Grabber.GetImage($"https://www.archinoe.net{generate.Split('\t')[1]}", client).ConfigureAwait(false);
@@ -152,9 +165,10 @@ namespace GeneaGrab.Core.Providers
             await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }
-        
-        [SuppressMessage("ReSharper", "StringLiteralTypo")] 
-        private static readonly Dictionary<string, int> Cities = new Dictionary<string, int> {
+
+        [SuppressMessage("ReSharper", "StringLiteralTypo")]
+        private static readonly Dictionary<string, int> Cities = new Dictionary<string, int>
+        {
             { "Agonnay", 170000598 },
             { "Agudelle", 170000003 },
             { "Aigrefeuille-d'Aunis", 170019179 },

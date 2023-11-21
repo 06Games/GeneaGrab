@@ -18,19 +18,17 @@ namespace GeneaGrab.Core.Providers
         public override string Url => "https://archives-deux-sevres-vienne.fr/";
         public override bool IndexSupport => false;
 
-        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
+        public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
-            info = null;
-            if (url.Host != "archives-deux-sevres-vienne.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return false;
+            if (url.Host != "archives-deux-sevres-vienne.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return null;
 
             var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
-            info = new RegistryInfo
+            return new RegistryInfo
             {
                 ProviderID = "AD79-86",
                 RegistryID = queries["id"].Value,
                 PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
             };
-            return true;
         }
 
         public override async Task<RegistryInfo> Infos(Uri url)

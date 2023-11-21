@@ -18,17 +18,15 @@ namespace GeneaGrab.Core.Providers
         public override string Url => "https://www.antenati.san.beniculturali.it/";
         public override bool IndexSupport => false;
 
-        public override bool TryGetRegistryId(Uri url, out RegistryInfo info)
+        public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
-            info = null;
-            if (url.Host != "dam-antenati.san.beniculturali.it" || !url.AbsolutePath.StartsWith("/antenati/containers/")) return false;
+            if (url.Host != "dam-antenati.san.beniculturali.it" || !url.AbsolutePath.StartsWith("/antenati/containers/")) return null;
 
-            info = new RegistryInfo
+            return new RegistryInfo
             {
                 ProviderID = "Antenati",
                 RegistryID = Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"].Value
             };
-            return true;
         }
 
         public override async Task<RegistryInfo> Infos(Uri url)
