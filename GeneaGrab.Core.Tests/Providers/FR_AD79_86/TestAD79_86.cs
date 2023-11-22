@@ -4,10 +4,7 @@ namespace GeneaGrab.Core.Tests.Providers.FR_AD79_86;
 
 public class TestAD79_86
 {
-    private readonly AD79_86 instance;
-    public TestAD79_86() {
-        instance = new AD79_86();
-    }
+    private readonly AD79_86 instance = new();
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD79_86))]

@@ -4,10 +4,7 @@ namespace GeneaGrab.Core.Tests.Providers.FR_AD17;
 
 public class TestAD17
 {
-    private readonly AD17 instance;
-    public TestAD17() {
-        instance = new AD17();
-    }
+    private readonly AD17 instance = new();
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD17))]
