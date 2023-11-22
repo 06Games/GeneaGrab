@@ -28,6 +28,10 @@ namespace GeneaGrab.Core.Providers
             "naissance" => RegistryType.Birth,
             "mariage" => RegistryType.Marriage,
             "décès" => RegistryType.Death,
+            "publication périodique" => RegistryType.Newspaper,
+            "ouvrage imprimé" => RegistryType.Book,
+            "carte postale" => RegistryType.Other,
+            "document photographique" => RegistryType.Other,
             _ => RegistryType.Unknown
         };
     }

@@ -143,6 +143,14 @@ namespace GeneaGrab.Core.Helpers
                 .Union(ParseDescriptorsFromDocPage(docWebPage))
                 .ToDictionary(x => x.Key, x => x.Value);
 
+        protected static (string placeInCity, string city, string[] cityLocation) ParsePlace(Dictionary<string, string[]> docPageInfo)
+        {
+            string place;
+            if (!docPageInfo.TryGetValue("Lieu", out var places) || (place = places.FirstOrDefault()) == null) return (null, null, null);
+            var regex = Regex.Match(place, @"^(?<city>[^(]*) \((?<position>[^(]*)\)( +-+ +(?<details>.+))?$").Groups;
+            return (regex.TryGetValue("details"), regex.TryGetValue("city"), regex.TryGetValue("position")?.Split(", ").Reverse().ToArray());
+        }
+
         protected async Task<(BachRegistryExtras series, string[] pages, BachSerieInfo info)> RetrieveInfoFromUrl(Uri url)
         {
             var page = ParseViewerUrl(url).page;
@@ -160,16 +168,20 @@ namespace GeneaGrab.Core.Helpers
             var docWebPage = await HttpClient.GetStringAsync(DocInfoUrl(ead.DocId));
             var (from, to) = ParseDateFromDocPage(docWebPage);
             var docPageInfo = ParseDocPage(docWebPage);
+            var (placeInCity, city, cityLocation) = ParsePlace(docPageInfo);
 
             var registry = new Registry
             {
                 URL = ead.DocLink,
-                Types = docPageInfo.TryGetValue("Mot matière thésaurus", out var thesaurus) ? ParseTypes(thesaurus) : null,
+                Types = GetTypes(docPageInfo).SelectMany(ParseTypes),
                 ProviderID = Id,
                 ID = ead.DocId,
                 CallNumber = ead.UnitId,
                 Title = ead.UnitTitle,
-                Author = docPageInfo.TryGetValue("Personne", out var personne) && docPageInfo.Remove("Personne") ? string.Join(", ", personne) : null,
+                Author = docPageInfo.TryGetValue("Auteur", out var personne) && docPageInfo.Remove("Auteur") ? string.Join(", ", personne) : null,
+                District = placeInCity,
+                Location = city,
+                LocationDetails = cityLocation,
                 From = from,
                 To = to,
                 Notes = string.Join("\n", docPageInfo.Select(kv => $"{kv.Key}: {string.Join(", ", kv.Value)}")),
@@ -184,6 +196,11 @@ namespace GeneaGrab.Core.Helpers
             return new RegistryInfo(registry) { PageNumber = info.Position ?? 1 };
         }
 
+        protected IEnumerable<string[]> GetTypes(Dictionary<string, string[]> docPageInfo)
+        {
+            if (docPageInfo.TryGetValue("Typologie documentaire", out var typologie)) yield return typologie;
+            if (docPageInfo.TryGetValue("Mot matière thésaurus", out var thesaurus)) yield return thesaurus;
+        }
         protected IEnumerable<RegistryType> ParseTypes(IEnumerable<string> thesaurus) => thesaurus.Select(ParseTag).Where(type => type != RegistryType.Unknown);
         protected abstract RegistryType ParseTag(string tag);
 
