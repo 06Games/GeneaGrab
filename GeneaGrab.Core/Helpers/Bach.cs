@@ -34,7 +34,7 @@ namespace GeneaGrab.Core.Helpers
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
             var (_, _, info) = await RetrieveInfoFromUrl(url);
-            return new RegistryInfo { ProviderID = Id, RegistryID = info.Remote.EncodedArchivalDescription.DocId, PageNumber = info.Position };
+            return new RegistryInfo { ProviderID = Id, RegistryID = info.Remote.EncodedArchivalDescription.DocId, PageNumber = info.Position ?? 1 };
         }
 
         public override Task<RegistryInfo> Infos(Uri url) => RetrieveViewerInfo(url);
@@ -70,8 +70,8 @@ namespace GeneaGrab.Core.Helpers
 
         protected string DocUrl(string docId) => $"{BaseUrl}/archives/show/{docId}";
         protected string DocInfoUrl(string docId) => $"{DocUrl(docId)}/ajax";
-        protected string PageViewerUrl(BachRegistryExtras series, string page) => $"{BaseUrl}/viewer/series/{series.Path}?img={page}";
-        protected string PageInfoUrl(BachRegistryExtras series, string page) => $"{BaseUrl}{series.AppUrl}/ajax/series/infos/{series.Path}/{page}";
+        protected string PageViewerUrl(BachRegistryExtras series, string page) => $"{BaseUrl}/viewer/{(series.IsSeries ? "series" : "viewer")}/{series.Path}?img={page}";
+        protected string PageInfoUrl(BachRegistryExtras series, string page) => $"{BaseUrl}{series.AppUrl}/ajax/{(series.IsSeries ? "series" : "image")}/infos/{series.Path}/{page}";
         protected string PageImageUrl(BachRegistryExtras series, string page, ImageSize size = ImageSize.Default)
             => $"{BaseUrl}{series.AppUrl}/show/{size.ToString().ToLower()}/{series.Path}/{page}";
 
@@ -84,9 +84,7 @@ namespace GeneaGrab.Core.Helpers
 
         protected static (string path, string page) ParseViewerUrl(Uri url)
         {
-            var path = Regex.Match(url.AbsolutePath, @"/viewer/series/(?<path>.*?)").Groups["path"];
-            var img = HttpUtility.ParseQueryString(url.Query).Get("img");
-            return (path.Success ? path.Value : null, img);
+            return (Regex.Match(url.AbsolutePath, @"/viewer/\w*?/(?<path>.*?)").Groups.TryGetValue("path"), HttpUtility.ParseQueryString(url.Query).Get("img"));
         }
         protected async Task<BachSerieInfo> RetrievePageInfo(BachRegistryExtras series, string page)
         {
@@ -96,10 +94,17 @@ namespace GeneaGrab.Core.Helpers
 
         protected static (BachRegistryExtras series, string[] pages) ParseViewerPage(string webpage)
         {
-            var regex = Regex.Match(webpage,
-                @"var series_path = '(?<series_path>.*?)';.*?var series_content =.*?parseJSON\('\[""(?<series_content>.*?)""\]'\);.*?var app_url = '(?<app_url>.*?)';",
-                RegexOptions.Singleline).Groups;
-            return (new BachRegistryExtras { AppUrl = regex.TryGetValue("app_url"), Path = regex.TryGetValue("series_path") }, regex.TryGetValue("series_content")?.Split("\",\""));
+            var regex = Regex.Match(webpage, @"var series_content =.*?parseJSON\('(\["""")?(?<series_content>.*?)(""""\])?'\);", RegexOptions.Singleline).Groups;
+            var pages = regex.TryGetValue("series_content");
+            var imgPath = GetVariable("image_path");
+            return (new BachRegistryExtras
+            {
+                AppUrl = GetVariable("app_url"),
+                Path = imgPath ?? GetVariable("series_path"),
+                IsSeries = imgPath == null
+            }, pages == "null" ? new[] { Regex.Match(webpage, @"imageName: '(?<img>.*?)'").Groups.TryGetValue("img") } : pages.Split(","));
+
+            string GetVariable(string variableName) => Regex.Match(webpage, $"var {variableName} = '(?<var>.*?)';").Groups.TryGetValue("var");
         }
 
         protected static (Date from, Date to) ParseDateFromDocPage(string docWebPage)
@@ -176,7 +181,7 @@ namespace GeneaGrab.Core.Helpers
                 Extra = series
             };
             Data.AddOrUpdate(Data.Providers[Id].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = info.Position };
+            return new RegistryInfo(registry) { PageNumber = info.Position ?? 1 };
         }
 
         protected IEnumerable<RegistryType> ParseTypes(IEnumerable<string> thesaurus) => thesaurus.Select(ParseTag).Where(type => type != RegistryType.Unknown);
@@ -188,6 +193,7 @@ namespace GeneaGrab.Core.Helpers
         {
             public string AppUrl { get; init; }
             public string Path { get; init; }
+            public bool IsSeries { get; init; }
         }
 
         [SuppressMessage("ReSharper", "StringLiteralTypo"), SuppressMessage("ReSharper", "IdentifierTypo")]
@@ -199,8 +205,8 @@ namespace GeneaGrab.Core.Helpers
             [JsonProperty("tennext")] public string TenNext { get; set; }
             [JsonProperty("prev")] public string Previous { get; set; }
             [JsonProperty("tenprev")] public string TenPrevious { get; set; }
-            [JsonProperty("count")] public int PageCount { get; set; }
-            [JsonProperty("position")] public int Position { get; set; }
+            [JsonProperty("count")] public int? PageCount { get; set; }
+            [JsonProperty("position")] public int? Position { get; set; }
             [JsonProperty("remote")] public BachRemote Remote { get; set; }
         }
         protected class BachRemote
