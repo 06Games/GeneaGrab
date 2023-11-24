@@ -87,4 +87,7 @@
     <data name="Registry.PageCount" xml:space="preserve">
         <value>{0} pages</value>
     </data>
+    <data name="Discord.OpenRegistry" xml:space="preserve">
+        <value>Open registry</value>
+    </data>
 </root>

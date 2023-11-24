@@ -40,7 +40,15 @@ namespace GeneaGrab.Views
         public async Task RichPresence(RichPresence richPresence)
         {
             if (Info is null) return;
-            richPresence.Buttons = new[] { new Button { Label = "Open registry", Url = await Info.Provider.Ark(Info.Registry, Info.Page) } };
+            var url = await Info.Provider.Ark(Info.Registry, Info.Page);
+            richPresence.Buttons = new[]
+            {
+                new Button
+                {
+                    Label = ResourceExtensions.GetLocalized("Discord.OpenRegistry", ResourceExtensions.Resource.UI),
+                    Url = Uri.IsWellFormedUriString(url, UriKind.Absolute) ? url : Info.Registry.URL
+                }
+            };
         }
 
 

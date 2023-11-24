@@ -68,4 +68,7 @@
     <data name="Tab.RegistryViewer" xml:space="preserve">
         <value>Visionneuse de registre</value>
     </data>
+    <data name="Discord.OpenRegistry" xml:space="preserve">
+        <value>Ouvrir le registre</value>
+    </data>
 </root>
