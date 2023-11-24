@@ -13,11 +13,13 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using DiscordRPC;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
+using Button = DiscordRPC.Button;
 
 namespace GeneaGrab.Views
 {
@@ -35,6 +37,11 @@ namespace GeneaGrab.Views
             }
         }
         public string? Identifier => Info?.RegistryID;
+        public async Task RichPresence(RichPresence richPresence)
+        {
+            if (Info is null) return;
+            richPresence.Buttons = new[] { new Button { Label = "Open registry", Url = await Info.Provider.Ark(Info.Registry, Info.Page) } };
+        }
 
 
         protected string? DownloadText => ResourceExtensions.GetLocalized("Registry.Download", ResourceExtensions.Resource.UI);

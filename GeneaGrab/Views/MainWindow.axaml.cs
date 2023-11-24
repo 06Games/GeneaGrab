@@ -28,6 +28,7 @@ public interface ITabPage
     Symbol IconSource { get; }
     string? DynaTabHeader { get; }
     string? Identifier { get; }
+    Task RichPresence(RichPresence richPresence);
 }
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
@@ -119,9 +120,9 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         tab.Header = name == null ? defaultName : string.Join(" - ", name);
         tab.Tag = frameData?.Identifier;
 
-        try
+        _ = Task.Run(async () =>
         {
-            (Application.Current as App)?.Discord.SetPresence(new RichPresence
+            var rp = new RichPresence
             {
                 Details = name is not { Length: > 0 } ? null : name[0][..Math.Min(name[0].Length, 96)],
                 State = name is not { Length: > 1 } ? null : name[1][..Math.Min(name[1].Length, 96)],
@@ -131,9 +132,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
                     SmallImageKey = frameData is null ? null : Enum.GetName(frameData.IconSource)?.ToLower(),
                     SmallImageText = defaultName?[..Math.Min(defaultName.Length, 96)]
                 }
-            });
-        }
-        catch (Exception e) { Log.Warning(e, "Couldn't update Discord RPC"); }
+            };
+            if (frameData != null) await frameData.RichPresence(rp);
+            (Application.Current as App)?.Discord.SetPresence(rp);
+        }).ContinueWith(t =>
+        {
+            Log.Warning(t.Exception, "Couldn't update Discord RPC");
+        }, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
     }
 
 

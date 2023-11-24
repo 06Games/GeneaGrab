@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
+using DiscordRPC;
 using DynamicData;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
@@ -17,6 +19,7 @@ namespace GeneaGrab.Views
         public Symbol IconSource => Symbol.Library;
         public string? DynaTabHeader => Provider?.Name;
         public string? Identifier => Provider?.Id;
+        public Task RichPresence(RichPresence richPresence) => Task.CompletedTask;
         private Provider? Provider { get; set; }
 
         public RegistriesPage()
@@ -39,7 +42,8 @@ namespace GeneaGrab.Views
             foreach (var registry in Provider.Registries.Values)
             {
                 var parent = Items;
-                foreach (var location in ((registry.Location == null ? registry.LocationDetails : null) ?? Array.Empty<string>()).Append(registry.Location).Append(registry.District)) // To add LocationDetails in the structure, replace the empty array
+                foreach (var location in ((registry.Location == null ? registry.LocationDetails : null) ?? Array.Empty<string>()).Append(registry.Location)
+                         .Append(registry.District)) // To add LocationDetails in the structure, replace the empty array
                 {
                     if (string.IsNullOrWhiteSpace(location)) continue;
                     var container = parent.FirstOrDefault(c => c.Title == location);

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using DiscordRPC;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
@@ -15,8 +17,9 @@ namespace GeneaGrab.Views
         public Symbol IconSource => Symbol.Setting;
         public string? DynaTabHeader => null;
         public string? Identifier => null;
+        public Task RichPresence(RichPresence richPresence) => Task.CompletedTask;
 
-        
+
         public string? Personalization => ResourceExtensions.GetLocalized("Settings.Personalization", ResourceExtensions.Resource.UI);
         public string? ThemeTitle => ResourceExtensions.GetLocalized("Settings.Theme", ResourceExtensions.Resource.UI);
         public string? LightTheme => ResourceExtensions.GetLocalized("Settings.Theme.Light", ResourceExtensions.Resource.UI);

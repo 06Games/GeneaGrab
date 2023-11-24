@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using DiscordRPC;
 using DynamicData;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Core.Models;
@@ -15,6 +16,7 @@ public partial class ProviderList : Page, ITabPage
     public Symbol IconSource => Symbol.World;
     public string? DynaTabHeader => null;
     public string? Identifier => null;
+    public Task RichPresence(RichPresence richPresence) => Task.CompletedTask;
 
     public ProviderList()
     {
