@@ -5,18 +5,11 @@ using System.Threading.Tasks;
 
 namespace GeneaGrab.Core.Models
 {
-    public interface IndexAPI
-    {
-        Task<IEnumerable<Index>> GetIndex(Registry registry, RPage page);
-        Task AddIndex(Registry registry, RPage page, Index index);
-    }
-
     /// <summary>Registry provider</summary>
     public abstract class Provider : IEquatable<Provider>
     {
         public abstract string Id { get; }
         public abstract string Url { get; }
-        public abstract bool IndexSupport { get; }
         public string Name => Data.Translate($"Provider.{Id}", Id);
         public string Icon => $"/Assets/Providers/{Id}.png";
         public override string ToString() => Name;

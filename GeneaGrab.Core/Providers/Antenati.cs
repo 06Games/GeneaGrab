@@ -16,7 +16,6 @@ namespace GeneaGrab.Core.Providers
     {
         public override string Id => "Antenati";
         public override string Url => "https://www.antenati.san.beniculturali.it/";
-        public override bool IndexSupport => false;
 
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {

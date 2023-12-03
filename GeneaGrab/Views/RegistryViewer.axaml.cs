@@ -207,7 +207,6 @@ namespace GeneaGrab.Views
                     page.Thumbnail = stream.ToBitmap(false);
                     Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
-            await GetIndex();
             RefreshView(image);
         }
         private void RefreshView(Stream? img = null)
@@ -293,27 +292,16 @@ namespace GeneaGrab.Views
         #region Index
 
         public ObservableCollection<Index> Index { get; private set; } = new();
-        private async Task GetIndex()
+        private Task GetIndex()
         {
-            if (Info == null) return;
             var indexPanel = IndexPanel;
-            if (!Info.Provider.IndexSupport)
-            {
-                indexPanel.IsVisible = false;
-                return;
-            }
-
             indexPanel.IsVisible = true;
-            IEnumerable<Core.Models.Index>? index = null;
-            if (Info.Provider is IndexAPI indexAPI)
-                index = await indexAPI.GetIndex(Info.Registry, Info.Page);
-            if (index is null) Index.Clear();
-            else Index = new ObservableCollection<Index>(index.Cast<Index>());
+            Index.Clear();
+            return Task.CompletedTask;
         }
         private void AddIndex(object sender, RoutedEventArgs e)
         {
-            if (!(Info?.Provider.IndexSupport ?? false)) return;
-            /* TODO */
+            if (Info is null) return;
         }
         private void DisplayIndexRectangle(Index? index)
         {
@@ -328,28 +316,24 @@ namespace GeneaGrab.Views
                 Height = pos.Height
             };
 
-            var tt = new ToolTip { Content = $"{index.FormatedDate} ({index.FormatedType}): {index.District}\n{index.Notes}" };
+            var tt = new ToolTip { Content = index.ToString() };
             ToolTip.SetTip(btn, tt);
 
             ImageCanvas.Children.Add(btn);
-            Canvas.SetTop(btn, pos.X);
-            Canvas.SetLeft(btn, pos.Y);
+            Canvas.SetLeft(btn, pos.X);
+            Canvas.SetTop(btn, pos.Y);
         }
 
         #endregion
     }
 
-    public class Index : Core.Models.Index
+    public class Index
     {
-        public string? FormatedDate => Date?.ToString("d");
-        public string? FormatedType
-        {
-            get
-            {
-                var typeName = Enum.GetName(typeof(RegistryType), Type);
-                return Data.Translate($"Registry.Type.{typeName}", typeName);
-            }
-        }
+        public int Id { get; set; }
+        public System.Drawing.Rectangle Position { get; set; }
+        public int Page { get; set; }
+
+        public override string ToString() => $"#{Id} p{Page} {Position}";
     }
     public class PageList
     {

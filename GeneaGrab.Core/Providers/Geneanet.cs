@@ -18,7 +18,6 @@ namespace GeneaGrab.Core.Providers
     {
         public override string Id => "Geneanet";
         public override string Url => "https://www.geneanet.org/";
-        public override bool IndexSupport => false;
 
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {

@@ -16,7 +16,6 @@ namespace GeneaGrab.Core.Providers
     {
         public override string Id => "AD79-86";
         public override string Url => "https://archives-deux-sevres-vienne.fr/";
-        public override bool IndexSupport => false;
 
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {

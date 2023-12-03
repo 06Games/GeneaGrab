@@ -117,11 +117,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate DataType="views:Index">
                                 <Grid Width="200" RowDefinitions="*,*,*,*" ColumnDefinitions="100,100">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding FormatedDate}" FontSize="12" />
-                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding FormatedType}" FontSize="12" TextAlignment="Right" />
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding District}" FontSize="13" />
-                                    <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Retranscription}" Margin="0,5" />
-                                    <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding Notes}" />
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Test" FontSize="12" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

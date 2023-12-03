@@ -10,7 +10,6 @@ namespace GeneaGrab.Core.Providers
         public override string Id => "AMNice";
         public override string Url => "https://archives.nicecotedazur.org/";
         protected override string BaseUrl => "https://recherche.archives.nicecotedazur.org";
-        public override bool IndexSupport => false;
 
         public Nice()
         {

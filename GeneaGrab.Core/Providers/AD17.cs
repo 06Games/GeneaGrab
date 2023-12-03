@@ -18,7 +18,6 @@ namespace GeneaGrab.Core.Providers
     {
         public override string Id => "AD17";
         public override string Url => "https://www.archinoe.net/v2/ad17/registre.html";
-        public override bool IndexSupport => false;
 
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
