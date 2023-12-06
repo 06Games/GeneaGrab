@@ -30,37 +30,34 @@ namespace GeneaGrab.Views
         /// <summary>The user has changed the zoom</summary>
         public event Action<double>? ZoomChanged;
 
+        private Size size;
         protected override Size ArrangeOverride(Size finalSize)
         {
+            size = finalSize;
             Initialize()?.Arrange(new Rect(new Point(), finalSize)); //Initialise the element and place the child in it
             return finalSize;
         }
         private Control? Initialize()
         {
-            if (initialized && Child != null) return Child;
-            if (!initialized)
-            {
-                PointerPressed += (_, e) =>
-                {
-                    var point = e.GetCurrentPoint(this);
-                    if (point.Properties.IsRightButtonPressed) Reset();
-                };
-
-                void SetClip() => Clip = new RectangleGeometry { Rect = new Rect(0, 0, Bounds.Width, Bounds.Height) }; //Prevents the child from being rendered out of the element
-                LayoutUpdated += (_, _) => SetClip();
-                SetClip();
-            }
-
-            Child = Children.FirstOrDefault();
+            Child ??= Children.FirstOrDefault();
             if (Child is null) return null;
+            if (initialized) return Child;
+
+            PointerPressed += (_, e) =>
+            {
+                var point = e.GetCurrentPoint(this);
+                if (point.Properties.IsRightButtonPressed) Reset();
+            };
+
+            LayoutUpdated += (_, _) => SetClip();
+            SetClip();
 
             var group = new TransformGroup();
-            var st = new ScaleTransform();
-            group.Children.Add(st);
-            var tt = new TranslateTransform();
-            group.Children.Add(tt);
+            group.Children.Add(new ScaleTransform());
+            group.Children.Add(new TranslateTransform());
+            Child.GetPropertyChangedObservable(BoundsProperty).Subscribe(_ => Reset());
             Child.RenderTransform = group;
-            Child.RenderTransformOrigin = new RelativePoint(new Point(0.0, 0.0), RelativeUnit.Absolute);
+            Child.RenderTransformOrigin = new RelativePoint(new Point(0.5, 0.5), RelativeUnit.Relative);
             Child.PointerWheelChanged += child_MouseWheel;
             Child.PointerPressed += child_MouseLeftButtonDown;
             Child.PointerReleased += child_MouseLeftButtonUp;
@@ -68,16 +65,18 @@ namespace GeneaGrab.Views
 
             initialized = true;
             return Child;
+
+            void SetClip() => Clip = new RectangleGeometry { Rect = new Rect(0, 0, Bounds.Width, Bounds.Height) }; //Prevents the child from being rendered out of the element
         }
 
         private static TranslateTransform? GetTranslateTransform(Visual element)
         {
-            if (element.RenderTransform is TransformGroup group) return (TranslateTransform)group.Children.First(tr => tr is TranslateTransform);
+            if (element.RenderTransform is TransformGroup group) return group.Children.First(tr => tr is TranslateTransform) as TranslateTransform;
             return null;
         }
         private static ScaleTransform? GetScaleTransform(Visual element)
         {
-            if (element.RenderTransform is TransformGroup group) return (ScaleTransform)group.Children.First(tr => tr is ScaleTransform);
+            if (element.RenderTransform is TransformGroup group) return group.Children.FirstOrDefault(tr => tr is ScaleTransform) as ScaleTransform;
             return null;
         }
 
@@ -88,7 +87,12 @@ namespace GeneaGrab.Views
 
             // Reset zoom
             var st = GetScaleTransform(Child);
-            if (st != null) st.ScaleX = st.ScaleY = 1.0;
+            if (st != null)
+            {
+                var scale = Vector.One;
+                if (Child.Bounds.Width != 0 && Child.Bounds.Height != 0) scale = size / Child.Bounds.Size;
+                st.ScaleX = st.ScaleY = Math.Min(scale.X, scale.Y);
+            }
 
             // Reset position
             var tt = GetTranslateTransform(Child);
@@ -104,21 +108,19 @@ namespace GeneaGrab.Views
             var st = GetScaleTransform(Child);
             var tt = GetTranslateTransform(Child);
             if (st == null || tt == null) return;
+            var position = new Point(tt.X, tt.Y);
 
             var delta = e.Delta.Y;
-            if (delta <= 0 && (st.ScaleX < .4 || st.ScaleY < .4)) return;
-            var zoom = delta > 0 ? .2 : -.2;
+            var zoom = 1.5;
+            if (delta < 0) zoom = 1 / zoom;
+            if (st.ScaleX * zoom < .1 || st.ScaleX * zoom > 10) return;
 
-            var (relativeX, relativeY) = e.GetCurrentPoint(Child).Position;
-            var absoluteX = relativeX * st.ScaleX + tt.X;
-            var absoluteY = relativeY * st.ScaleY + tt.Y;
-
-            st.ScaleX += zoom;
-            st.ScaleY += zoom;
-
-            tt.X = absoluteX - relativeX * st.ScaleX;
-            tt.Y = absoluteY - relativeY * st.ScaleY;
-
+            var pointer = e.GetCurrentPoint(Child).Position;
+            var childTopRight = new Point(Child.Bounds.Width, Child.Bounds.Height);
+            var pointerFromCenter = pointer - childTopRight / 2;
+            var oldZoom = st.ScaleX;
+            st.ScaleX = st.ScaleY *= zoom;
+            MoveTo(position + pointerFromCenter * oldZoom * (1 - zoom)); // position + oldMousePosFromCenter - currentMousePosFromCenter
             ZoomChanged?.Invoke(st.ScaleX);
         }
 
@@ -150,28 +152,21 @@ namespace GeneaGrab.Views
         private void child_MouseMove(object? _, PointerEventArgs e)
         {
             if (Child is null || !Equals(e.Pointer.Captured, Child)) return;
+            var (mouseX, mouseY) = e.GetCurrentPoint(this).Position;
+            MoveTo(origin.X + mouseX - start.X, origin.Y + mouseY - start.Y);
+        }
 
+        private void MoveTo(Point p) => MoveTo(p.X, p.Y);
+        private void MoveTo(double x, double y)
+        {
+            if (Child is null) return;
             var st = GetScaleTransform(Child);
             var tt = GetTranslateTransform(Child);
             if (st == null || tt == null) return;
-            var (mouseX, mouseY) = e.GetCurrentPoint(this).Position;
 
-
-            var x = origin.X - start.X + mouseX;
-            var left = x - Child.Bounds.Width / 2;
-            var right = left + Child.Bounds.Width * st.ScaleX;
-            var minX = Bounds.Width / -4;
-            var maxX = Bounds.Width / 4;
-            if (left < maxX && right > minX) tt.X = x;
-
-            var y = origin.Y - start.Y + mouseY;
-            var top = y - Child.Bounds.Height / 2;
-            var bottom = top + Child.Bounds.Height * st.ScaleY;
-            var minY = Bounds.Height / -4;
-            var maxY = Bounds.Height / 4;
-            if (top < maxY && bottom > minY) tt.Y = y;
-
-
+            var max = Bounds.Size / 4 + Child.Bounds.Size * st.ScaleX / 2;
+            tt.X = Math.Max(Math.Min(x, max.Width), -max.Width);
+            tt.Y = Math.Max(Math.Min(y, max.Height), -max.Height);
             PositionChanged?.Invoke(tt.X, tt.Y);
         }
 
