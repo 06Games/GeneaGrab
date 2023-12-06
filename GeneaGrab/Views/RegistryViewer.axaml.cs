@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
@@ -80,6 +82,12 @@ namespace GeneaGrab.Views
                     var index = PageNumbers.IndexOf(Info.PageNumber);
                     Pages[index] = Pages[index].Refresh();
                 };
+
+            Image.GetObservable(BoundsProperty).Subscribe(b =>
+            {
+                MainGrid.Width = b.Width;
+                MainGrid.Height = b.Height;
+            });
         }
 
         public RegistryInfo? Info { get; set; }
@@ -234,8 +242,7 @@ namespace GeneaGrab.Views
             }
 
             PageNotes.Text = Info.Page?.Notes ?? "";
-            ImageCanvas.Children.Clear();
-            foreach (var index in Index.Where(i => i.Page == Info.PageNumber)) DisplayIndexRectangle(index);
+            DisplayIndex();
 
             var image = Image;
             var pageList = PageList;
@@ -278,20 +285,17 @@ namespace GeneaGrab.Views
         public new event PropertyChangedEventHandler? PropertyChanged;
         private void OnPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-        public void TrackProgress(Progress progress)
+        private void TrackProgress(Progress progress) => Dispatcher.UIThread.Post(() =>
         {
-            Dispatcher.UIThread.Post(() =>
-            {
-                var imageProgress = ImageProgress;
-                imageProgress.IsVisible = !progress.Done;
-                imageProgress.IsIndeterminate = progress.Undetermined;
-                imageProgress.Value = progress.Value;
-            });
-        }
+            var imageProgress = ImageProgress;
+            imageProgress.IsVisible = !progress.Done;
+            imageProgress.IsIndeterminate = progress.Undetermined;
+            imageProgress.Value = progress.Value;
+        });
 
         #region Index
 
-        public ObservableCollection<Index> Index { get; private set; } = new();
+        public AvaloniaList<Index> Index { get; } = new();
         private Task GetIndex()
         {
             var indexPanel = IndexPanel;
@@ -302,6 +306,13 @@ namespace GeneaGrab.Views
         private void AddIndex(object sender, RoutedEventArgs e)
         {
             if (Info is null) return;
+            DisplayIndex();
+        }
+        private void DisplayIndex()
+        {
+            if (Info is null) return;
+            ImageCanvas.Children.Clear();
+            foreach (var index in Index.Where(i => i.Page == Info.PageNumber)) DisplayIndexRectangle(index);
         }
         private void DisplayIndexRectangle(Index? index)
         {
@@ -310,7 +321,7 @@ namespace GeneaGrab.Views
             var pos = index.Position;
             var btn = new Rectangle
             {
-                Fill = new SolidColorBrush(Color.FromArgb(255, (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255), (byte)new Random().Next(0, 255))),
+                Fill = new SolidColorBrush(Color.FromRgb((byte)(index.Id * 100 % 255), (byte)((index.Id + 2) * 50 % 255), (byte)((index.Id + 1) * 75 % 255))),
                 Opacity = .25,
                 Width = pos.Width,
                 Height = pos.Height

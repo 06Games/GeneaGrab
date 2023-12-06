@@ -55,7 +55,7 @@ namespace GeneaGrab.Views
             var group = new TransformGroup();
             group.Children.Add(new ScaleTransform());
             group.Children.Add(new TranslateTransform());
-            Child.GetPropertyChangedObservable(BoundsProperty).Subscribe(_ => Reset());
+            Child.GetObservable(BoundsProperty).Subscribe(_ => Reset());
             Child.RenderTransform = group;
             Child.RenderTransformOrigin = new RelativePoint(new Point(0.5, 0.5), RelativeUnit.Relative);
             Child.PointerWheelChanged += child_MouseWheel;

@@ -23,27 +23,27 @@
         <RelativePanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Name="ViewerRelativePanel">
             <views:ZoomPanel x:Name="ImagePanel"
                              RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True">
-                <Grid x:Name="MainGrid" ColumnDefinitions="*,*,*">
-                    <Image Grid.Column="1" Name="Image" Stretch="Uniform" />
-                    <Canvas Grid.Column="1" Name="ImageCanvas" />
-                </Grid>
+                <Canvas x:Name="MainGrid">
+                    <Image Name="Image" Stretch="Uniform" />
+                    <Canvas Name="ImageCanvas" />
+                </Canvas>
             </views:ZoomPanel>
             <ProgressBar Name="ImageProgress" RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignBottomWithPanel="True" IsVisible="False" Maximum="1" />
         </RelativePanel>
         <Border HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="1" Grid.Column="0" BorderThickness="0 1 0 0" BorderBrush="#FF383838">
             <RelativePanel Margin="15">
-                    <StackPanel Orientation="Horizontal">
-                        <controls:NumberBox Name="PageNumber" PlaceholderText="Page" Minimum="1" Width="90" Height="32.5" />
-                        <TextBlock Name="PageTotal" Text="/ ?" Margin="10 6.25 0 0" Height="20" VerticalAlignment="Center" TextAlignment="Center" />
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right" Spacing="5" RelativePanel.AlignRightWithPanel="True">
-                        <Button Name="PreviousPage" Click="GoToPreviousPage">
-                            <controls:SymbolIcon Symbol="ChevronLeft" />
-                        </Button>
-                        <Button Name="NextPage" Click="GoToNextPage">
-                            <controls:SymbolIcon Symbol="ChevronRight" />
-                        </Button>
-                    </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <controls:NumberBox Name="PageNumber" PlaceholderText="Page" Minimum="1" Width="90" Height="32.5" />
+                    <TextBlock Name="PageTotal" Text="/ ?" Margin="10 6.25 0 0" Height="20" VerticalAlignment="Center" TextAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Right" HorizontalAlignment="Right" Spacing="5" RelativePanel.AlignRightWithPanel="True">
+                    <Button Name="PreviousPage" Click="GoToPreviousPage">
+                        <controls:SymbolIcon Symbol="ChevronLeft" />
+                    </Button>
+                    <Button Name="NextPage" Click="GoToNextPage">
+                        <controls:SymbolIcon Symbol="ChevronRight" />
+                    </Button>
+                </StackPanel>
                 <ListBox Name="PageList" ItemsSource="{Binding Pages}" SelectionChanged="ChangePage"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                          RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
