@@ -24,8 +24,8 @@ namespace GeneaGrab.Core.Providers
             var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
             return new RegistryInfo
             {
-                ProviderID = "AD79-86",
-                RegistryID = queries["id"].Value,
+                ProviderId = "AD79-86",
+                RegistryId = queries["id"].Value,
                 PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
             };
         }
@@ -49,9 +49,9 @@ namespace GeneaGrab.Core.Providers
                 Extra = p.Classeur
             }).ToArray();
 
-            var dates = sequence.Label.Split(new[] { "- (" }, StringSplitOptions.RemoveEmptyEntries).Last().Replace(") ", "").Split('-');
-            registry.From = Date.ParseDate(dates.First());
-            registry.To = Date.ParseDate(dates.Last());
+            var dates = sequence.Label.Split(new[] { "- (" }, StringSplitOptions.RemoveEmptyEntries)[^1].Replace(") ", "").Split('-');
+            registry.From = Date.ParseDate(dates[0]);
+            registry.To = Date.ParseDate(dates[^1]);
             registry.Types = ParseTypes(iiif.MetaData["Type de document"]);
             registry.CallNumber = iiif.MetaData["Cote"];
             registry.Notes = GenerateNotes(iiif.MetaData);

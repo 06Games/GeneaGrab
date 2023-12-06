@@ -160,7 +160,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         {
             var info = await value.GetRegistryFromUrlAsync(uri);
             if (info == null) continue;
-            searchResults.Add(new Result { Text = $"Online Match: {key} ({(info.RegistryID.Length > 18 ? $"{info.RegistryID[..15]}..." : info.RegistryID)})", Value = uri });
+            searchResults.Add(new Result { Text = $"Online Match: {key} ({(info.RegistryId.Length > 18 ? $"{info.RegistryId[..15]}..." : info.RegistryId)})", Value = uri });
         }
         return searchResults;
 

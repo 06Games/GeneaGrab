@@ -54,7 +54,7 @@ namespace GeneaGrab.Core.Models.Dates.Calendars.Gregorian
 
         public double ToJulianDay()
         {
-            return new DateTime(Year.Value, Month.Value, Day.Value, Hour.Value, Minute.Value, Second.Value).ToOADate() + 2415018.5;
+            return new DateTime(Year.Value, Month.Value, Day.Value, Hour.Value, Minute.Value, Second.Value, DateTimeKind.Utc).ToOADate() + 2415018.5;
         }
     }
 }

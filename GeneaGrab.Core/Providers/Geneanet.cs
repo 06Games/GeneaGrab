@@ -26,9 +26,9 @@ namespace GeneaGrab.Core.Providers
             var regex = Regex.Match(url.OriginalString, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
             return new RegistryInfo
             {
-                RegistryID = regex.Groups["col"]?.Value,
-                ProviderID = "Geneanet",
-                PageNumber = int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var pageNumber) ? pageNumber : 1
+                RegistryId = regex.Groups["col"]?.Value,
+                ProviderId = "Geneanet",
+                PageNumber = int.TryParse(regex.Groups.TryGetValue("page") ?? "1", out var pageNumber) ? pageNumber : 1
             };
         }
 
@@ -38,7 +38,7 @@ namespace GeneaGrab.Core.Providers
         {
             var registry = new Registry(Data.Providers["Geneanet"]) { URL = url.OriginalString };
 
-            var regex = Regex.Match(registry.URL, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
+            var regex = Regex.Match(registry.URL, @"(?:idcollection=(?<col>\d*).*page=(?<page>\d*))|(?:\/(?<col>\d+)(?:\z|\/(?<page>\d*)))");
             registry.ID = regex.Groups["col"]?.Value;
             if (string.IsNullOrEmpty(registry.ID)) return null;
 
@@ -84,7 +84,7 @@ namespace GeneaGrab.Core.Providers
             registry.Pages = JObject.Parse($"{{results: {pagesData}}}").Value<JArray>("results")?.Select(p =>
             {
                 var pageNumber = p.Value<int>("page");
-                var page = registry.Pages?.FirstOrDefault(rPage => rPage.Number == pageNumber) ?? new RPage { Number = pageNumber };
+                var page = registry.Pages == null ? new RPage { Number = pageNumber } : Array.Find(registry.Pages, rPage => rPage.Number == pageNumber);
                 page.DownloadURL = $"https://www.geneanet.org{p.Value<string>("image_base_url")?.TrimEnd('/')}/";
                 page.URL = p.Value<string>("image_route");
                 return page;
@@ -157,7 +157,7 @@ namespace GeneaGrab.Core.Providers
             if (page.DownloadURL == null)
             {
                 Data.Providers["Geneanet"].Registries[registry.ID] = registry = await UpdateInfos(registry, client);
-                page = registry.Pages.FirstOrDefault(p => p.Number == page.Number);
+                page = Array.Find(registry.Pages, p => p.Number == page.Number);
                 if (page == null) return null;
             }
             if (!page.TileSize.HasValue) (page.Width, page.Height, page.TileSize) = await Zoomify.ImageData(page.DownloadURL, client);

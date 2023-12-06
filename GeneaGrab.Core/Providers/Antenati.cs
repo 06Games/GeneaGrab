@@ -23,8 +23,8 @@ namespace GeneaGrab.Core.Providers
 
             return new RegistryInfo
             {
-                ProviderID = "Antenati",
-                RegistryID = Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"].Value
+                ProviderId = "Antenati",
+                RegistryId = Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"].Value
             };
         }
 
@@ -47,7 +47,7 @@ namespace GeneaGrab.Core.Providers
             registry.To = Date.ParseDate(dates[1]);
             registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
             var location = iiif.MetaData["Contesto archivistico"].Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries);
-            registry.Location = location.Last();
+            registry.Location = location[^1];
             registry.LocationDetails = location.Take(location.Length - 1).ToArray();
             registry.ArkURL = Regex.Match(iiif.MetaData["Vedi il registro"], "<a .*>(?<url>.*)</a>").Groups["url"]?.Value;
 

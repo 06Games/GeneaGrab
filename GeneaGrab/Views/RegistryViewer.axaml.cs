@@ -34,11 +34,11 @@ namespace GeneaGrab.Views
             {
                 if (Info is null) return null;
                 var location = Info.Registry.Location ?? Info.Registry.LocationID;
-                var registry = Info.Registry?.Name ?? Info.RegistryID;
+                var registry = Info.Registry?.Name ?? Info.RegistryId;
                 return location is null ? registry : $"{location}: {registry}";
             }
         }
-        public string? Identifier => Info?.RegistryID;
+        public string? Identifier => Info?.RegistryId;
         public async Task RichPresence(RichPresence richPresence)
         {
             if (Info is null) return;
@@ -91,10 +91,10 @@ namespace GeneaGrab.Views
         }
 
         public RegistryInfo? Info { get; set; }
-        public override async void OnNavigatedTo(NavigationEventArgs e)
+        public override async void OnNavigatedTo(NavigationEventArgs args)
         {
-            base.OnNavigatedTo(e);
-            var (keepTabOpened, noRefresh) = await LoadRegistry(e.Parameter).ConfigureAwait(false);
+            base.OnNavigatedTo(args);
+            var (keepTabOpened, noRefresh) = await LoadRegistry(args.Parameter).ConfigureAwait(false);
             if (!keepTabOpened)
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
@@ -105,7 +105,7 @@ namespace GeneaGrab.Views
                 return;
             }
 
-            var tab = Info == null ? null : await Dispatcher.UIThread.InvokeAsync(() => NavigationService.TryGetTabWithId(Info.RegistryID, out var tab) ? tab : null);
+            var tab = Info == null ? null : await Dispatcher.UIThread.InvokeAsync(() => NavigationService.TryGetTabWithId(Info.RegistryId, out var tab) ? tab : null);
             if (tab != null)
             {
                 var currentTab = NavigationService.CurrentTab;
@@ -186,7 +186,7 @@ namespace GeneaGrab.Views
                             provider = p;
                             break;
                         }
-                    if (provider != null && info != null) Info = provider.Registries.ContainsKey(info.RegistryID) ? info : await provider.Infos(url);
+                    if (provider != null && info != null) Info = provider.Registries.ContainsKey(info.RegistryId) ? info : await provider.Infos(url);
                     break;
                 default:
                     inRam = true;
@@ -306,6 +306,7 @@ namespace GeneaGrab.Views
         private void AddIndex(object sender, RoutedEventArgs e)
         {
             if (Info is null) return;
+            Index.Add(new Index { Id = Index.Count, Page = Info.PageNumber, Position = new System.Drawing.Rectangle(Index.Count * 100, Index.Count * 75, 100, 50) });
             DisplayIndex();
         }
         private void DisplayIndex()
@@ -353,7 +354,7 @@ namespace GeneaGrab.Views
         public PageList Refresh()
         {
             Number = Page.Number;
-            Notes = Page.Notes?.Split('\n', '\r').FirstOrDefault() ?? "";
+            Notes = Page.Notes?.Split('\n').FirstOrDefault() ?? "";
             return this;
         }
 

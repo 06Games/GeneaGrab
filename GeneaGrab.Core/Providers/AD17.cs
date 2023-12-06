@@ -26,8 +26,8 @@ namespace GeneaGrab.Core.Providers
             var query = HttpUtility.ParseQueryString(url.Query);
             return new RegistryInfo
             {
-                RegistryID = query["id"],
-                ProviderID = "AD17",
+                RegistryId = query["id"],
+                ProviderId = "AD17",
                 PageNumber = int.TryParse(query["page"], out var p) ? p : 1
             };
         }
@@ -55,7 +55,7 @@ namespace GeneaGrab.Core.Providers
             registry.ID = query["id"] ?? infos["id"]?.Value;
             registry.CallNumber = infos["cote"]?.Value;
             registry.Location = infos["commune"]?.Value;
-            registry.LocationID = registry.Location == null ? null : Cities.TryGetValue(registry.Location, out var location) ? location.ToString() : null;
+            registry.LocationID = registry.Location != null && Cities.TryGetValue(registry.Location, out var location) ? location.ToString() : null;
             registry.Notes = infos["type"].Success ? $"{infos["type"]?.Value}: {infos["collection"]?.Value}" : null;
             registry.From = Date.ParseDate(infos["date_debut"]?.Value);
             registry.To = Date.ParseDate(infos["date_fin"]?.Value) ?? registry.From;

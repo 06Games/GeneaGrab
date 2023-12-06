@@ -24,8 +24,8 @@ namespace GeneaGrab.Core.Providers
             var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
             return new RegistryInfo
             {
-                ProviderID = "AD06",
-                RegistryID = queries["id"].Value,
+                ProviderId = "AD06",
+                RegistryId = queries["id"].Value,
                 PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
             };
         }

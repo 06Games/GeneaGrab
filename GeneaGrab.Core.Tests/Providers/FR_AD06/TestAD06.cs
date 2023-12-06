@@ -10,32 +10,34 @@ public class TestAD06
     private readonly AD06 instance;
     private static int timeoutCount;
     private readonly ITestOutputHelper output;
-    
-    public TestAD06(ITestOutputHelper output) { 
+
+    public TestAD06(ITestOutputHelper output)
+    {
         instance = new AD06();
-        this.output = output; }
+        this.output = output;
+    }
 
     [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD06))]
     public async Task CheckInfos(Data data)
     {
-        if(timeoutCount >= 3) return; // AD06 is geo-restricted, so if the API times out 3 times, we assume it's because the location is blocked.
+        if (timeoutCount >= 3) return; // AD06 is geo-restricted, so if the API times out 3 times, we assume it's because the location is blocked.
         RegistryInfo registryInfo;
         try { registryInfo = await instance.Infos(new Uri(data.URL)); }
         catch (Exception? e)
         {
             while (e is not TimeoutException or TaskCanceledException or null) e = e?.InnerException;
             if (e is not (TimeoutException or TaskCanceledException)) throw;
-            
+
             timeoutCount++;
             output.WriteLine($"Timed-out ({timeoutCount})");
             throw;
         }
-        
+
         output.WriteLine(JsonConvert.SerializeObject(registryInfo.Registry, Formatting.Indented));
-        
-        Assert.Equal(instance.GetType().Name, registryInfo.ProviderID);
-        Assert.Equal(data.Id, registryInfo.RegistryID);
+
+        Assert.Equal(instance.GetType().Name, registryInfo.ProviderId);
+        Assert.Equal(data.Id, registryInfo.RegistryId);
         Assert.Equal(data.Page, registryInfo.PageNumber);
         Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
         Assert.Equal(data.Ville, registryInfo.Registry.Location);

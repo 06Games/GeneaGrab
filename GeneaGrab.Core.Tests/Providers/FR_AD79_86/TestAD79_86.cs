@@ -11,8 +11,8 @@ public class TestAD79_86
     public async Task CheckInfos(Data data)
     {
         var registryInfo = await instance.Infos(new Uri(data.URL));
-        Assert.Equal("AD79-86", registryInfo.ProviderID);
-        Assert.Equal(data.Id, registryInfo.RegistryID);
+        Assert.Equal("AD79-86", registryInfo.ProviderId);
+        Assert.Equal(data.Id, registryInfo.RegistryId);
         Assert.Equal(data.Page, registryInfo.PageNumber);
         Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
         Assert.Equal(data.Ville, registryInfo.Registry.Location);

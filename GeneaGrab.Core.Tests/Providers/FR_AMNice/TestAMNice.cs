@@ -16,8 +16,8 @@ public class TestAMNice
     {
         var registryInfo = await instance.Infos(new Uri(data.URL));
         output.WriteLine(await Json.StringifyAsync(registryInfo));
-        Assert.Equal("AMNice", registryInfo.ProviderID);
-        Assert.Equal(data.Id, registryInfo.RegistryID);
+        Assert.Equal("AMNice", registryInfo.ProviderId);
+        Assert.Equal(data.Id, registryInfo.RegistryId);
         Assert.Equal(data.Page, registryInfo.PageNumber);
         Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
         Assert.Equal(data.Rue, registryInfo.Registry.District);

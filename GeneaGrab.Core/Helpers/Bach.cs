@@ -34,7 +34,7 @@ namespace GeneaGrab.Core.Helpers
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
             var (_, _, info) = await RetrieveInfoFromUrl(url);
-            return new RegistryInfo { ProviderID = Id, RegistryID = info.Remote.EncodedArchivalDescription.DocId, PageNumber = info.Position ?? 1 };
+            return new RegistryInfo { ProviderId = Id, RegistryId = info.Remote.EncodedArchivalDescription.DocId, PageNumber = info.Position ?? 1 };
         }
 
         public override Task<RegistryInfo> Infos(Uri url) => RetrieveViewerInfo(url);

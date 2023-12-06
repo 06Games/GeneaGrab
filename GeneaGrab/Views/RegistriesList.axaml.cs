@@ -30,11 +30,11 @@ namespace GeneaGrab.Views
 
         protected ObservableCollection<RegistriesTreeStructure> Items { get; } = new();
 
-        public override void OnNavigatedTo(NavigationEventArgs e)
+        public override void OnNavigatedTo(NavigationEventArgs args)
         {
-            base.OnNavigatedTo(e);
+            base.OnNavigatedTo(args);
 
-            if (e.Parameter is not Provider provider) return;
+            if (args.Parameter is not Provider provider) return;
             Provider = provider;
             MainWindow.UpdateSelectedTitle();
 

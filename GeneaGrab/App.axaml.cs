@@ -33,10 +33,11 @@ namespace GeneaGrab
 
         public override void Initialize()
         {
-            Data.SetLogger(Log.Logger = new LoggerConfiguration()
+            Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.ndjson"))
                 .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Area} {Source}] {Message:lj}{NewLine}{Exception}")
-                .CreateLogger());
+                .CreateLogger();
+            Data.SetLogger(Log.Logger);
             Logger.Sink = new SerilogSink();
 
             Data.Translate = (id, fallback) => ResourceExtensions.GetLocalized(id) ?? fallback;
