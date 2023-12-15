@@ -61,16 +61,6 @@ namespace GeneaGrab.Core.Providers
             registry = await UpdateInfos(registry, client);
             int.TryParse(regex.Groups["page"].Success ? regex.Groups["page"].Value : "1", out var pageNumber);
 
-            // TODO: Necessite un token
-            /* string marqueursPage = await client.GetStringAsync($"https://www.geneanet.org/registres/api/tool-panel/marqueur_date/view/{Registry.ID}/{_p}?lang=fr");
-            var marqueurs = Regex.Matches(marqueursPage.Replace("\t", "").Replace("\n", "").Replace("\r", ""), "<option *value=\\\"(?<year>\\d*)-(?<month>\\d*)-(?<type>.)\\\" *data-redirect-url=\\\".*?\\/(?<page>\\d*)\\\" *>"); //https://regex101.com/r/t6l2HF/1
-            foreach (var pageMarqueurs in marqueurs.Cast<Match>().GroupBy(m => m.Groups["page"].Value))
-            {
-                if (!int.TryParse(pageMarqueurs.Key ?? "0", out int i) || i < 1) continue;
-                Registry.Pages[i - 1].Notes = string.Join(" - ", pageMarqueurs.Select(marqueur => marqueur.Groups["year"].Value)) + "\n\n"
-                                            + string.Join("\n", pageMarqueurs.Select(marqueur => $"{marqueur.Groups["month"]}/{marqueur.Groups["year"]} ({marqueur.Groups["type"]})"));
-            } */
-
             Data.AddOrUpdate(Data.Providers["Geneanet"].Registries, registry.ID, registry);
             return new RegistryInfo(registry) { PageNumber = pageNumber };
         }

@@ -16,6 +16,7 @@ using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 using GeneaGrab.Views;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Formatting.Compact;
 using SingleInstance;
@@ -33,6 +34,10 @@ namespace GeneaGrab
 
         public override void Initialize()
         {
+            using (var client = new DatabaseContext())
+            {
+                client.Database.Migrate();
+            }
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.File(new RenderedCompactJsonFormatter(), Path.Combine(LocalData.LogFolder, $"{DateTime.UtcNow:yyyy-MM-dd HH-mm-ss}.ndjson"))
                 .WriteTo.Debug(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] [{Area} {Source}] {Message:lj}{NewLine}{Exception}")

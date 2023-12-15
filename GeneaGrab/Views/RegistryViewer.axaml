@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:views="clr-namespace:GeneaGrab.Views"
+             xmlns:indexing="clr-namespace:GeneaGrab.Models.Indexing"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="GeneaGrab.Views.RegistryViewer">
@@ -113,11 +114,11 @@
                         <TextBlock Grid.Column="0" FontSize="16" Text="Index" />
                         <Button Grid.Column="1" Content="+" Padding="5,0,5,1" Click="AddIndex" />
                     </Grid>
-                    <ListBox ItemsSource="{Binding Index}" MaxHeight="500">
+                    <ListBox MaxHeight="500" Name="RecordList">
                         <ListBox.ItemTemplate>
-                            <DataTemplate DataType="views:Index">
+                            <DataTemplate DataType="indexing:Record">
                                 <Grid Width="200" RowDefinitions="*,*,*,*" ColumnDefinitions="100,100">
-                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Test" FontSize="12" />
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding Id}" FontSize="12" />
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

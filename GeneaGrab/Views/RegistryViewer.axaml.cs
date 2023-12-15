@@ -8,7 +8,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Collections;
 using Avalonia.Controls;
 using Avalonia.Controls.Shapes;
 using Avalonia.Interactivity;
@@ -20,6 +19,7 @@ using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
+using GeneaGrab.Models.Indexing;
 using GeneaGrab.Services;
 using Button = DiscordRPC.Button;
 
@@ -159,7 +159,6 @@ namespace GeneaGrab.Views
                     await Dispatcher.UIThread.InvokeAsync(() => Pages[i] = page);
                     return thumbnail;
                 }
-                await GetIndex();
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView());
             });
         }
@@ -295,31 +294,35 @@ namespace GeneaGrab.Views
 
         #region Index
 
-        public AvaloniaList<Index> Index { get; } = new();
-        private Task GetIndex()
-        {
-            var indexPanel = IndexPanel;
-            indexPanel.IsVisible = true;
-            Index.Clear();
-            return Task.CompletedTask;
-        }
         private void AddIndex(object sender, RoutedEventArgs e)
         {
             if (Info is null) return;
-            Index.Add(new Index { Id = Index.Count, Page = Info.PageNumber, Position = new System.Drawing.Rectangle(Index.Count * 100, Index.Count * 75, 100, 50) });
+            using (var db = new DatabaseContext())
+            {
+                db.Records.Add(new Record(Info.Registry, Info.Page)
+                {
+                    Position = new Rect(100, 75, 100, 50)
+                });
+                db.SaveChanges();
+            }
             DisplayIndex();
         }
         private void DisplayIndex()
         {
             if (Info is null) return;
             ImageCanvas.Children.Clear();
-            foreach (var index in Index.Where(i => i.Page == Info.PageNumber)) DisplayIndexRectangle(index);
-        }
-        private void DisplayIndexRectangle(Index? index)
-        {
-            if (index is null || index.Position.IsEmpty) return;
 
-            var pos = index.Position;
+            using var db = new DatabaseContext();
+            var indexes = db.Records.Where(r => r.ProviderId == Info.ProviderId && r.RegistryId == Info.RegistryId && r.FrameNumber == Info.PageNumber);
+            RecordList.ItemsSource = indexes.ToList();
+            foreach (var index in indexes)
+                DisplayIndexRectangle(index);
+        }
+        private void DisplayIndexRectangle(Record? index)
+        {
+            if (index?.Position is null) return;
+
+            var pos = index.Position.Value;
             var btn = new Rectangle
             {
                 Fill = new SolidColorBrush(Color.FromRgb((byte)(index.Id * 100 % 255), (byte)((index.Id + 2) * 50 % 255), (byte)((index.Id + 1) * 75 % 255))),
@@ -339,14 +342,6 @@ namespace GeneaGrab.Views
         #endregion
     }
 
-    public class Index
-    {
-        public int Id { get; set; }
-        public System.Drawing.Rectangle Position { get; set; }
-        public int Page { get; set; }
-
-        public override string ToString() => $"#{Id} p{Page} {Position}";
-    }
     public class PageList
     {
         public static implicit operator PageList?(RPage? page) => page is null ? null : new PageList { Page = page }.Refresh();
