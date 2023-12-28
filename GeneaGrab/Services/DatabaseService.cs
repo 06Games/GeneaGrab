@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Models.Indexing;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,8 @@ namespace GeneaGrab.Services;
 
 public class DatabaseContext : DbContext
 {
+    public DbSet<Registry> Registries { get; set; } = null!;
+    public DbSet<Frame> Frames { get; set; } = null!;
     public DbSet<Record> Records { get; set; } = null!;
     public DbSet<Person> Persons { get; set; } = null!;
 
@@ -17,10 +20,13 @@ public class DatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Record>()
-            .Property(b => b.Position)
-            .HasConversion(
-                rect => rect == null ? null : rect.ToString(),
-                rectStr => rectStr == null ? null : Rect.Parse(rectStr));
+        modelBuilder.Entity<Record>(e =>
+        {
+            e.Property(b => b.Position)
+                .HasConversion(
+                    rect => rect == null ? null : rect.ToString(),
+                    rectStr => rectStr == null ? null : Rect.Parse(rectStr));
+            e.HasOne(r => r.Frame).WithMany().HasForeignKey(r => new { r.RegistryId, r.FrameNumber });
+        });
     }
 }

@@ -20,6 +20,7 @@ using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 using Serilog;
+using Frame = FluentAvalonia.UI.Controls.Frame;
 
 namespace GeneaGrab.Views;
 
@@ -150,12 +151,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var searchResults = new List<Result>();
         if (string.IsNullOrWhiteSpace(query)) return searchResults;
 
-        if (!Uri.TryCreate(query, UriKind.Absolute, out var uri))
-            searchResults.AddRange(GetRegistries(r => $"{r.Location ?? r.LocationID}: {r.Name}"));
 
-        searchResults.AddRange(GetRegistries(r => r.URL).ToList());
+        searchResults.AddRange(GetRegistries().ToList());
         if (searchResults.Any()) return searchResults;
 
+        if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return searchResults;
         foreach (var (key, value) in Data.Providers)
         {
             var info = await value.GetRegistryFromUrlAsync(uri);
@@ -164,9 +164,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
         return searchResults;
 
-        IEnumerable<Result> GetRegistries(Func<Registry, string?>? contains) => Data.Providers.Values.SelectMany(p => p.Registries.Values
-            .Where(r => contains?.Invoke(r)?.Contains(query, StringComparison.InvariantCultureIgnoreCase) ?? false)
-            .Select(r => new Result { Text = $"{r.Location ?? r.LocationID}: {r.Name}", Value = new RegistryInfo(r) }));
+        IEnumerable<Result> GetRegistries()
+        {
+            using var db = new DatabaseContext();
+            return db.Registries.Where(r => $"{r.URL} {r.Location}: {r}".Contains(query, StringComparison.InvariantCultureIgnoreCase))
+                .Select(r => new Result { Text = $"{r.Location}: {r}", Value = new RegistryInfo(r) });
+        }
     }
 
     private sealed class Result

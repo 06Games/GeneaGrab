@@ -28,31 +28,29 @@ namespace GeneaGrab.Core.Providers
             };
         }
 
-        public override async Task<RegistryInfo> Infos(Uri url)
+        public override async Task<(Registry, int)> Infos(Uri url)
         {
-            var registry = new Registry(Data.Providers["Antenati"]) { ID = Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value };
-            registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.ID}";
+            var registry = new Registry(Data.Providers["Antenati"]) { RemoteId = Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value };
+            registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.RemoteId}";
 
             var client = new HttpClient();
             var iiif = new Iiif(await client.GetStringAsync($"{registry.URL}/manifest"));
 
-            registry.Pages = iiif.Sequences.First().Canvases.Select(p => new RPage
+            registry.Frames = iiif.Sequences.First().Canvases.Select(p => new Frame
             {
-                Number = int.Parse(p.Label.Substring("pag. ".Length)),
-                URL = p.Images.First().ServiceId
+                FrameNumber = int.Parse(p.Label.Substring("pag. ".Length)),
+                DownloadUrl = p.Images.First().ServiceId
             }).ToArray();
 
             var dates = iiif.MetaData["Datazione"].Split(new[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
             registry.From = Date.ParseDate(dates[0]);
             registry.To = Date.ParseDate(dates[1]);
-            registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] });
+            registry.Types = ParseTypes(new[] { iiif.MetaData["Tipologia"] }).ToArray();
             var location = iiif.MetaData["Contesto archivistico"].Split(new[] { " > " }, StringSplitOptions.RemoveEmptyEntries);
-            registry.Location = location[^1];
-            registry.LocationDetails = location.Take(location.Length - 1).ToArray();
+            registry.Location = location;
             registry.ArkURL = Regex.Match(iiif.MetaData["Vedi il registro"], "<a .*>(?<url>.*)</a>").Groups["url"]?.Value;
 
-            Data.AddOrUpdate(Data.Providers["Antenati"].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = 1 };
+            return (registry, 1);
         }
         IEnumerable<RegistryType> ParseTypes(string[] types)
         {
@@ -64,29 +62,26 @@ namespace GeneaGrab.Core.Providers
             }
         }
 
-        public override Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"{registry.ArkURL} (p{page.Number})");
-        public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
+        public override Task<string> Ark(Frame page) => Task.FromResult($"{page.Registry.ArkURL} (p{page.FrameNumber})");
+
+        public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
         {
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
-            if (success) return stream;
-            return await GetTiles(registry, page, 0.1F, progress).ConfigureAwait(false);
-        }
-        public override Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.5F, progress);
-        public override Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
-        private static async Task<Stream> GetTiles(Registry registry, RPage page, float scale, Action<Progress> progress)
-        {
-            var zoom = (int)(scale * 100);
-            var (success, stream) = Data.TryGetImageFromDrive(registry, page, zoom);
+            var (success, stream) = Data.TryGetImageFromDrive(page, scale);
             if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            var image = await Image.LoadAsync(await client.GetStreamAsync(Iiif.GenerateImageRequestUri(page.URL, size: $"pct:{zoom}")).ConfigureAwait(false)).ConfigureAwait(false);
-            page.Zoom = zoom;
+            var size = scale switch
+            {
+                Scale.Thumbnail => "!512,512",
+                Scale.Navigation => "!2048,2048",
+                _ => "max"
+            };
+            var image = await Image.LoadAsync(await client.GetStreamAsync(Iiif.GenerateImageRequestUri(page.DownloadUrl, size: size)).ConfigureAwait(false)).ConfigureAwait(false);
+            page.ImageSize = scale;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers["Antenati"].Registries[registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
+            await Data.SaveImage(page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }
     }

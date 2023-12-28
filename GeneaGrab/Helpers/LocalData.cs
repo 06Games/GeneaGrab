@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using GeneaGrab.Core.Models;
-using Newtonsoft.Json;
+using GeneaGrab.Services;
 using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Metadata.Profiles.Exif;
@@ -27,11 +26,12 @@ public static class LocalData
     private const int ThumbnailSize = 512;
 
     private static bool Loaded { get; set; }
-    public static async Task LoadDataAsync(bool bypassLoadedCheck = false)
+    /*public static async Task LoadDataAsync(bool bypassLoadedCheck = false)
     {
         if (Loaded && !bypassLoadedCheck) return;
         Log.Information("Loading data");
         Loaded = true;
+
 
         foreach (var (providerId, provider) in Data.Providers)
         {
@@ -41,43 +41,48 @@ public static class LocalData
                 var data = await File.ReadAllTextAsync(reg);
                 var registry = JsonConvert.DeserializeObject<Registry>(data);
                 if (registry == null) Log.Warning("Registry {Registry} file is empty", registry);
-                else if (provider.Registries.ContainsKey(registry.ID)) Log.Warning("An registry already has the id {ID}", registry.ID);
-                else provider.Registries.Add(registry.ID, registry);
+                else if (provider.Registries.ContainsKey(registry.Id)) Log.Warning("An registry already has the id {ID}", registry.Id);
+                else provider.Registries.Add(registry.Id, registry);
             }
         }
         Log.Information("Data loaded");
     }
     public static Task SaveRegistryAsync(Registry registry) => RegistriesFolder
-        .CreateFolder(registry.ProviderID)
-        .CreateFolder(registry.ID)
-        .WriteFileAsync("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));
+        .CreateFolder(registry.ProviderId)
+        .CreateFolder(registry.Id)
+        .WriteFileAsync("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));*/
 
 
-    public static FileInfo GetFile(Registry registry, RPage page, bool write = false, bool thumbnail = false)
+    public static FileInfo GetFile(Frame page, bool write = false, bool thumbnail = false)
     {
-        var folder = RegistriesFolder.CreateFolderPath(registry.ProviderID, registry.ID);
+        var folder = RegistriesFolder.CreateFolderPath(page.Registry.ProviderId, page.RegistryId);
         if (thumbnail) folder = folder.CreateFolder(".thumbnails");
-        return new FileInfo(Path.Combine(folder.FullName, $"p{page.Number}.jpg"));
+        return new FileInfo(Path.Combine(folder.FullName, $"p{page.FrameNumber}.jpg"));
     }
 
 
-    public static Stream? GetImage(Registry registry, RPage page, bool thumbnail = false)
+    public static Stream? GetImage(Frame page, bool thumbnail = false)
     {
         try
         {
-            var file = GetFile(registry, page, thumbnail: thumbnail);
+            var file = GetFile(page, thumbnail: thumbnail);
             return !file.Exists ? null : file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
         catch (Exception e)
         {
-            Log.Error(e, "Couldn't get image for {ID} page {Number}", registry.ID, page.Number);
+            Log.Error(e, "Couldn't get image for {ID} page {Number}", page.RegistryId, page.FrameNumber);
             return null;
         }
     }
-    public static async Task<string?> SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
+    public static async Task<string?> SaveImageAsync(Frame page, Image img, bool thumbnail = false)
     {
-        var thumb = await _SaveImageAsync(registry, page, await ToThumbnailAsync(img), true).ConfigureAwait(false);
-        return thumbnail ? thumb : await _SaveImageAsync(registry, page, img).ConfigureAwait(false);
+        var thumb = await _SaveImageAsync(page, await ToThumbnailAsync(img), true).ConfigureAwait(false);
+        var result = thumbnail ? thumb : await _SaveImageAsync(page, img).ConfigureAwait(false);
+
+        await using var db = new DatabaseContext();
+        await db.SaveChangesAsync();
+
+        return result;
     }
 
     public static async Task<Image> ToThumbnailAsync(this Image img) => await Task.Run(() =>
@@ -88,29 +93,29 @@ public static class LocalData
         return img.Clone(x => x.Resize((int)(img.Width * scale), (int)(img.Height * scale)));
     });
 
-    private static async Task<string?> _SaveImageAsync(Registry registry, RPage page, Image img, bool thumbnail = false)
+    private static async Task<string?> _SaveImageAsync(Frame page, Image img, bool thumbnail = false)
     {
         try
         {
             img.Metadata.ExifProfile ??= new ExifProfile();
-            img.Metadata.ExifProfile.SetValue(ExifTag.DigitalZoomRatio, new Rational((uint)page.Zoom, page.MaxZoom <= 0 ? 100 : (uint)page.MaxZoom, false));
+            img.Metadata.ExifProfile.SetValue(ExifTag.DigitalZoomRatio, new Rational((uint)page.ImageSize, 1));
             if (page.TileSize > 0) img.Metadata.ExifProfile.SetValue(ExifTag.TileWidth, (uint)page.TileSize);
-            if (page.Width > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageWidth, page.Width);
-            if (page.Height > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageLength, page.Height);
-            if (page.Number > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageNumber, (uint)page.Number);
+            if (page.Width > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageWidth, page.Width.Value);
+            if (page.Height > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageLength, page.Height.Value);
+            if (page.FrameNumber > 0) img.Metadata.ExifProfile.SetValue(ExifTag.ImageNumber, (uint)page.FrameNumber);
             if (string.IsNullOrWhiteSpace(page.Notes)) img.Metadata.ExifProfile.RemoveValue(ExifTag.UserComment);
             else img.Metadata.ExifProfile.SetValue(ExifTag.UserComment, page.Notes);
 
 
-            var file = GetFile(registry, page, true, thumbnail);
+            var file = GetFile(page, true, thumbnail);
             await using var stream = file.Open(FileMode.OpenOrCreate, FileAccess.Write);
             await img.SaveAsJpegAsync(stream).ConfigureAwait(false);
             return file.FullName;
         }
         catch (Exception e)
         {
-            Log.Error(e, "Couldn't save image for {ID} page {Number}", registry.ID, page.Number);
-            return Path.Combine(RegistriesFolder.FullName, Extensions.GetValidFilename(registry.ProviderID), Extensions.GetValidFilename(registry.ID), $"p{page.Number}.jpg");
+            Log.Error(e, "Couldn't save image for {ID} page {Number}", page.RegistryId, page.FrameNumber);
+            return Path.Combine(RegistriesFolder.FullName, Extensions.GetValidFilename(page.Registry.ProviderId), Extensions.GetValidFilename(page.RegistryId), $"p{page.FrameNumber}.jpg");
         }
     }
 }

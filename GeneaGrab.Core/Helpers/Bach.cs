@@ -24,8 +24,6 @@ namespace GeneaGrab.Core.Helpers
         protected abstract string BaseUrl { get; }
         protected HttpClient HttpClient { get; } = new();
 
-        protected enum ImageSize { Thumb, Default, Full }
-
 
         #region Provider Implementation
 
@@ -37,31 +35,21 @@ namespace GeneaGrab.Core.Helpers
             return new RegistryInfo { ProviderId = Id, RegistryId = info.Remote.EncodedArchivalDescription.DocId, PageNumber = info.Position ?? 1 };
         }
 
-        public override Task<RegistryInfo> Infos(Uri url) => RetrieveViewerInfo(url);
+        public override Task<(Registry, int)> Infos(Uri url) => RetrieveViewerInfo(url);
 
-        public override Task<string> Ark(Registry registry, RPage page) => Task.FromResult(PageViewerUrl(GetSeriesInfo(registry), page.URL));
+        public override Task<string> Ark(Frame page) => Task.FromResult(PageViewerUrl(GetSeriesInfo(page.Registry), page.DownloadUrl));
 
-        public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
+        public override async Task<Stream> GetFrame(Frame page, Scale zoom, Action<Progress> progress)
         {
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
+            var (success, stream) = zoom == Scale.Thumbnail ? await Data.TryGetThumbnailFromDrive(page) : Data.TryGetImageFromDrive(page, zoom);
             if (success) return stream;
-            return await GetImageStream(registry, page, ImageSize.Thumb, progress);
-        }
-        public override Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetImageStream(registry, page, ImageSize.Full, progress);
-        public override Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetImageStream(registry, page, ImageSize.Full, progress);
-        private async Task<Stream> GetImageStream(Registry registry, RPage page, ImageSize zoom, Action<Progress> progress)
-        {
-            var (success, stream) = Data.TryGetImageFromDrive(registry, page, (int)zoom);
-            if (success) return stream;
-            var index = Array.IndexOf(registry.Pages, page);
 
             progress?.Invoke(Progress.Unknown);
-            var image = await Grabber.GetImage(PageImageUrl(GetSeriesInfo(registry), page.URL, zoom), HttpClient).ConfigureAwait(false);
-            page.Zoom = (int)zoom;
+            var image = await Grabber.GetImage(PageImageUrl(GetSeriesInfo(page.Registry), page.DownloadUrl, zoom), HttpClient).ConfigureAwait(false);
+            page.ImageSize = zoom;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers[Id].Registries[registry.ID].Pages[index] = page;
-            await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
+            await Data.SaveImage(page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }
 
@@ -72,8 +60,17 @@ namespace GeneaGrab.Core.Helpers
         protected string DocInfoUrl(string docId) => $"{DocUrl(docId)}/ajax";
         protected string PageViewerUrl(BachRegistryExtras series, string page) => $"{BaseUrl}/viewer/{(series.IsSeries ? "series" : "viewer")}/{series.Path}?img={page}";
         protected string PageInfoUrl(BachRegistryExtras series, string page) => $"{BaseUrl}{series.AppUrl}/ajax/{(series.IsSeries ? "series" : "image")}/infos/{series.Path}/{page}";
-        protected string PageImageUrl(BachRegistryExtras series, string page, ImageSize size = ImageSize.Default)
-            => $"{BaseUrl}{series.AppUrl}/show/{size.ToString().ToLower()}/{series.Path}/{page}";
+        protected string PageImageUrl(BachRegistryExtras series, string page, Scale size = Scale.Navigation)
+        {
+            var sizeTxt = size switch
+            {
+                Scale.Thumbnail => "thumb",
+                Scale.Navigation => "default",
+                Scale.Full => "full",
+                _ => "default"
+            };
+            return $"{BaseUrl}{series.AppUrl}/show/{sizeTxt}/{series.Path}/{page}";
+        }
 
         protected static BachRegistryExtras GetSeriesInfo(Registry registry)
         {
@@ -161,7 +158,7 @@ namespace GeneaGrab.Core.Helpers
             return (series, pages, info);
         }
 
-        protected async Task<RegistryInfo> RetrieveViewerInfo(Uri url)
+        protected async Task<(Registry, int)> RetrieveViewerInfo(Uri url)
         {
             var (series, pages, info) = await RetrieveInfoFromUrl(url);
             var ead = info.Remote.EncodedArchivalDescription;
@@ -170,30 +167,26 @@ namespace GeneaGrab.Core.Helpers
             var docPageInfo = ParseDocPage(docWebPage);
             var (placeInCity, city, cityLocation) = ParsePlace(docPageInfo);
 
-            var registry = new Registry
+            var registry = new Registry(this)
             {
                 URL = ead.DocLink,
-                Types = GetTypes(docPageInfo).SelectMany(ParseTypes),
-                ProviderID = Id,
-                ID = ead.DocId,
+                Types = GetTypes(docPageInfo).SelectMany(ParseTypes).ToArray(),
+                RemoteId = ead.DocId,
                 CallNumber = ead.UnitId,
                 Title = ead.UnitTitle,
                 Author = docPageInfo.TryGetValue("Auteur", out var personne) && docPageInfo.Remove("Auteur") ? string.Join(", ", personne) : null,
-                District = placeInCity,
-                Location = city,
-                LocationDetails = cityLocation,
+                Location = cityLocation.Append(city).Append(placeInCity).ToArray(),
                 From = from,
                 To = to,
                 Notes = string.Join("\n", docPageInfo.Select(kv => $"{kv.Key}: {string.Join(", ", kv.Value)}")),
-                Pages = pages.Select((pageImage, pageIndex) => new RPage
+                Frames = pages.Select((pageImage, pageIndex) => new Frame
                 {
-                    Number = pageIndex + 1,
-                    URL = pageImage
+                    FrameNumber = pageIndex + 1,
+                    DownloadUrl = pageImage
                 }).ToArray(),
                 Extra = series
             };
-            Data.AddOrUpdate(Data.Providers[Id].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = info.Position ?? 1 };
+            return (registry, info.Position ?? 1);
         }
 
         protected IEnumerable<string[]> GetTypes(Dictionary<string, string[]> docPageInfo)

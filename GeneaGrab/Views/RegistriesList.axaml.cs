@@ -39,19 +39,18 @@ namespace GeneaGrab.Views
             MainWindow.UpdateSelectedTitle();
 
             Items.Clear();
-            foreach (var registry in Provider.Registries.Values)
+
+            using var db = new DatabaseContext();
+            foreach (var registry in db.Registries.Where(r => r.ProviderId == Provider.Id))
             {
                 var parent = Items;
-                foreach (var location in ((registry.Location == null ? registry.LocationDetails : null) ?? Array.Empty<string>()).Append(registry.Location)
-                         .Append(registry.District)) // To add LocationDetails in the structure, replace the empty array
+                foreach (var location in registry.Location)
                 {
                     if (string.IsNullOrWhiteSpace(location)) continue;
                     var container = parent.FirstOrDefault(c => c.Title == location);
                     if (container is null)
                     {
-                        container = new RegistriesTreeStructure(location,
-                            registry.Location == null || location != registry.Location || registry.LocationDetails == null ? null
-                                : string.Join(", ", registry.LocationDetails)); // We uses LocationDetails as subtitle of the Location
+                        container = new RegistriesTreeStructure(location, registry.Location == null ? null : string.Join(", ", registry.Location));
                         InsertInPlace(parent, container);
                     }
                     parent = container.Children;
@@ -90,7 +89,7 @@ namespace GeneaGrab.Views
             Title = title;
             Subtitle = subtitle;
         }
-        private RegistriesTreeStructure(Registry registry) : this(registry.Name, string.Format(UI.Registry_PageCount, registry.Pages.Length))
+        private RegistriesTreeStructure(Registry registry) : this(registry.ToString(), string.Format(UI.Registry_PageCount, registry.Frames.Count()))
         {
             Registry = registry;
         }

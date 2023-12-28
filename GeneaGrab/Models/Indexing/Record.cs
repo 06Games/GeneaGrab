@@ -9,10 +9,7 @@ namespace GeneaGrab.Models.Indexing;
 [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
 public class Record
 {
-    public Record(Registry registry, RPage page) : this(registry.ProviderID, registry.ID, page.Number)
-    {
-        CallNumber = registry.CallNumber;
-    }
+    public Record(Registry registry, Frame frame) : this(registry.ProviderId, registry.Id, frame.FrameNumber) { }
     public Record(string providerId, string registryId, int frameNumber)
     {
         ProviderId = providerId;
@@ -28,11 +25,13 @@ public class Record
     public string ProviderId { get; private set; }
     /// <summary>(Internal) Id of the document</summary>
     public string RegistryId { get; private set; }
-    /// <summary>Call number of the document (if applicable)</summary>
-    public string? CallNumber { get; set; }
+    /// <summary>The document</summary>
+    public Registry? Registry { get; private set; }
     /// <summary>Frame number</summary>
     /// <remarks>A frame can contain multiple pages</remarks>
     public int FrameNumber { get; private set; }
+    /// <summary>The frame</summary>
+    public Frame? Frame { get; private set; }
     /// <summary>Ark url</summary>
     public Uri? ArkUrl { get; set; }
     /// <summary>Page number (if applicable)</summary>

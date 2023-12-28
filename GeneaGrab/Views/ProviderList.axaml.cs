@@ -1,12 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using DiscordRPC;
 using DynamicData;
 using FluentAvalonia.UI.Controls;
 using GeneaGrab.Core.Models;
-using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 
 namespace GeneaGrab.Views;
@@ -23,11 +21,9 @@ public partial class ProviderList : Page, ITabPage
         InitializeComponent();
         DataContext = this;
 
-        _ = LocalData.LoadDataAsync().ContinueWith(_ => Dispatcher.UIThread.Post(() =>
-        {
-            Providers.Clear();
-            Providers.Add(Data.Providers.Values);
-        }), TaskScheduler.Current);
+
+        Providers.Clear();
+        Providers.Add(Data.Providers.Values);
     }
 
     public ObservableCollection<Provider> Providers { get; } = new(Data.Providers.Values);

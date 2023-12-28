@@ -21,10 +21,11 @@ namespace GeneaGrab.Core.Providers
             if (url.Host != "www.nicehistorique.org" || !url.AbsolutePath.StartsWith("/vwr")) return null;
 
             //TODO: Find a way to do this without having to make a request
-            return await Infos(url);
+            var (registry, page) = await Infos(url);
+            return new RegistryInfo(registry) { PageNumber = page };
         }
 
-        public override async Task<RegistryInfo> Infos(Uri url)
+        public override async Task<(Registry, int)> Infos(Uri url)
         {
             var client = new HttpClient();
             var pageBody = await client.GetStringAsync(url).ConfigureAwait(false);
@@ -38,54 +39,43 @@ namespace GeneaGrab.Core.Providers
 
             var pagesTable = Regex.Matches(pageBody, "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>").ToArray();
 
-            var registry = new Registry(Data.Providers[Id])
+            var registry = new Registry(this)
             {
                 URL = url.OriginalString,
                 Types = new[] { RegistryType.Periodical },
-                ProviderID = Id,
-                ID = data["number"].Value,
+                RemoteId = data["number"].Value,
                 CallNumber = HttpUtility.HtmlDecode(data["title"].Value),
                 From = date,
                 To = date,
-                Pages = pagesTable.Select(page =>
+                Frames = pagesTable.Select(page =>
                 {
                     var pData = HttpUtility.UrlDecode(pages[int.Parse(page.Groups["index"].Value) - 1]).Trim('"', ' ');
-                    return new RPage
+                    return new Frame
                     {
-                        Number = int.Parse(page.Groups["number"].Value),
-                        URL = $"{path?.AbsoluteUri}{pData}"
+                        FrameNumber = int.Parse(page.Groups["number"].Value),
+                        DownloadUrl = $"{path?.AbsoluteUri}{pData}"
                     };
                 }).ToArray()
             };
 
-            Data.AddOrUpdate(Data.Providers[Id].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = int.Parse(pagesTable.FirstOrDefault(p => p.Groups["class"].Value == "current")?.Groups["index"]?.Value ?? "1") };
+            return (registry, int.Parse(pagesTable.FirstOrDefault(p => p.Groups["class"].Value == "current")?.Groups["index"]?.Value ?? "1"));
         }
 
 
-        public override Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"p{page.Number}");
-        public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
+        public override Task<string> Ark(Frame page) => Task.FromResult($"p{page.FrameNumber}");
+
+        public override async Task<Stream> GetFrame(Frame page, Scale zoom, Action<Progress> progress)
         {
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page).ConfigureAwait(false);
+            var (success, stream) = Data.TryGetImageFromDrive(page, zoom);
             if (success) return stream;
-            return null;
-        }
-        public override Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTile(registry, page, 1, progress);
-        public override Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTile(registry, page, 1, progress);
-        private async Task<Stream> GetTile(Registry registry, RPage page, int zoom, Action<Progress> progress)
-        {
-            var (success, stream) = Data.TryGetImageFromDrive(registry, page, zoom);
-            if (success) return stream;
-            var index = Array.IndexOf(registry.Pages, page);
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            var image = await Grabber.GetImage(page.URL, client).ConfigureAwait(false);
-            page.Zoom = 1;
+            var image = await Grabber.GetImage(page.DownloadUrl, client).ConfigureAwait(false);
+            page.ImageSize = zoom;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers[Id].Registries[registry.ID].Pages[index] = page;
-            await Data.SaveImage(registry, page, image, false).ConfigureAwait(false);
+            await Data.SaveImage(page, image, false).ConfigureAwait(false);
             return image.ToStream();
         }
     }

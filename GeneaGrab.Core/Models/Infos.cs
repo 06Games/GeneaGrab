@@ -13,22 +13,18 @@ namespace GeneaGrab.Core.Models
 {
     public sealed class RegistryInfo : IEquatable<RegistryInfo>
     {
-        public RegistryInfo() { PageNumber = Registry?.Pages?.FirstOrDefault()?.Number ?? 1; }
+        public RegistryInfo() { PageNumber = 1; }
         public RegistryInfo(Registry r)
         {
-            ProviderId = r.ProviderID;
-            RegistryId = r.ID;
-            PageNumber = Registry?.Pages?.FirstOrDefault()?.Number ?? 1;
+            ProviderId = r.ProviderId;
+            RegistryId = r.Id;
+            PageNumber = 1;
         }
 
         public string ProviderId { get; set; }
         public Provider Provider => ProviderId is not null && Data.Providers.TryGetValue(ProviderId, out var p) ? p : null;
         public string RegistryId { get; set; }
-        public Registry Registry => RegistryId is not null && Provider.Registries.TryGetValue(RegistryId, out var r) ? r : null;
         public int PageNumber { get; set; }
-        public int PageIndex => Array.IndexOf(Registry.Pages, Page);
-        public RPage Page => GetPage(PageNumber);
-        public RPage GetPage(int number) => Array.Find(Registry.Pages, page => page.Number == number);
 
 
         public bool Equals(RegistryInfo other) => ProviderId == other?.ProviderId && RegistryId == other?.RegistryId;
@@ -41,8 +37,8 @@ namespace GeneaGrab.Core.Models
     public static class Data
     {
         public static Func<string, string, string> Translate { get; set; } = (_, fallback) => fallback;
-        public static Func<Registry, RPage, bool, Stream> GetImage { get; set; } = (_, _, _) => null;
-        public static Func<Registry, RPage, Image, bool, Task<string>> SaveImage { get; set; } = (_, _, _, _) => Task.CompletedTask as Task<string>;
+        public static Func<Frame, bool, Stream> GetImage { get; set; } = (_, _) => null;
+        public static Func<Frame, Image, bool, Task<string>> SaveImage { get; set; } = (_, _, _) => Task.CompletedTask as Task<string>;
         public static Func<Image, Task<Image>> ToThumbnail { get; set; } = Task.FromResult;
         public static void SetLogger(ILogger value) => Log.Logger = value;
 
@@ -81,23 +77,23 @@ namespace GeneaGrab.Core.Models
             }
             else dic.Add(key, obj);
         }
-        public static async Task<(bool success, Stream stream)> TryGetThumbnailFromDrive(Registry registry, RPage current)
+        public static async Task<(bool success, Stream stream)> TryGetThumbnailFromDrive(Frame current)
         {
-            var image = GetImage(registry, current, true);
+            var image = GetImage(current, true);
             if (image != null) return (true, image);
 
-            var (success, stream) = TryGetImageFromDrive(registry, current, 0);
+            var (success, stream) = TryGetImageFromDrive(current, 0);
             if (!success) return (false, null);
 
             var thumb = await ToThumbnail(await Image.LoadAsync(stream).ConfigureAwait(false)).ConfigureAwait(false);
-            await SaveImage(registry, current, thumb, true);
+            await SaveImage(current, thumb, true);
             return (true, thumb.ToStream());
         }
-        public static (bool success, Stream stream) TryGetImageFromDrive(Registry registry, RPage current, double zoom)
+        public static (bool success, Stream stream) TryGetImageFromDrive(Frame current, Scale zoom)
         {
-            if (zoom > current.Zoom) return (false, null);
+            if (zoom > current.ImageSize) return (false, null);
 
-            var image = GetImage(registry, current, false);
+            var image = GetImage(current, false);
             return image != null ? (true, image) : (false, null);
         }
     }

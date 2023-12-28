@@ -22,6 +22,7 @@ using GeneaGrab.Helpers;
 using GeneaGrab.Models.Indexing;
 using GeneaGrab.Services;
 using Button = DiscordRPC.Button;
+using Frame = GeneaGrab.Core.Models.Frame;
 
 namespace GeneaGrab.Views
 {
@@ -32,25 +33,24 @@ namespace GeneaGrab.Views
         {
             get
             {
-                if (Info is null) return null;
-                var location = Info.Registry.Location ?? Info.Registry.LocationID;
-                var registry = Info.Registry?.Name ?? Info.RegistryId;
-                return location is null ? registry : $"{location}: {registry}";
+                if (Registry is null) return null;
+                var location = Registry.Location.ToArray();
+                var registry = Registry.ToString();
+                return !location.Any() ? registry : $"{location}: {registry}";
             }
         }
-        public string? Identifier => Info?.RegistryId;
+        public string? Identifier => Registry?.Id;
         public async Task RichPresence(RichPresence richPresence)
         {
-            if (Info is null) return;
-            var url = await Info.Provider.Ark(Info.Registry, Info.Page);
-            richPresence.Buttons = new[]
-            {
+            var url = await Provider.Ark(Frame);
+            richPresence.Buttons =
+            [
                 new Button
                 {
                     Label = ResourceExtensions.GetLocalized("Discord.OpenRegistry", ResourceExtensions.Resource.UI),
-                    Url = Uri.IsWellFormedUriString(url, UriKind.Absolute) ? url : Info.Registry.URL
+                    Url = Uri.IsWellFormedUriString(url, UriKind.Absolute) ? url : Registry?.URL
                 }
-            };
+            ];
         }
 
 
@@ -59,6 +59,10 @@ namespace GeneaGrab.Views
         protected string? ArkText => ResourceExtensions.GetLocalized("Registry.Ark", ResourceExtensions.Resource.UI);
         protected string? NotesText => ResourceExtensions.GetLocalized("Registry.Notes", ResourceExtensions.Resource.UI);
 
+
+        public Provider Provider => Data.Providers[Registry?.ProviderId];
+        public Registry? Registry { get; private set; }
+        public Frame? Frame { get; private set; }
 
         public RegistryViewer()
         {
@@ -77,9 +81,8 @@ namespace GeneaGrab.Views
                 pageNotes.TextChanging += (_, _) =>
                 {
                     var text = pageNotes.Text;
-                    if (Info == null || !PageNumbers.Contains(Info.PageNumber)) return;
-                    Info.Page.Notes = string.IsNullOrWhiteSpace(text) ? null : text;
-                    var index = PageNumbers.IndexOf(Info.PageNumber);
+                    Frame.Notes = string.IsNullOrWhiteSpace(text) ? null : text;
+                    var index = PageNumbers.IndexOf(Frame.FrameNumber);
                     Pages[index] = Pages[index].Refresh();
                 };
 
@@ -90,7 +93,6 @@ namespace GeneaGrab.Views
             });
         }
 
-        public RegistryInfo? Info { get; set; }
         public override async void OnNavigatedTo(NavigationEventArgs args)
         {
             base.OnNavigatedTo(args);
@@ -105,13 +107,13 @@ namespace GeneaGrab.Views
                 return;
             }
 
-            var tab = Info == null ? null : await Dispatcher.UIThread.InvokeAsync(() => NavigationService.TryGetTabWithId(Info.RegistryId, out var tab) ? tab : null);
+            var tab = await Dispatcher.UIThread.InvokeAsync(() => NavigationService.TryGetTabWithId(Registry.Id, out var tab) ? tab : null);
             if (tab != null)
             {
                 var currentTab = NavigationService.CurrentTab;
                 NavigationService.OpenTab(tab);
                 if (NavigationService.Frame?.Content is not RegistryViewer viewer) return;
-                await viewer.ChangePage(Info!.PageNumber);
+                await viewer.ChangePage(Frame.FrameNumber);
                 if (!ReferenceEquals(viewer, this))
                 {
                     await Dispatcher.UIThread.InvokeAsync(() => NavigationService.CloseTab(currentTab!));
@@ -124,33 +126,33 @@ namespace GeneaGrab.Views
                 RefreshView();
                 MainWindow.UpdateSelectedTitle();
             });
-            if (noRefresh || Info == null) return;
+            if (noRefresh) return;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 PageNumbers.Clear();
                 Pages.Clear();
 
                 var pageNumber = PageNumber;
-                pageNumber.Minimum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Min(p => p.Number) : 0;
-                pageNumber.Maximum = Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0;
-                PageNumbers = Info.Registry.Pages.Select(p => p.Number).ToList();
-                foreach (var page in Info.Registry.Pages) Pages.Add(page!);
+                pageNumber.Minimum = Registry.Frames.Any() ? Registry.Frames.Min(p => p.FrameNumber) : 0;
+                pageNumber.Maximum = Registry.Frames.Any() ? Registry.Frames.Max(p => p.FrameNumber) : 0;
+                PageNumbers = Registry.Frames.Select(p => p.FrameNumber).ToList();
+                foreach (var page in Registry.Frames) Pages.Add(page!);
             });
 
             _ = Task.Run(async () =>
             {
-                var img = await LoadImage(Info.PageNumber, page => Info.Provider.Preview(Info.Registry, page, TrackProgress), false);
+                var img = await LoadImage(Frame.FrameNumber, page => Provider.GetFrame(page, Scale.Navigation, TrackProgress), false);
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
 
                 var tasks = new List<Task>();
-                foreach (var page in Pages.ToList().Where(page => page.Number != Info.PageNumber))
+                foreach (var page in Pages.ToList().Where(page => page.Number != Frame.FrameNumber))
                 {
                     if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                    tasks.Add(LoadImage(page.Number, rPage => Info.Provider.Thumbnail(Info.Registry, rPage, null)));
+                    tasks.Add(LoadImage(page.Number, rPage => Provider.GetFrame(rPage, Scale.Thumbnail, null)));
                 }
                 await Task.WhenAll(tasks).ConfigureAwait(false);
 
-                async Task<Stream> LoadImage(int number, Func<RPage, Task<Stream>> func, bool close = true)
+                async Task<Stream> LoadImage(int number, Func<Frame, Task<Stream>> func, bool close = true)
                 {
                     var i = PageNumbers.IndexOf(number);
                     var page = Pages[i];
@@ -169,14 +171,14 @@ namespace GeneaGrab.Views
         {
             var inRam = false;
 
+            await using var db = new DatabaseContext();
             switch (parameter)
             {
                 case RegistryInfo infos:
-                    Info = infos;
+                    Registry = db.Registries.FirstOrDefault(r => r.Id == infos.RegistryId)!;
+                    Frame = db.Frames.FirstOrDefault(r => r.RegistryId == infos.RegistryId && r.FrameNumber == infos.PageNumber)!;
                     break;
                 case Uri url:
-                    await LocalData.LoadDataAsync().ConfigureAwait(false);
-
                     RegistryInfo? info = null;
                     Provider? provider = null;
                     foreach (var p in Data.Providers.Values)
@@ -185,29 +187,45 @@ namespace GeneaGrab.Views
                             provider = p;
                             break;
                         }
-                    if (provider != null && info != null) Info = provider.Registries.ContainsKey(info.RegistryId) ? info : await provider.Infos(url);
+                    if (provider != null && info != null)
+                    {
+                        var registry = db.Registries.FirstOrDefault(r => r.Id == info.RegistryId);
+                        var frame = db.Frames.FirstOrDefault(r => r.RegistryId == info.RegistryId && r.FrameNumber == info.PageNumber);
+                        if (registry is null || frame is null)
+                        {
+                            var data = await provider.Infos(url);
+                            registry = data.registry;
+                            frame = registry.Frames.FirstOrDefault(f => f.FrameNumber == data.pageNumber) ?? registry.Frames.First();
+                        }
+                        Registry = registry;
+                        Frame = frame;
+                    }
                     break;
                 default:
                     inRam = true;
                     break;
             }
-            return (Info != null, inRam);
+            return (Registry != null && Frame != null, inRam);
         }
 
 
-        private void GoToPreviousPage(object? _, RoutedEventArgs e) => ChangePage(Info?.PageNumber - 1 ?? -1);
-        private void GoToNextPage(object? _, RoutedEventArgs e) => ChangePage(Info?.PageNumber + 1 ?? -1);
+        private void GoToPreviousPage(object? _, RoutedEventArgs e) => ChangePage(Frame.FrameNumber - 1);
+        private void GoToNextPage(object? _, RoutedEventArgs e) => ChangePage(Frame.FrameNumber + 1);
         private async void ChangePage(object _, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
         }
-        public Task ChangePage(int pageNumber) => ChangePage(Info?.GetPage(pageNumber));
+        public async Task ChangePage(int pageNumber)
+        {
+            await using var db = new DatabaseContext();
+            ChangePage(db.Frames.FirstOrDefault(f => f.RegistryId == Registry.Id && f.FrameNumber == pageNumber));
+        }
         public async Task ChangePage(PageList? page)
         {
-            if (page is null || Info is null || Info.PageNumber == page.Number) return;
-            Info.PageNumber = page.Number;
-            var image = await Info.Provider.Preview(Info.Registry, page.Page, TrackProgress);
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(Info.Registry, page.Page);
+            if (page is null || Frame.FrameNumber == page.Number) return;
+            Frame = page.Page;
+            var image = await Provider.GetFrame(page.Page, Scale.Navigation, TrackProgress);
+            var (success, stream) = await Data.TryGetThumbnailFromDrive(page.Page);
             if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && success)
                 Dispatcher.UIThread.Post(() =>
                 {
@@ -218,51 +236,46 @@ namespace GeneaGrab.Views
         }
         private void RefreshView(Stream? img = null)
         {
-            if (Info?.Registry == null) return;
-
-            var pageTotal = Info.Registry.Pages.Any() ? Info.Registry.Pages.Max(p => p.Number) : 0;
-            PageNumber.Value = Info.PageNumber;
+            var pageTotal = 0; //Registry.Frames.Any() ? Registry.Frames.Max(p => p.Number) : 0; // TODO
+            PageNumber.Value = Frame.FrameNumber;
             PageTotal.Text = $"/ {pageTotal}";
-            PreviousPage.IsEnabled = Info.PageNumber > 1;
-            NextPage.IsEnabled = Info.PageNumber < pageTotal;
-            SetInfo(InfoLocationCity, Info.Registry.Location ?? Info.Registry.LocationID ?? Info.Registry.LocationDetails?.LastOrDefault());
-            SetInfo(InfoLocationDistrict, Info.Registry!.District ?? Info.Registry.DistrictID);
-            SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
-            SetInfo(InfoRegistryDate, Info.Registry.Dates);
-            SetInfo(InfoRegistryTitle, Info.Registry.Title);
-            SetInfo(InfoRegistrySubtitle, Info.Registry.Subtitle);
-            SetInfo(InfoRegistryAuthor, Info.Registry.Author);
-            SetInfo(InfoRegistryNotes, Info.Registry.Notes);
-            SetInfo(InfoRegistryId, Info.Registry.CallNumber ?? Info.Registry.ID);
+            PreviousPage.IsEnabled = Frame.FrameNumber > 1;
+            NextPage.IsEnabled = Frame.FrameNumber < pageTotal;
+            SetInfo(InfoLocationCity, string.Join(", ", Registry.Location));
+            /*SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
+            SetInfo(InfoRegistryDate, Registry.Dates);*/ // TODO
+            SetInfo(InfoRegistryTitle, Registry.Title);
+            SetInfo(InfoRegistrySubtitle, Registry.Subtitle);
+            SetInfo(InfoRegistryAuthor, Registry.Author);
+            SetInfo(InfoRegistryNotes, Registry.Notes);
+            SetInfo(InfoRegistryId, Registry.CallNumber ?? Registry.Id);
             void SetInfo(TextBlock block, string? text)
             {
                 block.Text = text ?? "";
                 block.IsVisible = !string.IsNullOrWhiteSpace(text);
             }
 
-            PageNotes.Text = Info.Page?.Notes ?? "";
+            PageNotes.Text = Frame.Notes ?? "";
             DisplayIndex();
 
             var image = Image;
             var pageList = PageList;
             if (img != null) image.Source = img.ToBitmap();
-            pageList.Selection.Select(Info.PageIndex);
-            pageList.ScrollIntoView(Info.PageIndex);
+            pageList.Selection.Select(Frame.FrameNumber - 1);
+            pageList.ScrollIntoView(Frame.FrameNumber - 1);
             ImagePanel.Reset();
             OnPropertyChanged(nameof(image));
-            _ = Task.Run(async () => await LocalData.SaveRegistryAsync(Info.Registry));
+            //_ = Task.Run(async () => await LocalData.SaveRegistryAsync(Registry));
         }
 
         private async void Download(object sender, RoutedEventArgs e)
         {
-            if (Info == null) return;
-            var stream = await Info.Provider.Download(Info.Registry, Info.Page, TrackProgress);
+            var stream = await Provider.GetFrame(Frame, Scale.Full, TrackProgress);
             RefreshView(stream);
         }
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
-            if (Info == null) return;
-            var page = LocalData.GetFile(Info.Registry, Info.Page);
+            var page = LocalData.GetFile(Frame);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -277,8 +290,7 @@ namespace GeneaGrab.Views
         }
         private async void Ark(object sender, RoutedEventArgs e)
         {
-            if (Info == null) return;
-            await TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(await Info.Provider.Ark(Info.Registry, Info.Page))!;
+            await TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(await Provider.Ark(Frame))!;
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;
@@ -296,24 +308,20 @@ namespace GeneaGrab.Views
 
         private void AddIndex(object sender, RoutedEventArgs e)
         {
-            if (Info is null) return;
-            using (var db = new DatabaseContext())
+            using var db = new DatabaseContext();
+            db.Records.Add(new Record(Registry.ProviderId, Registry.Id, Frame.FrameNumber)
             {
-                db.Records.Add(new Record(Info.Registry, Info.Page)
-                {
-                    Position = new Rect(100, 75, 100, 50)
-                });
-                db.SaveChanges();
-            }
+                Position = new Rect(100, 75, 100, 50)
+            });
+            db.SaveChanges();
             DisplayIndex();
         }
         private void DisplayIndex()
         {
-            if (Info is null) return;
             ImageCanvas.Children.Clear();
 
             using var db = new DatabaseContext();
-            var indexes = db.Records.Where(r => r.ProviderId == Info.ProviderId && r.RegistryId == Info.RegistryId && r.FrameNumber == Info.PageNumber);
+            var indexes = db.Records.Where(r => r.ProviderId == Registry.ProviderId && r.RegistryId == Registry.Id && r.FrameNumber == Frame.FrameNumber);
             RecordList.ItemsSource = indexes.ToList();
             foreach (var index in indexes)
                 DisplayIndexRectangle(index);
@@ -344,11 +352,11 @@ namespace GeneaGrab.Views
 
     public class PageList
     {
-        public static implicit operator PageList?(RPage? page) => page is null ? null : new PageList { Page = page }.Refresh();
-        public RPage Page { get; private init; } = null!;
+        public static implicit operator PageList?(Frame? page) => page is null ? null : new PageList { Page = page }.Refresh();
+        public Frame Page { get; private init; } = null!;
         public PageList Refresh()
         {
-            Number = Page.Number;
+            Number = Page.FrameNumber;
             Notes = Page.Notes?.Split('\n').FirstOrDefault() ?? "";
             return this;
         }

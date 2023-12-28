@@ -10,7 +10,7 @@ namespace GeneaGrab.Core.Helpers
     public static class DeepZoom
     {
         /// <summary>Returns the maximum zoom level</summary>
-        public static int CalculateIndex(RPage page) => (int)Math.Ceiling(Math.Log(Math.Max(page.Width, page.Height), 2));
+        public static int CalculateIndex(Frame page) => (int)Math.Ceiling(Math.Log(Math.Max(page.Width!.Value, page.Height!.Value), 2));
 
         /// <summary>Returns the properties of the image</summary>
         /// <param name="baseURL">Image root url</param>
@@ -31,11 +31,11 @@ namespace GeneaGrab.Core.Helpers
             );
         }
 
-        public static (Point tiles, int diviser) GetTilesNumber(RPage page, double multiplier)
+        public static (Point tiles, int diviser) GetTilesNumber(Frame page, double multiplier)
         {
             var diviser = Math.Pow(2, CalculateIndex(page) - multiplier);
+            return (new Point(NbTiles(page.Width!.Value), NbTiles(page.Height!.Value)), (int)diviser);
             int NbTiles(int val) => (int)Math.Ceiling(val / diviser / page.TileSize.GetValueOrDefault(256));
-            return (new Point(NbTiles(page.Width), NbTiles(page.Height)), (int)diviser);
         }
     }
 }

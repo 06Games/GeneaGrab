@@ -17,34 +17,34 @@ namespace GeneaGrab.Core.Providers
         public override string Id => "AD06";
         public override string Url => "https://archives06.fr/";
 
-        public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
+        public override Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
-            if (url.Host != "archives06.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return null;
+            if (url.Host != "archives06.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return Task.FromResult<RegistryInfo>(null);
 
             var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
-            return new RegistryInfo
+            return Task.FromResult(new RegistryInfo
             {
                 ProviderId = "AD06",
                 RegistryId = queries["id"].Value,
                 PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
-            };
+            });
         }
 
-        public override async Task<RegistryInfo> Infos(Uri url)
+        public override async Task<(Registry, int)> Infos(Uri url)
         {
             var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
-            var registry = new Registry(Data.Providers["AD06"]) { ID = queries["id"].Value };
-            registry.URL = $"https://archives06.fr/ark:/{queries["something"].Value}/{registry.ID}";
+            var registry = new Registry(Data.Providers["AD06"]) { RemoteId = queries["id"].Value };
+            registry.URL = $"https://archives06.fr/ark:/{queries["something"].Value}/{registry.RemoteId}";
 
             var client = new HttpClient();
             var manifest = new LigeoManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
             if (!int.TryParse(queries["seq"].Value, out var seq)) Log.Warning("Couldn't parse sequence ({SequenceValue}), using default one", queries["seq"].Value);
             var sequence = manifest.Sequences.ElementAt(seq);
 
-            registry.Pages = sequence.Canvases.Select((p, i) => new RPage
+            registry.Frames = sequence.Canvases.Select((p, i) => new Frame
             {
-                Number = int.TryParse(p.Label, out var number) ? number : i + 1,
-                URL = p.Images.First().ServiceId,
+                FrameNumber = int.TryParse(p.Label, out var number) ? number : i + 1,
+                DownloadUrl = p.Images.First().ServiceId,
                 Width = p.Images.First().Width,
                 Height = p.Images.First().Height,
                 Extra = p.Classeur
@@ -54,8 +54,11 @@ namespace GeneaGrab.Core.Providers
             registry.CallNumber = string.IsNullOrWhiteSpace(classeur.UnitId) ? null : classeur.UnitId;
             registry.ArkURL = sequence.Id;
 
-            // ReSharper disable StringLiteralTypo
             var notes = new List<string>();
+            var locationDetails = new List<string>();
+            string location = null;
+            string district = null;
+            // ReSharper disable StringLiteralTypo
             foreach (var metadata in manifest.MetaData)
             {
                 switch (metadata.Key)
@@ -64,11 +67,11 @@ namespace GeneaGrab.Core.Providers
                     case "Commune d’exercice du notaire":
                     case "Lieu":
                     case "Lieu d'édition":
-                        registry.Location = ToTitleCase(metadata.Value.ToLower());
+                        location = ToTitleCase(metadata.Value.ToLower());
                         break;
                     case "Paroisse":
                     case "Complément de lieu":
-                        registry.District = ToTitleCase(metadata.Value.ToLower());
+                        district = ToTitleCase(metadata.Value.ToLower());
                         break;
                     case "Date":
                     case "Date de l'acte":
@@ -82,7 +85,7 @@ namespace GeneaGrab.Core.Providers
                     case "Typologie":
                     case "Type de document":
                     case "Type d'acte":
-                        registry.Types = registry.Types.Union(GetTypes(metadata.Value));
+                        registry.Types = registry.Types.Union(GetTypes(metadata.Value)).ToArray();
                         break;
                     case "Analyse":
                         registry.Title = metadata.Value;
@@ -111,7 +114,7 @@ namespace GeneaGrab.Core.Providers
                 "FRAD006_CADASTRE_MATRICE" => ("(?<callnum>.+?) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralMatrix }),
                 "FRAD006_CADASTRE_ETAT_SECTION" => ("(?<callnum>.+) +- +(?<title>.*?) *?-", new[] { RegistryType.CadastralSectionStates }),
                 "FRAD006_RECENSEMENT_POPULATION" => ("(?<city>.+) +- +(?<from>.+)(, (?<district>.*))", new[] { RegistryType.Census }),
-                "FRAD006_HYPOTHEQUES" => (@"(?<callnum>.+) +- +(?<title>.+) +-", new[] { RegistryType.Catalogue }),
+                "FRAD006_HYPOTHEQUES" => ("(?<callnum>.+) +- +(?<title>.+) +-", new[] { RegistryType.Catalogue }),
                 "FRAD006_HYPOTHEQUES_ACTES_TRANSLATIFS" => (@"(?<callnum>.+?) ?- +(?<author>.+?) ?\.?- +(?<title>.+?) ?- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Engrossments }),
                 "FRAD006_REPERTOIRE_NOTAIRES" => ("(?<callnum>.+) +- +(?<title>.+)", new[] { RegistryType.Notarial }),
                 "FRAD006_3E" => (@"(?<callnum>3 E [\d ]+) (?<title>.*)\. (?<from>.*)-(?<to>.*)", new[] { RegistryType.Notarial }), // Notaire
@@ -123,7 +126,7 @@ namespace GeneaGrab.Core.Providers
                 "FRAD006_PRESSE" => (@"(?<title>.+) \(\d*-\d*\), .*? +- +(?<from>(\d|\/)+)(-(?<to>(\d|\/)+))?", new[] { RegistryType.Newspaper }),
                 "FRAD006_DELIBERATIONS_CONSEIL_GENERAL" => ("(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Book }),
                 "FRAD006_11AV" => ("(?<callnum>.+) +- +(?<title>.+) +- +(?<from>.+?)(-(?<to>.+))?$", new[] { RegistryType.Other }), // Audiovisuel
-                "FRAD006_10FI" => ("(?<callnum>.+) +- +(?<title>.+) +- +\\((?<from>.+?)-(?<to>.+)\\)", new[] { RegistryType.Other }), // Iconographie
+                "FRAD006_10FI" => (@"(?<callnum>.+) +- +(?<title>.+) +- +\((?<from>.+?)-(?<to>.+)\)", new[] { RegistryType.Other }), // Iconographie
                 _ => (null, null)
             };
             // ReSharper restore StringLiteralTypo
@@ -132,33 +135,32 @@ namespace GeneaGrab.Core.Providers
             {
                 var data = Regex.Match(sequence.Label, labelRegexExp).Groups;
                 registry.CallNumber ??= data.TryGetValue("callnum");
-                registry.Location ??= ToTitleCase(data.TryGetValue("city"));
-                registry.District ??= ToTitleCase(data.TryGetValue("district"));
+                location ??= ToTitleCase(data.TryGetValue("city"));
+                district ??= ToTitleCase(data.TryGetValue("district"));
                 registry.From ??= data.TryGetValue("from");
                 registry.To ??= data.TryGetValue(data["to"].Success ? "to" : "from");
                 registry.Title ??= data.TryGetValue("title");
                 registry.Subtitle ??= data.TryGetValue("subtitle");
                 registry.Author ??= data.TryGetValue("author");
-                if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(data.TryGetValue("type")));
-                if (type?.Length > 0) registry.Types = registry.Types.Union(type);
+                if (data["type"].Success) registry.Types = registry.Types.Union(GetTypes(data.TryGetValue("type"))).ToArray();
+                if (type?.Length > 0) registry.Types = registry.Types.Union(type).ToArray();
 
 
                 var analyse = await client.GetStringAsync(registry.URL);
-                registry.LocationDetails ??= Regex
+                locationDetails.AddRange(Regex
                     .Matches(analyse, @"<ul><li><a href=[^>]+?><span>(?<archivePath>[^>]+?)\.?</span></a>")
-                    .Select(m => m.Groups.TryGetValue("archivePath"))
-                    .ToArray();
+                    .Select(m => m.Groups.TryGetValue("archivePath")));
 
-                if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_ETAT_CIVIL") // The civil registry collection only provides the city through the analysis page
-                    registry.Location ??= ToTitleCase(registry.LocationDetails.LastOrDefault());
-                else if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && data.TryGetValue("title") == $"{data.TryGetValue("from")}-{data.TryGetValue("to")}")
-                    registry.Title = registry.LocationDetails.LastOrDefault();
+                if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && data.TryGetValue("title") == $"{data.TryGetValue("from")}-{data.TryGetValue("to")}")
+                    registry.Title = registry.Location.LastOrDefault();
             }
+            if (location != null) locationDetails.Add(location);
+            if (district != null) locationDetails.Add(district);
+            registry.Location = locationDetails.ToArray();
             registry.Notes = string.Join("\n", notes);
 
 
-            Data.AddOrUpdate(Data.Providers["AD06"].Registries, registry.ID, registry);
-            return new RegistryInfo(registry) { PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1 };
+            return (registry, int.TryParse(queries["page"].Value, out var page) ? page : 1);
         }
 
         private static string ToTitleCase(string text) => text is null ? null : Regex.Replace(text, @"\p{L}+", match => match.Value[..1].ToUpper() + match.Value[1..].ToLower());
@@ -196,32 +198,28 @@ namespace GeneaGrab.Core.Providers
         }
 
 
-        public override Task<string> Ark(Registry registry, RPage page) => Task.FromResult($"{registry.ArkURL}/{page.Number}");
-        public override async Task<Stream> Thumbnail(Registry registry, RPage page, Action<Progress> progress)
+        public override Task<string> Ark(Frame page) => Task.FromResult(page.Registry == null ? null : $"{page.Registry.ArkURL}/{page.FrameNumber}");
+
+        public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
         {
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(registry, page);
-            if (success) return stream;
-            return await GetTiles(registry, page, 0.1F, progress);
-        }
-        public override Task<Stream> Preview(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 0.5F, progress);
-        public override Task<Stream> Download(Registry registry, RPage page, Action<Progress> progress) => GetTiles(registry, page, 1, progress);
-        private static async Task<Stream> GetTiles(Registry registry, RPage page, float scale, Action<Progress> progress)
-        {
-            var zoom = (int)(scale * 100);
-            var (success, stream) = Data.TryGetImageFromDrive(registry, page, zoom);
+            var (success, stream) = scale == Scale.Thumbnail ? await Data.TryGetThumbnailFromDrive(page) : Data.TryGetImageFromDrive(page, scale);
             if (success) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
+            var size = scale switch
+            {
+                Scale.Thumbnail => "!512,512",
+                Scale.Navigation => "!2048,2048",
+                _ => "max"
+            };
             var image = await Image
-                .LoadAsync(await client.GetStreamAsync(zoom >= 100 ? Iiif.GenerateImageRequestUri(page.URL) : Iiif.GenerateImageRequestUri(page.URL, size: $"{page.Width * zoom / 100},"))
-                    .ConfigureAwait(false))
+                .LoadAsync(await client.GetStreamAsync(Iiif.GenerateImageRequestUri(page.DownloadUrl, size: size)).ConfigureAwait(false))
                 .ConfigureAwait(false);
-            page.Zoom = zoom;
+            page.ImageSize = scale;
             progress?.Invoke(Progress.Finished);
 
-            Data.Providers["AD06"].Registries[registry.ID].Pages[page.Number - 1] = page;
-            await Data.SaveImage(registry, page, image, false);
+            await Data.SaveImage(page, image, false);
             return image.ToStream();
         }
     }

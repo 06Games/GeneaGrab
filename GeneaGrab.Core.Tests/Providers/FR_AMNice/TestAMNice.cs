@@ -20,9 +20,7 @@ public class TestAMNice
         Assert.Equal(data.Id, registryInfo.RegistryId);
         Assert.Equal(data.Page, registryInfo.PageNumber);
         Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
-        Assert.Equal(data.Rue, registryInfo.Registry.District);
-        Assert.Equal(data.Ville, registryInfo.Registry.Location);
-        Assert.Equal(data.DetailPosition, registryInfo.Registry.LocationDetails);
+        Assert.Equal(data.DetailPosition.Append(data.Ville).Append(data.Rue), registryInfo.Registry.Location);
         Assert.Equal(data.Auteur, registryInfo.Registry.Author);
         Assert.Equal(data.From, registryInfo.Registry.From);
         Assert.Equal(data.To, registryInfo.Registry.To);
