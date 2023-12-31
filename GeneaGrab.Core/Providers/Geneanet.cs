@@ -36,11 +36,9 @@ namespace GeneaGrab.Core.Providers
 
         public override async Task<(Registry, int)> Infos(Uri url)
         {
-            var registry = new Registry(Data.Providers["Geneanet"]) { URL = url.OriginalString };
-
-            var regex = Regex.Match(registry.URL, @"(?:idcollection=(?<col>\d*).*page=(?<page>\d*))|(?:\/(?<col>\d+)(?:\z|\/(?<page>\d*)))");
-            registry.RemoteId = regex.Groups["col"]?.Value;
-            if (string.IsNullOrEmpty(registry.RemoteId)) return (null, -1);
+            var regex = Regex.Match(url.OriginalString, @"(?:idcollection=(?<col>\d*).*page=(?<page>\d*))|(?:\/(?<col>\d+)(?:\z|\/(?<page>\d*)))");
+            var registry = new Registry(Data.Providers["Geneanet"], regex.Groups["col"]?.Value) { URL = url.OriginalString };
+            if (string.IsNullOrEmpty(registry.Id)) return (null, -1);
 
             var client = new HttpClient();
             var page = await client.GetStringAsync(registry.URL);
@@ -68,9 +66,9 @@ namespace GeneaGrab.Core.Providers
         {
             if (client == null) client = new HttpClient();
 
-            registry.URL = $"https://www.geneanet.org/registres/view/{registry.RemoteId}";
+            registry.URL = $"https://www.geneanet.org/registres/view/{registry.Id}";
 
-            var pagesData = await client.GetStringAsync($"https://www.geneanet.org/registres/api/images/{registry.RemoteId}?min_page=1&max_page={int.MaxValue}");
+            var pagesData = await client.GetStringAsync($"https://www.geneanet.org/registres/api/images/{registry.Id}?min_page=1&max_page={int.MaxValue}");
             registry.Frames = JObject.Parse($"{{results: {pagesData}}}").Value<JArray>("results")?.Select(p =>
             {
                 var pageNumber = p.Value<int>("page");

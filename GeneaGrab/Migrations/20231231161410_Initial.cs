@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GeneaGrab.Migrations
 {
     /// <inheritdoc />
-    public partial class Registries : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,9 +15,8 @@ namespace GeneaGrab.Migrations
                 name: "Registries",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "TEXT", nullable: false),
                     ProviderId = table.Column<string>(type: "TEXT", nullable: false),
-                    RemoteId = table.Column<string>(type: "TEXT", nullable: true),
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
                     CallNumber = table.Column<string>(type: "TEXT", nullable: true),
                     URL = table.Column<string>(type: "TEXT", nullable: true),
                     ArkURL = table.Column<string>(type: "TEXT", nullable: true),
@@ -30,13 +29,14 @@ namespace GeneaGrab.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Registries", x => x.Id);
+                    table.PrimaryKey("PK_Registries", x => new { x.ProviderId, x.Id });
                 });
 
             migrationBuilder.CreateTable(
                 name: "Frames",
                 columns: table => new
                 {
+                    ProviderId = table.Column<string>(type: "TEXT", nullable: false),
                     RegistryId = table.Column<string>(type: "TEXT", nullable: false),
                     FrameNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     ArkUrl = table.Column<string>(type: "TEXT", nullable: true),
@@ -49,12 +49,12 @@ namespace GeneaGrab.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Frames", x => new { x.RegistryId, x.FrameNumber });
+                    table.PrimaryKey("PK_Frames", x => new { x.ProviderId, x.RegistryId, x.FrameNumber });
                     table.ForeignKey(
-                        name: "FK_Frames_Registries_RegistryId",
-                        column: x => x.RegistryId,
+                        name: "FK_Frames_Registries_ProviderId_RegistryId",
+                        columns: x => new { x.ProviderId, x.RegistryId },
                         principalTable: "Registries",
-                        principalColumn: "Id",
+                        principalColumns: new[] { "ProviderId", "Id" },
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -66,6 +66,7 @@ namespace GeneaGrab.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     ProviderId = table.Column<string>(type: "TEXT", nullable: false),
                     RegistryId = table.Column<string>(type: "TEXT", nullable: false),
+                    RegistryProviderId = table.Column<string>(type: "TEXT", nullable: true),
                     FrameNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     ArkUrl = table.Column<string>(type: "TEXT", nullable: true),
                     PageNumber = table.Column<string>(type: "TEXT", nullable: true),
@@ -83,17 +84,16 @@ namespace GeneaGrab.Migrations
                 {
                     table.PrimaryKey("PK_Records", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Records_Frames_RegistryId_FrameNumber",
-                        columns: x => new { x.RegistryId, x.FrameNumber },
+                        name: "FK_Records_Frames_ProviderId_RegistryId_FrameNumber",
+                        columns: x => new { x.ProviderId, x.RegistryId, x.FrameNumber },
                         principalTable: "Frames",
-                        principalColumns: new[] { "RegistryId", "FrameNumber" },
+                        principalColumns: new[] { "ProviderId", "RegistryId", "FrameNumber" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Records_Registries_RegistryId",
-                        column: x => x.RegistryId,
+                        name: "FK_Records_Registries_RegistryProviderId_RegistryId",
+                        columns: x => new { x.RegistryProviderId, x.RegistryId },
                         principalTable: "Registries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumns: new[] { "ProviderId", "Id" });
                 });
 
             migrationBuilder.CreateTable(
@@ -129,9 +129,14 @@ namespace GeneaGrab.Migrations
                 column: "RecordId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Records_RegistryId_FrameNumber",
+                name: "IX_Records_ProviderId_RegistryId_FrameNumber",
                 table: "Records",
-                columns: new[] { "RegistryId", "FrameNumber" });
+                columns: new[] { "ProviderId", "RegistryId", "FrameNumber" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Records_RegistryProviderId_RegistryId",
+                table: "Records",
+                columns: new[] { "RegistryProviderId", "RegistryId" });
         }
 
         /// <inheritdoc />

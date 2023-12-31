@@ -33,8 +33,8 @@ namespace GeneaGrab.Core.Providers
         public override async Task<(Registry, int)> Infos(Uri url)
         {
             var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
-            var registry = new Registry(Data.Providers["AD79-86"]) { RemoteId = queries["id"]?.Value };
-            registry.URL = $"https://archives-deux-sevres-vienne.fr/ark:/{queries["something"]?.Value}/{registry.RemoteId}";
+            var registry = new Registry(Data.Providers["AD79-86"], queries["id"].Value);
+            registry.URL = $"https://archives-deux-sevres-vienne.fr/ark:/{queries["something"]?.Value}/{registry.Id}";
 
             var client = new HttpClient();
             var iiif = new LigeoManifest(await client.GetStringAsync($"{registry.URL}/manifest"));

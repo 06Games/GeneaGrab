@@ -26,7 +26,11 @@ public class DatabaseContext : DbContext
                 .HasConversion(
                     rect => rect == null ? null : rect.ToString(),
                     rectStr => rectStr == null ? null : Rect.Parse(rectStr));
-            e.HasOne(r => r.Frame).WithMany().HasForeignKey(r => new { r.RegistryId, r.FrameNumber });
+            e.HasOne(r => r.Frame).WithMany().HasForeignKey(r => new { r.ProviderId, r.RegistryId, r.FrameNumber });
+        });
+        modelBuilder.Entity<Registry>(e =>
+        {
+            e.HasMany(r => r.Frames).WithOne(f => f.Registry).HasForeignKey(r => new { r.ProviderId, r.RegistryId });
         });
     }
 }

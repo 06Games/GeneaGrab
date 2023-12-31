@@ -6,17 +6,17 @@ namespace GeneaGrab.Core.Models;
 
 /// <summary>Frame of the registry</summary>
 /// <remarks>A frame can contain multiple pages</remarks>
-[PrimaryKey(nameof(RegistryId), nameof(FrameNumber))]
+[PrimaryKey(nameof(ProviderId), nameof(RegistryId), nameof(FrameNumber))]
 public class Frame
 {
-    public Frame() { }
-
+    /// <summary>Associated provider id</summary>
+    public string ProviderId { get; set; } = null!;
     /// <summary>Associated registry id</summary>
-    public string RegistryId { get; init; } = null!;
+    public string RegistryId { get; set; } = null!;
     /// <summary>Associated registry</summary>
-    public Registry? Registry { get; init; }
+    public Registry? Registry { get; set; }
     /// <summary>Frame number</summary>
-    public int FrameNumber { get; init; }
+    public int FrameNumber { get; set; }
 
     /// <summary>Ark URL</summary>
     public string? ArkUrl { get; set; }

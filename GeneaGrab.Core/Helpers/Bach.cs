@@ -167,11 +167,10 @@ namespace GeneaGrab.Core.Helpers
             var docPageInfo = ParseDocPage(docWebPage);
             var (placeInCity, city, cityLocation) = ParsePlace(docPageInfo);
 
-            var registry = new Registry(this)
+            var registry = new Registry(this, ead.DocId)
             {
                 URL = ead.DocLink,
                 Types = GetTypes(docPageInfo).SelectMany(ParseTypes).ToArray(),
-                RemoteId = ead.DocId,
                 CallNumber = ead.UnitId,
                 Title = ead.UnitTitle,
                 Author = docPageInfo.TryGetValue("Auteur", out var personne) && docPageInfo.Remove("Auteur") ? string.Join(", ", personne) : null,

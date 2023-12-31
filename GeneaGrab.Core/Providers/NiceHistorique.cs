@@ -39,11 +39,10 @@ namespace GeneaGrab.Core.Providers
 
             var pagesTable = Regex.Matches(pageBody, "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>").ToArray();
 
-            var registry = new Registry(this)
+            var registry = new Registry(this, data["number"].Value)
             {
                 URL = url.OriginalString,
                 Types = new[] { RegistryType.Periodical },
-                RemoteId = data["number"].Value,
                 CallNumber = HttpUtility.HtmlDecode(data["title"].Value),
                 From = date,
                 To = date,

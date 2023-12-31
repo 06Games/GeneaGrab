@@ -30,8 +30,8 @@ namespace GeneaGrab.Core.Providers
 
         public override async Task<(Registry, int)> Infos(Uri url)
         {
-            var registry = new Registry(Data.Providers["Antenati"]) { RemoteId = Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value };
-            registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.RemoteId}";
+            var registry = new Registry(Data.Providers["Antenati"], Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value);
+            registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.Id}";
 
             var client = new HttpClient();
             var iiif = new Iiif(await client.GetStringAsync($"{registry.URL}/manifest"));

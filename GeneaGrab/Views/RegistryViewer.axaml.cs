@@ -21,6 +21,7 @@ using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Models.Indexing;
 using GeneaGrab.Services;
+using Microsoft.EntityFrameworkCore;
 using Button = DiscordRPC.Button;
 using Frame = GeneaGrab.Core.Models.Frame;
 
@@ -42,6 +43,7 @@ namespace GeneaGrab.Views
         public string? Identifier => Registry?.Id;
         public async Task RichPresence(RichPresence richPresence)
         {
+            if (Provider is null) return;
             var url = await Provider.Ark(Frame);
             richPresence.Buttons =
             [
@@ -55,7 +57,7 @@ namespace GeneaGrab.Views
 
 
 
-        public Provider Provider => Data.Providers[Registry?.ProviderId];
+        public Provider? Provider => Registry is null ? null : Data.Providers[Registry.ProviderId];
         public Registry? Registry { get; private set; }
         public Frame? Frame { get; private set; }
 
@@ -75,10 +77,10 @@ namespace GeneaGrab.Views
             if (pageNotes != null)
                 pageNotes.TextChanging += (_, _) =>
                 {
+                    if (Frame is null) return;
                     var text = pageNotes.Text;
                     Frame.Notes = string.IsNullOrWhiteSpace(text) ? null : text;
-                    var index = PageNumbers.IndexOf(Frame.FrameNumber);
-                    Pages[index] = Pages[index].Refresh();
+                    // TODO
                 };
 
             Image.GetObservable(BoundsProperty).Subscribe(b =>
@@ -102,13 +104,13 @@ namespace GeneaGrab.Views
                 return;
             }
 
-            var tab = await Dispatcher.UIThread.InvokeAsync(() => NavigationService.TryGetTabWithId(Registry.Id, out var tab) ? tab : null);
+            var tab = await Dispatcher.UIThread.InvokeAsync(() => NavigationService.TryGetTabWithId(Registry?.Id, out var tab) ? tab : null);
             if (tab != null)
             {
                 var currentTab = NavigationService.CurrentTab;
                 NavigationService.OpenTab(tab);
                 if (NavigationService.Frame?.Content is not RegistryViewer viewer) return;
-                await viewer.ChangePage(Frame.FrameNumber);
+                await viewer.ChangePage(Frame!.FrameNumber);
                 if (!ReferenceEquals(viewer, this))
                 {
                     await Dispatcher.UIThread.InvokeAsync(() => NavigationService.CloseTab(currentTab!));
@@ -121,7 +123,7 @@ namespace GeneaGrab.Views
                 RefreshView();
                 MainWindow.UpdateSelectedTitle();
             });
-            if (noRefresh) return;
+            if (noRefresh || Provider is null || Registry is null || Frame is null) return;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 PageNumbers.Clear();
@@ -160,7 +162,7 @@ namespace GeneaGrab.Views
             });
         }
 
-        public List<int> PageNumbers { get; set; } = new();
+        public List<int> PageNumbers { get; set; } = new(); // TODO delete this
         public ObservableCollection<PageList> Pages { get; } = new();
         private async Task<(bool success, bool inRam)> LoadRegistry(object parameter)
         {
@@ -170,8 +172,8 @@ namespace GeneaGrab.Views
             switch (parameter)
             {
                 case RegistryInfo infos:
-                    Registry = db.Registries.FirstOrDefault(r => r.Id == infos.RegistryId)!;
-                    Frame = db.Frames.FirstOrDefault(r => r.RegistryId == infos.RegistryId && r.FrameNumber == infos.PageNumber)!;
+                    Registry = db.Registries.Include(r => r.Frames).FirstOrDefault(r => r.Id == infos.RegistryId)!;
+                    Frame = Registry.Frames.FirstOrDefault(f => f.FrameNumber == infos.PageNumber) ?? Registry.Frames.First();
                     break;
                 case Uri url:
                     RegistryInfo? info = null;
@@ -191,6 +193,9 @@ namespace GeneaGrab.Views
                             var data = await provider.Infos(url);
                             registry = data.registry;
                             frame = registry.Frames.FirstOrDefault(f => f.FrameNumber == data.pageNumber) ?? registry.Frames.First();
+
+                            db.Registries.Add(registry);
+                            await db.SaveChangesAsync();
                         }
                         Registry = registry;
                         Frame = frame;
@@ -204,20 +209,16 @@ namespace GeneaGrab.Views
         }
 
 
-        private void GoToPreviousPage(object? _, RoutedEventArgs e) => ChangePage(Frame.FrameNumber - 1);
-        private void GoToNextPage(object? _, RoutedEventArgs e) => ChangePage(Frame.FrameNumber + 1);
+        private void GoToPreviousPage(object? _, RoutedEventArgs e) => ChangePage(Frame?.FrameNumber - 1 ?? -1);
+        private void GoToNextPage(object? _, RoutedEventArgs e) => ChangePage(Frame?.FrameNumber + 1 ?? -1);
         private async void ChangePage(object _, SelectionChangedEventArgs e)
         {
             if (e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
         }
-        public async Task ChangePage(int pageNumber)
-        {
-            await using var db = new DatabaseContext();
-            ChangePage(db.Frames.FirstOrDefault(f => f.RegistryId == Registry.Id && f.FrameNumber == pageNumber));
-        }
+        public Task ChangePage(int pageNumber) => ChangePage(Registry?.Frames.FirstOrDefault(f => f.FrameNumber == pageNumber));
         public async Task ChangePage(PageList? page)
         {
-            if (page is null || Frame.FrameNumber == page.Number) return;
+            if (page is null || Provider is null || Frame is null || Frame.FrameNumber == page.Number) return;
             Frame = page.Page;
             var image = await Provider.GetFrame(page.Page, Scale.Navigation, TrackProgress);
             var (success, stream) = await Data.TryGetThumbnailFromDrive(page.Page);
@@ -231,13 +232,15 @@ namespace GeneaGrab.Views
         }
         private void RefreshView(Stream? img = null)
         {
-            var pageTotal = 0; //Registry.Frames.Any() ? Registry.Frames.Max(p => p.Number) : 0; // TODO
+            if (Registry is null || Frame is null) return;
+
+            var pageTotal = Registry.Frames.Any() ? Registry.Frames.Max(p => p.FrameNumber) : 0;
             PageNumber.Value = Frame.FrameNumber;
             PageTotal.Text = $"/ {pageTotal}";
             PreviousPage.IsEnabled = Frame.FrameNumber > 1;
             NextPage.IsEnabled = Frame.FrameNumber < pageTotal;
-            SetInfo(InfoLocationCity, string.Join(", ", Registry.Location));
-            /*SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
+            /*SetInfo(InfoLocationCity, string.Join(", ", Registry.Location));
+            SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
             SetInfo(InfoRegistryDate, Registry.Dates);*/ // TODO
             SetInfo(InfoRegistryTitle, Registry.Title);
             SetInfo(InfoRegistrySubtitle, Registry.Subtitle);
@@ -260,16 +263,18 @@ namespace GeneaGrab.Views
             pageList.ScrollIntoView(Frame.FrameNumber - 1);
             ImagePanel.Reset();
             OnPropertyChanged(nameof(image));
-            //_ = Task.Run(async () => await LocalData.SaveRegistryAsync(Registry));
+            //_ = Task.Run(async () => await LocalData.SaveRegistryAsync(Registry)); // TODO
         }
 
         private async void Download(object sender, RoutedEventArgs e)
         {
+            if (Provider is null || Frame == null) return;
             var stream = await Provider.GetFrame(Frame, Scale.Full, TrackProgress);
             RefreshView(stream);
         }
         private void OpenFolder(object sender, RoutedEventArgs e)
         {
+            if (Frame == null) return;
             var page = LocalData.GetFile(Frame);
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -285,6 +290,7 @@ namespace GeneaGrab.Views
         }
         private async void Ark(object sender, RoutedEventArgs e)
         {
+            if (Provider is null || Frame == null) return;
             await TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(await Provider.Ark(Frame))!;
         }
 
@@ -303,6 +309,7 @@ namespace GeneaGrab.Views
 
         private void AddIndex(object sender, RoutedEventArgs e)
         {
+            if (Registry == null || Frame == null) return;
             using var db = new DatabaseContext();
             db.Records.Add(new Record(Registry.ProviderId, Registry.Id, Frame.FrameNumber)
             {
@@ -313,6 +320,7 @@ namespace GeneaGrab.Views
         }
         private void DisplayIndex()
         {
+            if (Registry == null || Frame == null) return;
             ImageCanvas.Children.Clear();
 
             using var db = new DatabaseContext();

@@ -31,17 +31,16 @@ namespace GeneaGrab.Core.Providers
             };
         }
 
-        public override async Task<(Registry, int)> Infos(Uri url)
+        public override async Task<(Registry, int)> Infos(Uri uri)
         {
-            var registry = new Registry(Data.Providers["AD17"]) { URL = HttpUtility.UrlDecode(url.OriginalString) };
+            var url = HttpUtility.UrlDecode(uri.OriginalString);
 
             var client = new HttpClient();
-            var pageBody = await client.GetStringAsync(registry.URL).ConfigureAwait(false);
+            var pageBody = await client.GetStringAsync(url).ConfigureAwait(false);
 
+            var query = HttpUtility.ParseQueryString(uri.Query);
             var pages = Regex.Matches(pageBody, @"<img src="".*?"" width=""1px"" height=""1px"" id=""visu_image_(?<num>\d*?)""(.|\n)*?data-original=""(?<original>.*?)"".*?\/>")
                 .Cast<Match>(); // https://regex101.com/r/muCsZx/2
-            registry.Frames = pages.Select((p, i) => new Frame() { FrameNumber = i + 1, DownloadUrl = p.Groups["original"].Value }).ToArray();
-            var query = HttpUtility.ParseQueryString(url.Query);
             if (!int.TryParse(query["page"], out var pageNumber)) pageNumber = 1;
 
             var infos = Regex.Match(query["infos"],
@@ -51,13 +50,18 @@ namespace GeneaGrab.Core.Providers
                 infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>",
                     RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
             if (infos.Count == 0) return (null, -1);
-            registry.RemoteId = query["id"] ?? infos["id"]?.Value;
-            registry.CallNumber = infos["cote"]?.Value;
-            registry.Location = new[] { infos["commune"]?.Value };
-            registry.Notes = infos["type"].Success ? $"{infos["type"]?.Value}: {infos["collection"]?.Value}" : null;
-            registry.From = Date.ParseDate(infos["date_debut"]?.Value);
-            registry.To = Date.ParseDate(infos["date_fin"]?.Value) ?? registry.From;
-            registry.Types = GetTypes(infos["actes"]?.Value).ToArray();
+
+            var registry = new Registry(Data.Providers["AD17"], query["id"] ?? infos["id"].Value)
+            {
+                URL = url,
+                CallNumber = infos["cote"].Value,
+                Location = new[] { infos["commune"].Value },
+                Notes = infos["type"].Success ? $"{infos["type"]?.Value}: {infos["collection"].Value}" : null,
+                From = Date.ParseDate(infos["date_debut"].Value),
+                Types = GetTypes(infos["actes"]?.Value).ToArray(),
+                Frames = pages.Select((p, i) => new Frame { FrameNumber = i + 1, DownloadUrl = p.Groups["original"].Value }).ToArray()
+            };
+            registry.To = Date.ParseDate(infos["date_fin"].Value) ?? registry.From;
 
             IEnumerable<RegistryType> GetTypes(string type)
             {
@@ -105,7 +109,7 @@ namespace GeneaGrab.Core.Providers
             var client = new HttpClient();
             var registry = page.Registry;
             var desc = $"{registry.CallNumber} - {registry.Location} - {registry.Notes.Replace(": ", " - ")} - {registry.From?.Year} - {registry.To?.Year}".Replace(' ', '+');
-            var ark = await client.GetStringAsync($"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadUrl}&desc={desc}&id={registry.RemoteId}&ir=&vue=1&ajax=true")
+            var ark = await client.GetStringAsync($"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadUrl}&desc={desc}&id={registry.Id}&ir=&vue=1&ajax=true")
                 .ConfigureAwait(false);
             var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups["link"]?.Value;
 

@@ -19,6 +19,9 @@ namespace GeneaGrab.Migrations
 
             modelBuilder.Entity("GeneaGrab.Core.Models.Frame", b =>
                 {
+                    b.Property<string>("ProviderId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("RegistryId")
                         .HasColumnType("TEXT");
 
@@ -46,13 +49,16 @@ namespace GeneaGrab.Migrations
                     b.Property<int?>("Width")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("RegistryId", "FrameNumber");
+                    b.HasKey("ProviderId", "RegistryId", "FrameNumber");
 
                     b.ToTable("Frames");
                 });
 
             modelBuilder.Entity("GeneaGrab.Core.Models.Registry", b =>
                 {
+                    b.Property<string>("ProviderId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
@@ -72,13 +78,6 @@ namespace GeneaGrab.Migrations
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ProviderId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("RemoteId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Subtitle")
                         .HasColumnType("TEXT");
 
@@ -92,7 +91,7 @@ namespace GeneaGrab.Migrations
                     b.Property<string>("URL")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProviderId", "Id");
 
                     b.ToTable("Registries");
                 });
@@ -178,6 +177,9 @@ namespace GeneaGrab.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("RegistryProviderId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Road")
                         .HasColumnType("TEXT");
 
@@ -189,7 +191,9 @@ namespace GeneaGrab.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RegistryId", "FrameNumber");
+                    b.HasIndex("RegistryProviderId", "RegistryId");
+
+                    b.HasIndex("ProviderId", "RegistryId", "FrameNumber");
 
                     b.ToTable("Records");
                 });
@@ -198,7 +202,7 @@ namespace GeneaGrab.Migrations
                 {
                     b.HasOne("GeneaGrab.Core.Models.Registry", "Registry")
                         .WithMany("Frames")
-                        .HasForeignKey("RegistryId")
+                        .HasForeignKey("ProviderId", "RegistryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -220,13 +224,11 @@ namespace GeneaGrab.Migrations
                 {
                     b.HasOne("GeneaGrab.Core.Models.Registry", "Registry")
                         .WithMany()
-                        .HasForeignKey("RegistryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("RegistryProviderId", "RegistryId");
 
                     b.HasOne("GeneaGrab.Core.Models.Frame", "Frame")
                         .WithMany()
-                        .HasForeignKey("RegistryId", "FrameNumber")
+                        .HasForeignKey("ProviderId", "RegistryId", "FrameNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

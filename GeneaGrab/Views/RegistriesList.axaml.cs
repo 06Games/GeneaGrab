@@ -28,7 +28,7 @@ namespace GeneaGrab.Views
             DataContext = this;
         }
 
-        protected ObservableCollection<RegistriesTreeStructure> Items { get; } = new();
+        protected ObservableCollection<RegistriesTreeStructure> Items { get; } = [];
 
         public override void OnNavigatedTo(NavigationEventArgs args)
         {
@@ -41,7 +41,7 @@ namespace GeneaGrab.Views
             Items.Clear();
 
             using var db = new DatabaseContext();
-            foreach (var registry in db.Registries.Where(r => r.ProviderId == Provider.Id))
+            foreach (var registry in db.Registries.Where(r => r.ProviderId == Provider.Id).Select(r => r))
             {
                 var parent = Items;
                 foreach (var location in registry.Location)

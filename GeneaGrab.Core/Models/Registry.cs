@@ -4,30 +4,35 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using GeneaGrab.Core.Models.Dates;
+using Microsoft.EntityFrameworkCore;
 
 namespace GeneaGrab.Core.Models
 {
     /// <summary>Data on the registry</summary>
+    [PrimaryKey(nameof(ProviderId), nameof(Id))]
     public sealed class Registry : IEquatable<Registry>
     {
-        public Registry(Provider provider) : this(provider.Id) { }
-        public Registry(string providerId) => ProviderId = providerId;
+        public Registry(Provider provider, string id) : this(provider.Id, id) { }
+        public Registry(string providerId, string id)
+        {
+            ProviderId = providerId;
+            Id = id;
+        }
 
-        public string Id { get; private init; } = null!;
-        public string ProviderId { get; private init; }
+        public string ProviderId { get; set; }
 
-        public string? RemoteId { get; set; }
+        public string Id { get; set; }
 
         /// <summary>Call number of the document (if applicable)</summary>
         public string? CallNumber { get; set; }
         public string? URL { get; set; }
         public string? ArkURL { get; set; }
-        public IList<RegistryType> Types { get; set; } = Array.Empty<RegistryType>();
+        public IList<RegistryType> Types { get; set; } = new List<RegistryType>();
 
         public string? Title { get; set; }
         public string? Subtitle { get; set; }
         public string? Author { get; set; }
-        public string[] Location { get; set; } = Array.Empty<string>();
+        public IList<string> Location { get; set; } = new List<string>();
         public string? Notes { get; set; }
 
 
@@ -58,7 +63,7 @@ namespace GeneaGrab.Core.Models
             return name;
         }
 
-        public IEnumerable<Frame> Frames { get; set; } = Array.Empty<Frame>();
+        public IEnumerable<Frame> Frames { get; set; } = new List<Frame>();
 
 
         public bool Equals(Registry? other) => Id == other?.Id;

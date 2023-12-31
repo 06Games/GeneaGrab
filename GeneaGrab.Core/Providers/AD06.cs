@@ -33,8 +33,8 @@ namespace GeneaGrab.Core.Providers
         public override async Task<(Registry, int)> Infos(Uri url)
         {
             var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
-            var registry = new Registry(Data.Providers["AD06"]) { RemoteId = queries["id"].Value };
-            registry.URL = $"https://archives06.fr/ark:/{queries["something"].Value}/{registry.RemoteId}";
+            var registry = new Registry(Data.Providers["AD06"], queries["id"].Value);
+            registry.URL = $"https://archives06.fr/ark:/{queries["something"].Value}/{registry.Id}";
 
             var client = new HttpClient();
             var manifest = new LigeoManifest(await client.GetStringAsync($"{registry.URL}/manifest"));
@@ -209,8 +209,8 @@ namespace GeneaGrab.Core.Providers
             var client = new HttpClient();
             var size = scale switch
             {
-                Scale.Thumbnail => "!512,512",
-                Scale.Navigation => "!2048,2048",
+                Scale.Thumbnail => $"{Math.Min(512, page.Width!.Value)},", // AD06 neither supports ^ and ! modifiers nor percentages
+                Scale.Navigation => $"{Math.Min(2048, page.Width!.Value)},",
                 _ => "max"
             };
             var image = await Image
