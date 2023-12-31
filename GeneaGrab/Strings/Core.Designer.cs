@@ -21,7 +21,7 @@ namespace GeneaGrab.Strings {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Core {
+    public class Core {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -35,7 +35,7 @@ namespace GeneaGrab.Strings {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GeneaGrab.Strings.Core", typeof(Core).Assembly);
@@ -50,7 +50,7 @@ namespace GeneaGrab.Strings {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -62,7 +62,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Alpes-Maritimes Departmental Archives.
         /// </summary>
-        internal static string Provider_AD06 {
+        public static string Provider_AD06 {
             get {
                 return ResourceManager.GetString("Provider.AD06", resourceCulture);
             }
@@ -71,7 +71,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Departmental Archives of Charente-Maritime.
         /// </summary>
-        internal static string Provider_AD17 {
+        public static string Provider_AD17 {
             get {
                 return ResourceManager.GetString("Provider.AD17", resourceCulture);
             }
@@ -80,7 +80,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Departmental Archives of Deux-Sèvres and Vienne.
         /// </summary>
-        internal static string Provider_AD79_86 {
+        public static string Provider_AD79_86 {
             get {
                 return ResourceManager.GetString("Provider.AD79-86", resourceCulture);
             }
@@ -89,7 +89,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Municipal Archives of Nice.
         /// </summary>
-        internal static string Provider_AMNice {
+        public static string Provider_AMNice {
             get {
                 return ResourceManager.GetString("Provider.AMNice", resourceCulture);
             }
@@ -98,7 +98,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Antenati.
         /// </summary>
-        internal static string Provider_Antenati {
+        public static string Provider_Antenati {
             get {
                 return ResourceManager.GetString("Provider.Antenati", resourceCulture);
             }
@@ -107,7 +107,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Alpes-Maritimes Departmental Archives (CG06).
         /// </summary>
-        internal static string Provider_CG06 {
+        public static string Provider_CG06 {
             get {
                 return ResourceManager.GetString("Provider.CG06", resourceCulture);
             }
@@ -116,7 +116,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Geneanet.
         /// </summary>
-        internal static string Provider_Geneanet {
+        public static string Provider_Geneanet {
             get {
                 return ResourceManager.GetString("Provider.Geneanet", resourceCulture);
             }
@@ -125,7 +125,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Nice Historique.
         /// </summary>
-        internal static string Provider_NiceHistorique {
+        public static string Provider_NiceHistorique {
             get {
                 return ResourceManager.GetString("Provider.NiceHistorique", resourceCulture);
             }
@@ -134,7 +134,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Registry.
         /// </summary>
-        internal static string Registry_Name {
+        public static string Registry_Name {
             get {
                 return ResourceManager.GetString("Registry.Name", resourceCulture);
             }
@@ -143,7 +143,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Banns of marriage.
         /// </summary>
-        internal static string Registry_Type_Banns {
+        public static string Registry_Type_Banns {
             get {
                 return ResourceManager.GetString("Registry.Type.Banns", resourceCulture);
             }
@@ -152,7 +152,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Baptisms.
         /// </summary>
-        internal static string Registry_Type_Baptism {
+        public static string Registry_Type_Baptism {
             get {
                 return ResourceManager.GetString("Registry.Type.Baptism", resourceCulture);
             }
@@ -161,7 +161,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Table of baptisms.
         /// </summary>
-        internal static string Registry_Type_BaptismTable {
+        public static string Registry_Type_BaptismTable {
             get {
                 return ResourceManager.GetString("Registry.Type.BaptismTable", resourceCulture);
             }
@@ -170,7 +170,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Births.
         /// </summary>
-        internal static string Registry_Type_Birth {
+        public static string Registry_Type_Birth {
             get {
                 return ResourceManager.GetString("Registry.Type.Birth", resourceCulture);
             }
@@ -179,7 +179,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Table of births.
         /// </summary>
-        internal static string Registry_Type_BirthTable {
+        public static string Registry_Type_BirthTable {
             get {
                 return ResourceManager.GetString("Registry.Type.BirthTable", resourceCulture);
             }
@@ -188,7 +188,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Book.
         /// </summary>
-        internal static string Registry_Type_Book {
+        public static string Registry_Type_Book {
             get {
                 return ResourceManager.GetString("Registry.Type.Book", resourceCulture);
             }
@@ -197,7 +197,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Burials.
         /// </summary>
-        internal static string Registry_Type_Burial {
+        public static string Registry_Type_Burial {
             get {
                 return ResourceManager.GetString("Registry.Type.Burial", resourceCulture);
             }
@@ -206,7 +206,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Table of burials.
         /// </summary>
-        internal static string Registry_Type_BurialTable {
+        public static string Registry_Type_BurialTable {
             get {
                 return ResourceManager.GetString("Registry.Type.BurialTable", resourceCulture);
             }
@@ -215,7 +215,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Cadastral assembly table.
         /// </summary>
-        internal static string Registry_Type_CadastralAssemblyTable {
+        public static string Registry_Type_CadastralAssemblyTable {
             get {
                 return ResourceManager.GetString("Registry.Type.CadastralAssemblyTable", resourceCulture);
             }
@@ -224,7 +224,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Cadastral map.
         /// </summary>
-        internal static string Registry_Type_CadastralMap {
+        public static string Registry_Type_CadastralMap {
             get {
                 return ResourceManager.GetString("Registry.Type.CadastralMap", resourceCulture);
             }
@@ -233,7 +233,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Cadastral matrix.
         /// </summary>
-        internal static string Registry_Type_CadastralMatrix {
+        public static string Registry_Type_CadastralMatrix {
             get {
                 return ResourceManager.GetString("Registry.Type.CadastralMatrix", resourceCulture);
             }
@@ -242,7 +242,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Cadastral section states.
         /// </summary>
-        internal static string Registry_Type_CadastralSectionStates {
+        public static string Registry_Type_CadastralSectionStates {
             get {
                 return ResourceManager.GetString("Registry.Type.CadastralSectionStates", resourceCulture);
             }
@@ -251,7 +251,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Catalogue.
         /// </summary>
-        internal static string Registry_Type_Catalogue {
+        public static string Registry_Type_Catalogue {
             get {
                 return ResourceManager.GetString("Registry.Type.Catalogue", resourceCulture);
             }
@@ -260,7 +260,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Census.
         /// </summary>
-        internal static string Registry_Type_Census {
+        public static string Registry_Type_Census {
             get {
                 return ResourceManager.GetString("Registry.Type.Census", resourceCulture);
             }
@@ -269,7 +269,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Communions.
         /// </summary>
-        internal static string Registry_Type_Communion {
+        public static string Registry_Type_Communion {
             get {
                 return ResourceManager.GetString("Registry.Type.Communion", resourceCulture);
             }
@@ -278,7 +278,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Confirmations.
         /// </summary>
-        internal static string Registry_Type_Confirmation {
+        public static string Registry_Type_Confirmation {
             get {
                 return ResourceManager.GetString("Registry.Type.Confirmation", resourceCulture);
             }
@@ -287,7 +287,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Deaths.
         /// </summary>
-        internal static string Registry_Type_Death {
+        public static string Registry_Type_Death {
             get {
                 return ResourceManager.GetString("Registry.Type.Death", resourceCulture);
             }
@@ -296,7 +296,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Table of deaths.
         /// </summary>
-        internal static string Registry_Type_DeathTable {
+        public static string Registry_Type_DeathTable {
             get {
                 return ResourceManager.GetString("Registry.Type.DeathTable", resourceCulture);
             }
@@ -305,7 +305,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Engrossments.
         /// </summary>
-        internal static string Registry_Type_Engrossments {
+        public static string Registry_Type_Engrossments {
             get {
                 return ResourceManager.GetString("Registry.Type.Engrossments", resourceCulture);
             }
@@ -314,7 +314,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Parish family book.
         /// </summary>
-        internal static string Registry_Type_LiberStatutAnimarum {
+        public static string Registry_Type_LiberStatutAnimarum {
             get {
                 return ResourceManager.GetString("Registry.Type.LiberStatutAnimarum", resourceCulture);
             }
@@ -323,7 +323,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Marriages.
         /// </summary>
-        internal static string Registry_Type_Marriage {
+        public static string Registry_Type_Marriage {
             get {
                 return ResourceManager.GetString("Registry.Type.Marriage", resourceCulture);
             }
@@ -332,7 +332,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Table of marriages.
         /// </summary>
-        internal static string Registry_Type_MarriageTable {
+        public static string Registry_Type_MarriageTable {
             get {
                 return ResourceManager.GetString("Registry.Type.MarriageTable", resourceCulture);
             }
@@ -341,7 +341,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Military.
         /// </summary>
-        internal static string Registry_Type_Military {
+        public static string Registry_Type_Military {
             get {
                 return ResourceManager.GetString("Registry.Type.Military", resourceCulture);
             }
@@ -350,7 +350,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Minutes.
         /// </summary>
-        internal static string Registry_Type_Minutes {
+        public static string Registry_Type_Minutes {
             get {
                 return ResourceManager.GetString("Registry.Type.Minutes", resourceCulture);
             }
@@ -359,7 +359,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Newspaper.
         /// </summary>
-        internal static string Registry_Type_Newspaper {
+        public static string Registry_Type_Newspaper {
             get {
                 return ResourceManager.GetString("Registry.Type.Newspaper", resourceCulture);
             }
@@ -368,7 +368,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Notarial deeds.
         /// </summary>
-        internal static string Registry_Type_Notarial {
+        public static string Registry_Type_Notarial {
             get {
                 return ResourceManager.GetString("Registry.Type.Notarial", resourceCulture);
             }
@@ -377,7 +377,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Other.
         /// </summary>
-        internal static string Registry_Type_Other {
+        public static string Registry_Type_Other {
             get {
                 return ResourceManager.GetString("Registry.Type.Other", resourceCulture);
             }
@@ -386,7 +386,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Periodical.
         /// </summary>
-        internal static string Registry_Type_Periodical {
+        public static string Registry_Type_Periodical {
             get {
                 return ResourceManager.GetString("Registry.Type.Periodical", resourceCulture);
             }
@@ -395,7 +395,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Protocol.
         /// </summary>
-        internal static string Registry_Type_Protocol {
+        public static string Registry_Type_Protocol {
             get {
                 return ResourceManager.GetString("Registry.Type.Protocol", resourceCulture);
             }

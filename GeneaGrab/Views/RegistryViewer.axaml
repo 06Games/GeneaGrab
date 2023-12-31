@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:strings="clr-namespace:GeneaGrab.Strings"
              xmlns:views="clr-namespace:GeneaGrab.Views"
              xmlns:indexing="clr-namespace:GeneaGrab.Models.Indexing"
              xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
@@ -87,25 +88,25 @@
                     <Button Width="{Binding Bounds.Width, ElementName=SidePanel}" Click="Download">
                         <StackPanel Orientation="Horizontal">
                             <controls:SymbolIcon Symbol="Download" Margin="0 0 5 0" />
-                            <TextBlock Text="{Binding DownloadText}" />
+                            <TextBlock Text="{x:Static strings:UI.Registry_Download}" />
                         </StackPanel>
                     </Button>
                     <Button Width="{Binding Bounds.Width, ElementName=SidePanel}" Click="OpenFolder">
                         <StackPanel Orientation="Horizontal">
                             <controls:SymbolIcon Symbol="Folder" Margin="0 0 5 0" />
-                            <TextBlock Text="{Binding OpenFolderText}" />
+                            <TextBlock Text="{x:Static strings:UI.Registry_OpenFolder}" />
                         </StackPanel>
                     </Button>
                     <Button Width="{Binding Bounds.Width, ElementName=SidePanel}" Click="Ark">
                         <StackPanel Orientation="Horizontal">
                             <controls:SymbolIcon Symbol="Link" Margin="0 0 5 0" />
-                            <TextBlock Text="{Binding ArkText}" />
+                            <TextBlock Text="{x:Static strings:UI.Registry_Ark}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>
 
                 <StackPanel>
-                    <TextBlock Margin="0,25,0,5" FontSize="16" Text="{Binding NotesText}" />
+                    <TextBlock Margin="0,25,0,5" FontSize="16" Text="{x:Static strings:UI.Registry_Notes}" />
                     <TextBox Name="PageNotes" Height="100" FontSize="12" Background="Transparent" BorderBrush="Transparent" AcceptsReturn="True" Padding="0" />
                 </StackPanel>
 

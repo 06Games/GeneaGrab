@@ -21,7 +21,7 @@ namespace GeneaGrab.Strings {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class UI {
+    public class UI {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -35,7 +35,7 @@ namespace GeneaGrab.Strings {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("GeneaGrab.Strings.UI", typeof(UI).Assembly);
@@ -50,7 +50,7 @@ namespace GeneaGrab.Strings {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -62,7 +62,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Downloading from the departmental archives has never been easier!.
         /// </summary>
-        internal static string AppDescription {
+        public static string AppDescription {
             get {
                 return ResourceManager.GetString("AppDescription", resourceCulture);
             }
@@ -71,7 +71,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to GeneaGrab.
         /// </summary>
-        internal static string AppDisplayName {
+        public static string AppDisplayName {
             get {
                 return ResourceManager.GetString("AppDisplayName", resourceCulture);
             }
@@ -80,7 +80,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Open registry.
         /// </summary>
-        internal static string Discord_OpenRegistry {
+        public static string Discord_OpenRegistry {
             get {
                 return ResourceManager.GetString("Discord.OpenRegistry", resourceCulture);
             }
@@ -89,7 +89,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Copy reference.
         /// </summary>
-        internal static string Registry_Ark {
+        public static string Registry_Ark {
             get {
                 return ResourceManager.GetString("Registry.Ark", resourceCulture);
             }
@@ -98,7 +98,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Download.
         /// </summary>
-        internal static string Registry_Download {
+        public static string Registry_Download {
             get {
                 return ResourceManager.GetString("Registry.Download", resourceCulture);
             }
@@ -107,7 +107,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Notes.
         /// </summary>
-        internal static string Registry_Notes {
+        public static string Registry_Notes {
             get {
                 return ResourceManager.GetString("Registry.Notes", resourceCulture);
             }
@@ -116,7 +116,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Open folder.
         /// </summary>
-        internal static string Registry_OpenFolder {
+        public static string Registry_OpenFolder {
             get {
                 return ResourceManager.GetString("Registry.OpenFolder", resourceCulture);
             }
@@ -125,7 +125,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to {0} pages.
         /// </summary>
-        internal static string Registry_PageCount {
+        public static string Registry_PageCount {
             get {
                 return ResourceManager.GetString("Registry.PageCount", resourceCulture);
             }
@@ -134,7 +134,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to About this application.
         /// </summary>
-        internal static string Settings_About {
+        public static string Settings_About {
             get {
                 return ResourceManager.GetString("Settings.About", resourceCulture);
             }
@@ -143,7 +143,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Downloading from the departmental archives has never been easier!.
         /// </summary>
-        internal static string Settings_About_Description {
+        public static string Settings_About_Description {
             get {
                 return ResourceManager.GetString("Settings.About.Description", resourceCulture);
             }
@@ -152,7 +152,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Source code.
         /// </summary>
-        internal static string Settings_About_SourceCode {
+        public static string Settings_About_SourceCode {
             get {
                 return ResourceManager.GetString("Settings.About.SourceCode", resourceCulture);
             }
@@ -161,7 +161,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Personalization.
         /// </summary>
-        internal static string Settings_Personalization {
+        public static string Settings_Personalization {
             get {
                 return ResourceManager.GetString("Settings.Personalization", resourceCulture);
             }
@@ -170,7 +170,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Theme.
         /// </summary>
-        internal static string Settings_Theme {
+        public static string Settings_Theme {
             get {
                 return ResourceManager.GetString("Settings.Theme", resourceCulture);
             }
@@ -179,7 +179,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Dark.
         /// </summary>
-        internal static string Settings_Theme_Dark {
+        public static string Settings_Theme_Dark {
             get {
                 return ResourceManager.GetString("Settings.Theme.Dark", resourceCulture);
             }
@@ -188,7 +188,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to High Contrast.
         /// </summary>
-        internal static string Settings_Theme_HighContrast {
+        public static string Settings_Theme_HighContrast {
             get {
                 return ResourceManager.GetString("Settings.Theme.HighContrast", resourceCulture);
             }
@@ -197,7 +197,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Light.
         /// </summary>
-        internal static string Settings_Theme_Light {
+        public static string Settings_Theme_Light {
             get {
                 return ResourceManager.GetString("Settings.Theme.Light", resourceCulture);
             }
@@ -206,7 +206,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to System.
         /// </summary>
-        internal static string Settings_Theme_System {
+        public static string Settings_Theme_System {
             get {
                 return ResourceManager.GetString("Settings.Theme.System", resourceCulture);
             }
@@ -215,7 +215,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Platforms.
         /// </summary>
-        internal static string Tab_ProviderList {
+        public static string Tab_ProviderList {
             get {
                 return ResourceManager.GetString("Tab.ProviderList", resourceCulture);
             }
@@ -224,7 +224,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Registers.
         /// </summary>
-        internal static string Tab_RegistriesPage {
+        public static string Tab_RegistriesPage {
             get {
                 return ResourceManager.GetString("Tab.RegistriesPage", resourceCulture);
             }
@@ -233,7 +233,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Registry Viewer.
         /// </summary>
-        internal static string Tab_RegistryViewer {
+        public static string Tab_RegistryViewer {
             get {
                 return ResourceManager.GetString("Tab.RegistryViewer", resourceCulture);
             }
@@ -242,7 +242,7 @@ namespace GeneaGrab.Strings {
         /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
-        internal static string Tab_SettingsPage {
+        public static string Tab_SettingsPage {
             get {
                 return ResourceManager.GetString("Tab.SettingsPage", resourceCulture);
             }

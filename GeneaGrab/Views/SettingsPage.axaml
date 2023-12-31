@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:strings="clr-namespace:GeneaGrab.Strings"
              xmlns:views="clr-namespace:GeneaGrab.Views"
              xmlns:helpers="clr-namespace:GeneaGrab.Helpers"
              xmlns:services="clr-namespace:GeneaGrab.Services"
@@ -16,13 +17,13 @@
     </UserControl.Resources>
     <Grid>
         <StackPanel x:Name="ContentArea" Margin="15">
-            <TextBlock Text="{Binding Personalization}" FontSize="18" FontWeight="Medium" />
+            <TextBlock Text="{x:Static strings:UI.Settings_Personalization}" FontSize="18" FontWeight="Medium" />
             <StackPanel Margin="15,0,0,0">
-                <TextBlock Text="{Binding ThemeTitle}" FontSize="16" FontWeight="Regular" />
+                <TextBlock Text="{x:Static strings:UI.Settings_Theme}" FontSize="16" FontWeight="Regular" />
 
                 <StackPanel>
                     <RadioButton 
-                        Content="{Binding SystemTheme}"
+                        Content="{x:Static strings:UI.Settings_Theme_System}"
                         IsCheckedChanged="ThemeChanged_Checked"
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=System, Mode=OneWay}"
                         FontSize="14"
@@ -32,7 +33,7 @@
                         </RadioButton.CommandParameter>
                     </RadioButton>
                     <RadioButton 
-                        Content="{Binding LightTheme}"
+                        Content="{x:Static strings:UI.Settings_Theme_Light}"
                         IsCheckedChanged="ThemeChanged_Checked" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Light, Mode=OneWay}"
                         FontSize="14"
@@ -42,7 +43,7 @@
                         </RadioButton.CommandParameter> 
                     </RadioButton>
                     <RadioButton 
-                        Content="{Binding DarkTheme}"
+                        Content="{x:Static strings:UI.Settings_Theme_Dark}"
                         IsCheckedChanged="ThemeChanged_Checked" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=Dark, Mode=OneWay}"
                         FontSize="14"
@@ -52,7 +53,7 @@
                         </RadioButton.CommandParameter>
                     </RadioButton>
                     <RadioButton 
-                        Content="{Binding HighContrastTheme}"
+                        Content="{x:Static strings:UI.Settings_Theme_HighContrast}"
                         IsCheckedChanged="ThemeChanged_Checked" 
                         IsChecked="{Binding ElementTheme, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter=HighContrast, Mode=OneWay}"
                         FontSize="14"
@@ -64,11 +65,11 @@
                 </StackPanel>
             </StackPanel>
 
-            <TextBlock Text="{Binding About}" FontSize="18" FontWeight="Medium" Margin="0,15,0,0" />
+            <TextBlock Text="{x:Static strings:UI.Settings_About}" FontSize="18" FontWeight="Medium" Margin="0,15,0,0" />
             <StackPanel Margin="15,0,0,0">
                 <TextBlock Text="{Binding VersionDescription, Mode=OneWay}" />
-                <TextBlock Text="{Binding AboutDescription}" />
-                <controls:HyperlinkButton NavigateUri="https://github.com/06Games/GeneaGrab" Content="{Binding AboutSourceCode}" Padding="0" />
+                <TextBlock Text="{x:Static strings:UI.Settings_About_Description}" />
+                <controls:HyperlinkButton NavigateUri="https://github.com/06Games/GeneaGrab" Content="{x:Static strings:UI.Settings_About_SourceCode}" Padding="0" />
             </StackPanel>
         </StackPanel>
     </Grid>

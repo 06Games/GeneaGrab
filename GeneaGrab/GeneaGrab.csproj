@@ -48,11 +48,11 @@
     </ItemGroup>
     <ItemGroup>
       <EmbeddedResource Update="Strings\Core.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
+          <Generator>PublicResXFileCodeGenerator</Generator>
         <LastGenOutput>Core.Designer.cs</LastGenOutput>
       </EmbeddedResource>
       <EmbeddedResource Update="Strings\UI.resx">
-        <Generator>ResXFileCodeGenerator</Generator>
+          <Generator>PublicResXFileCodeGenerator</Generator>
         <LastGenOutput>UI.Designer.cs</LastGenOutput>
       </EmbeddedResource>
     </ItemGroup>

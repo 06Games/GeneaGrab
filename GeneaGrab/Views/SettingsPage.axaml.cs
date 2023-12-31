@@ -19,18 +19,6 @@ namespace GeneaGrab.Views
         public string? Identifier => null;
         public Task RichPresence(RichPresence richPresence) => Task.CompletedTask;
 
-
-        public string? Personalization => ResourceExtensions.GetLocalized("Settings.Personalization", ResourceExtensions.Resource.UI);
-        public string? ThemeTitle => ResourceExtensions.GetLocalized("Settings.Theme", ResourceExtensions.Resource.UI);
-        public string? LightTheme => ResourceExtensions.GetLocalized("Settings.Theme.Light", ResourceExtensions.Resource.UI);
-        public string? DarkTheme => ResourceExtensions.GetLocalized("Settings.Theme.Dark", ResourceExtensions.Resource.UI);
-        public string? HighContrastTheme => ResourceExtensions.GetLocalized("Settings.Theme.HighContrast", ResourceExtensions.Resource.UI);
-        public string? SystemTheme => ResourceExtensions.GetLocalized("Settings.Theme.System", ResourceExtensions.Resource.UI);
-        public string? About => ResourceExtensions.GetLocalized("Settings.About", ResourceExtensions.Resource.UI);
-        public string? AboutDescription => ResourceExtensions.GetLocalized("Settings.About.Description", ResourceExtensions.Resource.UI);
-        public string? AboutSourceCode => ResourceExtensions.GetLocalized("Settings.About.SourceCode", ResourceExtensions.Resource.UI);
-
-
         public Theme ElementTheme => ThemeSelectorService.Theme;
 
         private string? _versionDescription;

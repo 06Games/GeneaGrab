@@ -37,8 +37,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
     public GridLength WindowsTitleBarWidth => new(IsWindows ? 150 : 15);
 
-    protected string? RegistryText => ResourceExtensions.GetLocalized("Registry.Name");
-
     public MainWindow()
     {
         if (IsWindows)

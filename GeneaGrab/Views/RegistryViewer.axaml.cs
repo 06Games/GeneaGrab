@@ -36,7 +36,7 @@ namespace GeneaGrab.Views
                 if (Registry is null) return null;
                 var location = Registry.Location.ToArray();
                 var registry = Registry.ToString();
-                return !location.Any() ? registry : $"{location}: {registry}";
+                return location.Length == 0 ? registry : $"{location}: {registry}";
             }
         }
         public string? Identifier => Registry?.Id;
@@ -53,11 +53,6 @@ namespace GeneaGrab.Views
             ];
         }
 
-
-        protected string? DownloadText => ResourceExtensions.GetLocalized("Registry.Download", ResourceExtensions.Resource.UI);
-        protected string? OpenFolderText => ResourceExtensions.GetLocalized("Registry.OpenFolder", ResourceExtensions.Resource.UI);
-        protected string? ArkText => ResourceExtensions.GetLocalized("Registry.Ark", ResourceExtensions.Resource.UI);
-        protected string? NotesText => ResourceExtensions.GetLocalized("Registry.Notes", ResourceExtensions.Resource.UI);
 
 
         public Provider Provider => Data.Providers[Registry?.ProviderId];
