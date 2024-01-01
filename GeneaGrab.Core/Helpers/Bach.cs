@@ -167,6 +167,10 @@ namespace GeneaGrab.Core.Helpers
             var docPageInfo = ParseDocPage(docWebPage);
             var (placeInCity, city, cityLocation) = ParsePlace(docPageInfo);
 
+            var location = new List<string>(cityLocation);
+            if (!string.IsNullOrEmpty(city)) location.Add(city);
+            if (!string.IsNullOrEmpty(placeInCity)) location.Add(placeInCity);
+
             var registry = new Registry(this, ead.DocId)
             {
                 URL = ead.DocLink,
@@ -174,7 +178,7 @@ namespace GeneaGrab.Core.Helpers
                 CallNumber = ead.UnitId,
                 Title = ead.UnitTitle,
                 Author = docPageInfo.TryGetValue("Auteur", out var personne) && docPageInfo.Remove("Auteur") ? string.Join(", ", personne) : null,
-                Location = cityLocation.Append(city).Append(placeInCity).ToArray(),
+                Location = location,
                 From = from,
                 To = to,
                 Notes = string.Join("\n", docPageInfo.Select(kv => $"{kv.Key}: {string.Join(", ", kv.Value)}")),

@@ -10,16 +10,16 @@ public class TestAD17
     [ClassData(typeof(DataAD17))]
     public async Task CheckInfos(Data data)
     {
-        var registryInfo = await instance.Infos(new Uri(data.URL));
-        Assert.Equal(instance.GetType().Name, registryInfo.ProviderId);
-        Assert.Equal(data.Id, registryInfo.RegistryId);
-        Assert.Equal(data.Page, registryInfo.PageNumber);
-        Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
-        Assert.Equal(data.Ville, registryInfo.Registry.Location);
-        Assert.Equal(data.From, registryInfo.Registry.From);
-        Assert.Equal(data.To, registryInfo.Registry.To);
+        var (registry, pageNumber) = await instance.Infos(new Uri(data.URL));
+        Assert.Equal(instance.GetType().Name, registry.ProviderId);
+        Assert.Equal(data.Id, registry.Id);
+        Assert.Equal(data.Page, pageNumber);
+        Assert.Equal(data.Cote, registry.CallNumber);
+        Assert.Equal(new[] { data.Ville }, registry.Location);
+        Assert.Equal(data.From, registry.From);
+        Assert.Equal(data.To, registry.To);
 
-        var types = registryInfo.Registry.Types.ToArray();
+        var types = registry.Types.ToArray();
         Assert.Equal(data.Types.Length, types.Length);
         Assert.All(data.Types, type => Assert.Contains(type, types));
     }

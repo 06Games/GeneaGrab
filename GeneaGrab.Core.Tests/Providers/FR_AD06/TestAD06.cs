@@ -1,6 +1,6 @@
-﻿using GeneaGrab.Core.Models;
+﻿using GeneaGrab.Core.Helpers;
+using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Providers;
-using Newtonsoft.Json;
 using Xunit.Abstractions;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
@@ -22,8 +22,9 @@ public class TestAD06
     public async Task CheckInfos(Data data)
     {
         if (timeoutCount >= 3) return; // AD06 is geo-restricted, so if the API times out 3 times, we assume it's because the location is blocked.
-        RegistryInfo registryInfo;
-        try { registryInfo = await instance.Infos(new Uri(data.URL)); }
+        Registry registry;
+        int pageNumber;
+        try { (registry, pageNumber) = await instance.Infos(new Uri(data.URL)); }
         catch (Exception? e)
         {
             while (e is not TimeoutException or TaskCanceledException or null) e = e?.InnerException;
@@ -34,22 +35,23 @@ public class TestAD06
             throw;
         }
 
-        output.WriteLine(JsonConvert.SerializeObject(registryInfo.Registry, Formatting.Indented));
+        output.WriteLine(await Json.StringifyAsync(registry));
 
-        Assert.Equal(instance.GetType().Name, registryInfo.ProviderId);
-        Assert.Equal(data.Id, registryInfo.RegistryId);
-        Assert.Equal(data.Page, registryInfo.PageNumber);
-        Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
-        Assert.Equal(data.Ville, registryInfo.Registry.Location);
-        Assert.Equal(data.Paroisse, registryInfo.Registry.District);
-        Assert.Equal(data.Details, registryInfo.Registry.LocationDetails);
-        Assert.Equal(data.Titre, registryInfo.Registry.Title);
-        Assert.Equal(data.SousTitre, registryInfo.Registry.Subtitle);
-        Assert.Equal(data.Auteur, registryInfo.Registry.Author);
-        Assert.Equal(data.From, registryInfo.Registry.From);
-        Assert.Equal(data.To, registryInfo.Registry.To);
+        Assert.Equal(instance.GetType().Name, registry.ProviderId);
+        Assert.Equal(data.Id, registry.Id);
+        Assert.Equal(data.Page, pageNumber);
+        Assert.Equal(data.Cote, registry.CallNumber);
+        Assert.Equal(data.Titre, registry.Title);
+        Assert.Equal(data.SousTitre, registry.Subtitle);
+        Assert.Equal(data.Auteur, registry.Author);
+        Assert.Equal(data.From, registry.From);
+        Assert.Equal(data.To, registry.To);
 
-        var types = registryInfo.Registry.Types.ToArray();
+        var pos = new List<string>(data.Details ?? Array.Empty<string>()) { data.Ville };
+        if (data.Paroisse != null) pos.Add(data.Paroisse);
+        Assert.Equal(pos, registry.Location);
+
+        var types = registry.Types.ToArray();
         Assert.All(data.Types, type => Assert.Contains(type, types));
         Assert.Equal(data.Types.Length, types.Length);
     }

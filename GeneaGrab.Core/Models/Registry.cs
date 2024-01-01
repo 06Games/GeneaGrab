@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using GeneaGrab.Core.Models.Dates;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace GeneaGrab.Core.Models
 {
@@ -21,7 +22,7 @@ namespace GeneaGrab.Core.Models
 
         public string ProviderId { get; init; }
         /// <summary>Associated provider</summary>
-        [NotMapped] public Provider Provider => Data.Providers[ProviderId];
+        [NotMapped, JsonIgnore] public Provider Provider => Data.Providers[ProviderId];
 
         public string Id { get; init; }
 

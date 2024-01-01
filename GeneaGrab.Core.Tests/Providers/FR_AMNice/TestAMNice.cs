@@ -14,18 +14,21 @@ public class TestAMNice
     [ClassData(typeof(DataAMNice))]
     public async Task CheckInfos(Data data)
     {
-        var registryInfo = await instance.Infos(new Uri(data.URL));
-        output.WriteLine(await Json.StringifyAsync(registryInfo));
-        Assert.Equal("AMNice", registryInfo.ProviderId);
-        Assert.Equal(data.Id, registryInfo.RegistryId);
-        Assert.Equal(data.Page, registryInfo.PageNumber);
-        Assert.Equal(data.Cote, registryInfo.Registry.CallNumber);
-        Assert.Equal(data.DetailPosition.Append(data.Ville).Append(data.Rue), registryInfo.Registry.Location);
-        Assert.Equal(data.Auteur, registryInfo.Registry.Author);
-        Assert.Equal(data.From, registryInfo.Registry.From);
-        Assert.Equal(data.To, registryInfo.Registry.To);
+        var (registry, pageNumber) = await instance.Infos(new Uri(data.URL));
+        output.WriteLine(await Json.StringifyAsync(registry));
+        Assert.Equal("AMNice", registry.ProviderId);
+        Assert.Equal(data.Id, registry.Id);
+        Assert.Equal(data.Page, pageNumber);
+        Assert.Equal(data.Cote, registry.CallNumber);
+        Assert.Equal(data.Auteur, registry.Author);
+        Assert.Equal(data.From, registry.From);
+        Assert.Equal(data.To, registry.To);
 
-        var types = registryInfo.Registry.Types.ToArray();
+        var pos = data.DetailPosition.Append(data.Ville);
+        if (data.Rue != null) pos = pos.Append(data.Rue);
+        Assert.Equal(pos, registry.Location);
+
+        var types = registry.Types.ToArray();
         Assert.True(data.Types.Length == types.Length, $"{string.Join(", ", types)}\nExpected: {data.Types}");
         Assert.All(data.Types, type => Assert.Contains(type, types));
     }

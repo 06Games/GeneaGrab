@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace GeneaGrab.Core.Models;
 
@@ -12,7 +13,7 @@ public class Frame
     /// <summary>Associated provider id</summary>
     public string ProviderId { get; init; } = null!;
     /// <summary>Associated provider</summary>
-    [NotMapped] public Provider Provider => Data.Providers[ProviderId];
+    [NotMapped, JsonIgnore] public Provider Provider => Data.Providers[ProviderId];
     /// <summary>Associated registry id</summary>
     public string RegistryId { get; init; } = null!;
     /// <summary>Associated registry</summary>
