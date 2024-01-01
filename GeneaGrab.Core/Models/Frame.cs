@@ -10,13 +10,15 @@ namespace GeneaGrab.Core.Models;
 public class Frame
 {
     /// <summary>Associated provider id</summary>
-    public string ProviderId { get; set; } = null!;
+    public string ProviderId { get; init; } = null!;
+    /// <summary>Associated provider</summary>
+    [NotMapped] public Provider Provider => Data.Providers[ProviderId];
     /// <summary>Associated registry id</summary>
-    public string RegistryId { get; set; } = null!;
+    public string RegistryId { get; init; } = null!;
     /// <summary>Associated registry</summary>
-    public Registry? Registry { get; set; }
+    public Registry? Registry { get; init; }
     /// <summary>Frame number</summary>
-    public int FrameNumber { get; set; }
+    public int FrameNumber { get; init; }
 
     /// <summary>Ark URL</summary>
     public string? ArkUrl { get; set; }
@@ -24,7 +26,7 @@ public class Frame
     public string? DownloadUrl { get; set; }
 
     /// <summary>Size of largest locally available image version</summary>
-    public Scale ImageSize { get; set; }
+    public Scale ImageSize { get; set; } = Scale.Unavailable;
     /// <summary>Total width of the original image</summary>
     public int? Width { get; set; }
     /// <summary>Total height of the original image</summary>
@@ -35,7 +37,7 @@ public class Frame
     /// <summary>Notes about the page (user can edit this information)</summary>
     public string? Notes { get; set; }
     /// <summary>Any additional information the grabber needs</summary>
-    [NotMapped] public object? Extra { get; set; }
+    public object? Extra { get; set; }
 
     public override string ToString() => FrameNumber.ToString();
 }

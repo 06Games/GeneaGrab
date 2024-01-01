@@ -57,7 +57,7 @@ namespace GeneaGrab.Views
 
 
 
-        public Provider? Provider => Registry is null ? null : Data.Providers[Registry.ProviderId];
+        public Provider? Provider => Frame?.Provider;
         public Registry? Registry { get; private set; }
         public Frame? Frame { get; private set; }
 
@@ -172,7 +172,7 @@ namespace GeneaGrab.Views
             switch (parameter)
             {
                 case RegistryInfo infos:
-                    Registry = db.Registries.Include(r => r.Frames).FirstOrDefault(r => r.Id == infos.RegistryId)!;
+                    Registry = db.Registries.Include(r => r.Frames).FirstOrDefault(r => r.ProviderId == infos.ProviderId && r.Id == infos.RegistryId)!;
                     Frame = Registry.Frames.FirstOrDefault(f => f.FrameNumber == infos.PageNumber) ?? Registry.Frames.First();
                     break;
                 case Uri url:
@@ -186,19 +186,16 @@ namespace GeneaGrab.Views
                         }
                     if (provider != null && info != null)
                     {
-                        var registry = db.Registries.FirstOrDefault(r => r.Id == info.RegistryId);
-                        var frame = db.Frames.FirstOrDefault(r => r.RegistryId == info.RegistryId && r.FrameNumber == info.PageNumber);
-                        if (registry is null || frame is null)
+                        var registry = db.Registries.Include(r => r.Frames).FirstOrDefault(r => r.ProviderId == info.ProviderId && r.Id == info.RegistryId);
+                        if (registry is null)
                         {
                             var data = await provider.Infos(url);
                             registry = data.registry;
-                            frame = registry.Frames.FirstOrDefault(f => f.FrameNumber == data.pageNumber) ?? registry.Frames.First();
-
                             db.Registries.Add(registry);
                             await db.SaveChangesAsync();
                         }
                         Registry = registry;
-                        Frame = frame;
+                        Frame = Registry.Frames.FirstOrDefault(f => f.FrameNumber == info.PageNumber) ?? Registry.Frames.First();
                     }
                     break;
                 default:

@@ -19,9 +19,11 @@ namespace GeneaGrab.Core.Models
             Id = id;
         }
 
-        public string ProviderId { get; set; }
+        public string ProviderId { get; init; }
+        /// <summary>Associated provider</summary>
+        [NotMapped] public Provider Provider => Data.Providers[ProviderId];
 
-        public string Id { get; set; }
+        public string Id { get; init; }
 
         /// <summary>Call number of the document (if applicable)</summary>
         public string? CallNumber { get; set; }
@@ -37,7 +39,7 @@ namespace GeneaGrab.Core.Models
 
 
         /// <summary>Any additional information that might be needed</summary>
-        [NotMapped] public object? Extra { get; set; }
+        public object? Extra { get; set; }
 
         [NotMapped] public Date? From { get; set; } // TODO: Map this
         [NotMapped] public Date? To { get; set; }

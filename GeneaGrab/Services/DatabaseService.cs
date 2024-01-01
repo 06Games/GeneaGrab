@@ -3,6 +3,7 @@ using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Models.Indexing;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace GeneaGrab.Services;
 
@@ -20,17 +21,27 @@ public class DatabaseContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Record>(e =>
-        {
-            e.Property(b => b.Position)
-                .HasConversion(
-                    rect => rect == null ? null : rect.ToString(),
-                    rectStr => rectStr == null ? null : Rect.Parse(rectStr));
-            e.HasOne(r => r.Frame).WithMany().HasForeignKey(r => new { r.ProviderId, r.RegistryId, r.FrameNumber });
-        });
-        modelBuilder.Entity<Registry>(e =>
-        {
-            e.HasMany(r => r.Frames).WithOne(f => f.Registry).HasForeignKey(r => new { r.ProviderId, r.RegistryId });
-        });
+        modelBuilder
+            .Entity<Record>(e =>
+            {
+                e.Property(b => b.Position)
+                    .HasConversion(
+                        rect => rect == null ? null : rect.ToString(),
+                        rectStr => rectStr == null ? null : Rect.Parse(rectStr));
+                e.HasOne(r => r.Frame).WithMany().HasForeignKey(r => new { r.ProviderId, r.RegistryId, r.FrameNumber });
+            })
+            .Entity<Registry>(e =>
+            {
+                e.HasMany(r => r.Frames).WithOne(f => f.Registry).HasForeignKey(r => new { r.ProviderId, r.RegistryId });
+                e.Property(f => f.Extra).HasConversion(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject(v));
+            })
+            .Entity<Frame>(e =>
+            {
+                e.Property(f => f.Extra).HasConversion(
+                    v => JsonConvert.SerializeObject(v),
+                    v => JsonConvert.DeserializeObject(v));
+            });
     }
 }
