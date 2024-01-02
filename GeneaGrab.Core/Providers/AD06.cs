@@ -22,18 +22,13 @@ namespace GeneaGrab.Core.Providers
             if (url.Host != "archives06.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return Task.FromResult<RegistryInfo>(null);
 
             var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
-            return Task.FromResult(new RegistryInfo
-            {
-                ProviderId = "AD06",
-                RegistryId = queries["id"].Value,
-                PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
-            });
+            return Task.FromResult(new RegistryInfo(this, queries["id"].Value) { PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1 });
         }
 
         public override async Task<(Registry, int)> Infos(Uri url)
         {
             var queries = Regex.Match(url.AbsolutePath, @"/ark:/(?<something>[\w\.]+)(/(?<id>[\w\.]+))?(/(?<tag>[\w\.]+))?(/(?<seq>\d+))?(/(?<page>\d+))?").Groups;
-            var registry = new Registry(Data.Providers["AD06"], queries["id"].Value);
+            var registry = new Registry(this, queries["id"].Value);
             registry.URL = $"https://archives06.fr/ark:/{queries["something"].Value}/{registry.Id}";
 
             var client = new HttpClient();
@@ -204,8 +199,8 @@ namespace GeneaGrab.Core.Providers
 
         public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
         {
-            var (success, stream) = scale == Scale.Thumbnail ? await Data.TryGetThumbnailFromDrive(page) : Data.TryGetImageFromDrive(page, scale);
-            if (success) return stream;
+            var stream = await Data.TryGetImageFromDrive(page, scale);
+            if (stream != null) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();

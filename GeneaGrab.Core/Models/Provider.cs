@@ -9,9 +9,7 @@ namespace GeneaGrab.Core.Models
     {
         public abstract string Id { get; }
         public abstract string Url { get; }
-        public string Name => Data.Translate($"Provider.{Id}", Id);
-        public string Icon => $"/Assets/Providers/{Id}.png";
-        public override string ToString() => Name;
+        public override string ToString() => Id;
 
 
         public abstract Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url);

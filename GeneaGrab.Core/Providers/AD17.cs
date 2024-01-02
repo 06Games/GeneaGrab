@@ -23,12 +23,7 @@ namespace GeneaGrab.Core.Providers
             if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith("/v2/ad17/")) return null;
 
             var query = HttpUtility.ParseQueryString(url.Query);
-            return new RegistryInfo
-            {
-                RegistryId = query["id"],
-                ProviderId = "AD17",
-                PageNumber = int.TryParse(query["page"], out var p) ? p : 1
-            };
+            return new RegistryInfo(this, query["id"]) { PageNumber = int.TryParse(query["page"], out var p) ? p : 1 };
         }
 
         public override async Task<(Registry, int)> Infos(Uri uri)
@@ -51,7 +46,7 @@ namespace GeneaGrab.Core.Providers
                     RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
             if (infos.Count == 0) return (null, -1);
 
-            var registry = new Registry(Data.Providers["AD17"], query["id"] ?? infos["id"].Value)
+            var registry = new Registry(this, query["id"] ?? infos["id"].Value)
             {
                 URL = url,
                 CallNumber = infos["cote"].Value,
@@ -124,8 +119,8 @@ namespace GeneaGrab.Core.Providers
         }
         public override async Task<Stream> GetFrame(Frame page, Scale zoom, Action<Progress> progress)
         {
-            var (success, stream) = zoom == Scale.Thumbnail ? await Data.TryGetThumbnailFromDrive(page) : Data.TryGetImageFromDrive(page, zoom);
-            if (success) return stream;
+            var stream = await Data.TryGetImageFromDrive(page, zoom);
+            if (stream != null) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();

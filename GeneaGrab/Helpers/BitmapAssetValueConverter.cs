@@ -23,6 +23,8 @@ public class BitmapAssetValueConverter : IValueConverter
         if (value == null) return null;
         if (value is not string rawUri || !targetType.IsAssignableFrom(typeof(Bitmap))) throw new NotSupportedException();
 
+        if (parameter is string format) rawUri = string.Format(format, rawUri);
+
         var uri = new Uri(rawUri.StartsWith("avares://") ? rawUri : $"avares://{Assembly.GetEntryAssembly()?.GetName().Name}{rawUri}");
         if (!AssetLoader.Exists(uri)) return null;
         var asset = AssetLoader.Open(uri);

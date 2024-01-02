@@ -19,6 +19,11 @@ public class DatabaseContext : DbContext
         optionsBuilder.UseSqlite($"Data Source={LocalData.AppData}/data.db");
     }
 
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        //configurationBuilder.Properties<Enum>().HaveConversion<string>(); // Store enums as string
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder

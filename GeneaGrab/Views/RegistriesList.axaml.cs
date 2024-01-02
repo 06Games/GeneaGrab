@@ -9,6 +9,7 @@ using DynamicData;
 using FluentAvalonia.UI.Controls;
 using FluentAvalonia.UI.Navigation;
 using GeneaGrab.Core.Models;
+using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 using GeneaGrab.Strings;
 
@@ -17,7 +18,7 @@ namespace GeneaGrab.Views
     public partial class RegistriesPage : Page, ITabPage
     {
         public Symbol IconSource => Symbol.Library;
-        public string? DynaTabHeader => Provider?.Name;
+        public string? DynaTabHeader => ResourceExtensions.GetLocalized($"Provider.{Provider?.Id}") ?? Provider?.Id;
         public string? Identifier => Provider?.Id;
         public Task RichPresence(RichPresence richPresence) => Task.CompletedTask;
         private Provider? Provider { get; set; }

@@ -48,13 +48,11 @@ namespace GeneaGrab.Core.Models
 
         public override string ToString()
         {
-            /*// Type
-            var name = TypeToString ?? "";
+            // Type
+            var name = string.Join(", ", Types);
 
             // Dates
-            var dates = Dates;
-            if (!string.IsNullOrEmpty(dates)) name += $" ({dates})";*/
-            var name = "";
+            name += $" ({From ?? "?"} - {To ?? "?"})";
 
             // Title
             if (!string.IsNullOrEmpty(Title)) name += $"\n{Title}";

@@ -65,8 +65,8 @@ namespace GeneaGrab.Core.Providers
 
         public override async Task<Stream> GetFrame(Frame page, Scale zoom, Action<Progress> progress)
         {
-            var (success, stream) = Data.TryGetImageFromDrive(page, zoom);
-            if (success) return stream;
+            var stream = await Data.TryGetImageFromDrive(page, zoom);
+            if (stream != null) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();

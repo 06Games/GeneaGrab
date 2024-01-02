@@ -73,15 +73,21 @@
         <Border Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" BorderThickness="1 0 0 0" BorderBrush="#FF383838">
             <StackPanel Spacing="15" Margin="15" Name="SidePanel">
                 <StackPanel>
-                    <TextBlock Name="InfoLocationCity" FontSize="18" FontWeight="Medium" Text="{Binding Registry.Location, FallbackValue=Location}" TextWrapping="Wrap" />
-                    <TextBlock Name="InfoLocationDistrict" Text="District" TextWrapping="Wrap" />
-                    <TextBlock Name="InfoRegistryType" Text="Type" FontSize="18" TextWrapping="Wrap" Margin="0 12 0 0" />
-                    <TextBlock Name="InfoRegistryDate" Text="From - To" TextWrapping="Wrap" />
-                    <TextBlock Name="InfoRegistryTitle" Text="Title" TextWrapping="Wrap" />
-                    <TextBlock Name="InfoRegistrySubtitle" Text="Subtitle" TextWrapping="Wrap" />
-                    <TextBlock Name="InfoRegistryAuthor" Text="Author" TextWrapping="Wrap" />
-                    <TextBlock Name="InfoRegistryNotes" Text="Notes" TextWrapping="Wrap" />
-                    <TextBlock Name="InfoRegistryId" Text="Document number" TextWrapping="Wrap" Margin="0 12 0 0" />
+                    <TextBlock FontSize="18" FontWeight="Medium" Text="{Binding Registry.Location, FallbackValue='', Converter={StaticResource JoinConverter}}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Registry.Types, FallbackValue='', Converter={StaticResource JoinConverter}}" FontSize="18" TextWrapping="Wrap" Margin="0 12 0 0" />
+                    <TextBlock TextWrapping="Wrap">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} - {1}">
+                                <Binding Path="Registry.From" FallbackValue="?" />
+                                <Binding Path="Registry.To" FallbackValue="?" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <TextBlock Text="{Binding Registry.Title, FallbackValue=''}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Registry.Subtitle, FallbackValue=''}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Registry.Author, FallbackValue=''}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Registry.Notes, FallbackValue=''}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Registry.CallNumber, FallbackValue=''}" TextWrapping="Wrap" Margin="0 12 0 0" />
                 </StackPanel>
 
                 <StackPanel Spacing="15">
@@ -107,7 +113,7 @@
 
                 <StackPanel>
                     <TextBlock Margin="0,25,0,5" FontSize="16" Text="{x:Static strings:UI.Registry_Notes}" />
-                    <TextBox Name="PageNotes" Height="100" FontSize="12" Background="Transparent" BorderBrush="Transparent" AcceptsReturn="True" Padding="0" />
+                    <TextBox Name="FrameNotes" Text="{Binding Frame.Notes, Mode=TwoWay, FallbackValue=''}" Height="100" FontSize="12" Background="Transparent" BorderBrush="Transparent" AcceptsReturn="True" Padding="0" />
                 </StackPanel>
 
                 <StackPanel Margin="0,25,0,5" x:Name="IndexPanel">

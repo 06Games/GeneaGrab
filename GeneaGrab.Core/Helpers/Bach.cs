@@ -32,7 +32,7 @@ namespace GeneaGrab.Core.Helpers
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
             var (_, _, info) = await RetrieveInfoFromUrl(url);
-            return new RegistryInfo { ProviderId = Id, RegistryId = info.Remote.EncodedArchivalDescription.DocId, PageNumber = info.Position ?? 1 };
+            return new RegistryInfo(this, info.Remote.EncodedArchivalDescription.DocId) { PageNumber = info.Position ?? 1 };
         }
 
         public override Task<(Registry, int)> Infos(Uri url) => RetrieveViewerInfo(url);
@@ -41,8 +41,8 @@ namespace GeneaGrab.Core.Helpers
 
         public override async Task<Stream> GetFrame(Frame page, Scale zoom, Action<Progress> progress)
         {
-            var (success, stream) = zoom == Scale.Thumbnail ? await Data.TryGetThumbnailFromDrive(page) : Data.TryGetImageFromDrive(page, zoom);
-            if (success) return stream;
+            var stream = await Data.TryGetImageFromDrive(page, zoom);
+            if (stream != null) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var image = await Grabber.GetImage(PageImageUrl(GetSeriesInfo(page.Registry), page.DownloadUrl, zoom), HttpClient).ConfigureAwait(false);
@@ -177,7 +177,7 @@ namespace GeneaGrab.Core.Helpers
                 Types = GetTypes(docPageInfo).SelectMany(ParseTypes).ToArray(),
                 CallNumber = ead.UnitId,
                 Title = ead.UnitTitle,
-                Author = docPageInfo.TryGetValue("Auteur", out var personne) && docPageInfo.Remove("Auteur") ? string.Join(", ", personne) : null,
+                Author = docPageInfo.TryGetValue("Auteur", out var authors) && docPageInfo.Remove("Auteur") ? string.Join(", ", authors) : null,
                 Location = location,
                 From = from,
                 To = to,

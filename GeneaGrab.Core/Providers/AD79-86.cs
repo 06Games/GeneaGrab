@@ -22,18 +22,13 @@ namespace GeneaGrab.Core.Providers
             if (url.Host != "archives-deux-sevres-vienne.fr" || !url.AbsolutePath.StartsWith("/ark:/")) return null;
 
             var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
-            return new RegistryInfo
-            {
-                ProviderId = "AD79-86",
-                RegistryId = queries["id"].Value,
-                PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1
-            };
+            return new RegistryInfo(this, queries["id"].Value) { PageNumber = int.TryParse(queries["page"].Value, out var page) ? page : 1 };
         }
 
         public override async Task<(Registry, int)> Infos(Uri url)
         {
             var queries = Regex.Match(url.AbsolutePath, "/ark:/(?<something>.*?)/(?<id>.*?)/daogrp/(?<seq>\\d*?)/((?<page>\\d*?)/)?").Groups;
-            var registry = new Registry(Data.Providers["AD79-86"], queries["id"].Value);
+            var registry = new Registry(this, queries["id"].Value);
             registry.URL = $"https://archives-deux-sevres-vienne.fr/ark:/{queries["something"]?.Value}/{registry.Id}";
 
             var client = new HttpClient();
@@ -84,8 +79,8 @@ namespace GeneaGrab.Core.Providers
 
         public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
         {
-            var (success, stream) = Data.TryGetImageFromDrive(page, scale);
-            if (success) return stream;
+            var stream = await Data.TryGetImageFromDrive(page, scale);
+            if (stream != null) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();

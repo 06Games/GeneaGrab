@@ -24,12 +24,7 @@ namespace GeneaGrab.Core.Providers
             if (url.Host != "www.geneanet.org" || !url.AbsolutePath.StartsWith("/registres/view")) return null;
 
             var regex = Regex.Match(url.OriginalString, "(?:idcollection=(?<col>\\d*).*page=(?<page>\\d*))|(?:\\/(?<col>\\d+)(?:\\z|\\/(?<page>\\d*)))");
-            return new RegistryInfo
-            {
-                RegistryId = regex.Groups["col"]?.Value,
-                ProviderId = "Geneanet",
-                PageNumber = int.TryParse(regex.Groups.TryGetValue("page") ?? "1", out var pageNumber) ? pageNumber : 1
-            };
+            return new RegistryInfo(this, regex.Groups["col"].Value) { PageNumber = int.TryParse(regex.Groups.TryGetValue("page") ?? "1", out var pageNumber) ? pageNumber : 1 };
         }
 
         #region Infos
@@ -37,7 +32,7 @@ namespace GeneaGrab.Core.Providers
         public override async Task<(Registry, int)> Infos(Uri url)
         {
             var regex = Regex.Match(url.OriginalString, @"(?:idcollection=(?<col>\d*).*page=(?<page>\d*))|(?:\/(?<col>\d+)(?:\z|\/(?<page>\d*)))");
-            var registry = new Registry(Data.Providers["Geneanet"], regex.Groups["col"]?.Value) { URL = url.OriginalString };
+            var registry = new Registry(this, regex.Groups["col"]?.Value) { URL = url.OriginalString };
             if (string.IsNullOrEmpty(registry.Id)) return (null, -1);
 
             var client = new HttpClient();
@@ -127,8 +122,8 @@ namespace GeneaGrab.Core.Providers
         public override Task<string> Ark(Frame page) => Task.FromResult(page.ArkUrl);
         public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
         {
-            var (success, stream) = Data.TryGetImageFromDrive(page, scale);
-            if (success) return stream;
+            var stream = await Data.TryGetImageFromDrive(page, scale);
+            if (stream != null) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();

@@ -6,6 +6,7 @@
     
     <Application.Resources>
         <helpers:BitmapAssetValueConverter x:Key="VariableImage"/>
+        <helpers:JoinConvertor x:Key="JoinConverter" />
         <helpers:ResourceConverter x:Key="Translate"/>
     </Application.Resources>
 

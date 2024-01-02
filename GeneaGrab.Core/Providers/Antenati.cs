@@ -15,22 +15,18 @@ namespace GeneaGrab.Core.Providers
     public class Antenati : Provider
     {
         public override string Id => "Antenati";
-        public override string Url => "https://www.antenati.san.beniculturali.it/";
+        public override string Url => "https://antenati.cultura.gov.it/";
 
         public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
         {
             if (url.Host != "dam-antenati.san.beniculturali.it" || !url.AbsolutePath.StartsWith("/antenati/containers/")) return null;
 
-            return new RegistryInfo
-            {
-                ProviderId = "Antenati",
-                RegistryId = Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"].Value
-            };
+            return new RegistryInfo(this, Regex.Match(url.AbsolutePath, "$/antenati/containers/(?<id>.*?)/").Groups["id"].Value);
         }
 
         public override async Task<(Registry, int)> Infos(Uri url)
         {
-            var registry = new Registry(Data.Providers["Antenati"], Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value);
+            var registry = new Registry(this, Regex.Match(url.AbsolutePath, "/antenati/containers/(?<id>.*?)/").Groups["id"]?.Value);
             registry.URL = $"https://dam-antenati.san.beniculturali.it/antenati/containers/{registry.Id}";
 
             var client = new HttpClient();
@@ -66,8 +62,8 @@ namespace GeneaGrab.Core.Providers
 
         public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
         {
-            var (success, stream) = Data.TryGetImageFromDrive(page, scale);
-            if (success) return stream;
+            var stream = await Data.TryGetImageFromDrive(page, scale);
+            if (stream != null) return stream;
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();

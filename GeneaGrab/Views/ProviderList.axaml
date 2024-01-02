@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:views="clr-namespace:GeneaGrab.Views"
+             xmlns:controls="clr-namespace:FluentAvalonia.UI.Controls;assembly=FluentAvalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="GeneaGrab.Views.ProviderList">
     <Design.DataContext>
@@ -20,12 +21,12 @@
                                     <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center" Fill="#0FFFFFFF" />
                                     <Ellipse Width="32" Height="32" VerticalAlignment="Center" HorizontalAlignment="Center">
                                         <Ellipse.Fill>
-                                            <ImageBrush Source="{Binding Icon, Converter={StaticResource VariableImage}}" />
+                                            <ImageBrush Source="{Binding Id, ConverterParameter='/Assets/Providers/{0}.png', Converter={StaticResource VariableImage}}" />
                                         </Ellipse.Fill>
                                     </Ellipse>
                                 </Grid>
-                                <TextBlock Grid.Column="1" Grid.Row="0" Margin="12,6,0,0" Text="{Binding Name}" />
-                                <TextBlock Grid.Column="1" Grid.Row="1" Margin="12,0,0,6" Text="{Binding RegisterCount}" />
+                                <TextBlock Grid.Column="1" Grid.Row="0" Margin="12,6,0,0" Text="{Binding Id, ConverterParameter='Core@Provider', Converter={StaticResource Translate}}" />
+                                <controls:HyperlinkButton Grid.Column="1" Grid.Row="1" Margin="12,0,0,6" NavigateUri="{Binding Url}" Content="{Binding Url}" />
                             </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>

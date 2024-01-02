@@ -35,7 +35,7 @@ namespace GeneaGrab.Views
             get
             {
                 if (Registry is null) return null;
-                var location = Registry.Location.ToArray();
+                var location = string.Join(", ", Registry.Location);
                 var registry = Registry.ToString();
                 return location.Length == 0 ? registry : $"{location}: {registry}";
             }
@@ -57,7 +57,7 @@ namespace GeneaGrab.Views
 
 
 
-        public Provider? Provider => Frame?.Provider;
+        private Provider? Provider => Frame?.Provider;
         public Registry? Registry { get; private set; }
         public Frame? Frame { get; private set; }
 
@@ -73,21 +73,21 @@ namespace GeneaGrab.Views
                     if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
                 };
 
-            var pageNotes = PageNotes;
-            if (pageNotes != null)
-                pageNotes.TextChanging += (_, _) =>
-                {
-                    if (Frame is null) return;
-                    var text = pageNotes.Text;
-                    Frame.Notes = string.IsNullOrWhiteSpace(text) ? null : text;
-                    // TODO
-                };
+            FrameNotes.TextChanging += (_, _) => Task.Run(() => SaveAsync(Frame));
 
             Image.GetObservable(BoundsProperty).Subscribe(b =>
             {
                 MainGrid.Width = b.Width;
                 MainGrid.Height = b.Height;
             });
+        }
+
+        private static async Task SaveAsync<T>(T entity)
+        {
+            if (entity is null) return;
+            await using var db = new DatabaseContext();
+            db.Update(entity);
+            await db.SaveChangesAsync();
         }
 
         public override async void OnNavigatedTo(NavigationEventArgs args)
@@ -218,14 +218,15 @@ namespace GeneaGrab.Views
             if (page is null || Provider is null || Frame is null || Frame.FrameNumber == page.Number) return;
             Frame = page.Page;
             var image = await Provider.GetFrame(page.Page, Scale.Navigation, TrackProgress);
-            var (success, stream) = await Data.TryGetThumbnailFromDrive(page.Page);
-            if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && success)
+            var stream = await Data.TryGetImageFromDrive(page.Page, Scale.Thumbnail);
+            if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && stream != null)
                 Dispatcher.UIThread.Post(() =>
                 {
                     page.Thumbnail = stream.ToBitmap(false);
                     Pages[PageNumbers.IndexOf(page.Number)] = page;
                 });
             RefreshView(image);
+            await SaveAsync(Frame);
         }
         private void RefreshView(Stream? img = null)
         {
@@ -236,21 +237,7 @@ namespace GeneaGrab.Views
             PageTotal.Text = $"/ {pageTotal}";
             PreviousPage.IsEnabled = Frame.FrameNumber > 1;
             NextPage.IsEnabled = Frame.FrameNumber < pageTotal;
-            /*SetInfo(InfoLocationCity, string.Join(", ", Registry.Location));
-            SetInfo(InfoRegistryType, Info.Registry!.TypeToString);
-            SetInfo(InfoRegistryDate, Registry.Dates);*/ // TODO
-            SetInfo(InfoRegistryTitle, Registry.Title);
-            SetInfo(InfoRegistrySubtitle, Registry.Subtitle);
-            SetInfo(InfoRegistryAuthor, Registry.Author);
-            SetInfo(InfoRegistryNotes, Registry.Notes);
-            SetInfo(InfoRegistryId, Registry.CallNumber ?? Registry.Id);
-            void SetInfo(TextBlock block, string? text)
-            {
-                block.Text = text ?? "";
-                block.IsVisible = !string.IsNullOrWhiteSpace(text);
-            }
 
-            PageNotes.Text = Frame.Notes ?? "";
             DisplayIndex();
 
             var image = Image;
@@ -260,7 +247,8 @@ namespace GeneaGrab.Views
             pageList.ScrollIntoView(Frame.FrameNumber - 1);
             ImagePanel.Reset();
             OnPropertyChanged(nameof(image));
-            //_ = Task.Run(async () => await LocalData.SaveRegistryAsync(Registry)); // TODO
+            OnPropertyChanged(nameof(Registry));
+            OnPropertyChanged(nameof(Frame));
         }
 
         private async void Download(object sender, RoutedEventArgs e)

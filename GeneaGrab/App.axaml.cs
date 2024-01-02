@@ -45,7 +45,6 @@ namespace GeneaGrab
             Data.SetLogger(Log.Logger);
             Logger.Sink = new SerilogSink();
 
-            Data.Translate = (id, fallback) => ResourceExtensions.GetLocalized(id) ?? fallback;
             Data.GetImage = LocalData.GetImage;
             Data.SaveImage = LocalData.SaveImageAsync;
             Data.ToThumbnail = LocalData.ToThumbnailAsync;
