@@ -46,7 +46,7 @@
                         <controls:SymbolIcon Symbol="ChevronRight" />
                     </Button>
                 </StackPanel>
-                <ListBox Name="PageList" ItemsSource="{Binding Pages}" SelectionChanged="ChangePage"
+                <ListBox Name="PageList" SelectionChanged="ChangePage"
                          ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                          RelativePanel.AlignLeftWithPanel="True" RelativePanel.AlignRightWithPanel="True" RelativePanel.AlignTopWithPanel="True" RelativePanel.AlignBottomWithPanel="True"
                          Margin="0 45 0 0 ">

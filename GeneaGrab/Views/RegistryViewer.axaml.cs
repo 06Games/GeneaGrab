@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -68,9 +67,10 @@ namespace GeneaGrab.Views
 
             var pageNumber = PageNumber;
             if (pageNumber != null)
-                pageNumber.ValueChanged += async (_, ne) =>
+                pageNumber.ValueChanged += (s, ne) =>
                 {
-                    if (PageNumbers.Contains((int)ne.NewValue)) await ChangePage((int)ne.NewValue);
+                    var frame = Registry?.Frames.FirstOrDefault(f => f.FrameNumber == (int)ne.NewValue);
+                    if (frame != null) _ = ChangePage(frame);
                 };
 
             FrameNotes.TextChanging += (_, _) => Task.Run(() => SaveAsync(Frame));
@@ -126,44 +126,21 @@ namespace GeneaGrab.Views
             if (noRefresh || Provider is null || Registry is null || Frame is null) return;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                PageNumbers.Clear();
-                Pages.Clear();
-
                 var pageNumber = PageNumber;
                 pageNumber.Minimum = Registry.Frames.Any() ? Registry.Frames.Min(p => p.FrameNumber) : 0;
                 pageNumber.Maximum = Registry.Frames.Any() ? Registry.Frames.Max(p => p.FrameNumber) : 0;
-                PageNumbers = Registry.Frames.Select(p => p.FrameNumber).ToList();
-                foreach (var page in Registry.Frames) Pages.Add(page!);
             });
 
             _ = Task.Run(async () =>
             {
-                var img = await LoadImage(Frame.FrameNumber, page => Provider.GetFrame(page, Scale.Navigation, TrackProgress), false);
+                var img = await Provider.GetFrame(Frame, Scale.Navigation, TrackProgress);
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
 
-                var tasks = new List<Task>();
-                foreach (var page in Pages.ToList().Where(page => page.Number != Frame.FrameNumber))
-                {
-                    if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                    tasks.Add(LoadImage(page.Number, rPage => Provider.GetFrame(rPage, Scale.Thumbnail, null)));
-                }
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-
-                async Task<Stream> LoadImage(int number, Func<Frame, Task<Stream>> func, bool close = true)
-                {
-                    var i = PageNumbers.IndexOf(number);
-                    var page = Pages[i];
-                    var thumbnail = await func.Invoke(page.Page);
-                    page.Thumbnail = thumbnail.ToBitmap(close);
-                    await Dispatcher.UIThread.InvokeAsync(() => Pages[i] = page);
-                    return thumbnail;
-                }
-                await Dispatcher.UIThread.InvokeAsync(() => RefreshView());
+                var framesList = await GetFramesList();
+                await Dispatcher.UIThread.InvokeAsync(() => PageList.ItemsSource = framesList);
             });
         }
 
-        public List<int> PageNumbers { get; set; } = new(); // TODO delete this
-        public ObservableCollection<PageList> Pages { get; } = new();
         private async Task<(bool success, bool inRam)> LoadRegistry(object parameter)
         {
             var inRam = false;
@@ -210,21 +187,14 @@ namespace GeneaGrab.Views
         private void GoToNextPage(object? _, RoutedEventArgs e) => ChangePage(Frame?.FrameNumber + 1 ?? -1);
         private async void ChangePage(object _, SelectionChangedEventArgs e)
         {
-            if (e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page).ConfigureAwait(false);
+            if (e.AddedItems.Count >= 1 && e.AddedItems[0] is PageList page) await ChangePage(page.Page).ConfigureAwait(false);
         }
         public Task ChangePage(int pageNumber) => ChangePage(Registry?.Frames.FirstOrDefault(f => f.FrameNumber == pageNumber));
-        public async Task ChangePage(PageList? page)
+        public async Task ChangePage(Frame? page)
         {
-            if (page is null || Provider is null || Frame is null || Frame.FrameNumber == page.Number) return;
-            Frame = page.Page;
-            var image = await Provider.GetFrame(page.Page, Scale.Navigation, TrackProgress);
-            var stream = await Data.TryGetImageFromDrive(page.Page, Scale.Thumbnail);
-            if ((page.Thumbnail is null || page.Thumbnail.PixelSize.Width == 0 || page.Thumbnail.PixelSize.Height == 0) && stream != null)
-                Dispatcher.UIThread.Post(() =>
-                {
-                    page.Thumbnail = stream.ToBitmap(false);
-                    Pages[PageNumbers.IndexOf(page.Number)] = page;
-                });
+            if (page is null || Provider is null || Frame is null || Frame.FrameNumber == page.FrameNumber) return;
+            Frame = page;
+            var image = await Provider.GetFrame(page, Scale.Navigation, TrackProgress);
             RefreshView(image);
             await SaveAsync(Frame);
         }
@@ -249,6 +219,20 @@ namespace GeneaGrab.Views
             OnPropertyChanged(nameof(image));
             OnPropertyChanged(nameof(Registry));
             OnPropertyChanged(nameof(Frame));
+        }
+
+        private async Task<IEnumerable<PageList>> GetFramesList()
+        {
+            if (Provider == null || Registry == null) return Array.Empty<PageList>();
+            var result = new List<PageList>(Registry.Frames.Select(f => new PageList(f)));
+            var tasks = new List<Task>();
+            foreach (var frame in result)
+            {
+                if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
+                tasks.Add(frame.GetThumbnailAsync());
+            }
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+            return result;
         }
 
         private async void Download(object sender, RoutedEventArgs e)
@@ -338,19 +322,16 @@ namespace GeneaGrab.Views
         #endregion
     }
 
-    public class PageList
+    public class PageList(Frame page)
     {
-        public static implicit operator PageList?(Frame? page) => page is null ? null : new PageList { Page = page }.Refresh();
-        public Frame Page { get; private init; } = null!;
-        public PageList Refresh()
+        public Frame Page { get; } = page;
+        public async Task GetThumbnailAsync()
         {
-            Number = Page.FrameNumber;
-            Notes = Page.Notes?.Split('\n').FirstOrDefault() ?? "";
-            return this;
+            Thumbnail = (await Page.Provider.GetFrame(Page, Scale.Thumbnail, null)).ToBitmap();
         }
+        public Bitmap? Thumbnail { get; private set; }
 
-        public Bitmap? Thumbnail { get; set; }
-        public int Number { get; private set; }
-        public string Notes { get; private set; } = "";
+        public int Number => Page.FrameNumber;
+        public string Notes => Page.Notes?.Split('\n').FirstOrDefault() ?? ""; // TODO Doesn't seems to be update
     }
 }
