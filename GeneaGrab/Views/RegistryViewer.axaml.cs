@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
@@ -73,7 +74,12 @@ namespace GeneaGrab.Views
                     if (frame != null) _ = ChangePage(frame);
                 };
 
-            FrameNotes.TextChanging += (_, _) => Task.Run(() => SaveAsync(Frame));
+            FrameNotes.TextChanging += (_, _) => Task.Run(() => SaveAsync(Frame).ContinueWith(_ =>
+            {
+                if (Frame is null) return;
+                var frameItem = PageList.Items.Cast<PageList>().FirstOrDefault(f => f.Number == Frame.FrameNumber);
+                frameItem?.OnPropertyChanged(nameof(frameItem.Notes));
+            }, TaskScheduler.Current));
 
             Image.GetObservable(BoundsProperty).Subscribe(b =>
             {
@@ -136,7 +142,7 @@ namespace GeneaGrab.Views
                 var img = await Provider.GetFrame(Frame, Scale.Navigation, TrackProgress);
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
 
-                var framesList = await GetFramesList();
+                var framesList = GetFramesList();
                 await Dispatcher.UIThread.InvokeAsync(() => PageList.ItemsSource = framesList);
             });
         }
@@ -221,17 +227,20 @@ namespace GeneaGrab.Views
             OnPropertyChanged(nameof(Frame));
         }
 
-        private async Task<IEnumerable<PageList>> GetFramesList()
+        private IEnumerable<PageList> GetFramesList()
         {
             if (Provider == null || Registry == null) return Array.Empty<PageList>();
             var result = new List<PageList>(Registry.Frames.Select(f => new PageList(f)));
-            var tasks = new List<Task>();
-            foreach (var frame in result)
+            _ = Task.Run(async () =>
             {
-                if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                tasks.Add(frame.GetThumbnailAsync());
-            }
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+                var tasks = new List<Task>();
+                foreach (var frame in result)
+                {
+                    if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
+                    tasks.Add(frame.GetThumbnailAsync());
+                }
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            });
             return result;
         }
 
@@ -328,10 +337,14 @@ namespace GeneaGrab.Views
         public async Task GetThumbnailAsync()
         {
             Thumbnail = (await Page.Provider.GetFrame(Page, Scale.Thumbnail, null)).ToBitmap();
+            OnPropertyChanged(nameof(Thumbnail));
         }
         public Bitmap? Thumbnail { get; private set; }
 
         public int Number => Page.FrameNumber;
-        public string Notes => Page.Notes?.Split('\n').FirstOrDefault() ?? ""; // TODO Doesn't seems to be update
+        public string Notes => Page.Notes?.Split('\n').FirstOrDefault() ?? "";
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName] string? propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
