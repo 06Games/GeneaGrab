@@ -47,8 +47,13 @@ public class TestAD06
         Assert.Equal(data.From, registry.From);
         Assert.Equal(data.To, registry.To);
 
-        var pos = new List<string>(data.Details ?? Array.Empty<string>()) { data.Ville };
+        var pos = new List<string>(data.Details ?? Array.Empty<string>());
+        if (data.Ville != null) pos.Add(data.Ville);
         if (data.Paroisse != null) pos.Add(data.Paroisse);
+        if (pos.Contains("2e bureau de Nice 1914-1955 (autres communes)"))
+        {
+            output.WriteLine(string.Join(", ", pos));
+        }
         Assert.Equal(pos, registry.Location);
 
         var types = registry.Types.ToArray();

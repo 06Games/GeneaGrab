@@ -331,10 +331,10 @@ public class DataAD06 : IEnumerable<object[]>
         // Hypothèques
         yield return new Data
         {
-            URL = @"https://archives06.fr/ark:/79346/2974578/dao/0/1/",
-            Id = "2974578",
+            URL = @"https://archives06.fr/ark:/79346/3236728/dao/0/1",
+            Id = "3236728",
             Cote = "1262 W 2",
-            Details = new[] { "Hypothèques. - Tables et répertoires des formalités. BPU3 - (05/07/2022)", "2e bureau de Nice 1914-1955 (autres communes)", "Table des noms" },
+            Details = new[] { "Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des noms" },
             Titre = "Table des noms",
             SousTitre = "Bon à Dumistrescu",
             Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
@@ -343,10 +343,10 @@ public class DataAD06 : IEnumerable<object[]>
         };
         yield return new Data
         {
-            URL = @"https://archives06.fr/ark:/79346/2974596/dao/0/200",
-            Id = "2974596",
+            URL = @"https://archives06.fr/ark:/79346/3236746/dao/0/200",
+            Id = "3236746",
             Cote = "1262 W 21",
-            Details = new[] { "Hypothèques. - Tables et répertoires des formalités. BPU3 - (05/07/2022)", "2e bureau de Nice 1914-1955 (autres communes)", "Table des prénoms" },
+            Details = new[] { "Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des prénoms" },
             Titre = "Table des prénoms",
             SousTitre = "Volume 016",
             Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
@@ -355,10 +355,10 @@ public class DataAD06 : IEnumerable<object[]>
         };
         yield return new Data
         {
-            URL = @"https://archives06.fr/ark:/79346/2974490/dao/0/120",
-            Id = "2974490",
+            URL = @"https://archives06.fr/ark:/79346/3236640/dao/0/120",
+            Id = "3236640",
             Cote = "1262 W 156",
-            Details = new[] { "Hypothèques. - Tables et répertoires des formalités. BPU3 - (05/07/2022)", "2e bureau de Nice 1914-1955 (autres communes)", "Répertoire des formalités" },
+            Details = new[] { "Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Répertoire des formalités" },
             Titre = "Répertoire des formalités",
             SousTitre = "Volume 066",
             Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
@@ -553,7 +553,7 @@ public class Data
     public string Id = null!;
     public int Page;
     public string? Cote;
-    public string Ville = null!;
+    public string? Ville;
     public string[]? Details;
     public string? Paroisse;
     public RegistryType[] Types = null!;

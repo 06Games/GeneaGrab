@@ -147,11 +147,16 @@ namespace GeneaGrab.Core.Providers
                     .Select(m => m.Groups.TryGetValue("archivePath")));
 
                 if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_ETAT_CIVIL") // The civil registry collection only provides the city through the analysis page
-                    registry.Location[^1] = ToTitleCase(registry.Location[^1]);
+                    location = ToTitleCase(locationDetails[^1]);
                 else if (classeur.EncodedArchivalDescriptionId.ToUpperInvariant() == "FRAD006_3E" && data.TryGetValue("title") == $"{data.TryGetValue("from")}-{data.TryGetValue("to")}")
-                    registry.Title = registry.Location.LastOrDefault();
+                    registry.Title = locationDetails.LastOrDefault();
             }
-            if (location != null) locationDetails.Add(location);
+            if (location != null)
+            {
+                var locationInDetails = locationDetails.IndexOf(locationDetails.Find(l => string.Equals(l, location, StringComparison.CurrentCultureIgnoreCase)));
+                if (locationInDetails >= 0) locationDetails[locationInDetails] = location;
+                else locationDetails.Add(location);
+            }
             if (district != null) locationDetails.Add(district);
             registry.Location = locationDetails.ToArray();
             registry.Notes = string.Join("\n", notes);
