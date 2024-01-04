@@ -42,8 +42,8 @@ namespace GeneaGrab.Core.Models
         /// <summary>Any additional information that might be needed</summary>
         public object? Extra { get; set; }
 
-        [NotMapped] public Date? From { get; set; } // TODO: Map this
-        [NotMapped] public Date? To { get; set; }
+        public Date? From { get; set; }
+        public Date? To { get; set; }
 
 
         public override string ToString()

@@ -103,8 +103,8 @@ namespace GeneaGrab.Core.Providers
 
             var client = new HttpClient();
             var registry = page.Registry;
-            var desc = $"{registry.CallNumber} - {registry.Location} - {registry.Notes.Replace(": ", " - ")} - {registry.From?.Year} - {registry.To?.Year}".Replace(' ', '+');
-            var ark = await client.GetStringAsync($"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadUrl}&desc={desc}&id={registry.Id}&ir=&vue=1&ajax=true")
+            var desc = registry is null ? null : $"{registry.CallNumber} - {registry.Location} - {registry.From} - {registry.To}".Replace(' ', '+');
+            var ark = await client.GetStringAsync($"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadUrl}&desc={desc}&id={page.RegistryId}&ir=&vue=1&ajax=true")
                 .ConfigureAwait(false);
             var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups["link"]?.Value;
 

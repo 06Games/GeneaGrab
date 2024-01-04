@@ -1,6 +1,5 @@
 ﻿using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Models.Dates;
-using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AMNice;
 

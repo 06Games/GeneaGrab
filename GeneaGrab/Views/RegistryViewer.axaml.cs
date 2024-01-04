@@ -138,11 +138,11 @@ namespace GeneaGrab.Views
                 pageNumber.Maximum = Registry.Frames.Any() ? Registry.Frames.Max(p => p.FrameNumber) : 0;
             });
 
-            PageList.ItemsSource = GetFramesList();
             _ = Task.Run(async () =>
             {
                 var img = await Provider.GetFrame(Frame, Scale.Navigation, TrackProgress);
                 await Dispatcher.UIThread.InvokeAsync(() => RefreshView(img));
+                await Dispatcher.UIThread.InvokeAsync(() => PageList.ItemsSource = GetFramesList());
             });
         }
 

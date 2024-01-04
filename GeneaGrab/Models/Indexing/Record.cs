@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
 
 namespace GeneaGrab.Models.Indexing;
 
@@ -46,7 +47,7 @@ public class Record
     /// <summary>Type of record</summary>
     public RegistryType Type { get; set; }
     /// <summary>Date of the record</summary>
-    public DateTime? Date { get; set; }
+    public Date? Date { get; set; }
 
     /// <summary>City of record</summary>
     public string? City { get; set; }

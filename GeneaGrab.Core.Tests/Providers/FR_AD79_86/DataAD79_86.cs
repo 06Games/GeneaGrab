@@ -1,8 +1,5 @@
 ﻿using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Models.Dates;
-using GeneaGrab.Core.Models.Dates.Calendars.FrenchRepublican;
-using GeneaGrab.Core.Models.Dates.Calendars.Gregorian;
-using GeneaGrab.Core.Models.Dates.Calendars.Julian;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD79_86;
 
@@ -19,7 +16,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Cote = "collection communale 3171",
             Ville = "Poitiers (Vienne, France)",
             Paroisse = "Sainte-Opportune",
-            Types = new [] { RegistryType.Burial },
+            Types = new[] { RegistryType.Burial },
             From = new JulianDate(1366, precision: Precision.Years),
             To = new GregorianDate(1667, precision: Precision.Years)
         },
@@ -31,7 +28,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Cote = "collection communale 1994",
             Ville = "Loudun (Vienne, France)",
             Paroisse = "Saint-Pierre-du-Marché",
-            Types = new [] { RegistryType.BaptismTable, RegistryType.MarriageTable, RegistryType.BurialTable },
+            Types = new[] { RegistryType.BaptismTable, RegistryType.MarriageTable, RegistryType.BurialTable },
             From = new GregorianDate(1593, precision: Precision.Years),
             To = new GregorianDate(1678, precision: Precision.Years)
         },
@@ -43,7 +40,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Cote = "collection communale 3116",
             Ville = "Poitiers (Vienne, France)",
             Paroisse = "Saint-Didier",
-            Types = new [] { RegistryType.BaptismTable, RegistryType.MarriageTable, RegistryType.BurialTable },
+            Types = new[] { RegistryType.BaptismTable, RegistryType.MarriageTable, RegistryType.BurialTable },
             From = new JulianDate(1564, precision: Precision.Years),
             To = new GregorianDate(1791, precision: Precision.Years)
         },
@@ -55,7 +52,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Cote = "collection communale 906",
             Ville = "Châtellerault (Vienne, France)",
             Paroisse = "Saint-Jean-Baptiste",
-            Types = new [] { RegistryType.Baptism, RegistryType.Marriage, RegistryType.BurialTable },
+            Types = new[] { RegistryType.Baptism, RegistryType.Marriage, RegistryType.BurialTable },
             From = new JulianDate(1540, precision: Precision.Years),
             To = new JulianDate(1553, precision: Precision.Years)
         },
@@ -66,7 +63,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Page = 1,
             Cote = "E DEPOT 112 / 2 E 8-1",
             Ville = "Amailloux (Deux-Sèvres, France)",
-            Types = new [] { RegistryType.Baptism },
+            Types = new[] { RegistryType.Baptism },
             From = new GregorianDate(1589, precision: Precision.Years),
             To = new GregorianDate(1612, precision: Precision.Years)
         },
@@ -77,7 +74,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Page = 1,
             Cote = "11 E 246/1-1",
             Ville = "Saint-Aubin (Vienne, France)",
-            Types = new [] { RegistryType.BirthTable, RegistryType.MarriageTable, RegistryType.DeathTable },
+            Types = new[] { RegistryType.BirthTable, RegistryType.MarriageTable, RegistryType.DeathTable },
             From = new GregorianDate(1783, precision: Precision.Years),
             To = new GregorianDate(1846, precision: Precision.Years)
         },
@@ -88,7 +85,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Page = 1,
             Cote = "E DEPOT 154 / 2 E 317-11",
             Ville = "Tillou (Deux-Sèvres, France)",
-            Types = new [] { RegistryType.BirthTable, RegistryType.MarriageTable, RegistryType.DeathTable },
+            Types = new[] { RegistryType.BirthTable, RegistryType.MarriageTable, RegistryType.DeathTable },
             From = new GregorianDate(1640, precision: Precision.Years),
             To = new FrenchRepublicanDate(10, precision: Precision.Years)
         },
@@ -99,7 +96,7 @@ public class DataAD79_86 : IEnumerable<object[]>
             Page = 1,
             Cote = "12 NUM 41/2",
             Ville = "Sainte-Gemme (Deux-Sèvres, France)",
-            Types = new [] { RegistryType.Birth, RegistryType.Marriage, RegistryType.Death },
+            Types = new[] { RegistryType.Birth, RegistryType.Marriage, RegistryType.Death },
             From = new GregorianDate(1792, precision: Precision.Years),
             To = new FrenchRepublicanDate(10, precision: Precision.Years)
         }
@@ -109,7 +106,6 @@ public class DataAD79_86 : IEnumerable<object[]>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
-
 public class Data
 {
     public string URL = null!;
