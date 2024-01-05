@@ -25,36 +25,9 @@ public static class LocalData
 
     private const int ThumbnailSize = 512;
 
-    private static bool Loaded { get; set; }
-    /*public static async Task LoadDataAsync(bool bypassLoadedCheck = false)
+    public static FileInfo? GetFile(Frame page, bool thumbnail = false)
     {
-        if (Loaded && !bypassLoadedCheck) return;
-        Log.Information("Loading data");
-        Loaded = true;
-
-
-        foreach (var (providerId, provider) in Data.Providers)
-        {
-            var folder = RegistriesFolder.CreateFolder(providerId);
-            foreach (var reg in Directory.EnumerateFiles(folder.FullName, "Registry.json", SearchOption.AllDirectories).AsParallel())
-            {
-                var data = await File.ReadAllTextAsync(reg);
-                var registry = JsonConvert.DeserializeObject<Registry>(data);
-                if (registry == null) Log.Warning("Registry {Registry} file is empty", registry);
-                else if (provider.Registries.ContainsKey(registry.Id)) Log.Warning("An registry already has the id {ID}", registry.Id);
-                else provider.Registries.Add(registry.Id, registry);
-            }
-        }
-        Log.Information("Data loaded");
-    }
-    public static Task SaveRegistryAsync(Registry registry) => RegistriesFolder
-        .CreateFolder(registry.ProviderId)
-        .CreateFolder(registry.Id)
-        .WriteFileAsync("Registry.json", JsonConvert.SerializeObject(registry, Formatting.Indented));*/
-
-
-    public static FileInfo GetFile(Frame page, bool write = false, bool thumbnail = false)
-    {
+        if (page.Registry is null) return null;
         var folder = RegistriesFolder.CreateFolderPath(page.Registry.ProviderId, page.RegistryId);
         if (thumbnail) folder = folder.CreateFolder(".thumbnails");
         return new FileInfo(Path.Combine(folder.FullName, $"p{page.FrameNumber}.jpg"));
@@ -65,8 +38,8 @@ public static class LocalData
     {
         try
         {
-            var file = GetFile(page, thumbnail: thumbnail);
-            return !file.Exists ? null : file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            var file = GetFile(page, thumbnail);
+            return file is null || !file.Exists ? null : file.Open(FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         }
         catch (Exception e)
         {
@@ -107,7 +80,8 @@ public static class LocalData
             else img.Metadata.ExifProfile.SetValue(ExifTag.UserComment, page.Notes);
 
 
-            var file = GetFile(page, true, thumbnail);
+            var file = GetFile(page, thumbnail);
+            if (file is null) return null;
             await using var stream = file.Open(FileMode.OpenOrCreate, FileAccess.Write);
             await img.SaveAsJpegAsync(stream).ConfigureAwait(false);
             return file.FullName;
@@ -115,7 +89,8 @@ public static class LocalData
         catch (Exception e)
         {
             Log.Error(e, "Couldn't save image for {ID} page {Number}", page.RegistryId, page.FrameNumber);
-            return Path.Combine(RegistriesFolder.FullName, Extensions.GetValidFilename(page.Registry.ProviderId), Extensions.GetValidFilename(page.RegistryId), $"p{page.FrameNumber}.jpg");
+            return page.Registry is null ? null : Path.Combine(RegistriesFolder.FullName, Extensions.GetValidFilename(page.Registry.ProviderId), Extensions.GetValidFilename(page.RegistryId),
+                $"p{page.FrameNumber}.jpg");
         }
     }
 }

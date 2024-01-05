@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using GeneaGrab.Core.Models.Dates;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -46,23 +45,7 @@ namespace GeneaGrab.Core.Models
         public Date? To { get; set; }
 
 
-        public override string ToString()
-        {
-            // Type
-            var name = string.Join(", ", Types);
-
-            // Dates
-            name += $" ({From ?? "?"} - {To ?? "?"})";
-
-            // Title
-            if (!string.IsNullOrEmpty(Title)) name += $"\n{Title}";
-            else if (!string.IsNullOrEmpty(Notes)) name += $"\n{Notes.Split('\n').FirstOrDefault()}";
-
-            if (!string.IsNullOrEmpty(Subtitle)) name += $" ({Subtitle})";
-            if (!string.IsNullOrEmpty(Author)) name += $"\n{Author}";
-
-            return name;
-        }
+        public override string ToString() => $"{ProviderId}@{Id}";
 
         public IEnumerable<Frame> Frames { get; set; } = new List<Frame>();
 

@@ -40,7 +40,7 @@ public class Frame
     /// <summary>Any additional information the grabber needs</summary>
     public object? Extra { get; set; }
 
-    public override string ToString() => FrameNumber.ToString();
+    public override string ToString() => $"{ProviderId}@{RegistryId}#{FrameNumber}";
 }
 /// <summary>Available image size</summary>
 public enum Scale

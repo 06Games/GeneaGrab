@@ -74,7 +74,7 @@
             <StackPanel Spacing="15" Margin="15" Name="SidePanel">
                 <StackPanel>
                     <TextBlock FontSize="18" FontWeight="Medium" Text="{Binding Registry.Location, FallbackValue='', Converter={StaticResource JoinConverter}}" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding Registry.Types, FallbackValue='', Converter={StaticResource JoinConverter}}" FontSize="18" TextWrapping="Wrap" Margin="0 12 0 0" />
+                    <TextBlock Text="{Binding Registry.Types, FallbackValue='', ConverterParameter='Core@Registry.Type', Converter={StaticResource JoinConverter}}" FontSize="18" TextWrapping="Wrap" Margin="0 12 0 0" />
                     <TextBlock TextWrapping="Wrap">
                         <TextBlock.Text>
                             <MultiBinding StringFormat="{}{0} - {1}">

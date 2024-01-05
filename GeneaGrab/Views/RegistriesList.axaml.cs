@@ -11,101 +11,105 @@ using FluentAvalonia.UI.Navigation;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
-using GeneaGrab.Strings;
 
-namespace GeneaGrab.Views
+namespace GeneaGrab.Views;
+
+public partial class RegistriesPage : Page, ITabPage
 {
-    public partial class RegistriesPage : Page, ITabPage
+    public Symbol IconSource => Symbol.Library;
+    public string? DynaTabHeader => ResourceExtensions.GetLocalized($"Provider.{Provider?.Id}") ?? Provider?.Id;
+    public string? Identifier => Provider?.Id;
+    public Task RichPresence(RichPresence richPresence) => Task.CompletedTask;
+    private Provider? Provider { get; set; }
+
+    public RegistriesPage()
     {
-        public Symbol IconSource => Symbol.Library;
-        public string? DynaTabHeader => ResourceExtensions.GetLocalized($"Provider.{Provider?.Id}") ?? Provider?.Id;
-        public string? Identifier => Provider?.Id;
-        public Task RichPresence(RichPresence richPresence) => Task.CompletedTask;
-        private Provider? Provider { get; set; }
+        InitializeComponent();
+        DataContext = this;
+    }
 
-        public RegistriesPage()
+    protected ObservableCollection<RegistriesTreeStructure> Items { get; } = [];
+
+    public override void OnNavigatedTo(NavigationEventArgs args)
+    {
+        base.OnNavigatedTo(args);
+
+        if (args.Parameter is not Provider provider) return;
+        Provider = provider;
+        MainWindow.UpdateSelectedTitle();
+
+        Items.Clear();
+
+        using var db = new DatabaseContext();
+        foreach (var registry in db.Registries.Where(r => r.ProviderId == Provider.Id))
         {
-            InitializeComponent();
-            DataContext = this;
-        }
-
-        protected ObservableCollection<RegistriesTreeStructure> Items { get; } = [];
-
-        public override void OnNavigatedTo(NavigationEventArgs args)
-        {
-            base.OnNavigatedTo(args);
-
-            if (args.Parameter is not Provider provider) return;
-            Provider = provider;
-            MainWindow.UpdateSelectedTitle();
-
-            Items.Clear();
-
-            using var db = new DatabaseContext();
-            foreach (var registry in db.Registries.Where(r => r.ProviderId == Provider.Id).Select(r => r))
+            var parent = Items;
+            foreach (var location in registry.Location)
             {
-                var parent = Items;
-                foreach (var location in registry.Location)
+                if (string.IsNullOrWhiteSpace(location)) continue;
+                var container = parent.FirstOrDefault(c => c.Title == location);
+                if (container is null)
                 {
-                    if (string.IsNullOrWhiteSpace(location)) continue;
-                    var container = parent.FirstOrDefault(c => c.Title == location);
-                    if (container is null)
-                    {
-                        container = new RegistriesTreeStructure(location, registry.Location == null ? null : string.Join(", ", registry.Location));
-                        InsertInPlace(parent, container);
-                    }
-                    parent = container.Children;
+                    container = new RegistriesTreeStructure(location);
+                    InsertInPlace(parent, container);
                 }
-                InsertInPlace(parent, registry);
+                parent = container.Children;
             }
-
-            void InsertInPlace<T>(IList<T> list, T item) where T : IComparable<T>
-            {
-                var index = list.BinarySearch(item);
-                if (index < 0) index = ~index;
-                list.Insert(index, item);
-            }
+            InsertInPlace(parent, registry);
         }
 
-        private void RegisterList_ItemInvoked(object? sender, SelectionChangedEventArgs e)
+        void InsertInPlace<T>(IList<T> list, T item) where T : IComparable<T>
         {
-            if (e.AddedItems.Count < 1 || sender is not TreeView treeView || e.AddedItems[0] is not RegistriesTreeStructure data) return;
-            treeView.UnselectAll();
-            if (treeView.TreeContainerFromItem(data) is not TreeViewItem node) return;
-            if (data.Children.Any()) node.IsExpanded = !node.IsExpanded;
-            else if (data.Registry != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Registry));
+            var index = list.BinarySearch(item);
+            if (index < 0) index = ~index;
+            list.Insert(index, item);
         }
     }
 
-    public class RegistriesTreeStructure : IComparable<RegistriesTreeStructure>
+    private void RegisterList_ItemInvoked(object? sender, SelectionChangedEventArgs e)
     {
-        public string Title { get; }
-        public string? Subtitle { get; }
-        public ObservableCollection<RegistriesTreeStructure> Children { get; } = new();
-
-        public Registry? Registry { get; }
-
-        public RegistriesTreeStructure(string title, string? subtitle = null)
-        {
-            Title = title;
-            Subtitle = subtitle;
-        }
-        private RegistriesTreeStructure(Registry registry) : this(registry.ToString(), string.Format(UI.Registry_PageCount, registry.Frames.Count()))
-        {
-            Registry = registry;
-        }
-
-        public static implicit operator RegistriesTreeStructure(Registry registry) => new(registry);
-
-        public int CompareTo(RegistriesTreeStructure? other)
-        {
-            if (other is null) return 1;
-
-            var compare = 0;
-            if (Registry?.From != null && other.Registry?.From != null) compare += Registry.From.CompareTo(other.Registry.From) * 10;
-            else if (Registry == null && other.Registry != null) compare += -10;
-            else if (Registry != null && other.Registry == null) compare += 10;
-            return compare + string.Compare(Title, other.Title, StringComparison.CurrentCulture);
-        }
+        if (e.AddedItems.Count < 1 || sender is not TreeView treeView || e.AddedItems[0] is not RegistriesTreeStructure data) return;
+        treeView.UnselectAll();
+        if (treeView.TreeContainerFromItem(data) is not TreeViewItem node) return;
+        if (data.Children.Any()) node.IsExpanded = !node.IsExpanded;
+        else if (data.Registry != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Registry));
     }
+}
+public class RegistriesTreeStructure(string title, string? subtitle = null) : IComparable<RegistriesTreeStructure>
+{
+    public string Title { get; } = title;
+    public string? Subtitle { get; } = subtitle;
+    public ObservableCollection<RegistriesTreeStructure> Children { get; } = [];
+
+    public Registry? Registry { get; }
+
+    private RegistriesTreeStructure(Registry registry) : this(registry.GetDescription(), registry.CallNumber)
+    {
+        Registry = registry;
+    }
+
+    public static implicit operator RegistriesTreeStructure(Registry registry) => new(registry);
+
+    public int CompareTo(RegistriesTreeStructure? other)
+    {
+        if (other is null) return 1;
+
+        var compare = 0;
+        if (Registry?.From != null && other.Registry?.From != null) compare += Registry.From.CompareTo(other.Registry.From) * 10;
+        else if (Registry == null && other.Registry != null) compare += -10;
+        else if (Registry != null && other.Registry == null) compare += 10;
+        return compare + string.Compare(Title, other.Title, StringComparison.CurrentCulture);
+    }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not RegistriesTreeStructure other) return false;
+        return GetHashCode() == other.GetHashCode();
+    }
+    public override int GetHashCode() => HashCode.Combine(Title, Subtitle, Children, Registry);
+    public static bool operator ==(RegistriesTreeStructure? left, RegistriesTreeStructure? right) => left?.Equals(right) ?? false;
+    public static bool operator !=(RegistriesTreeStructure? left, RegistriesTreeStructure? right) => !(left == right);
+    public static bool operator >(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) > 0;
+    public static bool operator <(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) < 0;
+    public static bool operator >=(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) >= 0;
+    public static bool operator <=(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) <= 0;
 }

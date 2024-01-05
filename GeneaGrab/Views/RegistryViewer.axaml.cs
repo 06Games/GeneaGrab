@@ -37,7 +37,7 @@ namespace GeneaGrab.Views
             {
                 if (Registry is null) return null;
                 var location = string.Join(", ", Registry.Location);
-                var registry = Registry.ToString();
+                var registry = Registry.GetDescription();
                 return location.Length == 0 ? registry : $"{location}: {registry}";
             }
         }

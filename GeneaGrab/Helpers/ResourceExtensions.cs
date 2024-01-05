@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
 using Avalonia.Data.Converters;
 using GeneaGrab.Strings;
@@ -28,11 +27,16 @@ public class ResourceConverter : IValueConverter
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (!targetType.IsAssignableFrom(typeof(string))) throw new NotSupportedException();
-        Debug.Assert(value != null, nameof(value) + " != null");
+        return GetLocalized(value?.ToString(), parameter as string, culture);
+    }
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
 
+    public static string? GetLocalized(string? value, string? param, CultureInfo culture)
+    {
+        if (value is null) return null;
         var res = ResourceExtensions.Resource.UI;
         var cat = string.Empty;
-        if (parameter is not string param) return ResourceExtensions.GetLocalized($"{cat}.{value}", culture, res);
+        if (param is null) return ResourceExtensions.GetLocalized($"{cat}.{value}", culture, res);
         if (param.Contains('@'))
         {
             var parameters = param.Split('@');
@@ -43,5 +47,4 @@ public class ResourceConverter : IValueConverter
         else cat = param;
         return ResourceExtensions.GetLocalized($"{cat}.{value}", culture, res);
     }
-    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
 }
