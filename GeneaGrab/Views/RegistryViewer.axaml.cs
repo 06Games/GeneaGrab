@@ -239,6 +239,7 @@ namespace GeneaGrab.Views
                     tasks.Add(frame.GetThumbnailAsync());
                 }
                 await Task.WhenAll(tasks).ConfigureAwait(false);
+                await SaveAsync(Registry);
             });
             return result;
         }
@@ -329,7 +330,7 @@ namespace GeneaGrab.Views
         #endregion
     }
 
-    public class PageList(Frame page)
+    public class PageList(Frame page) : INotifyPropertyChanged
     {
         public Frame Page { get; } = page;
         public async Task GetThumbnailAsync()
