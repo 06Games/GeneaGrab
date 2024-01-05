@@ -58,7 +58,7 @@
                     <ListBox.ItemTemplate>
                         <DataTemplate x:DataType="views:PageList">
                             <Grid Width="125" RowDefinitions="100,15,15">
-                                <StackPanel Grid.Row="0">
+                                <StackPanel Grid.Row="0" VerticalAlignment="Center">
                                     <Image Source="{Binding Thumbnail}" MaxHeight="100" MaxWidth="125" />
                                 </StackPanel>
                                 <TextBlock Text="{Binding Number}" Margin="0,6,0,0" TextAlignment="Center" Grid.Row="1" />
