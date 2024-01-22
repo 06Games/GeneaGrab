@@ -62,15 +62,15 @@ namespace GeneaGrab.Core.Helpers
         {
             Id = image.Value<string>("@id");
             Format = image["resource"].Value<string>("format");
-            Width = image["resource"].Value<int?>("width") ?? -1;
-            Height = image["resource"].Value<int?>("height") ?? -1;
+            Width = image["resource"].Value<int?>("width");
+            Height = image["resource"].Value<int?>("height");
             ServiceId = image["resource"]["service"]?.Value<string>("@id");
         }
 
         public string Id { get; }
         public string Format { get; }
-        public int Width { get; }
-        public int Height { get; }
+        public int? Width { get; }
+        public int? Height { get; }
         public string ServiceId { get; }
     }
 }

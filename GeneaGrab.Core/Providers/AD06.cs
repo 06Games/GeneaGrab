@@ -211,8 +211,8 @@ namespace GeneaGrab.Core.Providers
             var client = new HttpClient();
             var size = scale switch
             {
-                Scale.Thumbnail => $"{Math.Min(512, page.Width!.Value)},", // AD06 neither supports ^ and ! modifiers nor percentages
-                Scale.Navigation => $"{Math.Min(2048, page.Width!.Value)},",
+                Scale.Thumbnail => $"{(page.Width is > 0 ? Math.Min(512, page.Width.Value) : 512)},", // AD06 neither supports ^ and ! modifiers nor percentages
+                Scale.Navigation => $"{(page.Width is > 0 ? Math.Min(2048, page.Width.Value) : 2048)},",
                 _ => "max"
             };
             var image = await Image
