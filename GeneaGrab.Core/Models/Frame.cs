@@ -52,9 +52,9 @@ public enum Scale
     /// <remarks>~128-512 px</remarks>
     Thumbnail,
     /// <summary>A reduced image size suitable for navigation is locally available</summary>
-    /// <remarks>~1024-2048 px</remarks>
+    /// <remarks>~2048-4096 px</remarks>
     Navigation,
     /// <summary>Full-resolution image is locally available</summary>
-    /// <remarks>Greater than 2048 px, or less if the original image is low resolution</remarks>
+    /// <remarks>Greater than 4096 px, or less if the original image is low resolution</remarks>
     Full
 }

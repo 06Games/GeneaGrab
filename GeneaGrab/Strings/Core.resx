@@ -174,4 +174,8 @@
         <value>Municipal Archives of Nice</value>
         <comment>archives.nicecotedazur.org</comment>
     </data>
+    <data name="Provider.FamilySearch" xml:space="preserve">
+        <value>FamilySearch</value>
+        <comment>www.familysearch.org</comment>
+    </data>
 </root>

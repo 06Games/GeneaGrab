@@ -20,12 +20,6 @@
     <data name="Provider.CG06" xml:space="preserve">
         <value>Archives départementales des Alpes-Maritimes (CG06)</value>
     </data>
-    <data name="Provider.Geneanet" xml:space="preserve">
-        <value>Geneanet</value>
-    </data>
-    <data name="Provider.NiceHistorique" xml:space="preserve">
-        <value>Nice Historique</value>
-    </data>
     <data name="Registry.Name" xml:space="preserve">
     <value>Registre</value>
   </data>

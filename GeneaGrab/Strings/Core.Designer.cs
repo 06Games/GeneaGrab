@@ -114,6 +114,15 @@ namespace GeneaGrab.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to FamilySearch.
+        /// </summary>
+        public static string Provider_FamilySearch {
+            get {
+                return ResourceManager.GetString("Provider.FamilySearch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Geneanet.
         /// </summary>
         public static string Provider_Geneanet {

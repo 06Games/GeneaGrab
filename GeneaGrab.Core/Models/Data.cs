@@ -39,6 +39,9 @@ public static class Data
 
                 // Italy
                 new Antenati(),
+
+                // Worldwide
+                new FamilySearch()
             };
             return _providers = new ReadOnlyDictionary<string, Provider>(providers.ToDictionary(k => k.Id, v => v));
         }

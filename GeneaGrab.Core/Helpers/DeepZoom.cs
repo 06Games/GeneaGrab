@@ -10,7 +10,8 @@ namespace GeneaGrab.Core.Helpers
     public static class DeepZoom
     {
         /// <summary>Returns the maximum zoom level</summary>
-        public static int CalculateIndex(Frame page) => (int)Math.Ceiling(Math.Log(Math.Max(page.Width!.Value, page.Height!.Value), 2));
+        public static int CalculateIndex(Frame page) => CalculateIndex(page.Width!.Value, page.Height!.Value);
+        public static int CalculateIndex(int width, int height) => (int)Math.Ceiling(Math.Log(Math.Max(width, height), 2));
 
         /// <summary>Returns the properties of the image</summary>
         /// <param name="baseURL">Image root url</param>

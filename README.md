@@ -6,6 +6,10 @@
 
 > For some services, UserScripts (🧰) are available to make GeneaGrab easier to use. To install them, you can use [Tampermonkey](https://www.tampermonkey.net/) or any other alternative.
 
+### :earth_africa: Worldwide
+
+* [<img src="GeneaGrab/Assets/Providers/FamilySearch.svg" width="20" height="20" /> FamilySearch](https://www.familysearch.org)
+
 ### :fr: France
 
 * [<img src="GeneaGrab/Assets/Providers/Geneanet.svg" width="20" height="20" /> Geneanet](https://www.geneanet.org/) ([🧰](GeneaGrab.WebScripts/Geneanet.user.js?raw=1))

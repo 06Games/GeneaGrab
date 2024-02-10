@@ -232,11 +232,25 @@ namespace GeneaGrab.Views
             var result = new List<PageList>(Registry.Frames.Select(f => new PageList(f)));
             _ = Task.Run(async () =>
             {
-                var tasks = new List<Task>();
+                var tasks = new List<Task<PageList>>();
+                var unsavedCount = 0;
                 foreach (var frame in result)
                 {
-                    if (tasks.Count >= 5) tasks.Remove(await Task.WhenAny(tasks).ConfigureAwait(false));
-                    tasks.Add(frame.GetThumbnailAsync());
+                    if (tasks.Count >= 5)
+                    {
+                        tasks.Remove(await Task.WhenAny(tasks));
+                        unsavedCount++;
+                        if (unsavedCount > 30)
+                        {
+                            unsavedCount = 0;
+                            await SaveAsync(Registry);
+                        }
+                    }
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        await frame.GetThumbnailAsync();
+                        return frame;
+                    }));
                 }
                 await Task.WhenAll(tasks).ConfigureAwait(false);
                 await SaveAsync(Registry);
@@ -247,7 +261,7 @@ namespace GeneaGrab.Views
         private void Download(object _1, RoutedEventArgs _2)
         {
             if (Provider is null || Frame == null) return;
-            Provider.GetFrame(Frame, Scale.Full, TrackProgress).ContinueWith(t => RefreshView(t.Result), TaskScheduler.Current).Forget();
+            Provider.GetFrame(Frame, Scale.Full, TrackProgress).ContinueWith(t => Dispatcher.UIThread.InvokeAsync(() => RefreshView(t.Result)), TaskScheduler.Current).Forget();
         }
         private void OpenFolder(object _, RoutedEventArgs _1)
         {

@@ -47,7 +47,7 @@ namespace GeneaGrab.Core.Models
 
         public override string ToString() => $"{ProviderId}@{Id}";
 
-        public IEnumerable<Frame> Frames { get; set; } = new List<Frame>();
+        public IList<Frame> Frames { get; set; } = new List<Frame>();
 
 
         public bool Equals(Registry? other) => Id == other?.Id;
