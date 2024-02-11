@@ -6,13 +6,16 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Security.Authentication;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Models;
+using GeneaGrab.Core.Models.Dates;
 using Gx.Source;
 using Gx.Types;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -104,12 +107,20 @@ public class FamilySearch : Provider
             }).Result.Content.ReadAsStringAsync());
 
         var waypointId = new Uri(waypointURL).AbsolutePath.Split('/')[^1];
+        var crumbs = waypointData.SelectToken("waypointCrumbs")?.Select(c => c.Value<string>("title")).ToList() ??
+                     sourceDescriptions
+                         .Select(elem => (elem.Titles.Find(t => t.Lang == Locale) ?? elem.Titles.FirstOrDefault())?.Value)
+                         .Reverse().ToList();
+        var title = crumbs[^1];
+        var titleDates = Regex.Matches(title, @"(?<from>\d{4})-(?<to>\d{4})").SelectMany(match => new[] { match.Groups["from"].Value, match.Groups["to"].Value }).Order().ToList();
         var registry = new Registry(this, waypointId)
         {
-            Location = waypointData.SelectToken("waypointCrumbs")?.Select(c => c.Value<string>("title")).ToList() ??
-                       sourceDescriptions
-                           .Select(elem => (elem.Titles.Find(t => t.Lang == Locale) ?? elem.Titles.FirstOrDefault())?.Value)
-                           .Reverse().ToList(),
+            Title = title,
+            Location = crumbs[..^1],
+            From = titleDates.Count > 0 ? Date.ParseDate(titleDates[0]) : null,
+            To = titleDates.Count > 0 ? Date.ParseDate(titleDates[^1]) : null,
+            Types = ParseTypes(title),
+            URL = waypointURL,
             Frames = waypointData.SelectToken("images")?.Values<string>().Select((imageUrl, i) => new Frame
             {
                 FrameNumber = i + 1,
@@ -124,6 +135,27 @@ public class FamilySearch : Provider
         };
 
         return (registry, meta.SelectToken("links.self")?.Value<int>("offset") ?? 1);
+    }
+
+    /// <summary>Extracts registry content type from the waypoint crumb</summary>
+    /// <param name="title">The waypoint crumb describing the current registry</param>
+    /// <remarks>Only supports French and Italian</remarks>
+    private static List<RegistryType> ParseTypes(string title)
+    {
+        var separators = new[] { ',', '-' };
+        return Regex
+            .Replace(title, @" (?<from>\d{4})-(?<to>\d{4})", ",")
+            .Split(separators, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Select(part => part.ToLower() switch
+            {
+                "baptêmes" or "battesimi" => RegistryType.Baptism,
+                "tables de baptêmes" => RegistryType.BaptismTable,
+                "naissances" or "nati" => RegistryType.Birth,
+                "pubblicazioni" => RegistryType.Banns,
+                "mariages" or "matrimoni" => RegistryType.Marriage,
+                "décès" or "morti" => RegistryType.Death,
+                "sépultures" or "sepolture" => RegistryType.Burial,
+                _ => RegistryType.Unknown
+            }).Where(type => type != RegistryType.Unknown).ToList();
     }
 
     private static IEnumerable<SourceDescription> NavigateSources(List<SourceDescription> sources, string id)
@@ -168,15 +200,16 @@ public class FamilySearch : Provider
                 _ => 1
             };
             var zoom = Math.Min(scaleZoom, maxZoom);
-            var (tiles, diviser) = DeepZoom.GetTilesNumber(page, zoom);
+            var (tiles, divider) = DeepZoom.GetTilesNumber(page, zoom);
 
-            image = new Image<Rgb24>(page.Width!.Value / diviser, page.Height!.Value / diviser);
+            image = new Image<Rgb24>(page.Width!.Value / divider, page.Height!.Value / divider);
             var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
             for (var y = 0; y < tiles.Y; y++)
                 for (var x = 0; x < tiles.X; x++)
                     tasks.Add(Grabber.GetImage($"{baseUrl}/image_files/{zoom}/{x}_{y}.{format}", client).ContinueWith(task =>
                     {
-                        progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
+                        try { progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count); }
+                        catch (Exception e) { Log.Warning(e, "Error while updating the progress bar"); }
                         return task.Result;
                     }), (page.TileSize.GetValueOrDefault(), 1, new Point(x, y)));
 
