@@ -69,7 +69,7 @@ public class FamilySearch : Provider
         {
             var wc = HttpUtility.UrlDecode(query["wc"]);
             var ccIndex = wc.IndexOf("?cc=", StringComparison.InvariantCultureIgnoreCase);
-            return new RegistryInfo(this, ccIndex >= 0 ? wc.Remove(ccIndex) : wc);
+            return new RegistryInfo(this, ccIndex >= 0 ? wc.Remove(ccIndex) : wc) { PageNumber = int.TryParse(query["i"], out var prevPage) ? prevPage + 1 : 1 };
         }
 
         return null; // TODO
