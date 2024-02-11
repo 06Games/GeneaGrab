@@ -8,7 +8,7 @@
 
 ### :earth_africa: Worldwide
 
-* [<img src="GeneaGrab/Assets/Providers/FamilySearch.svg" width="20" height="20" /> FamilySearch](https://www.familysearch.org)
+* [<img src="GeneaGrab/Assets/Providers/FamilySearch.svg" width="20" height="20" /> FamilySearch](https://www.familysearch.org) ([🧰](GeneaGrab.WebScripts/FamilySearch.user.js?raw=1))
 
 ### :fr: France
 
