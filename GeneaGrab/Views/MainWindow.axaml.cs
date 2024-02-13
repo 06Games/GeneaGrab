@@ -149,25 +149,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         var searchResults = new List<Result>();
         if (string.IsNullOrWhiteSpace(query)) return searchResults;
 
-
-        searchResults.AddRange(GetRegistries().ToList());
-        if (searchResults.Any()) return searchResults;
-
         if (!Uri.TryCreate(query, UriKind.Absolute, out var uri)) return searchResults;
-        foreach (var (key, value) in Data.Providers)
+        foreach (var (providerName, provider) in Data.Providers)
         {
-            var info = await value.GetRegistryFromUrlAsync(uri);
+            var info = await provider.GetRegistryFromUrlAsync(uri);
             if (info == null) continue;
-            searchResults.Add(new Result { Text = $"Online Match: {key} ({(info.RegistryId.Length > 18 ? $"{info.RegistryId[..15]}..." : info.RegistryId)})", Value = uri });
+            searchResults.Add(new Result { Text = $"{providerName} ({(info.RegistryId.Length > 18 ? $"{info.RegistryId[..15]}..." : info.RegistryId)})", Value = uri });
         }
         return searchResults;
-
-        IEnumerable<Result> GetRegistries()
-        {
-            using var db = new DatabaseContext();
-            return db.Registries.Where(r => $"{r.URL} {r.Location}: {r}".Contains(query, StringComparison.InvariantCultureIgnoreCase))
-                .Select(r => new Result { Text = $"{r.Location}: {r}", Value = new RegistryInfo(r) });
-        }
     }
 
     private sealed class Result
