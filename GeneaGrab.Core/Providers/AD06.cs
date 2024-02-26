@@ -209,12 +209,15 @@ namespace GeneaGrab.Core.Providers
 
             progress?.Invoke(Progress.Unknown);
             var client = new HttpClient();
-            var size = scale switch
+            var wantedSize = scale switch
             {
-                Scale.Thumbnail => $"{(page.Width is > 0 ? Math.Min(512, page.Width.Value) : 512)},", // AD06 neither supports ^ and ! modifiers nor percentages
-                Scale.Navigation => $"{(page.Width is > 0 ? Math.Min(2048, page.Width.Value) : 2048)},",
-                _ => "max"
+                Scale.Thumbnail => 512,
+                Scale.Navigation => 2048,
+                _ => -1
             };
+            var size = "max";
+            if (page.Width == null || page.Width <= wantedSize) scale = Scale.Full;
+            else size = $"{wantedSize},"; // AD06 neither supports ^ and ! modifiers nor percentages
             var image = await Image
                 .LoadAsync(await client.GetStreamAsync(Iiif.GenerateImageRequestUri(page.DownloadUrl, size: size)).ConfigureAwait(false))
                 .ConfigureAwait(false);
