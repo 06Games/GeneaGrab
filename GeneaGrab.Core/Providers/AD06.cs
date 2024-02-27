@@ -216,7 +216,7 @@ namespace GeneaGrab.Core.Providers
                 _ => -1
             };
             var size = "max";
-            if (page.Width == null || page.Width <= wantedSize) scale = Scale.Full;
+            if (wantedSize < 0 || page.Width == null || page.Width <= wantedSize) scale = Scale.Full;
             else size = $"{wantedSize},"; // AD06 neither supports ^ and ! modifiers nor percentages
             var image = await Image
                 .LoadAsync(await client.GetStreamAsync(Iiif.GenerateImageRequestUri(page.DownloadUrl, size: size)).ConfigureAwait(false))
