@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Avalonia;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Models.Dates;
@@ -23,6 +24,7 @@ public class DatabaseContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        if (!Directory.Exists(LocalData.AppData)) Directory.CreateDirectory(LocalData.AppData);
         optionsBuilder.UseSqlite($"Data Source={LocalData.AppData}/data.db");
     }
 
