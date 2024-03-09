@@ -41,7 +41,7 @@ jobs:
           dotnet restore
           
           if [ "${{ matrix.target }}" == "win-x64" ]; then
-            dotnet tool install -g  wix
+            dotnet tool install -g wix --version 4.*
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
             brew install create-dmg
           elif [ "${{ matrix.target }}" == "linux-x64" ]; then
@@ -113,7 +113,7 @@ jobs:
           mkdir output
           if [ "${{ matrix.target }}" == "win-x64" ]; then
             echo "[INFO] Generating installer"
-            wix extension add WixToolset.UI.wixext
+            wix extension add -g WixToolset.UI.wixext/4
             wix build -ext WixToolset.UI.wixext -d Version=${version}.${build} -arch x64 -out "output/${release_name}-installer.msi" geneagrab.wxs
             rm "output/${release_name}-installer.wixpdb"
           
