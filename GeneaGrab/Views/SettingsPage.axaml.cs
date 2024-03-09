@@ -7,6 +7,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using DiscordRPC;
 using FluentAvalonia.UI.Controls;
+using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using GeneaGrab.Services;
 
@@ -27,17 +28,20 @@ namespace GeneaGrab.Views
             get => _versionDescription;
             set => Set(ref _versionDescription, value);
         }
+        public Credentials? FamilySearch { get; }
 
         public SettingsPage()
         {
             ThemeSelectorService.Initialize();
             VersionDescription = GetVersionDescription();
+            FamilySearch = SettingsService.SettingsData.Credentials.TryGetValue("FamilySearch", out var credentials) ? credentials : new Credentials();
 
             InitializeComponent();
             DataContext = this;
         }
 
-        private string? GetVersionDescription()
+
+        private static string? GetVersionDescription()
         {
             var appName = ResourceExtensions.GetLocalized("AppDisplayName", ResourceExtensions.Resource.UI);
             if (Application.Current is not App package) return null;
@@ -51,6 +55,13 @@ namespace GeneaGrab.Views
             if (sender is not RadioButton btn) return;
             var param = btn.CommandParameter;
             if (param != null && btn.IsChecked.GetValueOrDefault()) ThemeSelectorService.SetTheme((Theme)param);
+        }
+
+        private void FamilySearch_Changed(object sender, TextChangedEventArgs _)
+        {
+            if (FamilySearch is null) return;
+            else SettingsService.SettingsData.Credentials["FamilySearch"] = FamilySearch;
+            SettingsService.Save();
         }
 
         public new event PropertyChangedEventHandler? PropertyChanged;

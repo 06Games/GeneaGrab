@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using GeneaGrab.Core.Models;
 using GeneaGrab.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -8,14 +10,15 @@ namespace GeneaGrab.Services;
 public static class SettingsService
 {
     private static readonly string FilePath = Path.Combine(LocalData.AppData, "Settings.json");
-    
+
     private static SettingsData? settingsData;
     public static SettingsData SettingsData
     {
-        get {
+        get
+        {
             if (settingsData is not null) return settingsData;
             if (!File.Exists(FilePath)) return settingsData = new SettingsData();
-            
+
             var data = File.ReadAllText(FilePath);
             return settingsData = JsonConvert.DeserializeObject<SettingsData>(data) ?? new SettingsData();
         }
@@ -33,14 +36,15 @@ public static class SettingsService
         File.WriteAllText(FilePath, data);
     }
 }
-
 public class SettingsData
 {
-    [JsonProperty("Theme"), JsonConverter(typeof(StringEnumConverter))] private Theme theme;
+    [JsonProperty(nameof(Theme)), JsonConverter(typeof(StringEnumConverter))] private Theme theme;
     [JsonIgnore] public Theme Theme { get => theme; set => Set(ref theme, value); }
-    
-    
-    private void Set<T>(ref T storage, T value)
+
+    [JsonProperty(nameof(Credentials))] private Dictionary<string, Credentials> credentials = new();
+    [JsonIgnore] public Dictionary<string, Credentials> Credentials { get => credentials; set => Set(ref credentials, value); }
+
+    private static void Set<T>(ref T storage, T value)
     {
         if (Equals(storage, value)) return;
         storage = value;

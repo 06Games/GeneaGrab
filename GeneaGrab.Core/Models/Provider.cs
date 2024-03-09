@@ -23,5 +23,11 @@ namespace GeneaGrab.Core.Models
         public static bool operator ==(Provider one, Provider two) => one?.Id == two?.Id;
         public static bool operator !=(Provider one, Provider two) => !(one == two);
         public override int GetHashCode() => Id.GetHashCode();
+
+        public bool NeedsAuthentication(string method)
+        {
+            var property = GetType().GetMethod(method);
+            return property is not null && Attribute.IsDefined(property, typeof(AuthentificationNeededAttribute));
+        }
     }
 }

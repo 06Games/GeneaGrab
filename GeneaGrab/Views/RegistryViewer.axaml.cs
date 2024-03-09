@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Authentication;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -138,6 +139,7 @@ namespace GeneaGrab.Views
                 pageNumber.Maximum = Registry.Frames.Any() ? Registry.Frames.Max(p => p.FrameNumber) : 0;
             });
 
+            AuthenticateIfNeeded(Provider, nameof(Provider.GetFrame));
             _ = Task.Run(async () =>
             {
                 var img = await Provider.GetFrame(Frame, Scale.Navigation, TrackProgress);
@@ -155,7 +157,7 @@ namespace GeneaGrab.Views
             {
                 case RegistryInfo infos:
                     Registry = db.Registries.Include(r => r.Frames).FirstOrDefault(r => r.ProviderId == infos.ProviderId && r.Id == infos.RegistryId)!;
-                    Frame = Registry.Frames.FirstOrDefault(f => f.FrameNumber == infos.PageNumber) ?? Registry.Frames.First();
+                    Frame = Registry.Frames.FirstOrDefault(f => f.FrameNumber == infos.PageNumber) ?? Registry.Frames.FirstOrDefault();
                     break;
                 case Uri url:
                     RegistryInfo? info = null;
@@ -171,13 +173,14 @@ namespace GeneaGrab.Views
                         var registry = db.Registries.Include(r => r.Frames).FirstOrDefault(r => r.ProviderId == info.ProviderId && r.Id == info.RegistryId);
                         if (registry is null)
                         {
+                            AuthenticateIfNeeded(provider, nameof(Provider.Infos));
                             var data = await provider.Infos(url);
                             registry = data.registry;
                             db.Registries.Add(registry);
                             await db.SaveChangesAsync();
                         }
                         Registry = registry;
-                        Frame = Registry.Frames.FirstOrDefault(f => f.FrameNumber == info.PageNumber) ?? Registry.Frames.First();
+                        Frame = Registry.Frames.FirstOrDefault(f => f.FrameNumber == info.PageNumber) ?? Registry.Frames.FirstOrDefault();
                     }
                     break;
                 default:
@@ -185,6 +188,13 @@ namespace GeneaGrab.Views
                     break;
             }
             return (Registry != null && Frame != null, inRam);
+        }
+
+        protected internal static void AuthenticateIfNeeded(Provider provider, string method)
+        {
+            if (!provider.NeedsAuthentication(method)) return;
+            if (provider is IAuthentification auth && SettingsService.SettingsData.Credentials.TryGetValue(provider.Id, out var credentials)) auth.Authenticate(credentials);
+            else throw new AuthenticationException("Couldn't authenticate");
         }
 
 
@@ -199,6 +209,7 @@ namespace GeneaGrab.Views
         {
             if (page is null || Provider is null || Frame is null || Frame.FrameNumber == page.FrameNumber) return;
             Frame = page;
+            AuthenticateIfNeeded(Provider, nameof(Provider.GetFrame));
             var image = await Provider.GetFrame(page, Scale.Navigation, TrackProgress);
             RefreshView(image);
             await SaveAsync(Frame);
@@ -261,12 +272,14 @@ namespace GeneaGrab.Views
         private void Download(object _1, RoutedEventArgs _2)
         {
             if (Provider is null || Frame == null) return;
+            AuthenticateIfNeeded(Provider, nameof(Provider.GetFrame));
             Provider.GetFrame(Frame, Scale.Full, TrackProgress).ContinueWith(t => Dispatcher.UIThread.InvokeAsync(() => RefreshView(t.Result)), TaskScheduler.Current).Forget();
         }
         private void OpenFolder(object _, RoutedEventArgs _1)
         {
             if (Frame == null) return;
             var page = LocalData.GetFile(Frame);
+            if (page is null) return;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -349,6 +362,7 @@ namespace GeneaGrab.Views
         public Frame Page { get; } = page;
         public async Task GetThumbnailAsync()
         {
+            RegistryViewer.AuthenticateIfNeeded(Page.Provider, nameof(Provider.GetFrame));
             Thumbnail = (await Page.Provider.GetFrame(Page, Scale.Thumbnail, null)).ToBitmap();
             OnPropertyChanged(nameof(Thumbnail));
         }

@@ -71,4 +71,13 @@
     <data name="Discord.OpenRegistry" xml:space="preserve">
         <value>Ouvrir le registre</value>
     </data>
+    <data name="Settings.Authentication" xml:space="preserve">
+        <value>Identifiants</value>
+    </data>
+    <data name="Settings.Authentication.Password" xml:space="preserve">
+        <value>Mot de passe</value>
+    </data>
+    <data name="Settings.Authentication.Username" xml:space="preserve">
+        <value>Nom d'utilisateur</value>
+    </data>
 </root>

@@ -90,4 +90,13 @@
     <data name="Discord.OpenRegistry" xml:space="preserve">
         <value>Open registry</value>
     </data>
+    <data name="Settings.Authentication" xml:space="preserve">
+        <value>Credentials</value>
+    </data>
+    <data name="Settings.Authentication.Username" xml:space="preserve">
+        <value>Username</value>
+    </data>
+    <data name="Settings.Authentication.Password" xml:space="preserve">
+        <value>Password</value>
+    </data>
 </root>

@@ -159,6 +159,33 @@ namespace GeneaGrab.Strings {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Credentials.
+        /// </summary>
+        public static string Settings_Authentication {
+            get {
+                return ResourceManager.GetString("Settings.Authentication", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string Settings_Authentication_Password {
+            get {
+                return ResourceManager.GetString("Settings.Authentication.Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Username.
+        /// </summary>
+        public static string Settings_Authentication_Username {
+            get {
+                return ResourceManager.GetString("Settings.Authentication.Username", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Personalization.
         /// </summary>
         public static string Settings_Personalization {

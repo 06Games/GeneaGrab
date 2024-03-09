@@ -21,7 +21,7 @@ using SixLabors.ImageSharp.PixelFormats;
 
 namespace GeneaGrab.Core.Providers;
 
-public class FamilySearch : Provider
+public class FamilySearch : Provider, IAuthentification
 {
     private static string BaseUrl => "https://www.familysearch.org";
     private static string IdentBaseUrl => "https://ident.familysearch.org";
@@ -32,13 +32,16 @@ public class FamilySearch : Provider
     private static string Locale => CultureInfo.CurrentCulture.TwoLetterISOLanguageName.ToLower();
 
 
-    private static HttpClient _client;
-    private static async Task<HttpClient> GetClient()
+    private HttpClient _client;
+    private async Task<HttpClient> GetClient()
     {
-        _client ??= await Authenticate("", ""); // TODO
+        if (Credentials == null) throw new AuthenticationException("This method requires authentication");
+        _client ??= await Authenticate(Credentials.Username, Credentials.Password);
         return _client;
     }
 
+    private Credentials Credentials { get; set; }
+    public void Authenticate(Credentials credentials) { Credentials = credentials; }
     private static async Task<HttpClient> Authenticate(string username, string password)
     {
         var cookies = new CookieContainer();
@@ -59,7 +62,6 @@ public class FamilySearch : Provider
         return client;
     }
 
-
     public override async Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
     {
         if (url.Host != "www.familysearch.org" || !url.AbsolutePath.StartsWith("/ark:/")) return null;
@@ -74,6 +76,8 @@ public class FamilySearch : Provider
 
         return null; // TODO
     }
+
+    [AuthentificationNeeded]
     public override async Task<(Registry registry, int pageNumber)> Infos(Uri url)
     {
         var imageData = JObject.Parse(await (await GetClient()).PostAsJsonAsync($"{BaseUrl}/search/filmdata/filmdatainfo",
@@ -169,6 +173,7 @@ public class FamilySearch : Provider
         }
     }
 
+    [AuthentificationNeeded]
     public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
     {
         var stream = await Data.TryGetImageFromDrive(page, scale);
