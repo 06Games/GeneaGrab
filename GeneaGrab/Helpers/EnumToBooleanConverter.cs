@@ -15,6 +15,7 @@ public class EnumToBooleanConverter : IValueConverter
         if (EnumType == null) throw new ArgumentException("An enum type must be set!");
         EnumValue ??= Enum.ToObject(EnumType, 0);
         if (EnumValue == null || !Enum.IsDefined(EnumType, EnumValue)) throw new ArgumentException("value must be a valid Enum object!");
+        if (value == null) return false;
 
         var enumValue = value switch
         {
