@@ -5,12 +5,15 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using AngleSharp;
 using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Models.Dates;
 using Newtonsoft.Json.Linq;
+using Serilog;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using Configuration = AngleSharp.Configuration;
 
 namespace GeneaGrab.Core.Providers;
 
@@ -24,7 +27,8 @@ public class Geneanet : Provider
         if (url.Host != "www.geneanet.org" || !url.AbsolutePath.StartsWith("/registres/view")) return Task.FromResult<RegistryInfo>(null);
 
         var regex = Regex.Match(url.OriginalString, @"(?:idcollection=(?<col>\d*).*page=(?<page>\d*))|(?:\/(?<col>\d+)(?:\z|\/(?<page>\d*)))");
-        return Task.FromResult(new RegistryInfo(this, regex.Groups["col"].Value) { PageNumber = int.TryParse(regex.Groups.TryGetValue("page") ?? "1", out var pageNumber) ? pageNumber : 1 });
+        return Task.FromResult(new RegistryInfo(this, regex.Groups["col"].Value)
+            { PageNumber = int.TryParse(regex.Groups.TryGetValue("page") ?? "1", out var pageNumber) ? pageNumber : 1 });
     }
 
     #region Infos
@@ -37,10 +41,22 @@ public class Geneanet : Provider
 
         var client = new HttpClient();
         var page = await client.GetStringAsync(registry.URL);
-        var infos = Regex.Match(page,
-            "Informations sur le document.*?<p>(\\[.*\\] - )?(?<location>.*) \\((?<locationDetails>.*?)\\) - (?<globalType>.*?)( \\((?<type>.*?)\\))?( - .*)? *\\| (?<from>.*) - (?<to>.*?)<\\/p>.*?<p>(?<cote>.*)</p>(.*<p>(?<notaire>.*)</p>)?.*<p class=\\\"no-margin-bottom\\\">(?<betterType>.*?)(\\..*| -.*)?</p>.*<p>(?<note>.*)</p>.*<strong>Lien permanent : </strong>",
-            RegexOptions.Multiline | RegexOptions.Singleline); //https://regex101.com/r/3Ou7DP/5
-        var location = infos.Groups.TryGetValue("locationDetails")?.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Reverse().ToList() ?? new List<string>();
+
+        var context = BrowsingContext.New(Configuration.Default);
+        var document = await context.OpenAsync(req => req.Content(page));
+        if (document.GetElementById("popup-informations") is not { InnerHtml : { } infoPopup })
+        {
+            Log.Error("Geneanet: Unable to find the popup with the registry information for {Url}", url);
+            return (null, -1);
+        }
+
+        var infos = Regex.Match(infoPopup,
+            "Informations sur le document.*?<p>(?:\\[.*\\] - )?(?<location>.*) \\((?<locationDetails>.*?)\\) - (?<globalType>.*?)(?: \\((?<type>.*?)\\))?(?: - .*)? *\\| (?<from>.*) - (?<to>.*?)<\\/p>.*?<p>(?<cote>.*)</p>(?:.*<p>(?<notaire>.*)</p>)?.*<p class=\\\"no-margin-bottom\\\">(?<betterType>.*?)(?:\\..*| -.*)?</p>.*<p>(?<note>.*)</p>.*<strong>Lien permanent : </strong>",
+            RegexOptions.Multiline | RegexOptions.Singleline, TimeSpan.FromSeconds(5)); //https://regex101.com/r/3Ou7DP/8
+        var location =
+            infos.Groups.TryGetValue("locationDetails")
+                ?.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries).Reverse().ToList() ??
+            new List<string>();
         location.Add(infos.Groups["location"].Value.Trim(' '));
 
         var (types, district, notes) = TryParseNotes(page, infos);
@@ -57,6 +73,7 @@ public class Geneanet : Provider
 
         return (registry, pageNumber);
     }
+
     private static async Task<Registry> UpdateInfos(Registry registry, HttpClient client = null)
     {
         client ??= new HttpClient();
@@ -112,6 +129,7 @@ public class Geneanet : Provider
                 t = RegistryType.Unknown;
                 return false;
             }
+
             return true;
         }
     }
@@ -144,12 +162,12 @@ public class Geneanet : Provider
         Image image = new Image<Rgb24>(page.Width!.Value / diviser, page.Height!.Value / diviser);
         var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
         for (var y = 0; y < tiles.Y; y++)
-            for (var x = 0; x < tiles.X; x++)
-                tasks.Add(Grabber.GetImage($"{page.DownloadUrl}TileGroup0/{zoom}-{x}-{y}.jpg", client).ContinueWith(task =>
-                {
-                    progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
-                    return task.Result;
-                }), (page.TileSize.GetValueOrDefault(), diviser, new Point(x, y)));
+        for (var x = 0; x < tiles.X; x++)
+            tasks.Add(Grabber.GetImage($"{page.DownloadUrl}TileGroup0/{zoom}-{x}-{y}.jpg", client).ContinueWith(task =>
+            {
+                progress?.Invoke(tasks.Keys.Count(t => t.IsCompleted) / (float)tasks.Count);
+                return task.Result;
+            }), (page.TileSize.GetValueOrDefault(), diviser, new Point(x, y)));
 
         await Task.WhenAll(tasks.Keys).ConfigureAwait(false);
         image = tasks.Aggregate(image, (current, tile) => current.MergeTile(tile.Key.Result, tile.Value));
