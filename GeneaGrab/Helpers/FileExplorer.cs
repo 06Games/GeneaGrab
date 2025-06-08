@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using Windows.Win32;
 using Windows.Win32.UI.Shell.Common;
 
@@ -27,8 +28,12 @@ public static partial class FileExplorer
             OpenFolderAndSelectItemWindows5_1_2600(folderPath, fileName); // Will reuse the existing window if the folder is already opened
         else if (OperatingSystem.IsWindows())
             Process.Start("explorer.exe", $"/select,\"{Path.Combine(folderPath, fileName)}\""); // Will open a new explorer window at each call
+        else if (OperatingSystem.IsLinux())
+            _ = OpenFolderAndSelectItemLinuxAsync(folderPath, fileName);
+        else if (OperatingSystem.IsMacOS())
+            Process.Start("open", $"-R \"{Path.Combine(folderPath, fileName)}\"");
         else
-            Process.Start(new ProcessStartInfo { FileName = new Uri(folderPath).AbsoluteUri, UseShellExecute = true });
+            OpenFolder(folderPath);
     }
 
     [SupportedOSPlatform("windows5.1.2600")]
@@ -44,7 +49,32 @@ public static partial class FileExplorer
             var hResult = PInvoke.SHOpenFolderAndSelectItems(nativeFolder, (uint)fileArray.Length, fileArrayPtr, 0);
             Marshal.ThrowExceptionForHR(hResult); // Throw any error that could have occured
         }
+
         Marshal.FreeCoTaskMem((nint)nativeFolder);
         if (nativeFile != null) Marshal.FreeCoTaskMem((nint)nativeFile);
+    }
+
+
+    [SupportedOSPlatform("Linux")]
+    private static async Task OpenFolderAndSelectItemLinuxAsync(string folderPath, string fileName)
+    {
+        var pathUrl = new Uri("file://" + Path.Combine(folderPath, fileName)).AbsoluteUri;
+        using var dbusShowItemsProcess = Process.Start(new ProcessStartInfo
+        {
+            FileName = "dbus-send",
+            Arguments = $"""
+                         --print-reply --dest=org.freedesktop.FileManager1 /org/freedesktop/FileManager1 org.freedesktop.FileManager1.ShowItems array:string:"{pathUrl}" string:""
+                         """,
+            UseShellExecute = true
+        });
+        if (dbusShowItemsProcess != null) await dbusShowItemsProcess.WaitForExitAsync();
+
+        if (dbusShowItemsProcess is not { ExitCode: 0 })
+            OpenFolder(folderPath); // Dbus command failed, fallback to opening the folder without selecting the item
+    }
+
+    private static void OpenFolder(string folderPath)
+    {
+        Process.Start(new ProcessStartInfo { FileName = new Uri(folderPath).AbsoluteUri, UseShellExecute = true });
     }
 }
