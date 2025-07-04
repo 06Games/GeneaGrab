@@ -13,7 +13,14 @@ namespace GeneaGrab.Core.Helpers;
 public abstract class Iiif : Provider
 {
     protected HttpClient HttpClient { get; }
-    protected Iiif(HttpClient client) => HttpClient = client ?? new HttpClient();
+
+    protected Iiif(HttpClient client) => HttpClient = client ?? new HttpClient
+    {
+        DefaultRequestHeaders =
+        {
+            { "User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0" }
+        }
+    };
 
     protected abstract Task<(Registry registry, int sequence, object page)> ParseUrl(Uri url);
 
@@ -55,7 +62,9 @@ public abstract class Iiif : Provider
         var (registry, sequenceIndex, page) = await ParseUrl(url);
 
         var manifest = ParseManifest(await HttpClient.GetStringAsync($"{registry.URL}/manifest"));
-        var sequence = manifest.Sequences.Length > sequenceIndex ? manifest.Sequences[sequenceIndex] : manifest.Sequences[0];
+        var sequence = manifest.Sequences.Length > sequenceIndex
+            ? manifest.Sequences[sequenceIndex]
+            : manifest.Sequences[0];
 
         registry.Frames = sequence.Canvases.Select(CreateFrame).ToArray();
 
@@ -74,9 +83,12 @@ public abstract class Iiif : Provider
         _ => "max"
     };
 
-    protected static Uri ImageGeneratorRequestUri(string imageURL, string region = "full", string size = "max", string rotation = "0", string quality = "default", string format = "jpg")
+    protected static Uri ImageGeneratorRequestUri(string imageURL, string region = "full", string size = "max",
+        string rotation = "0", string quality = "default", string format = "jpg")
         => new($"{imageURL}/{region}/{size}/{rotation}/{quality}.{format}");
-    protected virtual Uri GetImageRequestUri(Frame page, Scale scale) => ImageGeneratorRequestUri(page.DownloadUrl, size: GetRequestImageSize(ref scale, page));
+
+    protected virtual Uri GetImageRequestUri(Frame page, Scale scale) =>
+        ImageGeneratorRequestUri(page.DownloadUrl, size: GetRequestImageSize(ref scale, page));
 
     public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
     {
