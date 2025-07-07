@@ -14,12 +14,15 @@ public abstract class Iiif : Provider
 {
     protected HttpClient HttpClient { get; }
 
-    protected Iiif(HttpClient client) => HttpClient = client ?? new HttpClient
+    protected Iiif(HttpClient client) => HttpClient = client ?? GenerateHttpClient();
+
+    protected static HttpClient GenerateHttpClient() => new HttpClient
     {
         DefaultRequestHeaders =
         {
             { "User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0" }
-        }
+        },
+        Timeout = TimeSpan.FromSeconds(30)
     };
 
     protected abstract Task<(Registry registry, int sequence, object page)> ParseUrl(Uri url);

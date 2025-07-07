@@ -36,7 +36,8 @@ public sealed class Antenati : Iiif
                 registryId = Regex.Match(url.AbsolutePath, "^/antenati/containers/(?<id>.*?)/").Groups.TryGetValue("id");
                 break;
             case FrontDomain when url.AbsolutePath.StartsWith("/ark:/"):
-                var client = new HttpClient();
+                var client = GenerateHttpClient();
+                client.Timeout = TimeSpan.FromSeconds(10);
                 var response = await client.GetStringAsync(url.GetLeftPart(UriPartial.Path));
                 registryId = Regex.Match(response, "let windowsId = '(?<firstPageId>.*?)';").Groups.TryGetValue("firstPageId");
                 registrySignature = ExtractDetailFromHtmlHeader(response, "Segnatura attuale");
