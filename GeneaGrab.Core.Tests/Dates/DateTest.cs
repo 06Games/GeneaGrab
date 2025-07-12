@@ -35,6 +35,8 @@ public class DateTest(ITestOutputHelper output)
         Assert.Equal(expected.Precision, parsed.Precision);
         Assert.Equivalent(expected, parsed);
         Assert.True(expected == parsed);
+        Assert.Equivalent(expected.GregorianDateTime, parsed.GregorianDateTime);
+        Assert.Equal(DateTimeKind.Utc, parsed.GregorianDateTime.Kind);
     }
 
     public static TheoryData<Date, string> StringifyData() => new()

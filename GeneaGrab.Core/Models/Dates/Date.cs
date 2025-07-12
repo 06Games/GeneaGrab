@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace GeneaGrab.Core.Models.Dates;
@@ -44,13 +43,6 @@ public abstract class Date : IComparable<Date>
     }
 
     public override string ToString() => ToString(Precision);
-
-    public void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue("DateTime", GregorianDateTime);
-        info.AddValue("Precision", Precision);
-        info.AddValue("Calendar", GetType().Name);
-    }
 
     protected virtual string ToString(Precision precision)
     {

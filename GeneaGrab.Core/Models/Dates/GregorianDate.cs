@@ -5,16 +5,22 @@ namespace GeneaGrab.Core.Models.Dates;
 
 public class GregorianDate : Date
 {
-    public GregorianDate(int year, int? month = null, int? day = null, int? hour = null, int? minute = null, int? second = null, Precision precision = Precision.Days)
-        : base(year, month, day, hour, minute, second, precision) { }
-    public GregorianDate(DateTime dt, Precision precision = Precision.Days) : base(dt, precision) { }
+    public GregorianDate(int year, int? month = null, int? day = null, int? hour = null, int? minute = null,
+        int? second = null, Precision precision = Precision.Days)
+        : base(year, month, day, hour, minute, second, precision)
+    {
+    }
+
+    public GregorianDate(DateTime dt, Precision precision = Precision.Days) : base(dt, precision)
+    {
+    }
 
     public static bool TryParse(string dateString, out GregorianDate date)
     {
         date = null;
 
         var culture = new CultureInfo("fr-FR");
-        const DateTimeStyles style = DateTimeStyles.AssumeLocal;
+        const DateTimeStyles style = DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal;
 
         if (string.IsNullOrWhiteSpace(dateString)) return false;
 
