@@ -1,7 +1,6 @@
 ﻿using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Models;
 using GeneaGrab.Core.Providers;
-using Xunit.Abstractions;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 
@@ -18,11 +17,11 @@ public class TestAD06(ITestOutputHelper output)
 
     private static int timeoutCount;
 
-    [SkippableTheory(DisplayName = "Check information retriever")]
+    [Theory(DisplayName = "Check information retriever")]
     [ClassData(typeof(DataAD06))]
     public async Task CheckInfos(Data data)
     {
-        Skip.If(timeoutCount >= 3,
+        Assert.SkipWhen(timeoutCount >= 3,
             "Probably geo-blocked"); // AD06 is geo-restricted, so if the API times out 3 times, we assume it's because the location is blocked.
         Registry registry;
         int pageNumber;
@@ -34,7 +33,7 @@ public class TestAD06(ITestOutputHelper output)
         {
             var innerEx = e;
             while (innerEx is not TimeoutException or TaskCanceledException or null) innerEx = innerEx?.InnerException;
-            Skip.If(innerEx is TimeoutException or TaskCanceledException, $"Timed-out ({++timeoutCount})");
+            Assert.SkipWhen(innerEx is TimeoutException or TaskCanceledException, $"Timed-out ({++timeoutCount})");
             throw;
         }
 

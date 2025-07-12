@@ -1,5 +1,5 @@
 ﻿using GeneaGrab.Core.Models.Dates;
-using Xunit.Abstractions;
+using Newtonsoft.Json;
 
 namespace GeneaGrab.Core.Tests.Dates;
 
@@ -19,7 +19,10 @@ public class DateTest(ITestOutputHelper output)
         { "23 Ventôse An 4", new FrenchRepublicanDate(4, 6, 23, precision: Precision.Days) },
         { "23 Ventôse An IV", new FrenchRepublicanDate(4, 6, 23, precision: Precision.Days) },
         { "23 Ventose An IV", new FrenchRepublicanDate(4, 6, 23, precision: Precision.Days) },
-        { "10 Vendémiaire An X de la République Française", new FrenchRepublicanDate(10, 1, 10, precision: Precision.Days) },
+        {
+            "10 Vendémiaire An X de la République Française",
+            new FrenchRepublicanDate(10, 1, 10, precision: Precision.Days)
+        },
     };
 
     [Theory(DisplayName = "Check string parser")]
@@ -53,4 +56,17 @@ public class DateTest(ITestOutputHelper output)
     [Theory(DisplayName = "Check date to string conversion")]
     [MemberData(nameof(StringifyData))]
     public void CheckStringify(Date date, string expected) => Assert.Equal(expected, date.ToString());
+
+    [Theory(DisplayName = "Serialization")]
+    [MemberData(nameof(StringifyData))]
+    public void CheckSerialization(Date date, string _)
+    {
+        var json = JsonConvert.SerializeObject(date);
+        output.WriteLine(json);
+        var deserialized = JsonConvert.DeserializeObject<Date>(json);
+        Assert.NotNull(deserialized);
+        Assert.Equal(date.Precision, deserialized.Precision);
+        Assert.Equivalent(date, deserialized);
+        Assert.True(date == deserialized);
+    }
 }

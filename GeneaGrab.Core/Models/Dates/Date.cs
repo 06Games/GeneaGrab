@@ -1,17 +1,33 @@
 ﻿using System;
+using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace GeneaGrab.Core.Models.Dates;
 
-public enum Precision { Unknown = -1, Years, Months, Days, Hours, Minutes, Seconds }
+public enum Precision
+{
+    Unknown = -1,
+    Years,
+    Months,
+    Days,
+    Hours,
+    Minutes,
+    Seconds
+}
+
 [JsonConverter(typeof(DateConverter))]
 public abstract class Date : IComparable<Date>
 {
     public DateTime GregorianDateTime { get; }
     public Precision Precision { get; }
 
-    protected Date(int year, int? month = null, int? day = null, int? hour = null, int? minute = null, int? second = null, Precision precision = Precision.Days)
-        : this(new DateTime(year, month ?? 1, day ?? 1, hour ?? 0, minute ?? 0, second ?? 0, 0, DateTimeKind.Utc), precision) { }
+    protected Date(int year, int? month = null, int? day = null, int? hour = null, int? minute = null,
+        int? second = null, Precision precision = Precision.Days)
+        : this(new DateTime(year, month ?? 1, day ?? 1, hour ?? 0, minute ?? 0, second ?? 0, 0, DateTimeKind.Utc),
+            precision)
+    {
+    }
+
     protected Date(DateTime dt, Precision precision = Precision.Days)
     {
         GregorianDateTime = dt;
@@ -19,6 +35,7 @@ public abstract class Date : IComparable<Date>
     }
 
     public static implicit operator Date(string date) => ParseDate(date);
+
     public static Date ParseDate(string date)
     {
         if (GregorianDate.TryParse(date, out var gregorianDate)) return gregorianDate;
@@ -27,6 +44,14 @@ public abstract class Date : IComparable<Date>
     }
 
     public override string ToString() => ToString(Precision);
+
+    public void GetObjectData(SerializationInfo info, StreamingContext context)
+    {
+        info.AddValue("DateTime", GregorianDateTime);
+        info.AddValue("Precision", Precision);
+        info.AddValue("Calendar", GetType().Name);
+    }
+
     protected virtual string ToString(Precision precision)
     {
         var format = (Precision)Math.Min((int)precision, (int)Precision) switch
@@ -41,6 +66,7 @@ public abstract class Date : IComparable<Date>
         };
         return ToString(format);
     }
+
     protected virtual string ToString(string format) => GregorianDateTime.ToString(format);
 
     public int CompareTo(Date other) => GregorianDateTime.CompareTo(other.GregorianDateTime);
@@ -52,15 +78,18 @@ public abstract class Date : IComparable<Date>
         if (date1.Precision != date2.Precision) return false;
         return date1.GregorianDateTime == date2.GregorianDateTime;
     }
+
     public static bool operator !=(Date date1, Date date2) => !(date1 == date2);
 
     private bool Equals(Date other) => this == other;
+
     public override bool Equals(object obj)
     {
         if (ReferenceEquals(null, obj)) return false;
         if (ReferenceEquals(this, obj)) return true;
         return obj.GetType() == GetType() && Equals((Date)obj);
     }
+
     public static bool operator <(Date date1, Date date2) => date1?.CompareTo(date2) < 0;
     public static bool operator <=(Date date1, Date date2) => date1?.CompareTo(date2) <= 0;
     public static bool operator >(Date date1, Date date2) => date1?.CompareTo(date2) > 0;

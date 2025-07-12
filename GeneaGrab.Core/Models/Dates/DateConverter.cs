@@ -6,7 +6,8 @@ namespace GeneaGrab.Core.Models.Dates;
 
 internal class DateConverter : JsonConverter<Date>
 {
-    public override Date ReadJson(JsonReader reader, Type objectType, Date existingValue, bool hasExistingValue, JsonSerializer serializer)
+    public override Date ReadJson(JsonReader reader, Type objectType, Date existingValue, bool hasExistingValue,
+        JsonSerializer serializer)
     {
         if (reader.TokenType == JsonToken.String) return Date.ParseDate((string)reader.Value);
         if (reader.TokenType != JsonToken.StartObject) return null;
@@ -22,19 +23,20 @@ internal class DateConverter : JsonConverter<Date>
             _ => new GregorianDate(dt, precision)
         };
     }
+
     public override void WriteJson(JsonWriter writer, Date value, JsonSerializer serializer)
     {
         writer.WriteStartObject();
-        WriteProperty("Calendar", value.GetType().Name);
-        WriteProperty("Precision", Enum.GetName(typeof(Precision), value.Precision));
+        WriteProperty(writer, "Calendar", value.GetType().Name);
+        WriteProperty(writer, "Precision", Enum.GetName(typeof(Precision), value.Precision));
         writer.WritePropertyName("DateTime");
         serializer.Serialize(writer, value.GregorianDateTime);
         writer.WriteEndObject();
+    }
 
-        void WriteProperty(string propertyName, object propertyValue)
-        {
-            writer.WritePropertyName(propertyName);
-            writer.WriteValue(propertyValue);
-        }
+    private static void WriteProperty(JsonWriter writer, string propertyName, object propertyValue)
+    {
+        writer.WritePropertyName(propertyName);
+        writer.WriteValue(propertyValue);
     }
 }

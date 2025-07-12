@@ -10,7 +10,7 @@ public class DataAD06 : TheoryData<Data>
     public DataAD06()
     {
         // État civil
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/daogrp/0/3",
             Id = "ece981d3d12d06e97f5012a67ab768508e",
@@ -22,7 +22,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1784, precision: Precision.Years),
             Page = 3
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/daogrp/0/35",
             Id = "ecbbce420b017f540479f25c97ff2c266a",
@@ -35,9 +35,10 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1870, precision: Precision.Years),
             Page = 35
         });
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/daogrp/0/layout:table/idsearch:RECH_2616c589cede9aef5f50348ea29ef354",
+            URL =
+                "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/daogrp/0/layout:table/idsearch:RECH_2616c589cede9aef5f50348ea29ef354",
             Id = "ecebe99656ed10bbc4f90577557b5db67c",
             Cote = "5 Mi 89/80",
             Details = ["Etat civil (parcours de recherche)"],
@@ -48,9 +49,10 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1824, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/daogrp/0/layout:table/idsearch:RECH_b8eed04fe2a98dd5bf1fe2452dbc1b8e",
+            URL =
+                "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/daogrp/0/layout:table/idsearch:RECH_b8eed04fe2a98dd5bf1fe2452dbc1b8e",
             Id = "eca80928a80f578297aa1382ce096dd10e",
             Cote = "5 Mi 17/1",
             Details = ["Etat civil (parcours de recherche)"],
@@ -60,9 +62,10 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1768, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/daogrp/0/layout:table/idsearch:RECH_c99248cfe88969cc390bdb768dc1de70",
+            URL =
+                "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/daogrp/0/layout:table/idsearch:RECH_c99248cfe88969cc390bdb768dc1de70",
             Id = "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
             Cote = "1 E 3",
             Details = ["Etat civil (parcours de recherche)"],
@@ -72,7 +75,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1803, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/ec6f5e3a7e2cbde236ef1c70629240c15d",
             Id = "ec6f5e3a7e2cbde236ef1c70629240c15d",
@@ -84,7 +87,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1795, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1",
             Id = "eca462a76104f3e90edbdcaac70e14fec1",
@@ -96,7 +99,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1800, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc",
             Id = "ec1eb5b16de1632496bf6d65113d1d73fc",
@@ -108,7 +111,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1607, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e",
             Id = "ec0269f0e601136679d5332be8edc7262e",
@@ -120,7 +123,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1929, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055",
             Id = "ecc93946f2a961d4131c537524ca92d055",
@@ -134,9 +137,10 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Plans cadastraux
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/dao/0/layout:table/idsearch:RECH_8bd2b6be1f4d9dee88dd728c3f7365e6",
+            URL =
+                "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/dao/0/layout:table/idsearch:RECH_8bd2b6be1f4d9dee88dd728c3f7365e6",
             Id = "e5f3d1e196cf2c2c3fbcb9770bb85548",
             Cote = "25 Fi 15/1/A0",
             Details = ["Cadastre. - Plans cadastraux"],
@@ -149,7 +153,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1866, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/dao/0",
             Id = "c2ca249edd8bc5100f8a389e12389285",
@@ -166,9 +170,10 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // État des sections
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/daogrp/0/30/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+            URL =
+                "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/daogrp/0/30/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
             Id = "efe090d2498239ccfd227216e5211a09",
             Cote = "3 P 1503",
             Details = ["Cadastre. - Etats de section"],
@@ -181,9 +186,10 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Matrices cadastrales
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/daogrp/0/158/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+            URL =
+                "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/daogrp/0/158/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
             Id = "c9b59a423e101f278296bb4526a2e15c",
             Cote = "3 P 1511",
             Details = ["Cadastre. - Matrices"],
@@ -195,7 +201,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1969, precision: Precision.Years),
             Page = 158
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/daogrp/0",
             Id = "2fece3eabbcab939c1f84def0316487c",
@@ -212,9 +218,10 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Recensements
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/daogrp/0/7/layout:table/idsearch:RECH_2486f937f76e40e6df864a4708967f91",
+            URL =
+                "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/daogrp/0/7/layout:table/idsearch:RECH_2486f937f76e40e6df864a4708967f91",
             Id = "9b56a6d2e75f3d28e97044e9f373f5bb",
             Cote = "6 M 112",
             Details = ["Recensement de la population"],
@@ -224,7 +231,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1891, precision: Precision.Years),
             Page = 7
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/daogrp/0/62/",
             Id = "cb9d2442564ee9b717d681ea3af12a03",
@@ -239,14 +246,15 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Notaires
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/674341.2453955/dao/0/50",
             Id = "674341.2453955",
             Cote = "3 E 19 83",
             Details =
             [
-                "Instrument de recherche des versements d'archives notariales (3 E)", "Versement de l'étude Graillet, à Roquebillière", "Protocoles du notaire Joseph Buffonio, à Lantosque"
+                "Instrument de recherche des versements d'archives notariales (3 E)",
+                "Versement de l'étude Graillet, à Roquebillière", "Protocoles du notaire Joseph Buffonio, à Lantosque"
             ],
             Ville = "Lantosque",
             Titre = "Protocoles du notaire Joseph Buffonio, à Lantosque",
@@ -255,12 +263,16 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1760, 03, 14, precision: Precision.Days),
             Page = 50
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/674248.2453940/dao/0",
             Id = "674248.2453940",
             Cote = "3 E 19 70",
-            Details = ["Instrument de recherche des versements d'archives notariales (3 E)", "Versement de l'étude Graillet, à Roquebillière"],
+            Details =
+            [
+                "Instrument de recherche des versements d'archives notariales (3 E)",
+                "Versement de l'étude Graillet, à Roquebillière"
+            ],
             Ville = "Lantosque",
             Titre = "Protocole du notaire Pierre Malaussena, à Lantosque",
             Auteur = "MALAUSSENA, Pierre",
@@ -269,7 +281,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1703, 06, 30, precision: Precision.Days),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/765909.2436493",
             Id = "765909.2436493",
@@ -289,36 +301,48 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Archives anciennes
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/952271.2415676",
             Id = "952271.2415676",
             Cote = "C 1125",
-            Details = ["Instrument de recherche des archives anciennes, série C", "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Sospel"],
+            Details =
+            [
+                "Instrument de recherche des archives anciennes, série C",
+                "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Sospel"
+            ],
             Titre = "1641",
             Types = [RegistryType.Other],
             From = new GregorianDate(1641, precision: Precision.Years),
             To = new GregorianDate(1641, precision: Precision.Years),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/951070.2415509/dao/0/5",
             Id = "951070.2415509",
             Cote = "C 965",
-            Details = ["Instrument de recherche des archives anciennes, série C", "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Moulinet"],
+            Details =
+            [
+                "Instrument de recherche des archives anciennes, série C",
+                "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Moulinet"
+            ],
             Titre = "1742-1753",
             Types = [RegistryType.Other],
             From = new GregorianDate(1742, precision: Precision.Years),
             To = new GregorianDate(1753, precision: Precision.Years),
             Page = 5
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/944655.2414623",
             Id = "944655.2414623",
             Cote = "C 104",
-            Details = ["Instrument de recherche des archives anciennes, série C", "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Tables", "1610 à 1721"],
+            Details =
+            [
+                "Instrument de recherche des archives anciennes, série C",
+                "Fonds de l'administration de l'insinuation du comté de Nice", "Bureau de Nice", "Tables", "1610 à 1721"
+            ],
             Titre = "Lettres A-B",
             Types = [RegistryType.Other],
             From = new GregorianDate(1610, precision: Precision.Years),
@@ -327,43 +351,55 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Hypothèques
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/3236728/dao/0/1",
             Id = "3236728",
             Cote = "1262 W 2",
-            Details = ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des noms"],
+            Details =
+            [
+                "Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)",
+                "Table des noms"
+            ],
             Titre = "Table des noms",
             SousTitre = "Bon à Dumistrescu",
             Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
             Types = [RegistryType.Catalogue],
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/3236746/dao/0/200",
             Id = "3236746",
             Cote = "1262 W 21",
-            Details = ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des prénoms"],
+            Details =
+            [
+                "Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)",
+                "Table des prénoms"
+            ],
             Titre = "Table des prénoms",
             SousTitre = "Volume 016",
             Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
             Types = [RegistryType.Catalogue],
             Page = 200
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/3236640/dao/0/120",
             Id = "3236640",
             Cote = "1262 W 156",
-            Details = ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Répertoire des formalités"],
+            Details =
+            [
+                "Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)",
+                "Répertoire des formalités"
+            ],
             Titre = "Répertoire des formalités",
             SousTitre = "Volume 066",
             Auteur = "2e bureau de Nice 1914-1955 (autres communes)",
             Types = [RegistryType.Catalogue],
             Page = 120
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/2978304/dao/0/5",
             Id = "2978304",
@@ -379,14 +415,16 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Armoiries
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/dao/0/layout:table/idsearch:RECH_c8a1303621a60e2782b150cef417305b",
+            URL =
+                "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/dao/0/layout:table/idsearch:RECH_c8a1303621a60e2782b150cef417305b",
             Id = "b0f71497f90be8cb192bb0c77acac139",
             Cote = "1 J 57",
             Details = ["Armoiries dans les Alpes-Maritimes"],
             Ville = "Turin (Italie", // Yes, the closing parenthesis is missing
-            Titre = "Investiture du fief et juridiction de Puget (Puget-Théniers) en faveur du comte Nicolas Grimaldi de Busca (Nicolo Grimaldi di Busca).",
+            Titre =
+                "Investiture du fief et juridiction de Puget (Puget-Théniers) en faveur du comte Nicolas Grimaldi de Busca (Nicolo Grimaldi di Busca).",
             Auteur = "Chambre des comptes de Turin pour Victor Amédée II, duc de Savoie",
             Types = [RegistryType.Other],
             From = new GregorianDate(1704, 1, 1, precision: Precision.Days),
@@ -395,19 +433,20 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Ouvrages
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/1213862.2781873/dao/1/12",
             Id = "1213862.2781873",
             Cote = "1 Num 48",
             Details = ["Ouvrages", "Sous-série 1 Num. - Reproductions de complément"],
-            Titre = "Album du Carnaval 1937. Album illustré des Chars, Cavalcades, Groupes, Isolés de S. M. Carnaval de Nice 1937",
+            Titre =
+                "Album du Carnaval 1937. Album illustré des Chars, Cavalcades, Groupes, Isolés de S. M. Carnaval de Nice 1937",
             Types = [RegistryType.Book],
             From = new GregorianDate(1937, precision: Precision.Years),
             To = new GregorianDate(1937, precision: Precision.Years),
             Page = 12
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/649576.2781893/dao/1",
             Id = "649576.2781893",
@@ -422,7 +461,7 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Annuaires
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/daogrp/0/279",
             Id = "2231f2886f84620708c0eceab9d6b9b7",
@@ -433,7 +472,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1830, precision: Precision.Years),
             Page = 279
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/daogrp/0/425",
             Id = "3eaf8e3ad6a4d0fa88add0385faf26ce",
@@ -446,7 +485,7 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Presse
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/dao/0",
             Id = "1a061a78007faccd7f9125c2869ca143",
@@ -457,9 +496,10 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1891, 11, 6, precision: Precision.Days),
             Page = 1
         });
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/dao/0/5?id=https%3A%2F%2Farchives06.fr%2Fark%3A%2F79346%2Fa3fbfbacbda3ab24338625a01b000e5c%2Fcanvas%2F0%2F5",
+            URL =
+                "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/dao/0/5?id=https%3A%2F%2Farchives06.fr%2Fark%3A%2F79346%2Fa3fbfbacbda3ab24338625a01b000e5c%2Fcanvas%2F0%2F5",
             Id = "a3fbfbacbda3ab24338625a01b000e5c",
             Details = ["Presse ancienne numérisée", "Eclaireur (L') (1883-1945)", "Année 1937"],
             Types = [RegistryType.Newspaper],
@@ -468,7 +508,7 @@ public class DataAD06 : TheoryData<Data>
             To = new GregorianDate(1937, 12, 30, precision: Precision.Days),
             Page = 5
         });
-        AddRow(new Data
+        Add(new Data
         {
             URL = "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/dao/0/2",
             Id = "35d236db0bd7183dbf75ab2486e6d240",
@@ -481,9 +521,10 @@ public class DataAD06 : TheoryData<Data>
         });
 
         // Délibérations
-        AddRow(new Data
+        Add(new Data
         {
-            URL = "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/daogrp/0/layout:table/idsearch:RECH_61e8e38e23201aa701187c8e647f7c96",
+            URL =
+                "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/daogrp/0/layout:table/idsearch:RECH_61e8e38e23201aa701187c8e647f7c96",
             Id = "6c992c340bba967a24a29e352ac60851",
             Titre = "Délibérations du conseil général (1863)",
             Types = [RegistryType.Book],
@@ -498,7 +539,7 @@ public class DataAD06 : TheoryData<Data>
         // Not sure if there are any documents available online
 
         // Iconographie
-        AddRow(new Data // Non-disclosable
+        Add(new Data // Non-disclosable
         {
             URL = "https://archives06.fr/ark:/79346/703610.2544066/dao/0",
             Id = "703610.2544066",
@@ -513,6 +554,7 @@ public class DataAD06 : TheoryData<Data>
         });
     }
 }
+
 public class Data
 {
     public string URL = null!;

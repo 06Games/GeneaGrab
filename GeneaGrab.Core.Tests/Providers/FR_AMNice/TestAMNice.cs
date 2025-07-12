@@ -1,6 +1,5 @@
 ﻿using GeneaGrab.Core.Helpers;
 using GeneaGrab.Core.Providers;
-using Xunit.Abstractions;
 
 namespace GeneaGrab.Core.Tests.Providers.FR_AMNice;
 

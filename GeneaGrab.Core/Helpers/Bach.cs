@@ -37,7 +37,8 @@ public abstract class Bach : Provider
 
     public override Task<(Registry, int)> Infos(Uri url) => RetrieveViewerInfo(url);
 
-    public override Task<string> Ark(Frame page) => Task.FromResult(PageViewerUrl(GetSeriesInfo(page.Registry), page.DownloadUrl));
+    public override Task<string> Ark(Frame page) =>
+        Task.FromResult(PageViewerUrl(GetSeriesInfo(page.Registry), page.DownloadUrl));
 
     public override async Task<Stream> GetFrame(Frame page, Scale zoom, Action<Progress> progress)
     {
@@ -45,7 +46,9 @@ public abstract class Bach : Provider
         if (stream != null) return stream;
 
         progress?.Invoke(Progress.Unknown);
-        var image = await Grabber.GetImage(PageImageUrl(GetSeriesInfo(page.Registry), page.DownloadUrl, zoom), HttpClient).ConfigureAwait(false);
+        var image = await Grabber
+            .GetImage(PageImageUrl(GetSeriesInfo(page.Registry), page.DownloadUrl, zoom), HttpClient)
+            .ConfigureAwait(false);
         page.ImageSize = zoom;
         progress?.Invoke(Progress.Finished);
 
@@ -58,8 +61,13 @@ public abstract class Bach : Provider
 
     protected string DocUrl(string docId) => $"{BaseUrl}/archives/show/{docId}";
     protected string DocInfoUrl(string docId) => $"{DocUrl(docId)}/ajax";
-    protected string PageViewerUrl(BachRegistryExtras series, string page) => $"{BaseUrl}/viewer/{(series.IsSeries ? "series" : "viewer")}/{series.Path}?img={page}";
-    protected string PageInfoUrl(BachRegistryExtras series, string page) => $"{BaseUrl}{series.AppUrl}/ajax/{(series.IsSeries ? "series" : "image")}/infos/{series.Path}/{page}";
+
+    protected string PageViewerUrl(BachRegistryExtras series, string page) =>
+        $"{BaseUrl}/viewer/{(series.IsSeries ? "series" : "viewer")}/{series.Path}?img={page}";
+
+    protected string PageInfoUrl(BachRegistryExtras series, string page) =>
+        $"{BaseUrl}{series.AppUrl}/ajax/{(series.IsSeries ? "series" : "image")}/infos/{series.Path}/{page}";
+
     protected string PageImageUrl(BachRegistryExtras series, string page, Scale size = Scale.Navigation)
     {
         var sizeTxt = size switch
@@ -81,8 +89,10 @@ public abstract class Bach : Provider
 
     protected static (string path, string page) ParseViewerUrl(Uri url)
     {
-        return (Regex.Match(url.AbsolutePath, @"/viewer/\w*?/(?<path>.*?)").Groups.TryGetValue("path"), HttpUtility.ParseQueryString(url.Query).Get("img"));
+        return (Regex.Match(url.AbsolutePath, @"/viewer/\w*?/(?<path>.*?)").Groups.TryGetValue("path"),
+            HttpUtility.ParseQueryString(url.Query).Get("img"));
     }
+
     protected async Task<BachSerieInfo> RetrievePageInfo(BachRegistryExtras series, string page)
     {
         var jsonUrl = PageInfoUrl(series, page);
@@ -91,48 +101,69 @@ public abstract class Bach : Provider
 
     protected static (BachRegistryExtras series, string[] pages) ParseViewerPage(string webpage)
     {
-        var regex = Regex.Match(webpage, @"var series_content =.*?parseJSON\('(\["""")?(?<series_content>.*?)(""""\])?'\);", RegexOptions.Singleline).Groups;
+        var regex = Regex.Match(webpage,
+                @"var series_content =.*?parseJSON\('(\["""")?(?<series_content>.*?)(""""\])?'\);",
+                RegexOptions.Singleline)
+            .Groups;
         var pages = regex.TryGetValue("series_content");
         var imgPath = GetVariable("image_path");
         return (new BachRegistryExtras
-        {
-            AppUrl = GetVariable("app_url"),
-            Path = imgPath ?? GetVariable("series_path"),
-            IsSeries = imgPath == null
-        }, pages == "null" ? new[] { Regex.Match(webpage, "imageName: '(?<img>.*?)'").Groups.TryGetValue("img") } : pages.Split(","));
+            {
+                AppUrl = GetVariable("app_url"),
+                Path = imgPath ?? GetVariable("series_path"),
+                IsSeries = imgPath == null
+            },
+            pages is null or "null"
+                ? new[] { Regex.Match(webpage, "imageName: '(?<img>.*?)'").Groups.TryGetValue("img") }
+                : pages.Split(","));
 
-        string GetVariable(string variableName) => Regex.Match(webpage, $"var {variableName} = '(?<var>.*?)';").Groups.TryGetValue("var");
+        string GetVariable(string variableName) =>
+            Regex.Match(webpage, $"var {variableName} = '(?<var>.*?)';").Groups.TryGetValue("var");
     }
 
     protected static (Date from, Date to) ParseDateFromDocPage(string docWebPage)
     {
-        var dates = Regex.Match(docWebPage, "<section property=\"dc:date\" content=\"(?<dates>.*?)\">").Groups.TryGetValue("dates")?
+        var dates = Regex.Match(docWebPage, "<section property=\"dc:date\" content=\"(?<dates>.*?)\">").Groups
+            .TryGetValue("dates")?
             .Split('/').Select(Date.ParseDate).ToArray();
         return (dates?.FirstOrDefault(), dates?.LastOrDefault());
     }
+
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
-    protected static Dictionary<string, string[]> ParsePhysDescFromDocPage(string docWebPage) => ParseKeyValues(docWebPage,
+    protected static Dictionary<string, string[]> ParsePhysDescFromDocPage(string docWebPage) => ParseKeyValues(
+        docWebPage,
         @"<span><h4>(?<key>[^<>]*?)( :)?<\/h4> (?<value>[^<>]*?)\.?<\/span>",
         @"<section class=""physdesc"">.*?<\/header>(?<dico>.*?)</section>");
+
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     protected static Dictionary<string, string[]> ParseLegalFromDocPage(string docWebPage)
-        => ParseKeyValues(docWebPage, @"<section class=""accessrestrict"">\s*<header><h3>(?<key>[^<>]*?)</h3><\/header>\s*?<section .*?>(?<value>[^<>]*?)</section>\s*?</section>");
+        => ParseKeyValues(docWebPage,
+            @"<section class=""accessrestrict"">\s*<header><h3>(?<key>[^<>]*?)</h3><\/header>\s*?<section .*?>(?<value>[^<>]*?)</section>\s*?</section>");
+
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     protected static Dictionary<string, string[]> ParseAltFormFromDocPage(string docWebPage)
-        => ParseKeyValues(docWebPage, @"<section class=""altformavail"">\s*<header><h3>(?<key>[^<>]*?)</h3><\/header>\s*<p>(?<value>[^<>]*?)</p>.*?</section>");
+        => ParseKeyValues(docWebPage,
+            @"<section class=""altformavail"">\s*<header><h3>(?<key>[^<>]*?)</h3><\/header>\s*<p>(?<value>[^<>]*?)</p>.*?</section>");
+
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
-    protected static Dictionary<string, string[]> ParseDescriptorsFromDocPage(string docWebPage) => ParseKeyValues(docWebPage,
+    protected static Dictionary<string, string[]> ParseDescriptorsFromDocPage(string docWebPage) => ParseKeyValues(
+        docWebPage,
         @"<div>.*?<strong>(?<key>[^<>]*?)( :)?<\/strong> (<a.*?>(?<value>[^<>]*?)\.?</a>( • )?)+.*?<\/div>",
         @"<section class=""controlaccess"">.*?<\/header>(?<dico>.*?)</section>");
-    protected static Dictionary<string, string[]> ParseKeyValues(string docWebPage, string pattern, string sectionPattern = null, RegexOptions options = RegexOptions.Singleline)
+
+    protected static Dictionary<string, string[]> ParseKeyValues(string docWebPage, string pattern,
+        string sectionPattern = null, RegexOptions options = RegexOptions.Singleline)
     {
-        var section = sectionPattern == null ? docWebPage : Regex.Match(docWebPage, sectionPattern, options).Groups.TryGetValue("dico");
+        var section = sectionPattern == null
+            ? docWebPage
+            : Regex.Match(docWebPage, sectionPattern, options).Groups.TryGetValue("dico");
         if (section == null) return new Dictionary<string, string[]>();
         return Regex.Matches(section, pattern, options)
             .Select(match => match.Groups)
             .GroupBy(kv => kv.TryGetValue("key"), kv => kv["value"].Captures)
             .ToDictionary(kv => kv.Key, kv => kv.SelectMany(values => values.Select(v => v.Value)).ToArray());
     }
+
     protected static Dictionary<string, string[]> ParseDocPage(string docWebPage)
         => ParsePhysDescFromDocPage(docWebPage)
             .Union(ParseLegalFromDocPage(docWebPage))
@@ -140,12 +171,15 @@ public abstract class Bach : Provider
             .Union(ParseDescriptorsFromDocPage(docWebPage))
             .ToDictionary(x => x.Key, x => x.Value);
 
-    protected static (string placeInCity, string city, string[] cityLocation) ParsePlace(Dictionary<string, string[]> docPageInfo)
+    protected static (string placeInCity, string city, string[] cityLocation) ParsePlace(
+        Dictionary<string, string[]> docPageInfo)
     {
         string place;
-        if (!docPageInfo.TryGetValue("Lieu", out var places) || (place = places.FirstOrDefault()) == null) return (null, null, null);
+        if (!docPageInfo.TryGetValue("Lieu", out var places) || (place = places.FirstOrDefault()) == null)
+            return (null, null, null);
         var regex = Regex.Match(place, @"^(?<city>[^(]*) \((?<position>[^(]*)\)( +-+ +(?<details>.+))?$").Groups;
-        return (regex.TryGetValue("details"), regex.TryGetValue("city"), regex.TryGetValue("position")?.Split(", ").Reverse().ToArray());
+        return (regex.TryGetValue("details"), regex.TryGetValue("city"),
+            regex.TryGetValue("position")?.Split(", ").Reverse().ToArray());
     }
 
     protected async Task<(BachRegistryExtras series, string[] pages, BachSerieInfo info)> RetrieveInfoFromUrl(Uri url)
@@ -177,7 +211,9 @@ public abstract class Bach : Provider
             Types = GetTypes(docPageInfo).SelectMany(ParseTypes).ToArray(),
             CallNumber = ead.UnitId,
             Title = ead.UnitTitle,
-            Author = docPageInfo.TryGetValue("Auteur", out var authors) && docPageInfo.Remove("Auteur") ? string.Join(", ", authors) : null,
+            Author = docPageInfo.TryGetValue("Auteur", out var authors) && docPageInfo.Remove("Auteur")
+                ? string.Join(", ", authors)
+                : null,
             Location = location,
             From = from,
             To = to,
@@ -197,7 +233,10 @@ public abstract class Bach : Provider
         if (docPageInfo.TryGetValue("Typologie documentaire", out var typologie)) yield return typologie;
         if (docPageInfo.TryGetValue("Mot matière thésaurus", out var thesaurus)) yield return thesaurus;
     }
-    protected IEnumerable<RegistryType> ParseTypes(IEnumerable<string> thesaurus) => thesaurus.Select(ParseTag).Where(type => type != RegistryType.Unknown);
+
+    protected IEnumerable<RegistryType> ParseTypes(IEnumerable<string> thesaurus) =>
+        thesaurus.Select(ParseTag).Where(type => type != RegistryType.Unknown);
+
     protected abstract RegistryType ParseTag(string tag);
 
     #region API Models
@@ -222,6 +261,7 @@ public abstract class Bach : Provider
         [JsonProperty("position")] public int? Position { get; set; }
         [JsonProperty("remote")] public BachRemote Remote { get; set; }
     }
+
     protected class BachRemote
     {
         [JsonProperty("cookie")] public string Cookie { get; set; }
@@ -229,8 +269,11 @@ public abstract class Bach : Provider
         [JsonProperty("archivist")] public bool? Archivist { get; set; }
         [JsonProperty("reader")] public bool? Reader { get; set; }
         [JsonProperty("communicability")] public bool? Communicability { get; set; }
-        [JsonProperty("isCommunicabilitySalleLecture")] public bool? CommunicabilityReadingRoom { get; set; }
+
+        [JsonProperty("isCommunicabilitySalleLecture")]
+        public bool? CommunicabilityReadingRoom { get; set; }
     }
+
     [SuppressMessage("ReSharper", "StringLiteralTypo")]
     protected class BachEncodedArchivalDescription
     {
@@ -240,8 +283,13 @@ public abstract class Bach : Provider
         [JsonProperty("doclink")] public string DocALink { get; set; }
         [JsonIgnore] public string DocLink => Regex.Match(DocALink, "href=\"(?<url>.*?)\"").Groups.TryGetValue("url");
         [JsonIgnore] public string DocId => DocLink.Split('/').LastOrDefault();
-        [JsonProperty("communicability_general")] public bool? Communicability { get; set; }
-        [JsonProperty("communicability_sallelecture")] public bool? CommunicabilityReadingRoom { get; set; }
+
+        [JsonProperty("communicability_general")]
+        public bool? Communicability { get; set; }
+
+        [JsonProperty("communicability_sallelecture")]
+        public bool? CommunicabilityReadingRoom { get; set; }
+
         [JsonProperty("cAudience")] public bool? CAudience { get; set; }
         [JsonProperty("audience")] public bool? Audience { get; set; }
     }
