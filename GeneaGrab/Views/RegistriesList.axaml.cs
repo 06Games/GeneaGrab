@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.VisualTree;
 using DiscordRPC;
 using DynamicData;
 using FluentAvalonia.UI.Controls;
@@ -27,6 +31,9 @@ public partial class RegistriesPage : Page, ITabPage
     {
         InitializeComponent();
         DataContext = this;
+
+        LocationList.AddHandler(PointerPressedEvent, LocationList_OnPointerPressed, RoutingStrategies.Tunnel);
+        LocationList.SelectionChanged += (_, _) => LocationList.UnselectAll();
     }
 
     protected ObservableCollection<RegistriesTreeStructure> Items { get; } = [];
@@ -54,8 +61,10 @@ public partial class RegistriesPage : Page, ITabPage
                     container = new RegistriesTreeStructure(location);
                     InsertInPlace(parent, container);
                 }
+
                 parent = container.Children;
             }
+
             InsertInPlace(parent, registry);
         }
 
@@ -67,15 +76,21 @@ public partial class RegistriesPage : Page, ITabPage
         }
     }
 
-    private void RegisterList_ItemInvoked(object? sender, SelectionChangedEventArgs e)
+    private void LocationList_OnPointerPressed(object? sender, PointerPressedEventArgs e)
     {
-        if (e.AddedItems.Count < 1 || sender is not TreeView treeView || e.AddedItems[0] is not RegistriesTreeStructure data) return;
-        treeView.UnselectAll();
-        if (treeView.TreeContainerFromItem(data) is not TreeViewItem node) return;
-        if (data.Children.Any()) node.IsExpanded = !node.IsExpanded;
-        else if (data.Registry != null) NavigationService.Navigate(typeof(RegistryViewer), new RegistryInfo(data.Registry));
+        var properties = e.GetCurrentPoint(this).Properties;
+        if (e.Source is not Visual visual || visual.FindAncestorOfType<TreeViewItem>() is not
+                { DataContext: RegistriesTreeStructure data } node) return;
+
+        if (properties.IsLeftButtonPressed && data.Children.Any()) node.IsExpanded = !node.IsExpanded;
+        if (data.Registry is null) return;
+
+        var args = new RegistryInfo(data.Registry);
+        if (properties.IsLeftButtonPressed) NavigationService.Navigate(typeof(RegistryViewer), args);
+        else if (properties.IsMiddleButtonPressed) NavigationService.NewTab(typeof(RegistryViewer), args);
     }
 }
+
 public class RegistriesTreeStructure(string title, string? subtitle = null) : IComparable<RegistriesTreeStructure>
 {
     public string Title { get; } = title;
@@ -96,21 +111,35 @@ public class RegistriesTreeStructure(string title, string? subtitle = null) : IC
         if (other is null) return 1;
 
         var compare = 0;
-        if (Registry?.From != null && other.Registry?.From != null) compare += Registry.From.CompareTo(other.Registry.From) * 10;
+        if (Registry?.From != null && other.Registry?.From != null)
+            compare += Registry.From.CompareTo(other.Registry.From) * 10;
         else if (Registry == null && other.Registry != null) compare += -10;
         else if (Registry != null && other.Registry == null) compare += 10;
         return compare + string.Compare(Title, other.Title, StringComparison.CurrentCulture);
     }
+
     public override bool Equals(object? obj)
     {
         if (obj is not RegistriesTreeStructure other) return false;
         return GetHashCode() == other.GetHashCode();
     }
+
     public override int GetHashCode() => HashCode.Combine(Title, Subtitle, Children, Registry);
-    public static bool operator ==(RegistriesTreeStructure? left, RegistriesTreeStructure? right) => left?.Equals(right) ?? false;
+
+    public static bool operator ==(RegistriesTreeStructure? left, RegistriesTreeStructure? right) =>
+        left?.Equals(right) ?? false;
+
     public static bool operator !=(RegistriesTreeStructure? left, RegistriesTreeStructure? right) => !(left == right);
-    public static bool operator >(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) > 0;
-    public static bool operator <(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) < 0;
-    public static bool operator >=(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) >= 0;
-    public static bool operator <=(RegistriesTreeStructure left, RegistriesTreeStructure right) => left.CompareTo(right) <= 0;
+
+    public static bool operator >(RegistriesTreeStructure left, RegistriesTreeStructure right) =>
+        left.CompareTo(right) > 0;
+
+    public static bool operator <(RegistriesTreeStructure left, RegistriesTreeStructure right) =>
+        left.CompareTo(right) < 0;
+
+    public static bool operator >=(RegistriesTreeStructure left, RegistriesTreeStructure right) =>
+        left.CompareTo(right) >= 0;
+
+    public static bool operator <=(RegistriesTreeStructure left, RegistriesTreeStructure right) =>
+        left.CompareTo(right) <= 0;
 }
