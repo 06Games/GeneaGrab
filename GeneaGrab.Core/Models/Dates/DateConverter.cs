@@ -15,6 +15,14 @@ internal class DateConverter : JsonConverter<Date>
         var jObject = JObject.Load(reader);
 
         var dt = jObject.Value<DateTime>("DateTime");
+
+        // Normalize to UTC (shouldn't have happened in the first place, but it did in the past because of a bug)
+        if (dt.Kind != DateTimeKind.Utc)
+        {
+            if (dt.Hour > 12) dt = dt.AddDays(1);
+            dt = DateTime.SpecifyKind(dt.Date, DateTimeKind.Utc);
+        }
+
         if (!Enum.TryParse(jObject.Value<string>("Precision"), out Precision precision)) precision = default;
         return jObject.Value<string>("Calendar") switch
         {
