@@ -47,6 +47,8 @@ jobs:
           elif [ "${{ matrix.target }}" == "linux-x64" ]; then
             dotnet tool install -g KuiperZone.PupNet
             sudo apt update & sudo apt install libfuse2
+            wget -P "$HOME/.local/bin" https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           fi
 
       - name: Define some variables
