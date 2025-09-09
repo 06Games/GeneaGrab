@@ -46,7 +46,7 @@ jobs:
           elif [ "${{ matrix.target }}" == "osx-x64" ]; then
             brew install create-dmg
           elif [ "${{ matrix.target }}" == "linux-x64" ]; then
-            dotnet tool install -g KuiperZone.PupNet
+            dotnet tool install -g KuiperZone.PupNet --version 1.8.*
             sudo apt update & sudo apt install libfuse2
             wget -P "$HOME/.local/bin" https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
             chmod a+rx "$HOME/.local/bin/appimagetool-x86_64.AppImage"
