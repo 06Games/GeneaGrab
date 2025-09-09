@@ -22,8 +22,10 @@ namespace GeneaGrab.Core.Helpers;
 public abstract class Bach : Provider
 {
     protected abstract string BaseUrl { get; }
-    protected HttpClient HttpClient { get; } = new();
 
+    protected Bach(HttpClient client = null) : base(client)
+    {
+    }
 
     #region Provider Implementation
 

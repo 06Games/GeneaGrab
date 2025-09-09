@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -27,17 +26,21 @@ public class NiceHistorique : Provider
 
     public override async Task<(Registry, int)> Infos(Uri url)
     {
-        var client = new HttpClient();
-        var pageBody = await client.GetStringAsync(url).ConfigureAwait(false);
+        var pageBody = await HttpClient.GetStringAsync(url).ConfigureAwait(false);
 
-        var data = Regex.Match(pageBody, @"<h2>R&eacute;f&eacute;rence :  (?<title>.* (?<number>\d*)) de l'ann&eacute;e (?<year>\d*).*<\/h2>").Groups;
+        var data = Regex.Match(pageBody,
+                @"<h2>R&eacute;f&eacute;rence :  (?<title>.* (?<number>\d*)) de l'ann&eacute;e (?<year>\d*).*<\/h2>")
+            .Groups;
         var date = Date.ParseDate(data["year"].Value);
 
-        var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";").Groups;
+        var pageData = Regex.Match(pageBody, "var pages = Array\\((?<pages>.*)\\);\\n.*var path = \"(?<path>.*)\";")
+            .Groups;
         Uri.TryCreate(url, pageData["path"].Value, out var path);
         var pages = pageData["pages"].Value.Split(", ");
 
-        var pagesTable = Regex.Matches(pageBody, "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>").ToArray();
+        var pagesTable = Regex.Matches(pageBody,
+                "<a href=\"#\" class=\"(?<class>.*)\" onclick=\"doc\\.set\\('(?<index>\\d*)'\\); return false;\" title=\".*\">(?<number>\\d*)<\\/a>")
+            .ToArray();
 
         var registry = new Registry(this, data["number"].Value)
         {
@@ -57,7 +60,9 @@ public class NiceHistorique : Provider
             }).ToArray()
         };
 
-        return (registry, int.Parse(Array.Find(pagesTable, p => p.Groups["class"].Value == "current")?.Groups.TryGetValue("index") ?? "1"));
+        return (registry,
+            int.Parse(Array.Find(pagesTable, p => p.Groups["class"].Value == "current")?.Groups.TryGetValue("index") ??
+                      "1"));
     }
 
 
@@ -69,8 +74,7 @@ public class NiceHistorique : Provider
         if (stream != null) return stream;
 
         progress?.Invoke(Progress.Unknown);
-        var client = new HttpClient();
-        var image = await Grabber.GetImage(page.DownloadUrl, client).ConfigureAwait(false);
+        var image = await Grabber.GetImage(page.DownloadUrl, HttpClient).ConfigureAwait(false);
         page.ImageSize = scale;
         progress?.Invoke(Progress.Finished);
 

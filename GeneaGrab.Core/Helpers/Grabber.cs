@@ -11,17 +11,22 @@ namespace GeneaGrab.Core.Helpers;
 
 public static class Grabber
 {
-    public static async Task<Image> GetImage(string url, HttpClient client = null)
+    public static async Task<Image> GetImage(string url, HttpClient client)
     {
-        client ??= new HttpClient();
-        try { return await Image.LoadAsync(await client.GetStreamAsync(url).ConfigureAwait(false)).ConfigureAwait(false); }
+        try
+        {
+            return await Image.LoadAsync(await client.GetStreamAsync(url).ConfigureAwait(false)).ConfigureAwait(false);
+        }
         catch (HttpRequestException e)
         {
             Log.Error(e, "Failed to retrieve image at {Url}", url);
             return new Image<Rgb24>(1, 1, Color.Black);
         }
     }
-    public static Image MergeTile(this Image tex, Image tile, (int tileSize, int scale, Point pos) a) => MergeTile(tex, tile, a.tileSize, a.pos);
+
+    public static Image MergeTile(this Image tex, Image tile, (int tileSize, int scale, Point pos) a) =>
+        MergeTile(tex, tile, a.tileSize, a.pos);
+
     public static Image MergeTile(this Image tex, Image tile, int tileSize, Point pos)
     {
         if (tile is null)
@@ -29,6 +34,7 @@ public static class Grabber
             Log.Warning("The tile at {Position} is null", pos);
             return tex;
         }
+
         var point = new Point(pos.X * tileSize, pos.Y * tileSize);
         tex.Mutate(x => x.DrawImage(tile, point, 1));
         return tex;

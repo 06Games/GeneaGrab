@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
@@ -20,21 +19,23 @@ public class AD17 : Provider
 
     public override Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
     {
-        if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith("/v2/ad17/")) return Task.FromResult<RegistryInfo>(null);
+        if (url.Host != "www.archinoe.net" || !url.AbsolutePath.StartsWith("/v2/ad17/"))
+            return Task.FromResult<RegistryInfo>(null);
 
         var query = HttpUtility.ParseQueryString(url.Query);
-        return Task.FromResult(new RegistryInfo(this, query["id"]) { PageNumber = int.TryParse(query["page"], out var p) ? p : 1 });
+        return Task.FromResult(new RegistryInfo(this, query["id"])
+            { PageNumber = int.TryParse(query["page"], out var p) ? p : 1 });
     }
 
     public override async Task<(Registry, int)> Infos(Uri uri)
     {
         var url = HttpUtility.UrlDecode(uri.OriginalString);
 
-        var client = new HttpClient();
-        var pageBody = await client.GetStringAsync(url).ConfigureAwait(false);
+        var pageBody = await HttpClient.GetStringAsync(url).ConfigureAwait(false);
 
         var query = HttpUtility.ParseQueryString(uri.Query);
-        var pages = Regex.Matches(pageBody, @"<img src="".*?"" width=""1px"" height=""1px"" id=""visu_image_(?<num>\d*?)""(.|\n)*?data-original=""(?<original>.*?)"".*?\/>")
+        var pages = Regex.Matches(pageBody,
+                @"<img src="".*?"" width=""1px"" height=""1px"" id=""visu_image_(?<num>\d*?)""(.|\n)*?data-original=""(?<original>.*?)"".*?\/>")
             .Cast<Match>(); // https://regex101.com/r/muCsZx/2
         if (!int.TryParse(query["page"], out var pageNumber)) pageNumber = 1;
 
@@ -42,7 +43,8 @@ public class AD17 : Provider
                 @"<option value=\""(?<id>\d*?)\"".*?>(?<cote>.*?) - (?<commune>.*?) - (?<collection>.*?) - (?<type>.*?) - (?<actes>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?))?</option>")
             .Groups; // https://regex101.com/r/Ju2Y1b/3
         if (infos.Count == 0)
-            infos = Regex.Match(pageBody, @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>",
+            infos = Regex.Match(pageBody,
+                @"<form method=\""get\"">.*<option value=\""\"">(?<cote>.*?) - (?<date_debut>.*?)( - (?<date_fin>.*?)?)</option>",
                 RegexOptions.Multiline | RegexOptions.Singleline).Groups; // https://regex101.com/r/Ju2Y1b/3
         if (infos.Count == 0) return (null, -1);
 
@@ -54,7 +56,8 @@ public class AD17 : Provider
             Notes = infos["type"].Success ? $"{infos["type"].Value}: {infos["collection"].Value}" : null,
             From = Date.ParseDate(infos["date_debut"].Value),
             Types = GetTypes(infos.TryGetValue("type"), infos.TryGetValue("actes")).ToArray(),
-            Frames = pages.Select((p, i) => new Frame { FrameNumber = i + 1, DownloadUrl = p.Groups["original"].Value }).ToArray()
+            Frames = pages.Select((p, i) => new Frame { FrameNumber = i + 1, DownloadUrl = p.Groups["original"].Value })
+                .ToArray()
         };
         registry.To = Date.ParseDate(infos["date_fin"].Value) ?? registry.From;
 
@@ -74,12 +77,17 @@ public class AD17 : Provider
                 var pos = -1;
                 while ((pos = type.IndexOf("Mariages", pos + 1, StringComparison.InvariantCulture)) != -1)
                 {
-                    if (pos == bannsIndex + "Publications de ".Length) continue; // We are in the case where the term "Mariages" belongs to the expression "Publications de Mariages".
+                    if (pos == bannsIndex + "Publications de ".Length)
+                        continue; // We are in the case where the term "Mariages" belongs to the expression "Publications de Mariages".
                     yield return RegistryType.Marriage;
                     break;
                 }
             }
-            else if (type.Contains("Mariages")) yield return RegistryType.Marriage; // There are no "Publications de Mariages", so the term corresponds to the type itself
+            else if (type.Contains("Mariages"))
+                yield return
+                    RegistryType
+                        .Marriage; // There are no "Publications de Mariages", so the term corresponds to the type itself
+
             if (type.Contains("Divorces")) yield return RegistryType.Divorce;
 
             if (type.Contains("Décès")) yield return RegistryType.Death;
@@ -107,12 +115,16 @@ public class AD17 : Provider
     {
         if (page.ArkUrl != null) return page.ArkUrl;
 
-        var client = new HttpClient();
         var registry = page.Registry;
-        var desc = registry is null ? null : $"{registry.CallNumber} - {registry.Location} - {registry.From} - {registry.To}".Replace(' ', '+');
-        var ark = await client.GetStringAsync($"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadUrl}&desc={desc}&id={page.RegistryId}&ir=&vue=1&ajax=true")
+        var desc = registry is null
+            ? null
+            : $"{registry.CallNumber} - {registry.Location} - {registry.From} - {registry.To}".Replace(' ', '+');
+        var ark = await HttpClient
+            .GetStringAsync(
+                $"https://www.archinoe.net/v2/ark/permalien.html?chemin={page.DownloadUrl}&desc={desc}&id={page.RegistryId}&ir=&vue=1&ajax=true")
             .ConfigureAwait(false);
-        var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups.TryGetValue("link");
+        var link = Regex.Match(ark, @"<textarea id=\""inputpermalien\"".*?>(?<link>http.*?)<\/textarea>").Groups
+            .TryGetValue("link");
 
         if (string.IsNullOrWhiteSpace(link))
         {
@@ -123,18 +135,20 @@ public class AD17 : Provider
         page.ArkUrl = link;
         return link;
     }
+
     public override async Task<Stream> GetFrame(Frame page, Scale scale, Action<Progress> progress)
     {
         var stream = await Data.TryGetImageFromDrive(page, scale);
         if (stream != null) return stream;
 
         progress?.Invoke(Progress.Unknown);
-        var client = new HttpClient();
 
         string generate = null;
         if (page.Width < 1 || page.Height < 1)
         {
-            generate = await client.GetStringAsync($"https://www.archinoe.net/v2/images/genereImage.html?r=0&n=0&b=0&c=0&o=IMG&id=visu_image_${page.FrameNumber}&image={page.DownloadUrl}")
+            generate = await HttpClient
+                .GetStringAsync(
+                    $"https://www.archinoe.net/v2/images/genereImage.html?r=0&n=0&b=0&c=0&o=IMG&id=visu_image_${page.FrameNumber}&image={page.DownloadUrl}")
                 .ConfigureAwait(false);
             var data = generate.Split('\t');
             page.Width = int.TryParse(data[4], out var w) ? w : 0;
@@ -149,13 +163,14 @@ public class AD17 : Provider
             _ => (2048, 2048)
         };
         if (Math.Max(wantedW, wantedH) > 1800 || generate is null)
-            generate = await client
+            generate = await HttpClient
                 .GetStringAsync(
                     $"https://www.archinoe.net/v2/images/genereImage.html?l={page.Width}&h={page.Height}&x=0&y=0&r=0&n=0&b=0&c=0&o=TILE&id=tuile_20_2_2_3&image={page.DownloadUrl}&ol={wantedW}&oh={wantedH}")
                 .ConfigureAwait(false);
 
         //We can't track the progress because we don't know the final size
-        var image = await Grabber.GetImage($"https://www.archinoe.net{generate.Split('\t')[1]}", client).ConfigureAwait(false);
+        var image = await Grabber.GetImage($"https://www.archinoe.net{generate.Split('\t')[1]}", HttpClient)
+            .ConfigureAwait(false);
         page.ImageSize = scale;
         progress?.Invoke(Progress.Finished);
 

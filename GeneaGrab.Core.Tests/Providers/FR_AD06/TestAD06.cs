@@ -6,14 +6,7 @@ namespace GeneaGrab.Core.Tests.Providers.FR_AD06;
 
 public class TestAD06(ITestOutputHelper output)
 {
-    private readonly AD06 instance = new(new HttpClient
-    {
-        Timeout = TimeSpan.FromSeconds(15),
-        DefaultRequestHeaders =
-        {
-            { "User-Agent", "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0" }
-        }
-    });
+    private readonly AD06 instance = new();
 
     private static int timeoutCount;
 

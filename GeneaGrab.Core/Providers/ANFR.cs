@@ -21,16 +21,19 @@ public class ANFR : Provider
     public override string Id => nameof(ANFR);
     public override string Url => "https://www.archives-nationales.culture.gouv.fr/";
 
-    private HttpClient HttpClient { get; }
-    public ANFR(HttpClient client = null) => HttpClient = client ?? new HttpClient();
+    public ANFR(HttpClient client = null) : base(client)
+    {
+    }
 
     public override Task<RegistryInfo> GetRegistryFromUrlAsync(Uri url)
     {
-        if (url.Host != "www.siv.archives-nationales.culture.gouv.fr" || (!url.AbsolutePath.StartsWith("/siv/UD/") && !url.AbsolutePath.StartsWith("/siv/media/")))
+        if (url.Host != "www.siv.archives-nationales.culture.gouv.fr" || (!url.AbsolutePath.StartsWith("/siv/UD/") &&
+                                                                          !url.AbsolutePath.StartsWith("/siv/media/")))
             return Task.FromResult<RegistryInfo>(null);
 
         var (irId, udId, numberImage) = ParseArkUrl(url);
-        return Task.FromResult(new RegistryInfo(this, $"{irId}/{udId}") { FrameArkUrl = GetImageArkUrl(irId, udId, numberImage) });
+        return Task.FromResult(new RegistryInfo(this, $"{irId}/{udId}")
+            { FrameArkUrl = GetImageArkUrl(irId, udId, numberImage) });
     }
 
     public override async Task<(Registry registry, int pageNumber)> Infos(Uri url)
@@ -58,14 +61,16 @@ public class ANFR : Provider
         var carousel = await HttpClient.GetStringAsync(carouselUri);
         registry.Frames = GetFrames(irId, udId, carousel, carouselUri);
 
-        var pageNumber = registry.Frames.FirstOrDefault(frame => (frame.Extra as Dictionary<string, string>)?.GetValueOrDefault("fileName") == numberImage)?.FrameNumber;
+        var pageNumber = registry.Frames.FirstOrDefault(frame =>
+            (frame.Extra as Dictionary<string, string>)?.GetValueOrDefault("fileName") == numberImage)?.FrameNumber;
         return (registry, pageNumber ?? 1);
     }
 
     private async Task<Uri> ExtractCarouselUri(Uri page)
     {
         var pageBody = await HttpClient.GetStringAsync(page);
-        var carouselUrl = Regex.Match(pageBody, @"\$\('#carousel_[^']*'\)\.load\('(?<carousel>\/siv\/rechercheconsultation\/consultation\/multimedia\/Carousel\.action[^']*)'\);")
+        var carouselUrl = Regex.Match(pageBody,
+                @"\$\('#carousel_[^']*'\)\.load\('(?<carousel>\/siv\/rechercheconsultation\/consultation\/multimedia\/Carousel\.action[^']*)'\);")
             .Groups.TryGetValue("carousel");
         Uri.TryCreate(page, carouselUrl, out var carouselUri);
         return carouselUri;
@@ -73,15 +78,18 @@ public class ANFR : Provider
 
     private static (string irId, string udId, string numberImage) ParseArkUrl(Uri url)
     {
-        var regex = Regex.Match(url.OriginalString, @"siv/(?>\w*)/(?<irId>\w*)(?>/(?<udId>\w*)(?>/(?<numberImage>\w*))?)?").Groups;
+        var regex = Regex.Match(url.OriginalString,
+            @"siv/(?>\w*)/(?<irId>\w*)(?>/(?<udId>\w*)(?>/(?<numberImage>\w*))?)?").Groups;
         return (regex.TryGetValue("irId"), regex.TryGetValue("udId"), regex.TryGetValue("numberImage"));
     }
 
-    private static string GetImageArkUrl(string irId, string udId, string numberImage) => $"https://www.siv.archives-nationales.culture.gouv.fr/siv/media/{irId}/{udId}/{numberImage}";
+    private static string GetImageArkUrl(string irId, string udId, string numberImage) =>
+        $"https://www.siv.archives-nationales.culture.gouv.fr/siv/media/{irId}/{udId}/{numberImage}";
 
     private async Task<Registry> GetInfos(string irId, string udId)
     {
-        var xml = await HttpClient.GetStreamAsync($"https://www.siv.archives-nationales.culture.gouv.fr/siv/rechercheconsultation/consultation/ir/exportXML.action?irId={irId}");
+        var xml = await HttpClient.GetStreamAsync(
+            $"https://www.siv.archives-nationales.culture.gouv.fr/siv/rechercheconsultation/consultation/ir/exportXML.action?irId={irId}");
         var xmlDoc = new XmlDocument();
         xmlDoc.Load(xml);
 
@@ -104,7 +112,8 @@ public class ANFR : Provider
             CallNumber = did.SelectSingleNode("unitid")?.InnerText,
             From = dates?[0] ?? normalizedDates?[0],
             To = dates?[^1] ?? normalizedDates?[^1],
-            Location = collections.Select(c => c.SelectSingleNode("did")?.SelectSingleNode("unittitle")?.InnerText).ToArray(),
+            Location = collections.Select(c => c.SelectSingleNode("did")?.SelectSingleNode("unittitle")?.InnerText)
+                .ToArray(),
             Extra = new Dictionary<string, string>
             {
                 { "irId", irId },
@@ -117,7 +126,8 @@ public class ANFR : Provider
 
     private static Frame[] GetFrames(string irId, string udId, string carousel, Uri baseUrl)
     {
-        return Regex.Matches(carousel, @"mycarousel_itemList\.push\({url: ""(?<url>.*?)"", vignetteSuffix: ""(?<vignette>.*?)"", downloadSuffix: ""(?<download>.*?)""}\);")
+        return Regex.Matches(carousel,
+                @"mycarousel_itemList\.push\({url: ""(?<url>.*?)"", vignetteSuffix: ""(?<vignette>.*?)"", downloadSuffix: ""(?<download>.*?)""}\);")
             .Select((match, i) =>
             {
                 var groups = match.Groups;
@@ -126,7 +136,8 @@ public class ANFR : Provider
                 var downloadSuffix = groups.TryGetValue("download");
                 var suffixPosition = url.LastIndexOf(vignetteSuffix, StringComparison.InvariantCulture);
                 var fileNamePosition = url.LastIndexOf('/') + 1;
-                if (suffixPosition < 0 || fileNamePosition < 0 || suffixPosition < fileNamePosition) throw new FormatException($"Unexpected url format : {url}");
+                if (suffixPosition < 0 || fileNamePosition < 0 || suffixPosition < fileNamePosition)
+                    throw new FormatException($"Unexpected url format : {url}");
                 var fileName = url.Substring(fileNamePosition, suffixPosition - fileNamePosition);
                 var uri = new Uri(baseUrl, url[..suffixPosition]);
 
@@ -164,8 +175,9 @@ public class ANFR : Provider
         {
             var extraDico = page.Extra as Dictionary<string, string> ?? new Dictionary<string, string>();
             var suffix = extraDico.GetValueOrDefault("vignetteSuffix", "-min");
-            image = await Grabber.GetImage($"{page.DownloadUrl!.TrimEnd('/')}{suffix}.jpg", HttpClient).ConfigureAwait(false);
-        } 
+            image = await Grabber.GetImage($"{page.DownloadUrl!.TrimEnd('/')}{suffix}.jpg", HttpClient)
+                .ConfigureAwait(false);
+        }
         else image = await ZoomifyImage(page, scale == Scale.Full ? 1 : 0.75, progress);
 
         page.ImageSize = scale;
@@ -176,7 +188,8 @@ public class ANFR : Provider
 
     private async Task<Image> ZoomifyImage(Frame page, double scale, Action<Progress> progress)
     {
-        if (!page.TileSize.HasValue) (page.Width, page.Height, page.TileSize) = await Zoomify.ImageData(page.DownloadUrl, HttpClient);
+        if (!page.TileSize.HasValue)
+            (page.Width, page.Height, page.TileSize) = await Zoomify.ImageData(page.DownloadUrl, HttpClient);
         var maxZoom = Zoomify.CalculateIndex(page);
         var scaleZoom = maxZoom * scale;
         var zoom = Math.Min((int)Math.Ceiling(scaleZoom), maxZoom);
@@ -187,8 +200,9 @@ public class ANFR : Provider
         var tasks = new Dictionary<Task<Image>, (int tileSize, int scale, Point pos)>();
         var completed = 0;
         for (var y = 0; y < tiles.Y; y++)
-            for (var x = 0; x < tiles.X; x++)
-                tasks.Add(Grabber.GetImage($"{page.DownloadUrl}TileGroup0/{zoom}-{x}-{y}.jpg", HttpClient).ContinueWith(task =>
+        for (var x = 0; x < tiles.X; x++)
+            tasks.Add(Grabber.GetImage($"{page.DownloadUrl}TileGroup0/{zoom}-{x}-{y}.jpg", HttpClient)
+                .ContinueWith(task =>
                 {
                     progress?.Invoke(++completed / (float)tasks.Count);
                     return task.Result;
