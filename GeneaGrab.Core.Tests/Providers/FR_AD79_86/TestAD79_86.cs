@@ -6,7 +6,7 @@ public class TestAD79_86
 {
     private readonly AD79_86 instance = new();
 
-    [Theory(DisplayName = "Check information retriever")]
+    [Theory(DisplayName = "Check information retriever", Timeout = 15000)]
     [ClassData(typeof(DataAD79_86))]
     public async Task CheckInfos(Data data)
     {

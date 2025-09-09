@@ -7,7 +7,7 @@ public class TestAMNice(ITestOutputHelper output)
 {
     private readonly Nice instance = new();
 
-    [Theory(DisplayName = "Check information retriever")]
+    [Theory(DisplayName = "Check information retriever", Timeout = 15000)]
     [ClassData(typeof(DataAMNice))]
     public async Task CheckInfos(Data data)
     {

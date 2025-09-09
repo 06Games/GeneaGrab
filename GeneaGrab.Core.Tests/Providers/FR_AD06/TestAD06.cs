@@ -10,7 +10,7 @@ public class TestAD06(ITestOutputHelper output)
 
     private static int timeoutCount;
 
-    [Theory(DisplayName = "Check information retriever")]
+    [Theory(DisplayName = "Check information retriever", Timeout = 15000)]
     [ClassData(typeof(DataAD06))]
     public async Task CheckInfos(Data data)
     {
