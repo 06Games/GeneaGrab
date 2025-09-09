@@ -8,10 +8,9 @@ namespace GeneaGrab.Core.Models;
 /// <summary>Registry provider</summary>
 public abstract class Provider : IEquatable<Provider>
 {
-    public static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
 
-    public static readonly string DefaultUserAgent =
-        "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0";
+    private const string DefaultUserAgent = "Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0";
 
     public abstract string Id { get; }
     public abstract string Url { get; }
