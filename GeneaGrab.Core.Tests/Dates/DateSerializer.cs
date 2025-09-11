@@ -21,7 +21,7 @@ public class DateSerializer : IXunitSerializer
 
     public object Deserialize(Type type, string serializedValue)
     {
-        if (type != typeof(Date))
+        if (!type.IsAssignableTo(typeof(Date)))
             throw new ArgumentException($"Cannot deserialize type {type.Name} to Date.", nameof(type));
         return JsonConvert.DeserializeObject<Date>(serializedValue) ?? throw new InvalidOperationException();
     }
