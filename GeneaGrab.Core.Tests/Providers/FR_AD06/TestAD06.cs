@@ -8,13 +8,13 @@ public class TestAD06(ITestOutputHelper output)
 {
     private readonly AD06 instance = new();
 
-    private static int timeoutCount;
+    private static int _timeoutCount;
 
     [Theory(DisplayName = "Check information retriever", Timeout = 15000)]
     [ClassData(typeof(DataAD06))]
     public async Task CheckInfos(Data data)
     {
-        Assert.SkipWhen(timeoutCount >= 3,
+        Assert.SkipWhen(_timeoutCount >= 3,
             "Probably geo-blocked"); // AD06 is geo-restricted, so if the API times out 3 times, we assume it's because the location is blocked.
         Registry registry;
         int pageNumber;
@@ -26,7 +26,7 @@ public class TestAD06(ITestOutputHelper output)
         {
             var innerEx = e;
             while (innerEx is not TimeoutException or TaskCanceledException or null) innerEx = innerEx?.InnerException;
-            Assert.SkipWhen(innerEx is TimeoutException or TaskCanceledException, $"Timed-out ({++timeoutCount})");
+            Assert.SkipWhen(innerEx is TimeoutException or TaskCanceledException, $"Timed-out ({++_timeoutCount})");
             throw;
         }
 

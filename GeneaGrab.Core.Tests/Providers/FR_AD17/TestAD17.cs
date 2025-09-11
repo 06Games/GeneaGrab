@@ -15,7 +15,7 @@ public class TestAD17
         Assert.Equal(data.Id, registry.Id);
         Assert.Equal(data.Page, pageNumber);
         Assert.Equal(data.Cote, registry.CallNumber);
-        Assert.Equal(new[] { data.Ville }, registry.Location);
+        Assert.Equal([data.Ville], registry.Location);
         Assert.Equal(data.From, registry.From);
         Assert.Equal(data.To, registry.To);
 
