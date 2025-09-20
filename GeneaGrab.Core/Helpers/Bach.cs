@@ -101,7 +101,7 @@ public abstract class Bach : Provider
         return JsonConvert.DeserializeObject<BachSerieInfo>(await HttpClient.GetStringAsync(jsonUrl));
     }
 
-    protected static (BachRegistryExtras series, string[] pages) ParseViewerPage(string webpage)
+    protected (BachRegistryExtras series, string[] pages) ParseViewerPage(string webpage)
     {
         var regex = Regex.Match(webpage,
                 @"var series_content =.*?parseJSON\('(\["""")?(?<series_content>.*?)(""""\])?'\);",
@@ -184,7 +184,8 @@ public abstract class Bach : Provider
             regex.TryGetValue("position")?.Split(", ").Reverse().ToArray());
     }
 
-    protected async Task<(BachRegistryExtras series, string[] pages, BachSerieInfo info)> RetrieveInfoFromUrl(Uri url)
+    protected virtual async Task<(BachRegistryExtras series, string[] pages, BachSerieInfo info)>
+        RetrieveInfoFromUrl(Uri url)
     {
         var page = ParseViewerUrl(url).page;
         var webpage = await HttpClient.GetStringAsync(url.OriginalString);

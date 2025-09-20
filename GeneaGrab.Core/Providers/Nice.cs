@@ -34,4 +34,11 @@ public class Nice : Bach
         "document photographique" => RegistryType.Other,
         _ => RegistryType.Unknown
     };
+
+    protected override Task<(BachRegistryExtras series, string[] pages, BachSerieInfo info)>
+        RetrieveInfoFromUrl(Uri url)
+    {
+        // TODO: Now stored in the html page
+        return Task.FromResult<(BachRegistryExtras, string[], BachSerieInfo)>((null, null, null));
+    }
 }
