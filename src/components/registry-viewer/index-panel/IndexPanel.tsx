@@ -32,9 +32,9 @@ interface IndexPanelProps {
   onReset?: () => void;
 }
 
-const MIN_GRID_WIDTH = 200;
-const MAX_GRID_WIDTH = 560;
-const DEFAULT_GRID_WIDTH = 320;
+const MIN_GRID_WIDTH = 480;
+const MAX_GRID_WIDTH = 780;
+const DEFAULT_GRID_WIDTH = 560;
 
 /**
  * IndexPanel

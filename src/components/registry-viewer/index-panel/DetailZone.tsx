@@ -150,17 +150,17 @@ export const DetailZone = (props: DetailZoneProps) => {
           <section>
             <SectionLabel>Personnes</SectionLabel>
             <div class="flex flex-col gap-2">
-              <For each={people()}>
+              <Index each={people()}>
                 {(person, i) => (
                   <PersonBlock
                     person={person}
-                    index={i()}
-                    tabStart={10 + i() * 10}
+                    index={i}
+                    tabStart={10 + i * 10}
                     onChange={updatePerson}
                     onRemove={removePerson}
                   />
                 )}
-              </For>
+              </Index>
             </div>
 
             <button
