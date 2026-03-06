@@ -10,6 +10,13 @@ const DetachIcon = () => (
     <path d="M3 3h4v1H4v8h8v-3h1v4H3V3Zm6-1h4v4h-1V3.7L7.4 8.3l-.7-.7L11.3 3H9V2Z" />
   </svg>
 );
+
+const AttachIcon = () => (
+  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M4 11h8v-3h1v4H3V3h8v4h-1V4H4v7Zm7.5-6.5L14 7l-2.5 2.5-.7-.7L12.3 7.5H8v-1h4.3l-1.5-1.3.7-.7Z" />
+  </svg>
+);
+
 const CloseIcon = () => (
   <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
     <path d="M12 4.7 11.3 4 8 7.3 4.7 4 4 4.7 7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8 12 4.7Z" />
@@ -18,6 +25,7 @@ const CloseIcon = () => (
 
 interface IndexPanelProps {
   visible: boolean;
+  isDetached?: boolean;
   height: number;
   rows: ActRow[];
   selectedActId: number | null;
@@ -40,14 +48,7 @@ const DEFAULT_GRID_WIDTH = 560;
  * IndexPanel
  *
  * Manages its own internal grid/detail split width via a drag handle.
- * The resize works by:
- *  1. onPointerDown captures startX and startWidth
- *  2. pointermove on window updates gridWidth signal
- *  3. pointerup cleans up listeners
- *
- * Focus management:
- *  - GlobalGrid → press → or Tab → focus jumps to DetailZone first input
- *  - DetailZone → press Shift+Tab from first field → focus returns to grid list
+ * When detached, it forces itself to take up the full available viewport.
  */
 export const IndexPanel = (props: IndexPanelProps) => {
   const [gridWidth, setGridWidth] = createSignal(DEFAULT_GRID_WIDTH);
@@ -75,20 +76,22 @@ export const IndexPanel = (props: IndexPanelProps) => {
 
   // ── Focus helpers ─────────────────────────────────────────────────────────
   const focusGrid = () => {
-    // Focus the listbox div in GlobalGrid
     gridRef?.querySelector<HTMLElement>('[role="listbox"]')?.focus();
   };
 
   const focusDetail = () => {
-    // Focus the first text input in DetailZone
     detailRef?.querySelector<HTMLInputElement>("input")?.focus();
   };
 
   return (
     <Show when={props.visible}>
       <div
-        class="flex-shrink-0 flex flex-col border-t border-[#e0d8cc] bg-white"
-        style={{ height: `${props.height}px` }}
+        class={
+          props.isDetached
+            ? "flex-1 flex flex-col bg-white w-full h-full"
+            : "flex-shrink-0 flex flex-col border-t border-[#e0d8cc] bg-white"
+        }
+        style={props.isDetached ? {} : { height: `${props.height}px` }}
         role="region"
         aria-label="Panneau d'indexation"
       >
@@ -107,8 +110,11 @@ export const IndexPanel = (props: IndexPanelProps) => {
               <span class="mx-1">·</span>
               <Kbd>←</Kbd> liste
             </span>
-            <IconButton title="Détacher dans une fenêtre séparée" onClick={props.onDetach}>
-              <DetachIcon />
+            <IconButton 
+              title={props.isDetached ? "Rattacher à la fenêtre principale" : "Détacher dans une fenêtre séparée"} 
+              onClick={props.onDetach}
+            >
+              {props.isDetached ? <AttachIcon /> : <DetachIcon />}
             </IconButton>
             <IconButton title={`Masquer l'index (Ctrl I)`} onClick={props.onToggle}>
               <CloseIcon />
@@ -135,7 +141,7 @@ export const IndexPanel = (props: IndexPanelProps) => {
             />
           </div>
 
-          {/* ── Drag handle — THIS is what was broken ── */}
+          {/* ── Drag handle ── */}
           <div
             class={[
               "flex-shrink-0 w-[6px] h-full cursor-col-resize z-10 group",

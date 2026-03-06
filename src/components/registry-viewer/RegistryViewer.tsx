@@ -1,4 +1,4 @@
-import { createSignal, onCleanup, onMount } from "solid-js";
+import { createSignal, createEffect, onCleanup, onMount } from "solid-js";
 import type { ActDetail, ActRow, ActType, ImageMeta, RegistryMeta } from "../../types/registry";
 import { Kbd } from "../../ui/primitives";
 import { MainViewer } from "./MainViewer";
@@ -73,12 +73,163 @@ const MAX_INDEX_HEIGHT = 700;
 const DEFAULT_INDEX_HEIGHT = 340;
 
 export const RegistryViewer = () => {
+  // 1. Detect if this specific window is the spawned "IndexPanel" window
+  const isDetachedMode = typeof window !== 'undefined' && 
+    (window.location.search.includes('mode=index') || window.location.hash.includes('mode=index'));
+
   const [currentImage,   setCurrentImage]   = createSignal(12);
-  const [indexVisible,  setIndexVisible]  = createSignal(true);
-  const [indexHeight,   setIndexHeight]   = createSignal(DEFAULT_INDEX_HEIGHT);
-  const [selectedActId, setSelectedActId] = createSignal<number | null>(3);
-  const [notes,         setNotes]         = createSignal("");
-  const [saveStatus,    setSaveStatus]    = createSignal<"saved" | "saving" | "error">("saved");
+  const [indexVisible,   setIndexVisible]   = createSignal(true);
+  const [isDetached,     setIsDetached]     = createSignal(false);
+  const [indexHeight,    setIndexHeight]    = createSignal(DEFAULT_INDEX_HEIGHT);
+  const [selectedActId,  setSelectedActId]  = createSignal<number | null>(3);
+  const [notes,          setNotes]          = createSignal("");
+  const [saveStatus,     setSaveStatus]     = createSignal<"saved" | "saving" | "error">("saved");
+
+  // 2. Setup Cross-Window State Sync via BroadcastChannel
+  const channel = typeof window !== 'undefined' ? new BroadcastChannel('geneagrab_sync') : null;
+
+  onMount(() => {
+    if (!channel) return;
+
+    if (isDetachedMode) {
+      // We are the detached popup. Tell the main window we are ready.
+      channel.postMessage({ type: 'READY' });
+      
+      channel.onmessage = (e) => {
+        if (e.data.type === 'SYNC_STATE') setSelectedActId(e.data.selectedActId);
+      };
+      
+      // Fallback for normal browsers closing
+      window.addEventListener('beforeunload', () => channel.postMessage({ type: 'DETACHED_CLOSED' }));
+    } else {
+      // We are the Main Window. Listen for updates from the detached popup.
+      channel.onmessage = (e) => {
+        if (e.data.type === 'READY') {
+          // Send initial state to popup immediately
+          channel.postMessage({ type: 'SYNC_STATE', selectedActId: selectedActId() });
+        }
+        if (e.data.type === 'DETACHED_CLOSED' || e.data.type === 'TOGGLE_DETACHED') {
+          setIsDetached(false);
+        }
+        if (e.data.type === 'SELECT_ACT') {
+          setSelectedActId(e.data.id);
+        }
+      };
+    }
+  });
+
+  onCleanup(() => {
+    if (channel) channel.close();
+  });
+
+  // 3. Whenever selectedActId changes in the main window, broadcast it
+  createEffect(() => {
+    if (!isDetachedMode && channel) {
+      channel.postMessage({ type: 'SYNC_STATE', selectedActId: selectedActId() });
+    }
+  });
+
+  const selectedAct = () => selectedActId() === MOCK_ACT.id ? MOCK_ACT : null;
+
+  // Handles closing the detached window via button click
+  const handleCloseDetachedWindow = async () => {
+    channel?.postMessage({ type: 'TOGGLE_DETACHED' });
+    const isTauri = typeof window !== 'undefined' && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
+    
+    if (isTauri) {
+      try {
+        const { getCurrentWindow } = await import('@tauri-apps/api/window');
+        await getCurrentWindow().close();
+        return;
+      } catch (e) {
+        console.warn("Tauri close API not available, falling back to window.close", e);
+      }
+    }
+    window.close();
+  };
+
+  // ── Early Return for Detached Native Window ──
+  if (isDetachedMode) {
+    return (
+      <div 
+        class="w-screen h-screen overflow-hidden flex flex-col bg-white text-[#2c2820] antialiased"
+        style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
+      >
+        <IndexPanel
+          visible={true}
+          isDetached={true}
+          height={0} // Irrelevant when flex-1 full width
+          rows={MOCK_ROWS}
+          selectedActId={selectedActId()}
+          selectedAct={selectedAct()}
+          indexedCount={2}
+          onToggle={handleCloseDetachedWindow}
+          onDetach={handleCloseDetachedWindow}
+          onSelectRow={(row) => channel?.postMessage({ type: 'SELECT_ACT', id: row.id })}
+          onNewAct={() => console.log("new act")}
+          onSave={(act) => console.log("save", act)}
+          onValidateAndNext={(act) => console.log("validate", act)}
+          onReset={() => console.log("reset")}
+        />
+      </div>
+    );
+  }
+
+  // ── Spawn Window Logic ──
+  const handleDetach = async () => {
+    setIsDetached(true);
+    
+    const urlObj = new URL(window.location.href);
+    urlObj.searchParams.set('mode', 'index');
+    const targetUrl = urlObj.pathname + urlObj.search + urlObj.hash;
+
+    const isTauri = typeof window !== 'undefined' && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
+    
+    if (isTauri) {
+      try {
+        const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
+        
+        const windowLabel = `index-window-${Date.now()}`;
+        const webview = new WebviewWindow(windowLabel, {
+          url: targetUrl,
+          title: 'Index - GeneaGrab',
+          width: 900,
+          height: 600,
+          x: 200,
+          y: 200,
+        });
+
+        webview.once('tauri://error', (e: any) => {
+          console.error('Tauri window creation error:', e);
+          setIsDetached(false);
+        });
+
+        // CRITICAL: Native event listener for when user closes window using OS 'X' button
+        webview.once('tauri://destroyed', () => {
+          setIsDetached(false);
+        });
+        
+        return;
+      } catch (e: any) {
+        console.warn("Failed to spawn Tauri native window.", e);
+        setIsDetached(false);
+      }
+    }
+
+    // Fallback for standard browsers
+    const popup = window.open(targetUrl, 'IndexWindow', 'width=900,height=600,left=200,top=200');
+    if (popup) {
+      // Poll to catch window closing in browsers bypassing beforeunload
+      const timer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(timer);
+          setIsDetached(false);
+        }
+      }, 500);
+    } else {
+      setIsDetached(false);
+    }
+  };
 
   // ── Global keyboard shortcuts ─────────────────────────────────────────────
   const onKeyDown = (e: KeyboardEvent) => {
@@ -124,8 +275,6 @@ export const RegistryViewer = () => {
   };
   onCleanup(() => clearTimeout(saveTimer));
 
-  const selectedAct = () =>
-    selectedActId() === MOCK_ACT.id ? MOCK_ACT : null;
 
   return (
     <div
@@ -200,7 +349,7 @@ export const RegistryViewer = () => {
       </div>
 
       {/* ── Vertical resize handle above IndexPanel ── */}
-      {indexVisible() && (
+      {indexVisible() && !isDetached() && (
         <div
           class={[
             "flex-shrink-0 h-[6px] w-full cursor-row-resize z-10 group",
@@ -218,21 +367,25 @@ export const RegistryViewer = () => {
         </div>
       )}
 
-      {/* ── Index Panel ── */}
-      <IndexPanel
-        visible={indexVisible()}
-        height={indexHeight()}
-        rows={MOCK_ROWS}
-        selectedActId={selectedActId()}
-        selectedAct={selectedAct()}
-        indexedCount={2}
-        onToggle={() => setIndexVisible(v => !v)}
-        onSelectRow={(row) => setSelectedActId(row.id)}
-        onNewAct={() => console.log("new act")}
-        onSave={(act) => console.log("save", act)}
-        onValidateAndNext={(act) => console.log("validate", act)}
-        onReset={() => console.log("reset")}
-      />
+      {/* ── Inline Index Panel ── */}
+      {indexVisible() && !isDetached() && (
+        <IndexPanel
+          visible={true}
+          isDetached={false}
+          height={indexHeight()}
+          rows={MOCK_ROWS}
+          selectedActId={selectedActId()}
+          selectedAct={selectedAct()}
+          indexedCount={2}
+          onToggle={() => setIndexVisible(false)}
+          onDetach={handleDetach}
+          onSelectRow={(row) => setSelectedActId(row.id)}
+          onNewAct={() => console.log("new act")}
+          onSave={(act) => console.log("save", act)}
+          onValidateAndNext={(act) => console.log("validate", act)}
+          onReset={() => console.log("reset")}
+        />
+      )}
 
       {/* ── Status bar ── */}
       <div
