@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createSignal, createEffect } from "solid-js";
 import { IconButton, Divider, Button } from "../../ui/primitives";
 
 const ChevronLeft = () => (
@@ -48,6 +48,10 @@ export const MainViewer = (props: MainViewerProps) => {
   const [zoom, setZoom] = createSignal(100);
   const [rotation, setRotation] = createSignal(0);
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
+
+  createEffect(() => {
+    setImageInput(String(props.currentImage));
+  });
 
   const clamp = (z: number) => Math.max(10, Math.min(400, z));
 
