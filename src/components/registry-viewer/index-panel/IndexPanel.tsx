@@ -1,0 +1,170 @@
+import { Show, onCleanup } from "solid-js";
+import { createSignal } from "solid-js";
+import type { ActRow, ActDetail } from "../../../types/registry";
+import { Badge, IconButton, Kbd } from "../../../ui/primitives";
+import { GlobalGrid } from "./GlobalGrid";
+import { DetailZone } from "./DetailZone";
+
+const DetachIcon = () => (
+  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M3 3h4v1H4v8h8v-3h1v4H3V3Zm6-1h4v4h-1V3.7L7.4 8.3l-.7-.7L11.3 3H9V2Z" />
+  </svg>
+);
+const CloseIcon = () => (
+  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M12 4.7 11.3 4 8 7.3 4.7 4 4 4.7 7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8 12 4.7Z" />
+  </svg>
+);
+
+interface IndexPanelProps {
+  visible: boolean;
+  height: number;
+  rows: ActRow[];
+  selectedActId: number | null;
+  selectedAct: ActDetail | null;
+  indexedCount: number;
+  onToggle: () => void;
+  onDetach?: () => void;
+  onSelectRow: (row: ActRow) => void;
+  onNewAct: () => void;
+  onSave?: (act: ActDetail) => void;
+  onValidateAndNext?: (act: ActDetail) => void;
+  onReset?: () => void;
+}
+
+const MIN_GRID_WIDTH = 200;
+const MAX_GRID_WIDTH = 560;
+const DEFAULT_GRID_WIDTH = 320;
+
+/**
+ * IndexPanel
+ *
+ * Manages its own internal grid/detail split width via a drag handle.
+ * The resize works by:
+ *  1. onPointerDown captures startX and startWidth
+ *  2. pointermove on window updates gridWidth signal
+ *  3. pointerup cleans up listeners
+ *
+ * Focus management:
+ *  - GlobalGrid → press → or Tab → focus jumps to DetailZone first input
+ *  - DetailZone → press Shift+Tab from first field → focus returns to grid list
+ */
+export const IndexPanel = (props: IndexPanelProps) => {
+  const [gridWidth, setGridWidth] = createSignal(DEFAULT_GRID_WIDTH);
+
+  let gridRef!: HTMLDivElement;
+  let detailRef!: HTMLDivElement;
+
+  // ── Horizontal resize between grid and detail ─────────────────────────────
+  const onHandlePointerDown = (e: PointerEvent) => {
+    e.preventDefault();
+    const startX  = e.clientX;
+    const startW  = gridWidth();
+
+    const onMove = (ev: PointerEvent) => {
+      const next = Math.max(MIN_GRID_WIDTH, Math.min(MAX_GRID_WIDTH, startW + ev.clientX - startX));
+      setGridWidth(next);
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup",   onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup",   onUp);
+  };
+
+  // ── Focus helpers ─────────────────────────────────────────────────────────
+  const focusGrid = () => {
+    // Focus the listbox div in GlobalGrid
+    gridRef?.querySelector<HTMLElement>('[role="listbox"]')?.focus();
+  };
+
+  const focusDetail = () => {
+    // Focus the first text input in DetailZone
+    detailRef?.querySelector<HTMLInputElement>("input")?.focus();
+  };
+
+  return (
+    <Show when={props.visible}>
+      <div
+        class="flex-shrink-0 flex flex-col border-t border-[#e0d8cc] bg-white"
+        style={{ height: `${props.height}px` }}
+        role="region"
+        aria-label="Panneau d'indexation"
+      >
+        {/* Titlebar */}
+        <div class="flex-shrink-0 flex items-center justify-between px-4 h-10 border-b border-[#e0d8cc] bg-[#faf7f3]">
+          <div class="flex items-center gap-2">
+            <span class="text-[13px] font-semibold text-[#2c2820]">Index</span>
+            <Badge>{props.rows.length} actes</Badge>
+            <span class="text-[12px] text-[#a89e93]">
+              {props.indexedCount} indexés
+            </span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-[11px] text-[#a89e93] mr-1 hidden sm:flex items-center gap-1">
+              <Kbd>→</Kbd> détail
+              <span class="mx-1">·</span>
+              <Kbd>←</Kbd> liste
+            </span>
+            <IconButton title="Détacher dans une fenêtre séparée" onClick={props.onDetach}>
+              <DetachIcon />
+            </IconButton>
+            <IconButton title={`Masquer l'index (Ctrl I)`} onClick={props.onToggle}>
+              <CloseIcon />
+            </IconButton>
+          </div>
+        </div>
+
+        {/* Master-detail body */}
+        <div class="flex-1 flex min-h-0 overflow-hidden">
+
+          {/* GlobalGrid — fixed pixel width */}
+          <div
+            class="flex-shrink-0 h-full overflow-hidden"
+            style={{ width: `${gridWidth()}px` }}
+          >
+            <GlobalGrid
+              rows={props.rows}
+              selectedId={props.selectedActId}
+              indexedCount={props.indexedCount}
+              onSelect={props.onSelectRow}
+              onNewAct={props.onNewAct}
+              onRef={(el) => { gridRef = el; }}
+              onFocusDetail={focusDetail}
+            />
+          </div>
+
+          {/* ── Drag handle — THIS is what was broken ── */}
+          <div
+            class={[
+              "flex-shrink-0 w-[6px] h-full cursor-col-resize z-10 group",
+              "bg-[#f2ece3] hover:bg-[#b8743a]/25 active:bg-[#b8743a]/50",
+              "transition-colors duration-150 flex items-center justify-center",
+            ].join(" ")}
+            onPointerDown={onHandlePointerDown}
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Redimensionner"
+          >
+            <div class="flex flex-col gap-[3px] opacity-0 group-hover:opacity-60 transition-opacity">
+              {[0, 1, 2].map(() => (
+                <div class="w-1 h-1 rounded-full bg-[#b8743a]" />
+              ))}
+            </div>
+          </div>
+
+          {/* DetailZone — fills remaining width */}
+          <DetailZone
+            act={props.selectedAct}
+            onRef={(el) => { detailRef = el; }}
+            onFocusGrid={focusGrid}
+            onSave={props.onSave}
+            onValidateAndNext={props.onValidateAndNext}
+            onReset={props.onReset}
+          />
+        </div>
+      </div>
+    </Show>
+  );
+};
