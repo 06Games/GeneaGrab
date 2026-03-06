@@ -1,5 +1,5 @@
 import { createSignal, onCleanup, onMount } from "solid-js";
-import type { ActDetail, ActRow, PageMeta, RegistryMeta } from "../../types/registry";
+import type { ActDetail, ActRow, ImageMeta, RegistryMeta } from "../../types/registry";
 import { Kbd } from "../../ui/primitives";
 import { MainViewer } from "./MainViewer";
 import { ThumbnailBar } from "./ThumbnailBar";
@@ -18,12 +18,11 @@ const MOCK_REGISTRY: RegistryMeta = {
   source:  "AD83",
 };
 
-const MOCK_PAGE: PageMeta = {
+const MOCK_IMAGE: ImageMeta = {
   folio:        "12r",
   dateRange:    "3 Frimaire An II",
-  actCount:     4,
   indexedCount: 2,
-  actTypes:     ["Naissance", "Naissance", "Mariage", "Décès"],
+  actTypes:     new Set(["Naissance", "Naissance", "Mariage", "Décès"]),
 };
 
 const MOCK_ROWS: ActRow[] = [
@@ -65,13 +64,13 @@ const IndexIcon = () => (
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-const TOTAL_PAGES = 348;
+const TOTAL_IMAGES = 348;
 const MIN_INDEX_HEIGHT = 200;
 const MAX_INDEX_HEIGHT = 700;
 const DEFAULT_INDEX_HEIGHT = 340;
 
 export const RegistryViewer = () => {
-  const [currentPage,   setCurrentPage]   = createSignal(12);
+  const [currentImage,   setCurrentImage]   = createSignal(12);
   const [indexVisible,  setIndexVisible]  = createSignal(true);
   const [indexHeight,   setIndexHeight]   = createSignal(DEFAULT_INDEX_HEIGHT);
   const [selectedActId, setSelectedActId] = createSignal<number | null>(3);
@@ -84,8 +83,8 @@ export const RegistryViewer = () => {
     const inInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
 
     if (!inInput) {
-      if (e.key === "ArrowLeft")  setCurrentPage(p => Math.max(1, p - 1));
-      if (e.key === "ArrowRight") setCurrentPage(p => Math.min(TOTAL_PAGES, p + 1));
+      if (e.key === "ArrowLeft")  setCurrentImage(p => Math.max(1, p - 1));
+      if (e.key === "ArrowRight") setCurrentImage(p => Math.min(TOTAL_IMAGES, p + 1));
     }
     if (e.key === "i" && e.ctrlKey) { e.preventDefault(); setIndexVisible(v => !v); }
     if (e.key === "s" && e.ctrlKey && inInput) { e.preventDefault(); /* trigger save */ }
@@ -175,22 +174,22 @@ export const RegistryViewer = () => {
         {/* Viewer column */}
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
           <MainViewer
-            currentPage={currentPage()}
-            totalPages={TOTAL_PAGES}
-            onPageChange={setCurrentPage}
+            currentImage={currentImage()}
+            totalImages={TOTAL_IMAGES}
+            onImageChange={setCurrentImage}
           />
           <ThumbnailBar
-            totalPages={TOTAL_PAGES}
-            currentPage={currentPage()}
-            onPageChange={setCurrentPage}
+            totalImages={TOTAL_IMAGES}
+            currentImage={currentImage()}
+            onImageChange={setCurrentImage}
           />
         </div>
 
         {/* Right panel */}
         <InfoNotesPanel
           registryMeta={MOCK_REGISTRY}
-          pageMeta={MOCK_PAGE}
-          folio={`f.${currentPage()}r`}
+          imageMeta={MOCK_IMAGE}
+          image={currentImage().toString()}
           notes={notes()}
           onNotesChange={handleNotesChange}
           saveStatus={saveStatus()}
@@ -239,8 +238,8 @@ export const RegistryViewer = () => {
         aria-live="polite"
       >
         <div class="flex items-center gap-4">
-          <span class="text-[11px] text-[#a89e93]">f.{currentPage()}r</span>
-          <span class="text-[11px] text-[#a89e93]">{TOTAL_PAGES} pages · {MOCK_ROWS.length} actes</span>
+          <span class="text-[11px] text-[#a89e93]">{currentImage()}</span>
+          <span class="text-[11px] text-[#a89e93]">{TOTAL_IMAGES} prises de vue · {MOCK_ROWS.length} actes indexés</span>
           <span class="text-[11px] text-[#3a8c5c] flex items-center gap-1">
             <span class="w-1.5 h-1.5 rounded-full bg-[#3a8c5c] inline-block" />
             AD83 connecté

@@ -38,25 +38,25 @@ const DownloadIcon = () => (
 );
 
 interface MainViewerProps {
-  currentPage: number;
-  totalPages: number;
+  currentImage: number;
+  totalImages: number;
   imageSrc?: string;
-  onPageChange: (page: number) => void;
+  onImageChange: (image: number) => void;
 }
 
 export const MainViewer = (props: MainViewerProps) => {
   const [zoom, setZoom] = createSignal(100);
   const [rotation, setRotation] = createSignal(0);
-  const [pageInput, setPageInput] = createSignal(String(props.currentPage));
+  const [imageInput, setImageInput] = createSignal(String(props.currentImage));
 
   const clamp = (z: number) => Math.max(10, Math.min(400, z));
 
-  const commitPageInput = () => {
-    const n = parseInt(pageInput(), 10);
-    if (!isNaN(n) && n >= 1 && n <= props.totalPages) {
-      props.onPageChange(n);
+  const commitImageInput = () => {
+    const n = parseInt(imageInput(), 10);
+    if (!isNaN(n) && n >= 1 && n <= props.totalImages) {
+      props.onImageChange(n);
     } else {
-      setPageInput(String(props.currentPage));
+      setImageInput(String(props.currentImage));
     }
   };
 
@@ -66,33 +66,33 @@ export const MainViewer = (props: MainViewerProps) => {
       {/* ── Toolbar ── */}
       <div class="flex-shrink-0 flex items-center gap-1 px-3 py-2 bg-white border-b border-[#e0d8cc] shadow-sm">
 
-        {/* Page navigation */}
-        <IconButton title="Page précédente (←)" onClick={() => props.onPageChange(Math.max(1, props.currentPage - 1))}>
+        {/* Image navigation */}
+        <IconButton title="Image précédente (←)" onClick={() => props.onImageChange(Math.max(1, props.currentImage - 1))}>
           <ChevronLeft />
         </IconButton>
 
-        {/* Editable page input */}
+        {/* Editable image input */}
         <div class="flex items-center gap-1.5 mx-1">
           <input
             type="text"
-            value={pageInput()}
-            onInput={(e) => setPageInput(e.currentTarget.value)}
-            onBlur={commitPageInput}
-            onKeyDown={(e) => e.key === "Enter" && commitPageInput()}
+            value={imageInput()}
+            onInput={(e) => setImageInput(e.currentTarget.value)}
+            onBlur={commitImageInput}
+            onKeyDown={(e) => e.key === "Enter" && commitImageInput()}
             class={[
               "w-12 h-8 text-center rounded-md border border-[#e0d8cc]",
               "text-[14px] text-[#2c2820] bg-[#faf7f3]",
               "focus:outline-none focus:border-[#b8743a] focus:ring-2 focus:ring-[#b8743a]/20",
               "transition-all tabular-nums",
             ].join(" ")}
-            aria-label="Numéro de page"
+            aria-label="Numéro d'image"
           />
           <span class="text-[13px] text-[#a89e93] select-none">
-            / {props.totalPages}
+            / {props.totalImages}
           </span>
         </div>
 
-        <IconButton title="Page suivante (→)" onClick={() => props.onPageChange(Math.min(props.totalPages, props.currentPage + 1))}>
+        <IconButton title="Image suivante (→)" onClick={() => props.onImageChange(Math.min(props.totalImages, props.currentImage + 1))}>
           <ChevronRight />
         </IconButton>
 
@@ -127,7 +127,7 @@ export const MainViewer = (props: MainViewerProps) => {
         {props.imageSrc ? (
           <img
             src={props.imageSrc}
-            alt={`Folio ${props.currentPage}`}
+            alt={`Folio ${props.currentImage}`}
             class="shadow-2xl shadow-black/20 object-contain max-h-full rounded-sm"
             style={{
               width: `${zoom()}%`,
@@ -154,10 +154,10 @@ export const MainViewer = (props: MainViewerProps) => {
               <svg class="w-10 h-10 text-[#e0d8cc]" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm4 18H6V4h7v5h5v11Z" />
               </svg>
-              <span class="text-[13px] text-[#a89e93]">f.{props.currentPage}r — aucune image</span>
+              <span class="text-[13px] text-[#a89e93]">vue {props.currentImage} — aucune image</span>
             </div>
             <span class="absolute bottom-3 right-4 text-[12px] text-[#e0d8cc] select-none font-mono">
-              {props.currentPage}r
+              {props.currentImage}
             </span>
           </div>
         )}

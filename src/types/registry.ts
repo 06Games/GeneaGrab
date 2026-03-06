@@ -1,4 +1,4 @@
-// ─── Registry & page metadata ─────────────────────────────────────────────────
+// ─── Registry & image metadata ─────────────────────────────────────────────────
 
 export interface RegistryMeta {
   archive: string;
@@ -10,12 +10,11 @@ export interface RegistryMeta {
   source: string;
 }
 
-export interface PageMeta {
+export interface ImageMeta {
   folio: string;
   dateRange: string;
-  actCount: number;
   indexedCount: number;
-  actTypes: ActType[];
+  actTypes: Set<ActType>;
 }
 
 // ─── Acts ─────────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 [![GitHub release](https://img.shields.io/github/v/release/06Games/GeneaGrab?include_prereleases)](https://github.com/06Games/GeneaGrab/releases/latest)  
-**GeneaGrab** is a tool to download pages of digitised registers available on the websites of various (mainly French) archive services.
+**GeneaGrab** is a tool to download images of digitised registers available on the websites of various (mainly French) archive services.
 
 ## Supported archive services
 

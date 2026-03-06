@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from "solid-js";
-import type { RegistryMeta, PageMeta, ActType } from "../../types/registry";
+import type { RegistryMeta, ImageMeta, ActType } from "../../types/registry";
 import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
 
 const EditIcon = () => (
@@ -23,8 +23,8 @@ const ACT_TYPE_STYLES: Record<ActType, string> = {
 
 interface InfoNotesPanelProps {
   registryMeta: RegistryMeta;
-  pageMeta: PageMeta;
-  folio: string;
+  imageMeta: ImageMeta;
+  image: string;
   notes: string;
   onNotesChange: (value: string) => void;
   onEditRegistry?: () => void;
@@ -33,12 +33,6 @@ interface InfoNotesPanelProps {
 
 export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   const [registryExpanded, setRegistryExpanded] = createSignal(false);
-
-  const uniqueTypes = () => [...new Set(props.pageMeta.actTypes)];
-  const progressPct = () =>
-    props.pageMeta.actCount > 0
-      ? (props.pageMeta.indexedCount / props.pageMeta.actCount) * 100
-      : 0;
 
   const saveInfo = () => ({
     saved:   { dot: "bg-[#3a8c5c]", label: "Enregistré" },
@@ -88,45 +82,24 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         </Show>
       </div>
 
-      {/* [B] Page metadata */}
+      {/* [B] Image metadata */}
       <div class="px-4 py-3 border-b border-[#e0d8cc] flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-[13px] font-semibold text-[#2c2820]">Folio {props.folio}</span>
-          <div
-            class="flex items-center gap-2"
-            title={`${props.pageMeta.indexedCount} / ${props.pageMeta.actCount} indexés`}
-          >
-            <div
-              class="w-16 h-1.5 rounded-full bg-[#f2ece3] overflow-hidden"
-              role="progressbar"
-              aria-valuenow={progressPct()}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div
-                class="h-full bg-[#b8743a] rounded-full transition-all duration-300"
-                style={{ width: `${progressPct()}%` }}
-              />
-            </div>
-            <span class="text-[12px] text-[#a89e93] tabular-nums">
-              {props.pageMeta.indexedCount}/{props.pageMeta.actCount}
-            </span>
-          </div>
+          <span class="text-[13px] font-semibold text-[#2c2820]">Folio {props.image}</span>
         </div>
 
-        <MetaRow label="Période"  value={props.pageMeta.dateRange} />
-        <MetaRow label="Actes"    value={String(props.pageMeta.actCount)} />
+        <MetaRow label="Période"  value={props.imageMeta.dateRange} />
+        <MetaRow label="Actes indexés"    value={String(props.imageMeta.indexedCount)} />
 
         <div class="mt-2 flex flex-wrap gap-1.5">
-          <For each={uniqueTypes()}>
+          <For each={Array.from(props.imageMeta.actTypes)}>
             {(type) => {
-              const count = props.pageMeta.actTypes.filter(t => t === type).length;
               return (
                 <span class={[
                   "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border",
                   ACT_TYPE_STYLES[type],
                 ].join(" ")}>
-                  {count}× {type}
+                  {type}
                 </span>
               );
             }}
@@ -140,7 +113,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       {/* [C] Notes — flex-grow */}
       <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
         <div class="flex items-center justify-between mb-2">
-          <label for="page-notes" class="text-[13px] font-semibold text-[#2c2820] cursor-pointer">
+          <label for="image-notes" class="text-[13px] font-semibold text-[#2c2820] cursor-pointer">
             Notes
           </label>
           <span class="text-[11px] text-[#a89e93] tabular-nums" aria-live="polite">
@@ -149,7 +122,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         </div>
 
         <textarea
-          id="page-notes"
+          id="image-notes"
           value={props.notes}
           onInput={(e) => props.onNotesChange(e.currentTarget.value)}
           placeholder="Annotations libres pour ce folio…"
