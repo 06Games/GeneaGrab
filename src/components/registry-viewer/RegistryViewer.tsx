@@ -1,5 +1,5 @@
 import { createSignal, onCleanup, onMount } from "solid-js";
-import type { ActDetail, ActRow, ImageMeta, RegistryMeta } from "../../types/registry";
+import type { ActDetail, ActRow, ActType, ImageMeta, RegistryMeta } from "../../types/registry";
 import { Kbd } from "../../ui/primitives";
 import { MainViewer } from "./MainViewer";
 import { ThumbnailBar } from "./ThumbnailBar";
@@ -21,8 +21,11 @@ const MOCK_REGISTRY: RegistryMeta = {
 const MOCK_IMAGE: ImageMeta = {
   folio:        "12r",
   dateRange:    "3 Frimaire An II",
-  indexedCount: 2,
-  actTypes:     new Set(["Naissance", "Naissance", "Mariage", "Décès"]),
+  actTypes:     new Map<ActType, number>([
+    ["Naissance", 2],
+    ["Mariage", 1],
+    ["Décès", 1],
+  ]),
 };
 
 const MOCK_ROWS: ActRow[] = [

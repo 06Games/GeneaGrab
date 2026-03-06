@@ -89,17 +89,17 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         </div>
 
         <MetaRow label="Période"  value={props.imageMeta.dateRange} />
-        <MetaRow label="Actes indexés"    value={String(props.imageMeta.indexedCount)} />
+        <MetaRow label="Actes indexés"    value={String(Array.from(props.imageMeta.actTypes.values()).reduce((a, b) => a + b, 0))} />
 
         <div class="mt-2 flex flex-wrap gap-1.5">
-          <For each={Array.from(props.imageMeta.actTypes)}>
-            {(type) => {
+          <For each={Array.from(props.imageMeta.actTypes.entries())}>
+            {([type, count]) => {
               return (
                 <span class={[
                   "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border",
                   ACT_TYPE_STYLES[type],
                 ].join(" ")}>
-                  {type}
+                  {count}× {type}
                 </span>
               );
             }}

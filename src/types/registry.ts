@@ -13,8 +13,7 @@ export interface RegistryMeta {
 export interface ImageMeta {
   folio: string;
   dateRange: string;
-  indexedCount: number;
-  actTypes: Set<ActType>;
+  actTypes: Map<ActType, number>;
 }
 
 // ─── Acts ─────────────────────────────────────────────────────────────────────
