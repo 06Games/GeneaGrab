@@ -157,7 +157,6 @@ export const RegistryViewer = () => {
           rows={MOCK_ROWS}
           selectedEventId={selectedEventId()}
           selectedEvent={selectedEvent()}
-          indexedCount={2}
           onToggle={handleCloseDetachedWindow}
           onDetach={handleCloseDetachedWindow}
           onSelectRow={(row) => channel?.postMessage({ type: 'SELECT_EVENT', id: row.event_id })}
@@ -356,7 +355,6 @@ export const RegistryViewer = () => {
           rows={MOCK_ROWS}
           selectedEventId={selectedEventId()}
           selectedEvent={selectedEvent()}
-          indexedCount={2}
           onToggle={() => setIndexVisible(false)}
           onDetach={handleDetach}
           onSelectRow={(row) => setSelectedEventId(row.event_id)}

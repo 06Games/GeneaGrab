@@ -18,7 +18,6 @@ interface GlobalGridProps {
   selectedId: number | null;
   onSelect: (row: EventRow) => void;
   onNewAct: () => void;
-  indexedCount: number;
   onRef?: (el: HTMLDivElement) => void;
   onFocusDetail?: () => void;
 }
@@ -77,7 +76,7 @@ export const GlobalGrid = (props: GlobalGridProps) => {
 
       {/* Footer */}
       <div class="flex-shrink-0 flex items-center justify-between px-3 py-2 border-t border-[#e0d8cc] bg-[#faf7f3]">
-        <span class="text-[12px] text-[#a89e93]">{props.rows.length} actes · {props.indexedCount} indexés</span>
+        <span class="text-[12px] text-[#a89e93]">{props.rows.length} actes indexés</span>
         <Button variant="outline" size="sm" onClick={props.onNewAct}><Icon icon="lucide:plus" width="16" height="16" /> Nouvel acte</Button>
       </div>
     </div>

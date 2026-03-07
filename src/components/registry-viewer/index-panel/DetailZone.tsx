@@ -151,7 +151,7 @@ export const DetailZone = (props: DetailZoneProps) => {
             Sauvegarder <Kbd>Ctrl S</Kbd>
           </Button>
           <Button variant="primary" size="sm" onClick={() => props.event && props.onValidateAndNext?.({ ...props.event, people: people() })} disabled={!props.event}>
-            Valider & Suivant <Kbd class="bg-[#8a5020] border-[#8a5020]">↵</Kbd>
+            Valider & Suivant <Kbd>↵</Kbd>
           </Button>
         </div>
       </div>

@@ -12,7 +12,6 @@ interface IndexPanelProps {
   rows: EventRow[];
   selectedEventId: number | null;
   selectedEvent: EventDetail | null;
-  indexedCount: number;
   onToggle: () => void;
   onDetach?: () => void;
   onSelectRow: (row: EventRow) => void;
@@ -50,8 +49,7 @@ export const IndexPanel = (props: IndexPanelProps) => {
         <div class="flex-shrink-0 flex items-center justify-between px-4 h-10 border-b border-[#e0d8cc] bg-[#faf7f3]">
           <div class="flex items-center gap-2">
             <span class="text-[13px] font-semibold text-[#2c2820]">Index</span>
-            <Badge>{props.rows.length} actes</Badge>
-            <span class="text-[12px] text-[#a89e93]">{props.indexedCount} indexés</span>
+            <Badge>{props.rows.length} actes indexés</Badge>
           </div>
           <div class="flex items-center gap-1">
             <span class="text-[11px] text-[#a89e93] mr-1 hidden sm:flex items-center gap-1"><Kbd>→</Kbd> détail <span class="mx-1">·</span> <Kbd>←</Kbd> liste</span>
@@ -65,7 +63,6 @@ export const IndexPanel = (props: IndexPanelProps) => {
             <GlobalGrid
               rows={props.rows}
               selectedId={props.selectedEventId}
-              indexedCount={props.indexedCount}
               onSelect={props.onSelectRow}
               onNewAct={props.onNewAct}
               onRef={(el) => { gridRef = el; }}
