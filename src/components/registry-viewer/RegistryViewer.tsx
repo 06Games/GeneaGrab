@@ -7,12 +7,19 @@ import { IndexPanel } from "./index-panel/IndexPanel";
 import { Icon } from "@iconify-icon/solid";
 import { useDetachedWindow } from "../../hooks/DetachedWindow";
 
-import { 
-  MOCK_REGISTRY_DATA, 
-  MOCK_IMAGE_META, 
-  MOCK_EVENT_ROWS, 
-  MOCK_SELECTED_EVENT 
-} from "../../mocks/registryMocks";
+import type { RegistryMeta, ImageMeta, EventRow, EventDetail } from "../../types/registry";
+
+export interface RegistryViewerProps {
+  registryMeta: RegistryMeta;
+  imageMeta: ImageMeta;
+  eventRows: EventRow[];
+  totalImages: number;
+  initialImage?: number;
+  onImageChange?: (image: number) => void;
+  getEventDetail: (id: number) => EventDetail | null;
+  onSaveAct?: (event: EventDetail) => void;
+  onValidateAndNext?: (event: EventDetail) => void;
+}
 
 type SyncMessage = 
   | { type: 'READY' }
@@ -21,17 +28,16 @@ type SyncMessage =
   | { type: 'TOGGLE_DETACHED' }
   | { type: 'SELECT_EVENT', id: number | null };
 
-const TOTAL_IMAGES = 348;
 const MIN_INDEX_HEIGHT = 200;
 const MAX_INDEX_HEIGHT = 700;
 const DEFAULT_INDEX_HEIGHT = 340;
 
-export const RegistryViewer = () => {
+export const RegistryViewer = (props: RegistryViewerProps) => {
   const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : "");
   const isDetachedMode = urlParams.get('mode') === 'index';
-  const activeRegistryId = urlParams.get('registryId') || MOCK_REGISTRY_DATA.source_id;
+  const activeRegistryId = urlParams.get('registryId') || props.registryMeta.source_id;
 
-  const [currentImage,    setCurrentImage]    = createSignal(12);
+  const [currentImage,    setCurrentImage]    = createSignal(props.initialImage ?? 1);
   const [indexVisible,    setIndexVisible]    = createSignal(true);
   const [indexHeight,     setIndexHeight]     = createSignal(DEFAULT_INDEX_HEIGHT);
   const [selectedEventId, setSelectedEventId] = createSignal<number | null>(3);
@@ -40,7 +46,7 @@ export const RegistryViewer = () => {
 
   const { isDetached, setIsDetached, detach, closeSelf, sendMessage } = useDetachedWindow<SyncMessage>({
     id: `index-${activeRegistryId}`,
-    title: `Index - ${MOCK_REGISTRY_DATA.archive_reference}`,
+    title: `Index - ${props.registryMeta.archive_reference}`,
     queryParams: { mode: 'index', registryId: activeRegistryId },
     width: 1400,
     height: 600,
@@ -76,7 +82,13 @@ export const RegistryViewer = () => {
     }
   });
 
-  const selectedEvent = () => selectedEventId() === MOCK_SELECTED_EVENT.event_id ? MOCK_SELECTED_EVENT : null;
+  createEffect(() => {
+    if (props.onImageChange) {
+      props.onImageChange(currentImage());
+    }
+  });
+
+  const selectedEvent = () => selectedEventId() !== null ? props.getEventDetail(selectedEventId()!) : null;
 
   const handleCloseDetachedWindow = async () => {
     sendMessage({ type: 'TOGGLE_DETACHED' });
@@ -90,15 +102,21 @@ export const RegistryViewer = () => {
           visible={true}
           isDetached={true}
           height={0}
-          rows={MOCK_EVENT_ROWS}
+          rows={props.eventRows}
           selectedEventId={selectedEventId()}
           selectedEvent={selectedEvent()}
           onToggle={handleCloseDetachedWindow}
           onDetach={handleCloseDetachedWindow}
           onSelectRow={(row) => sendMessage({ type: 'SELECT_EVENT', id: row.event_id })}
           onNewAct={() => console.info("Action: Create new act")}
-          onSave={(event) => console.info("Action: Save act", event)}
-          onValidateAndNext={(event) => console.info("Action: Validate act", event)}
+          onSave={(event) => {
+            console.info("Action: Save act", event);
+            props.onSaveAct?.(event);
+          }}
+          onValidateAndNext={(event) => {
+            console.info("Action: Validate act", event);
+            props.onValidateAndNext?.(event);
+          }}
           onReset={() => console.info("Action: Reset form")}
         />
       </div>
@@ -110,7 +128,7 @@ export const RegistryViewer = () => {
     const inInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
     if (!inInput) {
       if (e.key === "ArrowLeft")  setCurrentImage(p => Math.max(1, p - 1));
-      if (e.key === "ArrowRight") setCurrentImage(p => Math.min(TOTAL_IMAGES, p + 1));
+      if (e.key === "ArrowRight") setCurrentImage(p => Math.min(props.totalImages, p + 1));
     }
     if (e.key === "i" && e.ctrlKey) { e.preventDefault(); setIndexVisible(v => !v); }
   };
@@ -149,10 +167,10 @@ export const RegistryViewer = () => {
           <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
           <span class="text-[15px] font-bold text-accent flex-shrink-0">GeneaGrab</span>
           <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0" />
-          <span class="text-[13px] text-dim flex-shrink-0">AD83 · {MOCK_REGISTRY_DATA.archive_reference}</span>
+          <span class="text-[13px] text-dim flex-shrink-0">AD83 · {props.registryMeta.archive_reference}</span>
           <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0" />
           <span class="text-[13px] text-main font-medium truncate">
-            {MOCK_REGISTRY_DATA.town} — {Array.from(MOCK_REGISTRY_DATA.source_types).join(", ")}
+            {props.registryMeta.town} — {Array.from(props.registryMeta.source_types).join(", ")}
           </span>
         </div>
 
@@ -166,13 +184,13 @@ export const RegistryViewer = () => {
 
       <div class="flex flex-1 min-h-0 overflow-hidden">
         <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <MainViewer currentImage={currentImage()} totalImages={TOTAL_IMAGES} onImageChange={setCurrentImage} />
-          <ThumbnailBar totalImages={TOTAL_IMAGES} currentImage={currentImage()} onImageChange={setCurrentImage} />
+          <MainViewer currentImage={currentImage()} totalImages={props.totalImages} onImageChange={setCurrentImage} />
+          <ThumbnailBar totalImages={props.totalImages} currentImage={currentImage()} onImageChange={setCurrentImage} />
         </main>
 
         <InfoNotesPanel
-          registryMeta={MOCK_REGISTRY_DATA}
-          imageMeta={MOCK_IMAGE_META}
+          registryMeta={props.registryMeta}
+          imageMeta={props.imageMeta}
           image={currentImage().toString()}
           notes={notes()}
           onNotesChange={handleNotesChange}
@@ -193,15 +211,21 @@ export const RegistryViewer = () => {
           visible={true}
           isDetached={false}
           height={indexHeight()}
-          rows={MOCK_EVENT_ROWS}
+          rows={props.eventRows}
           selectedEventId={selectedEventId()}
           selectedEvent={selectedEvent()}
           onToggle={() => setIndexVisible(false)}
           onDetach={() => detach()}
           onSelectRow={(row) => setSelectedEventId(row.event_id)}
           onNewAct={() => console.info("Action: New Act")}
-          onSave={(event) => console.info("Action: Save", event)}
-          onValidateAndNext={(event) => console.info("Action: Validate", event)}
+          onSave={(event) => {
+            console.info("Action: Save", event);
+            props.onSaveAct?.(event);
+          }}
+          onValidateAndNext={(event) => {
+            console.info("Action: Validate", event);
+            props.onValidateAndNext?.(event);
+          }}
           onReset={() => console.info("Action: Reset")}
         />
       )}
@@ -209,7 +233,7 @@ export const RegistryViewer = () => {
       <footer class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle" role="status">
         <div class="flex items-center gap-4">
           <span class="text-[11px] text-dim">{currentImage()}</span>
-          <span class="text-[11px] text-dim">{TOTAL_IMAGES} vues · {MOCK_EVENT_ROWS.length} actes indexés</span>
+          <span class="text-[11px] text-dim">{props.totalImages} vues · {props.eventRows.length} actes indexés</span>
         </div>
         <div class="flex items-center gap-3">
           <span class="text-[11px] text-dim tabular-nums">

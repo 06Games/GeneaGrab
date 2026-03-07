@@ -6,7 +6,7 @@ const App = () => {
   return (
     <Router>
       <Route path="/" component={HomePage} />
-      <Route path="/registry/:id" component={ViewerPage} />
+      <Route path="/registry/:id/:imageId?" component={ViewerPage} />
     </Router>
   );
 };
