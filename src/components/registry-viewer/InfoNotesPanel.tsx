@@ -1,5 +1,5 @@
 import { createSignal, For, Show } from "solid-js";
-import type { RegistryMeta, ImageMeta, ActType } from "../../types/registry";
+import type { RegistryMeta, ImageMeta, EventType } from "../../types/registry";
 import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
 
 const EditIcon = () => (
@@ -13,11 +13,13 @@ const ChevronDown = () => (
   </svg>
 );
 
-const ACT_TYPE_STYLES: Record<ActType, string> = {
+const ACT_TYPE_STYLES: Record<EventType, string> = {
   Naissance:      "text-[#2d6a4f] bg-[#d8f3dc] border-[#b7e4c7]",
   Mariage:        "text-[#1d4e89] bg-[#dbeafe] border-[#bfdbfe]",
   Décès:          "text-[#7f1d1d] bg-[#fee2e2] border-[#fecaca]",
-  Reconnaissance: "text-[#5b21b6] bg-[#ede9fe] border-[#ddd6fe]",
+  Sépulture:      "text-[#713f12] bg-[#ffedd5] border-[#fed7aa]",
+  Testament:      "text-[#4b5563] bg-[#f3f4f6] border-[#e5e7eb]",
+  Recensement:    "text-[#403937] bg-[#f2e9e4] border-[#e0d8cc]",
   Autre:          "text-[#6b6358] bg-[#f2ece3] border-[#e0d8cc]",
 };
 
@@ -62,9 +64,9 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           class="w-full flex items-center justify-between px-4 py-3 hover:bg-[#faf7f3] transition-colors duration-100 focus-visible:outline-none text-left"
         >
           <div class="overflow-hidden">
-            <p class="text-[14px] font-medium text-[#2c2820] truncate">{props.registryMeta.cote}</p>
+            <p class="text-[14px] font-medium text-[#2c2820] truncate">{props.registryMeta.archive_reference}</p>
             <p class="text-[12px] text-[#a89e93] truncate mt-0.5">
-              {props.registryMeta.commune} · {props.registryMeta.type}
+              {props.registryMeta.town} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : "Inconnu"}
             </p>
           </div>
           <span class={["text-[#a89e93] flex-shrink-0 ml-2 transition-transform duration-150", registryExpanded() ? "rotate-180" : ""].join(" ")}>
