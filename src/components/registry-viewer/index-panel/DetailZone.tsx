@@ -6,18 +6,17 @@ import { IndexField } from "./IndexField";
 import { PersonBlock } from "./PersonBlock";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
+import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
 
 interface DetailZoneProps {
   event: EventDetail | null;
   onRef?: (el: HTMLDivElement) => void;
   onFocusGrid?: () => void;
-  onSave?: (event: EventDetail) => void;
-  onValidateAndNext?: (event: EventDetail) => void;
-  onReset?: () => void;
 }
 
 export const DetailZone = (props: DetailZoneProps) => {
   const { t } = useI18n();
+  const actions = useRegistryActions(); // Consume the context directly
   const [people, setPeople] = createSignal<PersonEntry[]>(
     props.event?.people ?? []
   );
@@ -129,12 +128,12 @@ export const DetailZone = (props: DetailZoneProps) => {
       </div>
 
       <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-subtle bg-panel">
-        <Button variant="ghost" size="sm" onClick={props.onReset}>{t("detail.reset")}</Button>
+        <Button variant="ghost" size="sm" onClick={actions.onReset}>{t("detail.reset")}</Button>
         <div class="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => props.event && props.onSave?.({ ...props.event, people: people() })} disabled={!props.event}>
+          <Button variant="outline" size="sm" onClick={() => props.event && actions.onSaveAct?.({ ...props.event, people: people() })} disabled={!props.event}>
             {t("detail.save")} <Kbd>Ctrl S</Kbd>
           </Button>
-          <Button variant="primary" size="sm" onClick={() => props.event && props.onValidateAndNext?.({ ...props.event, people: people() })} disabled={!props.event}>
+          <Button variant="primary" size="sm" onClick={() => props.event && actions.onValidateAndNext?.({ ...props.event, people: people() })} disabled={!props.event}>
             {t("detail.validateAndNext")} <Kbd>↵</Kbd>
           </Button>
         </div>

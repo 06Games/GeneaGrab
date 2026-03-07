@@ -3,6 +3,7 @@ import type { EventRow } from "../../../types/registry";
 import { Button } from "../../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { TranslationKey, useI18n } from "../../../ui/i18n";
+import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
 
 const EVENT_CHIP: Record<string, string> = {
   Naissance: "text-event-birth bg-event-birth-bg",
@@ -18,13 +19,13 @@ interface GlobalGridProps {
   rows: EventRow[];
   selectedId: number | null;
   onSelect: (row: EventRow) => void;
-  onNewAct: () => void;
   onRef?: (el: HTMLDivElement) => void;
   onFocusDetail?: () => void;
 }
 
 export const GlobalGrid = (props: GlobalGridProps) => {
   const { t } = useI18n();
+  const actions = useRegistryActions(); // Consume the context directly
 
   const handleKeyDown = (e: KeyboardEvent) => {
     const idx = props.rows.findIndex(r => r.event_id === props.selectedId);
@@ -81,7 +82,7 @@ export const GlobalGrid = (props: GlobalGridProps) => {
       {/* Footer */}
       <div class="flex-shrink-0 flex items-center justify-between px-3 py-2 border-t border-subtle bg-tinted">
         <span class="text-[12px] text-dim">{t("grid.actsCount", { count: props.rows.length })}</span>
-        <Button variant="outline" size="sm" onClick={props.onNewAct}><Icon icon="lucide:plus" width="16" height="16" /> {t("grid.newAct")}</Button>
+        <Button variant="outline" size="sm" onClick={actions.onNewAct}><Icon icon="lucide:plus" width="16" height="16" /> {t("grid.newAct")}</Button>
       </div>
     </div>
   );

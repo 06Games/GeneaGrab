@@ -7,6 +7,7 @@ import { IndexPanel } from "./index-panel/IndexPanel";
 import { Icon } from "@iconify-icon/solid";
 import { useDetachedWindow } from "../../hooks/DetachedWindow";
 import { useI18n } from "../../ui/i18n";
+import { RegistryActionsProvider } from "../../contexts/RegistryActionsContext";
 
 import type { RegistryMeta, ImageMeta, EventRow, EventDetail } from "../../types/registry";
 
@@ -70,6 +71,20 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
     }
   });
 
+  // Bundle the actions together to supply them to our context
+  const registryActions = {
+    onSaveAct: (event: EventDetail) => {
+      console.info("Action: Save", event);
+      props.onSaveAct?.(event);
+    },
+    onValidateAndNext: (event: EventDetail) => {
+      console.info("Action: Validate", event);
+      props.onValidateAndNext?.(event);
+    },
+    onNewAct: () => console.info("Action: Create new act"),
+    onReset: () => console.info("Action: Reset form")
+  };
+
   onMount(() => {
     if (isDetachedMode) {
       sendMessage({ type: 'READY' });
@@ -100,29 +115,21 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
 
   if (isDetachedMode) {
     return (
-      <div class="w-screen h-screen overflow-hidden flex flex-col bg-panel text-main antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
-        <IndexPanel
-          visible={true}
-          isDetached={true}
-          height={0}
-          rows={props.eventRows}
-          selectedEventId={selectedEventId()}
-          selectedEvent={selectedEvent()}
-          onToggle={handleCloseDetachedWindow}
-          onDetach={handleCloseDetachedWindow}
-          onSelectRow={(row) => sendMessage({ type: 'SELECT_EVENT', id: row.event_id })}
-          onNewAct={() => console.info("Action: Create new act")}
-          onSave={(event) => {
-            console.info("Action: Save act", event);
-            props.onSaveAct?.(event);
-          }}
-          onValidateAndNext={(event) => {
-            console.info("Action: Validate act", event);
-            props.onValidateAndNext?.(event);
-          }}
-          onReset={() => console.info("Action: Reset form")}
-        />
-      </div>
+      <RegistryActionsProvider {...registryActions}>
+        <div class="w-screen h-screen overflow-hidden flex flex-col bg-panel text-main antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
+          <IndexPanel
+            visible={true}
+            isDetached={true}
+            height={0}
+            rows={props.eventRows}
+            selectedEventId={selectedEventId()}
+            selectedEvent={selectedEvent()}
+            onToggle={handleCloseDetachedWindow}
+            onDetach={handleCloseDetachedWindow}
+            onSelectRow={(row) => sendMessage({ type: 'SELECT_EVENT', id: row.event_id })}
+          />
+        </div>
+      </RegistryActionsProvider>
     );
   }
 
@@ -165,86 +172,78 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
   onCleanup(() => clearTimeout(saveTimer));
 
   return (
-    <div class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
-      <header data-tauri-drag-region class="flex-shrink-0 flex items-center justify-between px-4 h-11 bg-panel border-b border-subtle shadow-sm">
-          <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
-          <span class="text-[15px] font-bold text-accent flex-shrink-0">GeneaGrab</span>
-          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0" />
-          <span class="text-[13px] text-dim flex-shrink-0">AD83 · {props.registryMeta.archive_reference}</span>
-          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0" />
-          <span class="text-[13px] text-main font-medium truncate">
-            {props.registryMeta.town} — {Array.from(props.registryMeta.source_types).join(", ")}
-          </span>
-        </div>
-
-        <button type="button" onClick={() => setIndexVisible(v => !v)} class={[
-            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
-            indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted",
-          ].join(" ")}>
-          <Icon icon="lucide:list" /> {t("registryViewer.index")} <Kbd>Ctrl I</Kbd>
-        </button>
-      </header>
-
-      <div class="flex flex-1 min-h-0 overflow-hidden">
-        <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <MainViewer currentImage={currentImage()} totalImages={props.totalImages} onImageChange={setCurrentImage} />
-          <ThumbnailBar totalImages={props.totalImages} currentImage={currentImage()} onImageChange={setCurrentImage} />
-        </main>
-
-        <InfoNotesPanel
-          registryMeta={props.registryMeta}
-          imageMeta={props.imageMeta}
-          image={currentImage().toString()}
-          notes={notes()}
-          onNotesChange={handleNotesChange}
-          saveStatus={saveStatus()}
-        />
-      </div>
-
-      {indexVisible() && !isDetached() && (
-        <div class="flex-shrink-0 h-[6px] w-full cursor-row-resize z-10 group bg-active hover:bg-accent/25 active:bg-accent/50 transition-colors duration-150 flex items-center justify-center" onPointerDown={onResizePointerDown} role="separator" aria-orientation="horizontal">
-          <div class="flex flex-row gap-[3px] opacity-0 group-hover:opacity-60 transition-opacity">
-            {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-accent" />)}
+    <RegistryActionsProvider {...registryActions}>
+      <div class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
+        <header data-tauri-drag-region class="flex-shrink-0 flex items-center justify-between px-4 h-11 bg-panel border-b border-subtle shadow-sm">
+            <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
+            <span class="text-[15px] font-bold text-accent flex-shrink-0">GeneaGrab</span>
+            <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0" />
+            <span class="text-[13px] text-dim flex-shrink-0">AD83 · {props.registryMeta.archive_reference}</span>
+            <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0" />
+            <span class="text-[13px] text-main font-medium truncate">
+              {props.registryMeta.town} — {Array.from(props.registryMeta.source_types).join(", ")}
+            </span>
           </div>
-        </div>
-      )}
 
-      {indexVisible() && !isDetached() && (
-        <IndexPanel
-          visible={true}
-          isDetached={false}
-          height={indexHeight()}
-          rows={props.eventRows}
-          selectedEventId={selectedEventId()}
-          selectedEvent={selectedEvent()}
-          onToggle={() => setIndexVisible(false)}
-          onDetach={() => detach()}
-          onSelectRow={(row) => setSelectedEventId(row.event_id)}
-          onNewAct={() => console.info("Action: New Act")}
-          onSave={(event) => {
-            console.info("Action: Save", event);
-            props.onSaveAct?.(event);
-          }}
-          onValidateAndNext={(event) => {
-            console.info("Action: Validate", event);
-            props.onValidateAndNext?.(event);
-          }}
-          onReset={() => console.info("Action: Reset")}
-        />
-      )}
+          <button type="button" onClick={() => setIndexVisible(v => !v)} class={[
+              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+              indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted",
+            ].join(" ")}>
+            <Icon icon="lucide:list" /> {t("registryViewer.index")} <Kbd>Ctrl I</Kbd>
+          </button>
+        </header>
 
-      <footer class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle" role="status">
-        <div class="flex items-center gap-4">
-          <span class="text-[11px] text-dim">{currentImage()}</span>
-          <span class="text-[11px] text-dim">{t("registryViewer.viewsAndActs", { views: props.totalImages, acts: props.eventRows.length })}</span>
+        <div class="flex flex-1 min-h-0 overflow-hidden">
+          <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+            <MainViewer currentImage={currentImage()} totalImages={props.totalImages} onImageChange={setCurrentImage} />
+            <ThumbnailBar totalImages={props.totalImages} currentImage={currentImage()} onImageChange={setCurrentImage} />
+          </main>
+
+          <InfoNotesPanel
+            registryMeta={props.registryMeta}
+            imageMeta={props.imageMeta}
+            image={currentImage().toString()}
+            notes={notes()}
+            onNotesChange={handleNotesChange}
+            saveStatus={saveStatus()}
+          />
         </div>
-        <div class="flex items-center gap-3">
-          <span class="text-[11px] text-dim tabular-nums">
-            {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        </div>
-      </footer>
-    </div>
+
+        {indexVisible() && !isDetached() && (
+          <div class="flex-shrink-0 h-[6px] w-full cursor-row-resize z-10 group bg-active hover:bg-accent/25 active:bg-accent/50 transition-colors duration-150 flex items-center justify-center" onPointerDown={onResizePointerDown} role="separator" aria-orientation="horizontal">
+            <div class="flex flex-row gap-[3px] opacity-0 group-hover:opacity-60 transition-opacity">
+              {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-accent" />)}
+            </div>
+          </div>
+        )}
+
+        {indexVisible() && !isDetached() && (
+          <IndexPanel
+            visible={true}
+            isDetached={false}
+            height={indexHeight()}
+            rows={props.eventRows}
+            selectedEventId={selectedEventId()}
+            selectedEvent={selectedEvent()}
+            onToggle={() => setIndexVisible(false)}
+            onDetach={() => detach()}
+            onSelectRow={(row) => setSelectedEventId(row.event_id)}
+          />
+        )}
+
+        <footer class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle" role="status">
+          <div class="flex items-center gap-4">
+            <span class="text-[11px] text-dim">{currentImage()}</span>
+            <span class="text-[11px] text-dim">{t("registryViewer.viewsAndActs", { views: props.totalImages, acts: props.eventRows.length })}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span class="text-[11px] text-dim tabular-nums">
+              {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
+        </footer>
+      </div>
+    </RegistryActionsProvider>
   );
 };
 
