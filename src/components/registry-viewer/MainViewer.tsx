@@ -76,8 +76,8 @@ export const MainViewer = (props: MainViewerProps) => {
   };
 
   return (
-    <div class="relative flex-1 flex flex-col overflow-hidden bg-[#eee8df] min-h-0">
-      <div class="flex-shrink-0 flex items-center gap-1 px-3 py-2 bg-white border-b border-[#e0d8cc] shadow-sm z-10">
+    <div class="relative flex-1 flex flex-col overflow-hidden bg-viewer-bg min-h-0">
+      <div class="flex-shrink-0 flex items-center gap-1 px-3 py-2 bg-panel border-b border-subtle shadow-sm z-10">
         <IconButton title="Image précédente (←)" onClick={() => props.onImageChange(Math.max(1, props.currentImage - 1))}>
           <Icon icon="lucide:chevron-left"></Icon>
         </IconButton>
@@ -90,14 +90,14 @@ export const MainViewer = (props: MainViewerProps) => {
             onBlur={commitImageInput}
             onKeyDown={(e) => e.key === "Enter" && commitImageInput()}
             class={[
-              "w-12 h-8 text-center rounded-md border border-[#e0d8cc]",
-              "text-[14px] text-[#2c2820] bg-[#faf7f3]",
-              "focus:outline-none focus:border-[#b8743a] focus:ring-2 focus:ring-[#b8743a]/20",
+              "w-12 h-8 text-center rounded-md border border-subtle",
+              "text-[14px] text-main bg-tinted",
+              "focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
               "transition-all tabular-nums",
             ].join(" ")}
             aria-label="Numéro d'image"
           />
-          <span class="text-[13px] text-[#a89e93] select-none">
+          <span class="text-[13px] text-dim select-none">
             / {props.totalImages}
           </span>
         </div>
@@ -111,7 +111,7 @@ export const MainViewer = (props: MainViewerProps) => {
         <IconButton title="Dézoomer (−)" onClick={handleZoomOut}>
           <Icon icon="lucide:zoom-out"></Icon>
         </IconButton>
-        <span class="text-[13px] text-[#6b6358] tabular-nums w-10 text-center select-none">
+        <span class="text-[13px] text-muted tabular-nums w-10 text-center select-none">
           {zoomDisplay()}%
         </span>
         <IconButton title="Zoomer (+)" onClick={handleZoomIn}>
@@ -134,13 +134,13 @@ export const MainViewer = (props: MainViewerProps) => {
         </IconButton>
       </div>
 
-      <div class="relative flex-1 min-h-0 bg-[#1a1815] overflow-hidden">
+      <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
         <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
         {!props.imageSrc && (
-          <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#eee8df] z-20">
+          <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
              <div class="flex flex-col items-center gap-3 select-none">
-              <Icon icon="lucide:image" class="text-[#e0d8cc]" width="50" height="50"></Icon>
-              <span class="text-[13px] text-[#a89e93]">vue {props.currentImage} — aucune image</span>
+              <Icon icon="lucide:image" class="text-subtle" width="50" height="50"></Icon>
+              <span class="text-[13px] text-dim">vue {props.currentImage} — aucune image</span>
             </div>
           </div>
         )}

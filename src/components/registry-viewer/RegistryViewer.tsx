@@ -146,7 +146,7 @@ export const RegistryViewer = () => {
   if (isDetachedMode) {
     return (
       <div 
-        class="w-screen h-screen overflow-hidden flex flex-col bg-white text-[#2c2820] antialiased"
+        class="w-screen h-screen overflow-hidden flex flex-col bg-panel text-main antialiased"
         style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
       >
         <IndexPanel
@@ -215,19 +215,19 @@ export const RegistryViewer = () => {
 
   return (
     <div
-      class="flex flex-col w-screen h-screen overflow-hidden bg-[#f7f3ee] text-[#2c2820] select-none antialiased"
+      class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased"
       style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
     >
       <div
         data-tauri-drag-region
-        class="flex-shrink-0 flex items-center justify-between px-4 h-11 bg-white border-b border-[#e0d8cc] shadow-sm"
+        class="flex-shrink-0 flex items-center justify-between px-4 h-11 bg-panel border-b border-subtle shadow-sm"
       >
           <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
-          <span class="text-[15px] font-bold text-[#b8743a] flex-shrink-0">GeneaGrab</span>
-          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-[#ccc4b8] flex-shrink-0"></Icon>
-          <span class="text-[13px] text-[#a89e93] flex-shrink-0">AD83 · 5 Mi 1/342</span>
-          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-[#ccc4b8] flex-shrink-0"></Icon>
-          <span class="text-[13px] text-[#2c2820] font-medium truncate">
+          <span class="text-[15px] font-bold text-accent flex-shrink-0">GeneaGrab</span>
+          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0"></Icon>
+          <span class="text-[13px] text-dim flex-shrink-0">AD83 · 5 Mi 1/342</span>
+          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0"></Icon>
+          <span class="text-[13px] text-main font-medium truncate">
             Brignoles — Naissances 1792–1832
           </span>
         </div>
@@ -239,10 +239,10 @@ export const RegistryViewer = () => {
           class={[
             "flex items-center gap-2 px-3 py-1.5 rounded-lg",
             "text-[13px] font-medium border transition-colors duration-100 flex-shrink-0",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8743a]",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
             indexVisible()
-              ? "bg-[#fef3e7] border-[#f0c990] text-[#7a4a1e]"
-              : "bg-white border-[#e0d8cc] text-[#6b6358] hover:bg-[#faf7f3]",
+              ? "bg-accent-bg border-accent-border text-accent-text"
+              : "bg-panel border-subtle text-muted hover:bg-tinted",
           ].join(" ")}
         >
           <Icon icon="lucide:list"></Icon>
@@ -279,7 +279,7 @@ export const RegistryViewer = () => {
         <div
           class={[
             "flex-shrink-0 h-[6px] w-full cursor-row-resize z-10 group",
-            "bg-[#ede8e1] hover:bg-[#b8743a]/25 active:bg-[#b8743a]/50",
+            "bg-active hover:bg-accent/25 active:bg-accent/50",
             "transition-colors duration-150 flex items-center justify-center",
           ].join(" ")}
           onPointerDown={onResizePointerDown}
@@ -288,7 +288,7 @@ export const RegistryViewer = () => {
           aria-label="Redimensionner le panneau d'index"
         >
           <div class="flex flex-row gap-[3px] opacity-0 group-hover:opacity-60 transition-opacity">
-            {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-[#b8743a]" />)}
+            {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-accent" />)}
           </div>
         </div>
       )}
@@ -312,16 +312,16 @@ export const RegistryViewer = () => {
       )}
 
       <div
-        class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-white border-t border-[#e0d8cc]"
+        class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle"
         role="status"
         aria-live="polite"
       >
         <div class="flex items-center gap-4">
-          <span class="text-[11px] text-[#a89e93]">{currentImage()}</span>
-          <span class="text-[11px] text-[#a89e93]">{TOTAL_IMAGES} prises de vue · {MOCK_ROWS.length} actes indexés</span>
+          <span class="text-[11px] text-dim">{currentImage()}</span>
+          <span class="text-[11px] text-dim">{TOTAL_IMAGES} prises de vue · {MOCK_ROWS.length} actes indexés</span>
         </div>
         <div class="flex items-center gap-3">
-          <span class="text-[11px] text-[#a89e93] tabular-nums">
+          <span class="text-[11px] text-dim tabular-nums">
             {new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}
           </span>
         </div>

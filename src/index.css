@@ -1,1 +1,180 @@
 @import "tailwindcss";
+@plugin "tailwind-scrollbar";
+
+@theme {
+  /* Register fonts */
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+
+  /* Register all custom colors into the Tailwind engine */
+  --color-app: var(--app);
+  --color-panel: var(--panel);
+  --color-tinted: var(--tinted);
+  --color-hover: var(--hover);
+  --color-active: var(--active);
+  
+  --color-subtle: var(--subtle);
+  --color-subtle-md: var(--subtle-md);
+  
+  --color-main: var(--main);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-bg: var(--accent-bg);
+  --color-accent-border: var(--accent-border);
+  --color-accent-text: var(--accent-text);
+  
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  
+  --color-viewer-bg: var(--viewer-bg);
+  --color-viewer-dark: var(--viewer-dark);
+
+  /* Event tags */
+  --color-event-birth: var(--evt-birth);
+  --color-event-birth-bg: var(--evt-birth-bg);
+  --color-event-birth-border: var(--evt-birth-border);
+  
+  --color-event-marriage: var(--evt-marriage);
+  --color-event-marriage-bg: var(--evt-marriage-bg);
+  --color-event-marriage-border: var(--evt-marriage-border);
+  
+  --color-event-death: var(--evt-death);
+  --color-event-death-bg: var(--evt-death-bg);
+  --color-event-death-border: var(--evt-death-border);
+  
+  --color-event-burial: var(--evt-burial);
+  --color-event-burial-bg: var(--evt-burial-bg);
+  --color-event-burial-border: var(--evt-burial-border);
+  
+  --color-event-will: var(--evt-will);
+  --color-event-will-bg: var(--evt-will-bg);
+  --color-event-will-border: var(--evt-will-border);
+  
+  --color-event-census: var(--evt-census);
+  --color-event-census-bg: var(--evt-census-bg);
+  --color-event-census-border: var(--evt-census-border);
+  
+  --color-event-other: var(--evt-other);
+  --color-event-other-bg: var(--evt-other-bg);
+  --color-event-other-border: var(--evt-other-border);
+}
+
+:root {
+  /* Core UI */
+  --app: #f7f3ee;
+  --panel: #ffffff;
+  --tinted: #faf7f3;
+  --hover: #f2ece3;
+  --active: #efe8dc;
+  
+  /* Borders */
+  --subtle: #e0d8cc;
+  --subtle-md: #ccc4b8;
+  
+  /* Typography */
+  --main: #2c2820;
+  --muted: #6b6358;
+  --dim: #a89e93;
+  
+  /* Accents & Status */
+  --accent: #b8743a;
+  --accent-hover: #a06530;
+  --accent-bg: #fef3e7;
+  --accent-border: #f0c990;
+  --accent-text: #7a4a1e;
+  
+  --success: #3a8c5c;
+  --danger: #c0392b;
+  
+  /* Viewer specific */
+  --viewer-bg: #eee8df;
+  --viewer-dark: #1a1815;
+
+  /* Event tags */
+  --evt-birth: #2d6a4f;
+  --evt-birth-bg: #d8f3dc;
+  --evt-birth-border: #b7e4c7;
+  --evt-marriage: #1d4e89;
+  --evt-marriage-bg: #dbeafe;
+  --evt-marriage-border: #bfdbfe;
+  --evt-death: #7f1d1d;
+  --evt-death-bg: #fee2e2;
+  --evt-death-border: #fecaca;
+  --evt-burial: #713f12;
+  --evt-burial-bg: #ffedd5;
+  --evt-burial-border: #fed7aa;
+  --evt-will: #4b5563;
+  --evt-will-bg: #f3f4f6;
+  --evt-will-border: #e5e7eb;
+  --evt-census: #403937;
+  --evt-census-bg: #f2e9e4;
+  --evt-census-border: #e0d8cc;
+  --evt-other: #6b6358;
+  --evt-other-bg: #f2ece3;
+  --evt-other-border: #e0d8cc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Core UI */
+    --app: #1e1e20;
+    --panel: #252528;
+    --tinted: #2a2a2e;
+    --hover: #323236;
+    --active: #3a3a3f;
+    
+    /* Borders */
+    --subtle: #3a3a3f;
+    --subtle-md: #525259;
+    
+    /* Typography */
+    --main: #e4e4e7;
+    --muted: #a1a1aa;
+    --dim: #71717a;
+    
+    /* Accents & Status */
+    --accent: #d9853b;
+    --accent-hover: #eda058;
+    --accent-bg: #3b2615;
+    --accent-border: #5c3b20;
+    --accent-text: #f5c8a3;
+    
+    --success: #4ade80;
+    --danger: #f87171;
+    
+    /* Viewer specific */
+    --viewer-bg: #141415;
+    --viewer-dark: #09090b;
+
+    /* Event tags */
+    --evt-birth: #86d4af;
+    --evt-birth-bg: #193829;
+    --evt-birth-border: #23533c;
+    
+    --evt-marriage: #93bbf5;
+    --evt-marriage-bg: #1a3052;
+    --evt-marriage-border: #264778;
+    
+    --evt-death: #f28f8f;
+    --evt-death-bg: #4d1d1d;
+    --evt-death-border: #732929;
+    
+    --evt-burial: #e0a67b;
+    --evt-burial-bg: #472b15;
+    --evt-burial-border: #6b401e;
+    
+    --evt-will: #b3b3ba;
+    --evt-will-bg: #323236;
+    --evt-will-border: #4a4a50;
+    
+    --evt-census: #c0b3b9;
+    --evt-census-bg: #382d33;
+    --evt-census-border: #54434d;
+    
+    --evt-other: #b3b3ba;
+    --evt-other-bg: #323236;
+    --evt-other-border: #4a4a50;
+  }
+}

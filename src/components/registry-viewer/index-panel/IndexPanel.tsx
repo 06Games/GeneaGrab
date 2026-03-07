@@ -45,14 +45,14 @@ export const IndexPanel = (props: IndexPanelProps) => {
 
   return (
     <Show when={props.visible}>
-      <div class={props.isDetached ? "flex-1 flex flex-col bg-white w-full h-full" : "flex-shrink-0 flex flex-col border-t border-[#e0d8cc] bg-white"} style={props.isDetached ? {} : { height: `${props.height}px` }}>
-        <div class="flex-shrink-0 flex items-center justify-between px-4 h-10 border-b border-[#e0d8cc] bg-[#faf7f3]">
+      <div class={props.isDetached ? "flex-1 flex flex-col bg-panel w-full h-full" : "flex-shrink-0 flex flex-col border-t border-subtle bg-panel"} style={props.isDetached ? {} : { height: `${props.height}px` }}>
+        <div class="flex-shrink-0 flex items-center justify-between px-4 h-10 border-b border-subtle bg-tinted">
           <div class="flex items-center gap-2">
-            <span class="text-[13px] font-semibold text-[#2c2820]">Index</span>
+            <span class="text-[13px] font-semibold text-main">Index</span>
             <Badge>{props.rows.length} actes indexés</Badge>
           </div>
           <div class="flex items-center gap-1">
-            <span class="text-[11px] text-[#a89e93] mr-1 hidden sm:flex items-center gap-1"><Kbd>→</Kbd> détail <span class="mx-1">·</span> <Kbd>←</Kbd> liste</span>
+            <span class="text-[11px] text-dim mr-1 hidden sm:flex items-center gap-1"><Kbd>→</Kbd> détail <span class="mx-1">·</span> <Kbd>←</Kbd> liste</span>
             <Show when={!props.isDetached}><IconButton onClick={props.onDetach}><Icon icon="lucide:picture-in-picture"></Icon></IconButton></Show>
             <IconButton onClick={props.onToggle}><Icon icon="lucide:x"></Icon></IconButton>
           </div>
@@ -70,9 +70,9 @@ export const IndexPanel = (props: IndexPanelProps) => {
             />
           </div>
 
-          <div class="flex-shrink-0 w-[6px] h-full cursor-col-resize z-10 group bg-[#f2ece3] hover:bg-[#b8743a]/25 transition-colors duration-150 flex items-center justify-center" onPointerDown={onHandlePointerDown}>
+          <div class="flex-shrink-0 w-[6px] h-full cursor-col-resize z-10 group bg-hover hover:bg-accent/25 transition-colors duration-150 flex items-center justify-center" onPointerDown={onHandlePointerDown}>
             <div class="flex flex-col gap-[3px] opacity-0 group-hover:opacity-60 transition-opacity">
-              {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-[#b8743a]" />)}
+              {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-accent" />)}
             </div>
           </div>
 

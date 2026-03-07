@@ -30,8 +30,8 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
       aria-orientation="horizontal"
       class={[
         "flex-shrink-0 h-[86px] flex items-center gap-1 px-3",
-        "bg-[#f7f3ee] border-t border-[#e0d8cc] overflow-x-auto",
-        "scrollbar-thin scrollbar-thumb-[#ccc4b8] scrollbar-track-transparent",
+        "bg-app border-t border-subtle overflow-x-auto",
+        "scrollbar-thin scrollbar-thumb-subtle-md scrollbar-track-transparent",
       ].join(" ")}
     >
       <For each={images()}>
@@ -48,24 +48,24 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
               onClick={() => props.onImageChange(image)}
               class={[
                 "flex-shrink-0 flex flex-col items-center gap-1 rounded-md group",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8743a]",
+                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
               ].join(" ")}
             >
               <div class={[
                 "w-20 h-[54px] rounded border-2 overflow-hidden transition-all duration-150",
-                "bg-white flex items-center justify-center",
+                "bg-panel flex items-center justify-center",
                 isActive()
-                  ? "border-[#b8743a] shadow-md shadow-[#b8743a]/20"
-                  : "border-[#e0d8cc] opacity-60 group-hover:opacity-100 group-hover:border-[#ccc4b8] group-hover:shadow-sm",
+                  ? "border-accent shadow-md shadow-accent/20"
+                  : "border-subtle opacity-60 group-hover:opacity-100 group-hover:border-subtle-md group-hover:shadow-sm",
               ].join(" ")}>
                 {src()
                   ? <img src={src()} alt="" class="w-full h-full object-cover" loading="lazy" />
-                  : <span class="text-[9px] text-[#a89e93] font-mono leading-none">{image}</span>
+                  : <span class="text-[9px] text-dim font-mono leading-none">{image}</span>
                 }
               </div>
               <span class={[
                 "text-[10px] tabular-nums transition-colors",
-                isActive() ? "text-[#b8743a] font-semibold" : "text-[#a89e93] group-hover:text-[#6b6358]",
+                isActive() ? "text-accent font-semibold" : "text-dim group-hover:text-muted",
               ].join(" ")}>
                 {image}
               </span>

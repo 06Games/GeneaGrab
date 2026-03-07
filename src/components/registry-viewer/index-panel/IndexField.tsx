@@ -31,7 +31,7 @@ export const IndexField = (props: IndexFieldProps) => {
         title={props.label}
         class={[
           props.labelWidth || "w-24",
-          "flex-shrink-0 text-[12px] text-[#a89e93] text-right truncate select-none cursor-pointer"
+          "flex-shrink-0 text-[12px] text-dim text-right truncate select-none cursor-pointer"
         ].join(" ")}
       >
         {props.label}
@@ -50,9 +50,9 @@ export const IndexField = (props: IndexFieldProps) => {
             autocomplete="off"
             spellcheck={false}
             class={[
-              "w-full h-full px-3 rounded-lg border text-[13px] text-[#2c2820]",
-              "bg-[#faf7f3] border-[#e0d8cc] placeholder:text-[#ccc4b8]",
-              "focus:border-[#b8743a] focus:ring-2 focus:ring-[#b8743a]/15 focus:outline-none",
+              "w-full h-full px-3 rounded-lg border text-[13px] text-main",
+              "bg-tinted border-subtle placeholder:text-subtle-md",
+              "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
               "transition-all duration-100",
             ].join(" ")}
           />
@@ -75,9 +75,9 @@ export const IndexField = (props: IndexFieldProps) => {
                 onChange={(e) => props.onInput?.(e.currentTarget.checked)}
                 class={[
                   "appearance-none cursor-pointer m-0 w-full h-full rounded border",
-                  "bg-[#faf7f3] border-[#e0d8cc]",
-                  "focus:border-[#b8743a] focus:ring-2 focus:ring-[#b8743a]/15 focus:outline-none",
-                  "checked:bg-[#b8743a] checked:border-[#b8743a]",
+                  "bg-tinted border-subtle",
+                  "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                  "checked:bg-accent checked:border-accent",
                   "transition-all duration-100"
                 ].join(" ")}
               />

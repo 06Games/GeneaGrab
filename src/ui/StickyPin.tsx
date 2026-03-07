@@ -23,10 +23,10 @@ export const StickyPin = (props: StickyPinProps) => {
       class={[
         "flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md",
         "transition-colors duration-100",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8743a]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
         pinned()
-          ? "text-[#b8743a] bg-[#fef3e7] border border-[#f0c990]"
-          : "text-[#ccc4b8] hover:text-[#a89e93] hover:bg-[#f2ece3] border border-transparent",
+          ? "text-accent bg-accent-bg border border-accent-border"
+          : "text-subtle-md hover:text-dim hover:bg-hover border border-transparent",
       ].join(" ")}
     >
       <Icon icon="lucide:pin" class="w-3.5 h-3.5" aria-hidden="true"></Icon>

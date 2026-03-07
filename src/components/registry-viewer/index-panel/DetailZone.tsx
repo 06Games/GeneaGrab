@@ -49,28 +49,28 @@ export const DetailZone = (props: DetailZoneProps) => {
   };
 
   return (
-    <div ref={setRef} class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#faf7f3]">
+    <div ref={setRef} class="flex-1 flex flex-col min-w-0 overflow-hidden bg-tinted">
       {/* Header */}
-      <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-[#e0d8cc] bg-white">
+      <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-subtle bg-panel">
         <div class="flex items-center gap-2 overflow-hidden">
-          <span class="text-[13px] font-semibold text-[#2c2820] flex-shrink-0">
+          <span class="text-[13px] font-semibold text-main flex-shrink-0">
             {props.event ? `Acte / Événement #${props.event.event_id}` : "Aucun acte sélectionné"}
           </span>
           <Show when={props.event}>
-            <span class="text-[12px] text-[#a89e93] truncate">— {props.event!.title || props.event!.date}</span>
+            <span class="text-[12px] text-dim truncate">— {props.event!.title || props.event!.date}</span>
           </Show>
         </div>
-        <div class="flex items-center gap-1.5 flex-shrink-0 text-[11px] text-[#a89e93]">
+        <div class="flex items-center gap-1.5 flex-shrink-0 text-[11px] text-dim">
           <Kbd>←</Kbd> liste <span class="mx-1">·</span> <Kbd>Ctrl S</Kbd> sauvegarder
         </div>
       </div>
 
       {/* Formulaire scrollable */}
-      <div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-[#e0d8cc]">
+      <div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-subtle">
 
         <Show when={!props.event}>
           <div class="flex-1 flex items-center justify-center py-12">
-            <p class="text-[14px] text-[#a89e93] text-center">
+            <p class="text-[14px] text-dim text-center">
               Sélectionnez un acte dans la liste<br />
               <span class="text-[12px]">ou appuyez sur <Kbd>N</Kbd> pour en créer un nouveau</span>
             </p>
@@ -117,7 +117,7 @@ export const DetailZone = (props: DetailZoneProps) => {
 
             <button
               type="button" onClick={addPerson}
-              class="mt-2 w-full py-2 rounded-xl border-2 border-dashed border-[#e0d8cc] text-[13px] text-[#a89e93] flex items-center justify-center gap-1.5 hover:text-[#6b6358] hover:border-[#ccc4b8] hover:bg-white transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8743a]"
+              class="mt-2 w-full py-2 rounded-xl border-2 border-dashed border-subtle text-[13px] text-dim flex items-center justify-center gap-1.5 hover:text-muted hover:border-subtle-md hover:bg-panel transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <Icon icon="lucide:plus" width="16" height="16" class="block" /> Ajouter une personne
             </button>
@@ -129,14 +129,14 @@ export const DetailZone = (props: DetailZoneProps) => {
               <SectionLabel>Transcription</SectionLabel>
               <textarea
                 rows={4} value={props.event!.transcription_text} placeholder="Texte intégral de l'acte..."
-                spellcheck={false} class="w-full resize-y rounded-lg border bg-white px-3 py-2.5 text-[13px] text-[#2c2820] border-[#e0d8cc] focus:border-[#b8743a] focus:ring-2 focus:ring-[#b8743a]/15 outline-none"
+                spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
               />
             </div>
             <div>
               <SectionLabel>Notes de l'Acte</SectionLabel>
               <textarea
                 rows={4} value={props.event!.notes} placeholder="Remarques de l'indexeur..."
-                spellcheck={false} class="w-full resize-y rounded-lg border bg-white px-3 py-2.5 text-[13px] text-[#2c2820] border-[#e0d8cc] focus:border-[#b8743a] focus:ring-2 focus:ring-[#b8743a]/15 outline-none"
+                spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
               />
             </div>
           </section>
@@ -144,7 +144,7 @@ export const DetailZone = (props: DetailZoneProps) => {
       </div>
 
       {/* Action bar */}
-      <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-[#e0d8cc] bg-white">
+      <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-subtle bg-panel">
         <Button variant="ghost" size="sm" onClick={props.onReset}>Réinitialiser</Button>
         <div class="flex gap-2">
           <Button variant="outline" size="sm" onClick={() => props.event && props.onSave?.({ ...props.event, people: people() })} disabled={!props.event}>

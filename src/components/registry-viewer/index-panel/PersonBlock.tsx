@@ -30,10 +30,10 @@ export const PersonBlock = (props: PersonBlockProps) => {
     props.onChange(p().person_id, field, value);
 
   return (
-    <div class="border border-[#e0d8cc] rounded-xl overflow-hidden bg-white shadow-sm">
+    <div class="border border-subtle rounded-xl overflow-hidden bg-panel shadow-sm">
       {/* Header */}
-      <div class="flex items-center px-3 py-2 gap-2 bg-[#faf7f3] border-b border-[#e0d8cc]">
-        <span class="text-[#ccc4b8] cursor-grab select-none flex-shrink-0">
+      <div class="flex items-center px-3 py-2 gap-2 bg-tinted border-b border-subtle">
+        <span class="text-subtle-md cursor-grab select-none flex-shrink-0">
           <Icon icon="lucide:grip-vertical" class="block"></Icon>
         </span>
 
@@ -42,12 +42,12 @@ export const PersonBlock = (props: PersonBlockProps) => {
           onClick={() => setCollapsed(v => !v)}
           class="flex-1 flex items-center gap-2 text-left focus-visible:outline-none min-w-0"
         >
-          <span class="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-[#fef3e7] text-[#7a4a1e] border border-[#f0c990] flex-shrink-0">
-            {p().role || <span class="italic text-[#a89e93]">Sans rôle</span>}
+          <span class="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-accent-bg text-accent-text border border-accent-border flex-shrink-0">
+            {p().role || <span class="italic text-dim">Sans rôle</span>}
           </span>
           <Show when={displayName()}>
-            <span class="text-[13px] text-[#6b6358] truncate">
-              {p().is_deceased && <span class="text-xs mr-1 text-[#c0392b] font-bold">†</span>}
+            <span class="text-[13px] text-muted truncate">
+              {p().is_deceased && <span class="text-xs mr-1 text-danger font-bold">†</span>}
               {displayName()}
             </span>
           </Show>
@@ -58,7 +58,7 @@ export const PersonBlock = (props: PersonBlockProps) => {
             <Icon icon="lucide:chevron-down" class="block" />
           </span>
         </IconButton>
-        <IconButton title="Supprimer" onClick={() => props.onRemove(p().person_id)} class="text-[#c0392b] opacity-50 hover:opacity-100">
+        <IconButton title="Supprimer" onClick={() => props.onRemove(p().person_id)} class="text-danger opacity-50 hover:opacity-100">
           <Icon icon="lucide:trash-2" class="block"></Icon>
         </IconButton>
       </div>

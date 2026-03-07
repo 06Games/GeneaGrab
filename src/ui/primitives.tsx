@@ -1,32 +1,12 @@
 import { JSX } from "solid-js";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DESIGN TOKENS — warm archival light theme
-//
-//  bg-app      #f7f3ee   warm cream shell
-//  bg-panel    #ffffff   panel surfaces
-//  bg-tinted   #faf7f3   slightly tinted surface
-//  bg-hover    #f2ece3   hover state
-//  bg-active   #efe8dc   active / selected
-//  border      #e0d8cc   dividers
-//  border-md   #ccc4b8   medium emphasis border
-//  text        #2c2820   near-black warm
-//  text-2      #6b6358   secondary text
-//  text-3      #a89e93   tertiary / placeholder
-//  accent      #b8743a   warm terracotta amber
-//  accent-bg   #fef3e7   accent tint
-//  accent-text #7a4a1e   dark accent for text on light
-//  success     #3a8c5c
-//  danger      #c0392b
-// ─────────────────────────────────────────────────────────────────────────────
-
 // ─── Divider ─────────────────────────────────────────────────────────────────
 
 interface DividerProps { vertical?: boolean; class?: string }
 
 export const Divider = (props: DividerProps) => (
   <div class={[
-    "bg-[#e0d8cc] flex-shrink-0",
+    "bg-subtle flex-shrink-0",
     props.vertical ? "w-px self-stretch" : "h-px w-full",
     props.class,
   ].filter(Boolean).join(" ")} />
@@ -45,7 +25,7 @@ export const ResizeHandle = (props: ResizeHandleProps) => (
     onPointerDown={props.onPointerDown}
     class={[
       "group relative flex items-center justify-center select-none z-10 flex-shrink-0",
-      "bg-[#ede8e1] hover:bg-[#b8743a]/25 active:bg-[#b8743a]/45",
+      "bg-active hover:bg-accent/25 active:bg-accent/45",
       "transition-colors duration-150",
       props.vertical
         ? "w-[6px] h-full cursor-col-resize"
@@ -58,7 +38,7 @@ export const ResizeHandle = (props: ResizeHandleProps) => (
       props.vertical ? "flex-col" : "flex-row",
     ].join(" ")}>
       {[0, 1, 2].map(() => (
-        <div class="w-1 h-1 rounded-full bg-[#b8743a]" />
+        <div class="w-1 h-1 rounded-full bg-accent" />
       ))}
     </div>
   </div>
@@ -72,7 +52,7 @@ export const Badge = (props: BadgeProps) => (
   <span class={[
     "inline-flex items-center px-2 py-0.5 rounded-full",
     "text-[11px] font-medium",
-    "border border-[#e0d8cc] bg-[#faf7f3] text-[#7a4a1e]",
+    "border border-subtle bg-tinted text-accent-text",
     props.class,
   ].filter(Boolean).join(" ")}>
     {props.children}
@@ -99,15 +79,15 @@ export const Button = (props: ButtonProps) => {
   const base = [
     "inline-flex items-center justify-center gap-1.5 rounded-md font-medium",
     "transition-colors duration-100 focus-visible:outline-none",
-    "focus-visible:ring-2 focus-visible:ring-[#b8743a] focus-visible:ring-offset-1",
+    "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1",
     "disabled:opacity-40 disabled:cursor-not-allowed",
     size === "sm"  ? "px-2.5 py-1 text-[13px]" : "px-3.5 py-1.5 text-[14px]",
   ];
 
   const variants = {
-    ghost:   "text-[#6b6358] hover:text-[#2c2820] hover:bg-[#f2ece3]",
-    outline: "text-[#2c2820] border border-[#e0d8cc] bg-white hover:bg-[#f7f3ee] hover:border-[#ccc4b8]",
-    primary: "text-white bg-[#b8743a] hover:bg-[#a06530] shadow-sm",
+    ghost:   "text-muted hover:text-main hover:bg-hover",
+    outline: "text-main border border-subtle bg-panel hover:bg-app hover:border-subtle-md",
+    primary: "text-white bg-accent hover:bg-accent-hover shadow-sm",
   };
 
   return (
@@ -141,10 +121,10 @@ export const IconButton = (props: IconButtonProps) => (
     class={[
       "flex items-center justify-center w-8 h-8 rounded-md",
       "transition-colors duration-100",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8743a]",
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
       props.active
-        ? "text-[#b8743a] bg-[#fef3e7]"
-        : "text-[#6b6358] hover:text-[#2c2820] hover:bg-[#f2ece3]",
+        ? "text-accent bg-accent-bg"
+        : "text-muted hover:text-main hover:bg-hover",
       props.class,
     ].filter(Boolean).join(" ")}
   >
@@ -159,8 +139,8 @@ interface KbdProps { class?: string; children: JSX.Element }
 export const Kbd = (props: KbdProps) => (
   <kbd class={[
     "px-1.5 py-0.5 rounded text-[10px] font-mono",
-    "bg-[#f2ece3] border border-[#ccc4b8] text-[#6b6358]",
-    "shadow-[0_1px_0_#ccc4b8]",
+    "bg-hover border border-subtle-md text-muted",
+    "shadow-[0_1px_0_var(--subtle-md)]",
     props.class,
   ].filter(Boolean).join(" ")}>
     {props.children}
@@ -173,10 +153,10 @@ interface MetaRowProps { label: string; value?: string | null }
 
 export const MetaRow = (props: MetaRowProps) => (
   <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-baseline py-1">
-    <span class="text-[12px] text-[#a89e93] truncate capitalize">{props.label}</span>
+    <span class="text-[12px] text-dim truncate capitalize">{props.label}</span>
     {props.value
-      ? <span class="text-[13px] text-[#2c2820] truncate" title={props.value}>{props.value}</span>
-      : <span class="text-[13px] text-[#ccc4b8] italic">—</span>
+      ? <span class="text-[13px] text-main truncate" title={props.value}>{props.value}</span>
+      : <span class="text-[13px] text-subtle-md italic">—</span>
     }
   </div>
 );
@@ -187,9 +167,9 @@ interface SectionLabelProps { children: JSX.Element; class?: string }
 
 export const SectionLabel = (props: SectionLabelProps) => (
   <div class={["flex items-center gap-2 mb-2", props.class].filter(Boolean).join(" ")}>
-    <span class="text-[11px] font-semibold uppercase tracking-wider text-[#a89e93]">
+    <span class="text-[11px] font-semibold uppercase tracking-wider text-dim">
       {props.children}
     </span>
-    <div class="flex-1 h-px bg-[#e0d8cc]" />
+    <div class="flex-1 h-px bg-subtle" />
   </div>
 );
