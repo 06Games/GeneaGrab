@@ -6,13 +6,21 @@ import { ThumbnailBar } from "./ThumbnailBar";
 import { InfoNotesPanel } from "./InfoNotesPanel";
 import { IndexPanel } from "./index-panel/IndexPanel";
 import { Icon } from "@iconify-icon/solid";
+import { useDetachedWindow } from "../../hooks/DetachedWindow";
+
+type SyncMessage = 
+  | { type: 'READY' }
+  | { type: 'SYNC_STATE', selectedEventId: number | null }
+  | { type: 'DETACHED_CLOSED' }
+  | { type: 'TOGGLE_DETACHED' }
+  | { type: 'SELECT_EVENT', id: number | null };
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
 const MOCK_REGISTRY: RegistryMeta = {
   source_id: "src-123",
   archive_reference: "5 Mi 1/342",
-  source_type: "État civil",
+  source_types: new Set(["Naissance", "Mariage"]),
   town: "Brignoles",
   repository_url: "https://archives.var.fr",
 };
@@ -20,7 +28,7 @@ const MOCK_REGISTRY: RegistryMeta = {
 const MOCK_IMAGE: ImageMeta = {
   folio:        "12r",
   dateRange:    "3 Frimaire An II",
-  actTypes:     new Map<string, number>([
+  actTypes:     new Map<EventType, number>([
     ["Naissance", 2],
     ["Mariage", 1],
     ["Décès", 1],
@@ -68,79 +76,70 @@ const MAX_INDEX_HEIGHT = 700;
 const DEFAULT_INDEX_HEIGHT = 340;
 
 export const RegistryViewer = () => {
-  // 1. Detect if this specific window is the spawned "IndexPanel" window
-  const isDetachedMode = typeof window !== 'undefined' && 
-    (window.location.search.includes('mode=index') || window.location.hash.includes('mode=index'));
+  const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : "");
+  const isDetachedMode = urlParams.get('mode') === 'index';
+  
+  const activeRegistryId = urlParams.get('registryId') || MOCK_REGISTRY.source_id;
 
   const [currentImage,    setCurrentImage]    = createSignal(12);
   const [indexVisible,    setIndexVisible]    = createSignal(true);
-  const [isDetached,      setIsDetached]      = createSignal(false);
   const [indexHeight,     setIndexHeight]     = createSignal(DEFAULT_INDEX_HEIGHT);
   const [selectedEventId, setSelectedEventId] = createSignal<number | null>(3);
   const [notes,           setNotes]           = createSignal("");
   const [saveStatus,      setSaveStatus]      = createSignal<"saved" | "saving" | "error">("saved");
 
-  // 2. Setup Cross-Window State Sync via BroadcastChannel
-  const channel = typeof window !== 'undefined' ? new BroadcastChannel('geneagrab_sync') : null;
-
-  onMount(() => {
-    if (!channel) return;
-
-    if (isDetachedMode) {
-      // We are the detached popup. Tell the main window we are ready.
-      channel.postMessage({ type: 'READY' });
-      
-      channel.onmessage = (e) => {
-        if (e.data.type === 'SYNC_STATE') setSelectedEventId(e.data.selectedEventId);
-      };
-      
-      // Fallback for normal browsers closing
-      window.addEventListener('beforeunload', () => channel.postMessage({ type: 'DETACHED_CLOSED' }));
-    } else {
-      // We are the Main Window. Listen for updates from the detached popup.
-      channel.onmessage = (e) => {
-        if (e.data.type === 'READY') {
-          // Send initial state to popup immediately
-          channel.postMessage({ type: 'SYNC_STATE', selectedEventId: selectedEventId() });
+  const { isDetached, setIsDetached, detach, closeSelf, sendMessage } = useDetachedWindow<SyncMessage>({
+    id: `index-${activeRegistryId}`,
+    title: `Index - ${MOCK_REGISTRY.archive_reference}`,
+    queryParams: {
+      mode: 'index',
+      registryId: activeRegistryId
+    },
+    width: 1400,
+    height: 600,
+    onMessage: (msg) => {
+      if (isDetachedMode) {
+        // We are the popup window receiving a sync from the main window
+        if (msg.type === 'SYNC_STATE') setSelectedEventId(msg.selectedEventId);
+      } else {
+        // We are the main window receiving messages from the popup window
+        if (msg.type === 'READY') {
+          sendMessage({ type: 'SYNC_STATE', selectedEventId: selectedEventId() });
         }
-        if (e.data.type === 'DETACHED_CLOSED' || e.data.type === 'TOGGLE_DETACHED') {
+        if (msg.type === 'DETACHED_CLOSED' || msg.type === 'TOGGLE_DETACHED') {
           setIsDetached(false);
         }
-        if (e.data.type === 'SELECT_EVENT') {
-          setSelectedEventId(e.data.id);
+        if (msg.type === 'SELECT_EVENT') {
+          setSelectedEventId(msg.id);
         }
-      };
+      }
     }
   });
 
-  onCleanup(() => {
-    if (channel) channel.close();
+  onMount(() => {
+    if (isDetachedMode) {
+      // Tell the main window we are ready
+      sendMessage({ type: 'READY' });
+      
+      // Fallback for normal browsers closing
+      const handleUnload = () => sendMessage({ type: 'DETACHED_CLOSED' });
+      window.addEventListener('beforeunload', handleUnload);
+      onCleanup(() => window.removeEventListener('beforeunload', handleUnload));
+    }
   });
 
-  // 3. Whenever selectedEventId changes in the main window, broadcast it
+  // Whenever selectedEventId changes in the main window, broadcast it
   createEffect(() => {
-    if (!isDetachedMode && channel) {
-      channel.postMessage({ type: 'SYNC_STATE', selectedEventId: selectedEventId() });
+    if (!isDetachedMode) {
+      sendMessage({ type: 'SYNC_STATE', selectedEventId: selectedEventId() });
     }
   });
 
   const selectedEvent = () => selectedEventId() === MOCK_EVENT.event_id ? MOCK_EVENT : null;
 
-  // Handles closing the detached window via button click
   const handleCloseDetachedWindow = async () => {
-    channel?.postMessage({ type: 'TOGGLE_DETACHED' });
-    const isTauri = typeof window !== 'undefined' && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
-    
-    if (isTauri) {
-      try {
-        const { getCurrentWindow } = await import('@tauri-apps/api/window');
-        await getCurrentWindow().close();
-        return;
-      } catch (e) {
-        console.warn("Tauri close API not available, falling back to window.close", e);
-      }
-    }
-    window.close();
+    sendMessage({ type: 'TOGGLE_DETACHED' });
+    await closeSelf();
   };
 
   // ── Early Return for Detached Native Window ──
@@ -159,7 +158,7 @@ export const RegistryViewer = () => {
           selectedEvent={selectedEvent()}
           onToggle={handleCloseDetachedWindow}
           onDetach={handleCloseDetachedWindow}
-          onSelectRow={(row) => channel?.postMessage({ type: 'SELECT_EVENT', id: row.event_id })}
+          onSelectRow={(row) => sendMessage({ type: 'SELECT_EVENT', id: row.event_id })}
           onNewAct={() => console.log("new event")}
           onSave={(event) => console.log("save", event)}
           onValidateAndNext={(event) => console.log("validate", event)}
@@ -168,59 +167,6 @@ export const RegistryViewer = () => {
       </div>
     );
   }
-
-  // ── Spawn Window Logic ──
-  const handleDetach = async () => {
-    setIsDetached(true);
-    
-    const urlObj = new URL(window.location.href);
-    urlObj.searchParams.set('mode', 'index');
-    const targetUrl = urlObj.pathname + urlObj.search + urlObj.hash;
-
-    const isTauri = typeof window !== 'undefined' && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
-    
-    if (isTauri) {
-      try {
-        const { WebviewWindow } = await import('@tauri-apps/api/webviewWindow');
-        
-        const windowLabel = `index-window-${Date.now()}`;
-        const webview = new WebviewWindow(windowLabel, {
-          url: targetUrl,
-          title: 'Index - GeneaGrab',
-          width: 1400,
-          height: 600,
-          x: 200,
-          y: 200,
-        });
-
-        webview.once('tauri://error', (e: any) => {
-          console.error('Tauri window creation error:', e);
-          setIsDetached(false);
-        });
-
-        webview.once('tauri://destroyed', () => {
-          setIsDetached(false);
-        });
-        
-        return;
-      } catch (e: any) {
-        console.warn("Failed to spawn Tauri native window.", e);
-        setIsDetached(false);
-      }
-    }
-
-    const popup = window.open(targetUrl, 'IndexWindow', 'width=1400,height=600,left=200,top=200');
-    if (popup) {
-      const timer = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(timer);
-          setIsDetached(false);
-        }
-      }, 500);
-    } else {
-      setIsDetached(false);
-    }
-  };
 
   // ── Global keyboard shortcuts ─────────────────────────────────────────────
   const onKeyDown = (e: KeyboardEvent) => {
@@ -356,7 +302,7 @@ export const RegistryViewer = () => {
           selectedEventId={selectedEventId()}
           selectedEvent={selectedEvent()}
           onToggle={() => setIndexVisible(false)}
-          onDetach={handleDetach}
+          onDetach={() => detach()}
           onSelectRow={(row) => setSelectedEventId(row.event_id)}
           onNewAct={() => console.log("new event")}
           onSave={(event) => console.log("save", event)}
