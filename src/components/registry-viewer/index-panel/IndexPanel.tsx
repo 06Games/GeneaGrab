@@ -22,9 +22,9 @@ interface IndexPanelProps {
   onReset?: () => void;
 }
 
-const MIN_GRID_WIDTH = 480;
+const MIN_GRID_WIDTH = 250;
 const MAX_GRID_WIDTH = 780;
-const DEFAULT_GRID_WIDTH = 560;
+const DEFAULT_GRID_WIDTH = 480;
 
 export const IndexPanel = (props: IndexPanelProps) => {
   const [gridWidth, setGridWidth] = createSignal(DEFAULT_GRID_WIDTH);

@@ -126,8 +126,11 @@ export const MainViewer = (props: MainViewerProps) => {
 
         <Divider vertical class="mx-2 h-5" />
 
-        <IconButton title="Télécharger l'image HD">
+        <IconButton title="Télécharger l'image pleine résolution">
           <Icon icon="lucide:download"></Icon>
+        </IconButton>
+        <IconButton title="Copier l'URL de l'image">
+          <Icon icon="lucide:link"></Icon>
         </IconButton>
       </div>
 
@@ -136,7 +139,7 @@ export const MainViewer = (props: MainViewerProps) => {
         {!props.imageSrc && (
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#eee8df] z-20">
              <div class="flex flex-col items-center gap-3 select-none">
-              <Icon icon="lucide:image" class="w-10 h-10 text-[#e0d8cc]"></Icon>
+              <Icon icon="lucide:image" class="text-[#e0d8cc]" width="50" height="50"></Icon>
               <span class="text-[13px] text-[#a89e93]">vue {props.currentImage} — aucune image</span>
             </div>
           </div>
