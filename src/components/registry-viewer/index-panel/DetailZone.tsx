@@ -1,13 +1,10 @@
 import { createSignal, Show, Index } from "solid-js";
-import type { EventDetail, PersonEntry, EventType } from "../../../types/registry";
+import type { EventDetail, PersonEntry } from "../../../types/registry";
+import { EVENT_TYPE_OPTIONS } from "../../../types/registry";
 import { Button, Kbd, SectionLabel } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
 import { PersonBlock } from "./PersonBlock";
 import { Icon } from "@iconify-icon/solid";
-
-const EVENT_TYPE_OPTIONS: string[] = [
-  "Naissance", "Mariage", "Décès", "Sépulture", "Testament", "Recensement", "Autre",
-];
 
 interface DetailZoneProps {
   event: EventDetail | null;
@@ -43,14 +40,8 @@ export const DetailZone = (props: DetailZoneProps) => {
     setPeople(prev => prev.filter(p => p.person_id !== id));
   };
 
-  const setEventField = (field: keyof EventDetail, val: string) => {
-     // Local state mutation strategy would go here, assuming parent passes down a signal
-     // Or we emit changes via a callback. Simplified for view.
-  };
-
   return (
     <div ref={setRef} class="flex-1 flex flex-col min-w-0 overflow-hidden bg-tinted">
-      {/* Header */}
       <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-subtle bg-panel">
         <div class="flex items-center gap-2 overflow-hidden">
           <span class="text-[13px] font-semibold text-main flex-shrink-0">
@@ -65,9 +56,7 @@ export const DetailZone = (props: DetailZoneProps) => {
         </div>
       </div>
 
-      {/* Formulaire scrollable */}
       <div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-subtle">
-
         <Show when={!props.event}>
           <div class="flex-1 flex items-center justify-center py-12">
             <p class="text-[14px] text-dim text-center">
@@ -78,27 +67,22 @@ export const DetailZone = (props: DetailZoneProps) => {
         </Show>
 
         <Show when={props.event}>
-          {/* Section Acte (events) */}
           <section>
             <SectionLabel>Détails de l'Acte</SectionLabel>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
               <IndexField label="Type" value={props.event!.event_type} tabIndex={1} options={EVENT_TYPE_OPTIONS} />
               <IndexField label="Titre" value={props.event!.title} tabIndex={2} placeholder="Testament de..." />
               <IndexField label="N° Acte" value={props.event!.act_number} tabIndex={3} placeholder="Ex: 47" />
-              
               <IndexField label="Date (Texte)" value={props.event!.date} tabIndex={4} placeholder="12 Floréal an III" />
               <IndexField label="Date Norm." value={props.event!.date_normalized} tabIndex={5} placeholder="YYYY-MM-DD" />
               <IndexField label="Page/Folio" value={props.event!.page} tabIndex={6} />
-              
               <IndexField label="Ville" value={props.event!.town} tabIndex={7} defaultPinned />
               <IndexField label="Paroisse" value={props.event!.parish} tabIndex={8} defaultPinned />
               <IndexField label="Hameau" value={props.event!.hamlet} tabIndex={9} defaultPinned />
-              
               <IndexField label="N° Image (Vue)" value={props.event!.image_number} tabIndex={10} />
             </div>
           </section>
 
-          {/* Section Personnes (persons, event_participants, person_relationships) */}
           <section>
             <SectionLabel>Personnes & Participants</SectionLabel>
             <div class="flex flex-col gap-2">
@@ -107,7 +91,7 @@ export const DetailZone = (props: DetailZoneProps) => {
                   <PersonBlock
                     person={person()}
                     index={i}
-                    tabStart={20 + i * 20} // Laisse 20 tabIndex libres par personne
+                    tabStart={20 + i * 20} 
                     onChange={updatePerson}
                     onRemove={removePerson}
                   />
@@ -123,7 +107,6 @@ export const DetailZone = (props: DetailZoneProps) => {
             </button>
           </section>
 
-          {/* Section Textes et Notes */}
           <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <SectionLabel>Transcription</SectionLabel>
@@ -143,7 +126,6 @@ export const DetailZone = (props: DetailZoneProps) => {
         </Show>
       </div>
 
-      {/* Action bar */}
       <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-subtle bg-panel">
         <Button variant="ghost" size="sm" onClick={props.onReset}>Réinitialiser</Button>
         <div class="flex gap-2">

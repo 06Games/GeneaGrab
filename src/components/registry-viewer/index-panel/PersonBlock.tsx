@@ -1,13 +1,9 @@
 import { createSignal, Show } from "solid-js";
 import type { PersonEntry } from "../../../types/registry";
-import { ROLE_SUGGESTIONS, RELATION_SUGGESTIONS } from "../../../types/registry";
+import { ROLE_SUGGESTIONS, RELATION_SUGGESTIONS, PROFESSION_OPTIONS } from "../../../types/registry";
 import { IconButton } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
 import { Icon } from "@iconify-icon/solid";
-
-const PROFESSION_OPTIONS = [
-  "Laboureur", "Tisserand", "Notaire", "Charpentier", "Cordonnier", "Cultivateur", "Ménagère"
-];
 
 interface PersonBlockProps {
   person: PersonEntry;

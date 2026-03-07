@@ -1,4 +1,11 @@
-// ─── Registry & image metadata (Sources) ──────────────────────────────────────
+export type EventType = 
+  | "Naissance" 
+  | "Mariage" 
+  | "Décès" 
+  | "Sépulture" 
+  | "Testament" 
+  | "Recensement" 
+  | "Autre";
 
 export interface RegistryMeta {
   source_id: string;
@@ -14,42 +21,20 @@ export interface ImageMeta {
   actTypes: Map<EventType, number>;
 }
 
-// ─── Events (Acts) ────────────────────────────────────────────────────────────
-
-export type EventType =
-  | "Naissance"
-  | "Mariage"
-  | "Décès"
-  | "Sépulture"
-  | "Testament"
-  | "Recensement"
-  | "Autre";
-
 export interface EventRow {
   event_id: number;
   date: string;
-  event_type: EventType | string;
+  event_type: EventType;
   title: string;
 }
 
-// ─── People inside an act ─────────────────────────────────────────────────────
-
-/**
- * PersonEntry — one person within an act.
- * Map à la fois la table `persons`, `event_participants` et `person_relationships`
- * pour une saisie fluide "à plat" côté UI.
- */
 export interface PersonEntry {
   person_id: string;
-  
-  // -- event_participants --
-  role: string; // ex: Déclarant, Testateur, Témoin
-  
-  // -- persons --
+  role: string;
   first_name: string;
   last_name: string;
-  sex: string; // 'M', 'F', 'Inconnu'
-  title: string; // ex: nob., Me, Révérend
+  sex: string;
+  title: string;
   age: string;
   is_deceased: boolean;
   occupation: string;
@@ -57,39 +42,40 @@ export interface PersonEntry {
   residence_place: string;
   sequence_number: string;
   notes: string;
-
-  // -- person_relationships (simplifié pour l'UI) --
-  relationship_type: string; // ex: Père de, Époux de
-  relationship_to: string; // ex: Jean DUPONT (ou ID)
+  relationship_type: string;
+  relationship_to: string;
 }
 
 export interface EventDetail {
   event_id: number;
-  event_type: EventType | string;
+  date: string;
+  date_normalized: string;
+  event_type: EventType;
   title: string;
   act_number: string;
-  date: string; // JSON inline possible côté DB, string côté UI
-  date_normalized: string;
-  town: string;
-  hamlet: string;
-  parish: string;
   page: string;
   image_number: string;
+  town: string;
+  parish: string;
+  hamlet: string;
   transcription_text: string;
   notes: string;
-  
   people: PersonEntry[];
 }
 
-// ─── Suggestions communes ───────────────────────────────────────────────────
-
-export const ROLE_SUGGESTIONS: string[] = [
-  "Sujet principal", "Déclarant", "Déclarante", "Témoin", 
-  "Notaire", "Curé", "Officier d'état civil", "Chef de ménage", 
-  "Résident", "Mentionné", "Parrain", "Marraine"
+// Shared UI Constants
+export const EVENT_TYPE_OPTIONS: EventType[] = [
+  "Naissance", "Mariage", "Décès", "Sépulture", "Testament", "Recensement", "Autre",
 ];
 
-export const RELATION_SUGGESTIONS: string[] = [
-  "Père de", "Mère de", "Époux de", "Épouse de", 
-  "Enfant de", "Veuf de", "Veuve de", "Frère de", "Sœur de"
+export const ROLE_SUGGESTIONS = [
+  "Sujet principal", "Époux", "Épouse", "Père", "Mère", "Témoin", "Déclarant", "Parrain", "Marraine"
+];
+
+export const RELATION_SUGGESTIONS = [
+  "Époux de", "Épouse de", "Fils de", "Fille de", "Frère de", "Sœur de", "Veuve de", "Veuf de"
+];
+
+export const PROFESSION_OPTIONS = [
+  "Laboureur", "Tisserand", "Notaire", "Charpentier", "Cordonnier", "Cultivateur", "Ménagère", "Journalier", "Propriétaire"
 ];
