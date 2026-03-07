@@ -2,6 +2,7 @@ import { createSignal, For, Show } from "solid-js";
 import type { RegistryMeta, ImageMeta, EventType } from "../../types/registry";
 import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
+import { useI18n } from "../../ui/i18n";
 
 const ACT_TYPE_STYLES: Record<EventType, string> = {
   Naissance:      "text-event-birth bg-event-birth-bg border-event-birth-border",
@@ -24,22 +25,23 @@ interface InfoNotesPanelProps {
 }
 
 export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
+  const { t } = useI18n();
   const [registryExpanded, setRegistryExpanded] = createSignal(false);
 
   const saveInfo = () => ({
-    saved:   { dot: "bg-success", label: "Enregistré" },
-    saving:  { dot: "bg-accent animate-pulse", label: "Enregistrement…" },
-    error:   { dot: "bg-danger", label: "Erreur" },
+    saved:   { dot: "bg-success", label: t("infoPanel.saved") },
+    saving:  { dot: "bg-accent animate-pulse", label: t("infoPanel.saving") },
+    error:   { dot: "bg-danger", label: t("infoPanel.error") },
   })[props.saveStatus ?? "saved"];
 
   return (
     <aside
       class="flex flex-col w-72 min-w-[220px] flex-shrink-0 bg-panel border-l border-subtle overflow-hidden"
-      aria-label="Informations et notes"
+      aria-label={t("infoPanel.ariaLabel")}
     >
       <div class="flex items-center justify-between px-4 py-3 border-b border-subtle flex-shrink-0">
-        <span class="text-[13px] font-semibold text-main">Registre</span>
-        <IconButton title="Modifier les métadonnées" onClick={props.onEditRegistry}>
+        <span class="text-[13px] font-semibold text-main">{t("infoPanel.title")}</span>
+        <IconButton title={t("infoPanel.editMeta")} onClick={props.onEditRegistry}>
           <Icon icon="lucide:edit-2"></Icon>
         </IconButton>
       </div>
@@ -55,7 +57,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           <div class="overflow-hidden">
             <p class="text-[14px] font-medium text-main truncate">{props.registryMeta.archive_reference}</p>
             <p class="text-[12px] text-dim truncate mt-0.5">
-              {props.registryMeta.town} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : "Inconnu"}
+              {props.registryMeta.town} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
             </p>
           </div>
           <span class={["text-dim flex-shrink-0 ml-2 inline-flex items-center justify-center transition-transform duration-150 origin-center", registryExpanded() ? "rotate-180" : ""].join(" ")}>
@@ -74,13 +76,13 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       </div>
 
       {/* [B] Image metadata */}
-      <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
+        <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-[13px] font-semibold text-main">Folio {props.image}</span>
+          <span class="text-[13px] font-semibold text-main">{t("infoPanel.folio", { n: props.image })}</span>
         </div>
 
-        <MetaRow label="Période"  value={props.imageMeta.dateRange} />
-        <MetaRow label="Actes indexés"    value={String(Array.from(props.imageMeta.actTypes.values()).reduce((a, b) => a + b, 0))} />
+        <MetaRow label={t("infoPanel.period")}  value={props.imageMeta.dateRange} />
+        <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta.actTypes.values()).reduce((a, b) => a + b, 0))} />
 
         <div class="mt-2 flex flex-wrap gap-1.5">
           <For each={Array.from(props.imageMeta.actTypes.entries())}>
@@ -105,10 +107,10 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
         <div class="flex items-center justify-between mb-2">
           <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer">
-            Notes
+            {t("infoPanel.notesLabel")}
           </label>
           <span class="text-[11px] text-dim tabular-nums" aria-live="polite">
-            {props.notes.length} car.
+            {props.notes.length} {t("infoPanel.charsShort")}
           </span>
         </div>
 
@@ -116,7 +118,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           id="image-notes"
           value={props.notes}
           onInput={(e) => props.onNotesChange(e.currentTarget.value)}
-          placeholder="Annotations libres pour ce folio…"
+          placeholder={t("infoPanel.notesPlaceholder")}
           spellcheck={false}
           class={[
             "flex-1 resize-none rounded-lg border min-h-0",

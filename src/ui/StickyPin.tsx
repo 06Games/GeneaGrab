@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal } from "solid-js";
+import { useI18n } from "./i18n";
 
 interface StickyPinProps {
   defaultPinned?: boolean;
@@ -8,6 +9,7 @@ interface StickyPinProps {
 
 export const StickyPin = (props: StickyPinProps) => {
   const [pinned, setPinned] = createSignal(props.defaultPinned ?? false);
+  const { t } = useI18n();
 
   const toggle = () => {
     const next = !pinned();
@@ -19,7 +21,7 @@ export const StickyPin = (props: StickyPinProps) => {
     <button
       type="button"
       onClick={toggle}
-      title={pinned() ? "Valeur verrouillée (cliquer pour déverrouiller)" : "Verrouiller pour l'acte suivant"}
+      title={pinned() ? t("stickyPin.locked") : t("stickyPin.lockForNext")}
       class={[
         "flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md",
         "transition-colors duration-100",

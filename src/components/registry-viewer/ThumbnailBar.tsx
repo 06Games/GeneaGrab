@@ -1,4 +1,5 @@
 import { For, createEffect } from "solid-js";
+import { useI18n } from "../../ui/i18n";
 
 interface ThumbnailBarProps {
   totalImages: number;
@@ -13,6 +14,7 @@ interface ThumbnailBarProps {
  */
 export const ThumbnailBar = (props: ThumbnailBarProps) => {
   let containerRef!: HTMLDivElement;
+  const { t } = useI18n();
 
   const images = () => Array.from({ length: props.totalImages }, (_, i) => i + 1);
 
@@ -26,7 +28,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
     <div
       ref={containerRef!}
       role="listbox"
-      aria-label="Miniatures des prises de vue"
+      aria-label={t("thumbnailBar.ariaLabel")}
       aria-orientation="horizontal"
       class={[
         "flex-shrink-0 h-[86px] flex items-center gap-1 px-3",
@@ -43,7 +45,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
               type="button"
               role="option"
               aria-selected={isActive()}
-              aria-label={`Image ${image}`}
+              aria-label={t("thumbnailBar.imageLabel", { n: image })}
               data-image={image}
               onClick={() => props.onImageChange(image)}
               class={[

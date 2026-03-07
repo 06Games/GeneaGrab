@@ -6,6 +6,7 @@ import { InfoNotesPanel } from "./InfoNotesPanel";
 import { IndexPanel } from "./index-panel/IndexPanel";
 import { Icon } from "@iconify-icon/solid";
 import { useDetachedWindow } from "../../hooks/DetachedWindow";
+import { useI18n } from "../../ui/i18n";
 
 import type { RegistryMeta, ImageMeta, EventRow, EventDetail } from "../../types/registry";
 
@@ -43,6 +44,8 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
   const [selectedEventId, setSelectedEventId] = createSignal<number | null>(3);
   const [notes,           setNotes]           = createSignal("");
   const [saveStatus,      setSaveStatus]      = createSignal<"saved" | "saving" | "error">("saved");
+
+  const { t } = useI18n();
 
   const { isDetached, setIsDetached, detach, closeSelf, sendMessage } = useDetachedWindow<SyncMessage>({
     id: `index-${activeRegistryId}`,
@@ -178,7 +181,7 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
             "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
             indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted",
           ].join(" ")}>
-          <Icon icon="lucide:list" /> Index <Kbd>Ctrl I</Kbd>
+          <Icon icon="lucide:list" /> {t("registryViewer.index")} <Kbd>Ctrl I</Kbd>
         </button>
       </header>
 
@@ -233,7 +236,7 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
       <footer class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle" role="status">
         <div class="flex items-center gap-4">
           <span class="text-[11px] text-dim">{currentImage()}</span>
-          <span class="text-[11px] text-dim">{props.totalImages} vues · {props.eventRows.length} actes indexés</span>
+          <span class="text-[11px] text-dim">{t("registryViewer.viewsAndActs", { views: props.totalImages, acts: props.eventRows.length })}</span>
         </div>
         <div class="flex items-center gap-3">
           <span class="text-[11px] text-dim tabular-nums">

@@ -5,5 +5,10 @@ import "@fontsource/jetbrains-mono/600.css";
 
 import { render } from "solid-js/web";
 import App from "./App";
+import { I18nProvider } from "./ui/i18n";
 
-render(() => <App />, document.getElementById("root") as HTMLElement);
+render(() => (
+	<I18nProvider>
+		<App />
+	</I18nProvider>
+), document.getElementById("root") as HTMLElement);

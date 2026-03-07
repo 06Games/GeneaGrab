@@ -4,6 +4,7 @@ import { Badge, IconButton, Kbd } from "../../../ui/primitives";
 import { GlobalGrid } from "./GlobalGrid";
 import { DetailZone } from "./DetailZone";
 import { Icon } from "@iconify-icon/solid";
+import { useI18n } from "../../../ui/i18n";
 
 interface IndexPanelProps {
   visible: boolean;
@@ -29,6 +30,7 @@ export const IndexPanel = (props: IndexPanelProps) => {
   const [gridWidth, setGridWidth] = createSignal(DEFAULT_GRID_WIDTH);
   let gridRef!: HTMLDivElement;
   let detailRef!: HTMLDivElement;
+  const { t } = useI18n();
 
   const onHandlePointerDown = (e: PointerEvent) => {
     e.preventDefault();
@@ -48,11 +50,11 @@ export const IndexPanel = (props: IndexPanelProps) => {
       <div class={props.isDetached ? "flex-1 flex flex-col bg-panel w-full h-full" : "flex-shrink-0 flex flex-col border-t border-subtle bg-panel"} style={props.isDetached ? {} : { height: `${props.height}px` }}>
         <div class="flex-shrink-0 flex items-center justify-between px-4 h-10 border-b border-subtle bg-tinted">
           <div class="flex items-center gap-2">
-            <span class="text-[13px] font-semibold text-main">Index</span>
-            <Badge>{props.rows.length} actes indexés</Badge>
+            <span class="text-[13px] font-semibold text-main">{t("indexPanel.title")}</span>
+            <Badge>{t("indexPanel.badgeActs", { count: props.rows.length })}</Badge>
           </div>
           <div class="flex items-center gap-1">
-            <span class="text-[11px] text-dim mr-1 hidden sm:flex items-center gap-1"><Kbd>→</Kbd> détail <span class="mx-1">·</span> <Kbd>←</Kbd> liste</span>
+            <span class="text-[11px] text-dim mr-1 hidden sm:flex items-center gap-1"><Kbd>→</Kbd> {t("detail.help.detail")} <span class="mx-1">·</span> <Kbd>←</Kbd> {t("detail.help.list")}</span>
             <Show when={!props.isDetached}><IconButton onClick={props.onDetach}><Icon icon="lucide:picture-in-picture"></Icon></IconButton></Show>
             <IconButton onClick={props.onToggle}><Icon icon="lucide:x"></Icon></IconButton>
           </div>

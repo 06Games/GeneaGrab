@@ -1,7 +1,8 @@
 import { createSignal, createEffect, onMount, onCleanup } from "solid-js";
 import OpenSeadragon from "openseadragon";
-import { IconButton, Divider, Button } from "../../ui/primitives";
+import { IconButton, Divider } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
+import { useI18n } from "../../ui/i18n";
 
 interface MainViewerProps {
   currentImage: number;
@@ -12,6 +13,7 @@ interface MainViewerProps {
 }
 
 export const MainViewer = (props: MainViewerProps) => {
+  const { t } = useI18n();
   let viewerContainerRef!: HTMLDivElement;
   let viewer: OpenSeadragon.Viewer | null = null;
 
@@ -63,7 +65,7 @@ export const MainViewer = (props: MainViewerProps) => {
     viewer.open({
       type: 'image',
       url: props.imageSrc
-    });
+    } as any);
   });
 
   const handleZoomIn = () => viewer?.viewport.zoomBy(1.3);
@@ -78,7 +80,7 @@ export const MainViewer = (props: MainViewerProps) => {
   return (
     <div class="relative flex-1 flex flex-col overflow-hidden bg-viewer-bg min-h-0">
       <div class="flex-shrink-0 flex items-center gap-1 px-3 py-2 bg-panel border-b border-subtle shadow-sm z-10">
-        <IconButton title="Image précédente (←)" onClick={() => props.onImageChange(Math.max(1, props.currentImage - 1))}>
+        <IconButton title={t("mainViewer.prev", { key: "←" })} onClick={() => props.onImageChange(Math.max(1, props.currentImage - 1))}>
           <Icon icon="lucide:chevron-left"></Icon>
         </IconButton>
 
@@ -95,41 +97,41 @@ export const MainViewer = (props: MainViewerProps) => {
               "focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
               "transition-all tabular-nums",
             ].join(" ")}
-            aria-label="Numéro d'image"
+            aria-label={t("mainViewer.ariaImageNumber")}
           />
           <span class="text-[13px] text-dim select-none">
             / {props.totalImages}
           </span>
         </div>
 
-        <IconButton title="Image suivante (→)" onClick={() => props.onImageChange(Math.min(props.totalImages, props.currentImage + 1))}>
+        <IconButton title={t("mainViewer.next", { key: "→" })} onClick={() => props.onImageChange(Math.min(props.totalImages, props.currentImage + 1))}>
           <Icon icon="lucide:chevron-right"></Icon>
         </IconButton>
 
         <Divider vertical class="mx-2 h-5" />
 
-        <IconButton title="Dézoomer (−)" onClick={handleZoomOut}>
+        <IconButton title={t("mainViewer.zoomOut", { key: "−" })} onClick={handleZoomOut}>
           <Icon icon="lucide:zoom-out"></Icon>
         </IconButton>
         <span class="text-[13px] text-muted tabular-nums w-10 text-center select-none">
           {zoomDisplay()}%
         </span>
-        <IconButton title="Zoomer (+)" onClick={handleZoomIn}>
+        <IconButton title={t("mainViewer.zoomIn", { key: "+" })} onClick={handleZoomIn}>
           <Icon icon="lucide:zoom-in"></Icon>
         </IconButton>
-        <IconButton title="Ajuster à la fenêtre (F)" onClick={handleFit}>
+        <IconButton title={t("mainViewer.fit", { key: "F" })} onClick={handleFit}>
           <Icon icon="lucide:maximize-2"></Icon>
         </IconButton>
-        <IconButton title="Pivoter 90° (R)" onClick={handleRotate}>
+        <IconButton title={t("mainViewer.rotate", { key: "R" })} onClick={handleRotate}>
           <Icon icon="lucide:rotate-ccw"></Icon>
         </IconButton>
 
         <Divider vertical class="mx-2 h-5" />
 
-        <IconButton title="Télécharger l'image pleine résolution">
+        <IconButton title={t("mainViewer.download")}>
           <Icon icon="lucide:download"></Icon>
         </IconButton>
-        <IconButton title="Copier l'URL de l'image">
+        <IconButton title={t("mainViewer.copyUrl")}>
           <Icon icon="lucide:link"></Icon>
         </IconButton>
       </div>
@@ -140,7 +142,7 @@ export const MainViewer = (props: MainViewerProps) => {
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
              <div class="flex flex-col items-center gap-3 select-none">
               <Icon icon="lucide:image" class="text-subtle" width="50" height="50"></Icon>
-              <span class="text-[13px] text-dim">vue {props.currentImage} — aucune image</span>
+              <span class="text-[13px] text-dim">{t("mainViewer.noImage", { n: props.currentImage })}</span>
             </div>
           </div>
         )}

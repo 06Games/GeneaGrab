@@ -1,16 +1,17 @@
 import { For } from "solid-js";
-import type { EventRow, EventType } from "../../../types/registry";
+import type { EventRow } from "../../../types/registry";
 import { Button } from "../../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
+import { TranslationKey, useI18n } from "../../../ui/i18n";
 
 const EVENT_CHIP: Record<string, string> = {
-  Naissance:      "text-event-birth bg-event-birth-bg",
-  Mariage:        "text-event-marriage bg-event-marriage-bg",
-  Décès:          "text-event-death bg-event-death-bg",
-  Sépulture:      "text-event-burial bg-event-burial-bg",
-  Testament:      "text-event-will bg-event-will-bg",
-  Recensement:    "text-event-census bg-event-census-bg",
-  Autre:          "text-event-other bg-event-other-bg",
+  Naissance: "text-event-birth bg-event-birth-bg",
+  Mariage: "text-event-marriage bg-event-marriage-bg",
+  Décès: "text-event-death bg-event-death-bg",
+  Sépulture: "text-event-burial bg-event-burial-bg",
+  Testament: "text-event-will bg-event-will-bg",
+  Recensement: "text-event-census bg-event-census-bg",
+  Autre: "text-event-other bg-event-other-bg",
 };
 
 interface GlobalGridProps {
@@ -23,6 +24,7 @@ interface GlobalGridProps {
 }
 
 export const GlobalGrid = (props: GlobalGridProps) => {
+  const { t } = useI18n();
 
   const handleKeyDown = (e: KeyboardEvent) => {
     const idx = props.rows.findIndex(r => r.event_id === props.selectedId);
@@ -39,13 +41,15 @@ export const GlobalGrid = (props: GlobalGridProps) => {
     }
   };
 
+  const headers: TranslationKey[] = ["grid.number", "grid.date", "grid.type", "grid.title"];
   return (
     <div class="flex flex-col h-full border-r border-subtle bg-panel flex-shrink-0" style={{ "min-width": "240px" }} ref={props.onRef}>
       {/* Column headers */}
       <div class="flex-shrink-0 grid px-3 py-2 border-b border-subtle bg-tinted" style={{ "grid-template-columns": "2.5rem 6.5rem 5rem 1fr" }} aria-hidden="true">
-        {["#", "Date", "Type", "Titre"].map(col => (
-          <span class="text-[11px] font-semibold uppercase tracking-wider text-dim">{col}</span>
-        ))}
+        <For each={headers}>{col => (
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-dim">{t(col)}</span>
+        )}
+        </For>
       </div>
 
       {/* Rows */}
@@ -76,8 +80,8 @@ export const GlobalGrid = (props: GlobalGridProps) => {
 
       {/* Footer */}
       <div class="flex-shrink-0 flex items-center justify-between px-3 py-2 border-t border-subtle bg-tinted">
-        <span class="text-[12px] text-dim">{props.rows.length} actes indexés</span>
-        <Button variant="outline" size="sm" onClick={props.onNewAct}><Icon icon="lucide:plus" width="16" height="16" /> Nouvel acte</Button>
+        <span class="text-[12px] text-dim">{t("grid.actsCount", { count: props.rows.length })}</span>
+        <Button variant="outline" size="sm" onClick={props.onNewAct}><Icon icon="lucide:plus" width="16" height="16" /> {t("grid.newAct")}</Button>
       </div>
     </div>
   );

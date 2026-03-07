@@ -1,3 +1,5 @@
-const App = () => <a href="/registry/1">Registre</a>; // TODO
+const App = () => {
+	return <a href="/registry/1">Registre</a>;
+};
 
 export default App;
