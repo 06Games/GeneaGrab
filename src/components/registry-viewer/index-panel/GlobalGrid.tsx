@@ -1,6 +1,7 @@
 import { For } from "solid-js";
 import type { EventRow, EventType } from "../../../types/registry";
 import { Button } from "../../../ui/primitives";
+import { Icon } from "@iconify-icon/solid";
 
 const EVENT_CHIP: Record<string, string> = {
   Naissance:      "text-[#2d6a4f] bg-[#d8f3dc]",
@@ -77,7 +78,7 @@ export const GlobalGrid = (props: GlobalGridProps) => {
       {/* Footer */}
       <div class="flex-shrink-0 flex items-center justify-between px-3 py-2 border-t border-[#e0d8cc] bg-[#faf7f3]">
         <span class="text-[12px] text-[#a89e93]">{props.rows.length} actes · {props.indexedCount} indexés</span>
-        <Button variant="outline" size="sm" onClick={props.onNewAct}>+ Nouvel acte</Button>
+        <Button variant="outline" size="sm" onClick={props.onNewAct}><Icon icon="lucide:plus" width="16" height="16" /> Nouvel acte</Button>
       </div>
     </div>
   );

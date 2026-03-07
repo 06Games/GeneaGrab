@@ -3,11 +3,7 @@ import type { EventRow, EventDetail } from "../../../types/registry";
 import { Badge, IconButton, Kbd } from "../../../ui/primitives";
 import { GlobalGrid } from "./GlobalGrid";
 import { DetailZone } from "./DetailZone";
-
-// ... (Icones DetachIcon, AttachIcon, CloseIcon conservées identiques)
-const DetachIcon = () => (<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h4v1H4v8h8v-3h1v4H3V3Zm6-1h4v4h-1V3.7L7.4 8.3l-.7-.7L11.3 3H9V2Z" /></svg>);
-const AttachIcon = () => (<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M4 11h8v-3h1v4H3V3h8v4h-1V4H4v7Zm7.5-6.5L14 7l-2.5 2.5-.7-.7L12.3 7.5H8v-1h4.3l-1.5-1.3.7-.7Z" /></svg>);
-const CloseIcon = () => (<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M12 4.7 11.3 4 8 7.3 4.7 4 4 4.7 7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8 12 4.7Z" /></svg>);
+import { Icon } from "@iconify-icon/solid";
 
 interface IndexPanelProps {
   visible: boolean;
@@ -59,8 +55,8 @@ export const IndexPanel = (props: IndexPanelProps) => {
           </div>
           <div class="flex items-center gap-1">
             <span class="text-[11px] text-[#a89e93] mr-1 hidden sm:flex items-center gap-1"><Kbd>→</Kbd> détail <span class="mx-1">·</span> <Kbd>←</Kbd> liste</span>
-            <IconButton onClick={props.onDetach}>{props.isDetached ? <AttachIcon /> : <DetachIcon />}</IconButton>
-            <IconButton onClick={props.onToggle}><CloseIcon /></IconButton>
+            <Show when={!props.isDetached}><IconButton onClick={props.onDetach}><Icon icon="lucide:picture-in-picture"></Icon></IconButton></Show>
+            <IconButton onClick={props.onToggle}><Icon icon="lucide:x"></Icon></IconButton>
           </div>
         </div>
 

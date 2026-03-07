@@ -3,16 +3,7 @@ import type { PersonEntry } from "../../../types/registry";
 import { ROLE_SUGGESTIONS, RELATION_SUGGESTIONS } from "../../../types/registry";
 import { IconButton } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
-
-const ChevronDown = () => (
-  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M3 5l5 5 5-5H3Z" /></svg>
-);
-const TrashIcon = () => (
-  <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M6 2h4v1h3v1H3V3h3V2Zm-2 3h8l-.8 9H6.8L4 5Zm2 2v5h1V7H6Zm3 0v5h1V7H9Z" /></svg>
-);
-const DragIcon = () => (
-  <svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2ZM5 9a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm-6 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm6 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z" /></svg>
-);
+import { Icon } from "@iconify-icon/solid";
 
 const PROFESSION_OPTIONS = [
   "Laboureur", "Tisserand", "Notaire", "Charpentier", "Cordonnier", "Cultivateur", "Ménagère"
@@ -42,7 +33,9 @@ export const PersonBlock = (props: PersonBlockProps) => {
     <div class="border border-[#e0d8cc] rounded-xl overflow-hidden bg-white shadow-sm">
       {/* Header */}
       <div class="flex items-center px-3 py-2 gap-2 bg-[#faf7f3] border-b border-[#e0d8cc]">
-        <span class="text-[#ccc4b8] cursor-grab select-none flex-shrink-0"><DragIcon /></span>
+        <span class="text-[#ccc4b8] cursor-grab select-none flex-shrink-0">
+          <Icon icon="lucide:grip-vertical" class="block"></Icon>
+        </span>
 
         <button
           type="button"
@@ -60,11 +53,13 @@ export const PersonBlock = (props: PersonBlockProps) => {
           </Show>
         </button>
 
-        <button type="button" onClick={() => setCollapsed(v => !v)} class="text-[#a89e93] hover:text-[#6b6358] focus-visible:outline-none">
-          <span class={["transition-transform duration-150 block", collapsed() ? "-rotate-90" : ""].join(" ")}><ChevronDown /></span>
-        </button>
+        <IconButton onClick={() => setCollapsed(v => !v)}>
+          <span class={["transition-transform duration-150 inline-flex items-center justify-center origin-center", collapsed() ? "-rotate-90" : ""].join(" ")}>
+            <Icon icon="lucide:chevron-down" class="block" />
+          </span>
+        </IconButton>
         <IconButton title="Supprimer" onClick={() => props.onRemove(p().person_id)} class="text-[#c0392b] opacity-50 hover:opacity-100">
-          <TrashIcon />
+          <Icon icon="lucide:trash-2" class="block"></Icon>
         </IconButton>
       </div>
 

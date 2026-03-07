@@ -1,5 +1,6 @@
 import { Show, createUniqueId } from "solid-js";
 import { StickyPin } from "../../../ui/StickyPin";
+import { Icon } from "@iconify-icon/solid";
 
 interface IndexFieldProps {
   label: string;
@@ -15,9 +16,7 @@ interface IndexFieldProps {
   class?: string;
 }
 
-/**
- * IndexField — a labelled input row with optional StickyPin, datalist, or checkbox.
- */
+// IndexField — labelled input with optional pin, datalist or checkbox
 export const IndexField = (props: IndexFieldProps) => {
   const uniqueId = createUniqueId();
   const listId = `dl-${uniqueId}`;
@@ -83,13 +82,7 @@ export const IndexField = (props: IndexFieldProps) => {
                 ].join(" ")}
               />
               <Show when={!!props.value}>
-                <svg
-                  class="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                >
-                  <path d="M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z" />
-                </svg>
+                <Icon icon="lucide:check" class="absolute inset-0 m-auto w-4 h-4 text-white pointer-events-none"></Icon>
               </Show>
             </div>
           </div>

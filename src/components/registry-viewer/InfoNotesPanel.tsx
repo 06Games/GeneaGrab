@@ -1,17 +1,7 @@
 import { createSignal, For, Show } from "solid-js";
 import type { RegistryMeta, ImageMeta, EventType } from "../../types/registry";
 import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
-
-const EditIcon = () => (
-  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-    <path d="M11.5 2a1.5 1.5 0 0 1 2.12 2.12L5 12.74 2 13l.26-3L11.5 2Z" />
-  </svg>
-);
-const ChevronDown = () => (
-  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-    <path d="M3 5l5 5 5-5H3Z" />
-  </svg>
-);
+import { Icon } from "@iconify-icon/solid";
 
 const ACT_TYPE_STYLES: Record<EventType, string> = {
   Naissance:      "text-[#2d6a4f] bg-[#d8f3dc] border-[#b7e4c7]",
@@ -47,11 +37,10 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       class="flex flex-col w-72 min-w-[220px] flex-shrink-0 bg-white border-l border-[#e0d8cc] overflow-hidden"
       aria-label="Informations et notes"
     >
-      {/* Header */}
       <div class="flex items-center justify-between px-4 py-3 border-b border-[#e0d8cc] flex-shrink-0">
         <span class="text-[13px] font-semibold text-[#2c2820]">Registre</span>
         <IconButton title="Modifier les métadonnées" onClick={props.onEditRegistry}>
-          <EditIcon />
+          <Icon icon="lucide:edit-2"></Icon>
         </IconButton>
       </div>
 
@@ -69,8 +58,8 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
               {props.registryMeta.town} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : "Inconnu"}
             </p>
           </div>
-          <span class={["text-[#a89e93] flex-shrink-0 ml-2 transition-transform duration-150", registryExpanded() ? "rotate-180" : ""].join(" ")}>
-            <ChevronDown />
+          <span class={["text-[#a89e93] flex-shrink-0 ml-2 inline-flex items-center justify-center transition-transform duration-150 origin-center", registryExpanded() ? "rotate-180" : ""].join(" ")}>
+            <Icon icon="lucide:chevron-down" width="16" height="16" class="block" />
           </span>
         </button>
 

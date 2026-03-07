@@ -3,14 +3,11 @@ import type { EventDetail, PersonEntry, EventType } from "../../../types/registr
 import { Button, Kbd, SectionLabel } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
 import { PersonBlock } from "./PersonBlock";
+import { Icon } from "@iconify-icon/solid";
 
 const EVENT_TYPE_OPTIONS: string[] = [
   "Naissance", "Mariage", "Décès", "Sépulture", "Testament", "Recensement", "Autre",
 ];
-
-const PlusIcon = () => (
-  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M7 7V3h2v4h4v2H9v4H7V9H3V7h4Z" /></svg>
-);
 
 interface DetailZoneProps {
   event: EventDetail | null;
@@ -122,7 +119,7 @@ export const DetailZone = (props: DetailZoneProps) => {
               type="button" onClick={addPerson}
               class="mt-2 w-full py-2 rounded-xl border-2 border-dashed border-[#e0d8cc] text-[13px] text-[#a89e93] flex items-center justify-center gap-1.5 hover:text-[#6b6358] hover:border-[#ccc4b8] hover:bg-white transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b8743a]"
             >
-              <PlusIcon /> Ajouter une personne
+              <Icon icon="lucide:plus" width="16" height="16" class="block" /> Ajouter une personne
             </button>
           </section>
 

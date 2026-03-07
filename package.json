@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.2.8",
+    "@iconify-icon/solid": "^3.0.3",
     "@kobalte/core": "^0.13.11",
     "@tanstack/solid-table": "^8.21.3",
     "@tauri-apps/api": "^2",

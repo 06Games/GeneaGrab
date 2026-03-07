@@ -5,6 +5,7 @@ import { MainViewer } from "./MainViewer";
 import { ThumbnailBar } from "./ThumbnailBar";
 import { InfoNotesPanel } from "./InfoNotesPanel";
 import { IndexPanel } from "./index-panel/IndexPanel";
+import { Icon } from "@iconify-icon/solid";
 
 // ─── Mock data ────────────────────────────────────────────────────────────────
 
@@ -58,14 +59,6 @@ const MOCK_EVENT: EventDetail = {
     },
   ]
 };
-
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
-const IndexIcon = () => (
-  <svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor">
-    <path d="M1 3h14v2H1V3Zm0 4h14v2H1V7Zm0 4h8v2H1v-2Z" />
-  </svg>
-);
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -284,15 +277,11 @@ export const RegistryViewer = () => {
         data-tauri-drag-region
         class="flex-shrink-0 flex items-center justify-between px-4 h-11 bg-white border-b border-[#e0d8cc] shadow-sm"
       >
-        <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
+          <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
           <span class="text-[15px] font-bold text-[#b8743a] flex-shrink-0">GeneaGrab</span>
-          <svg class="w-3.5 h-3.5 text-[#ccc4b8] flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M6 3l5 5-5 5V3Z" />
-          </svg>
+          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-[#ccc4b8] flex-shrink-0"></Icon>
           <span class="text-[13px] text-[#a89e93] flex-shrink-0">AD83 · 5 Mi 1/342</span>
-          <svg class="w-3.5 h-3.5 text-[#ccc4b8] flex-shrink-0" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M6 3l5 5-5 5V3Z" />
-          </svg>
+          <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-[#ccc4b8] flex-shrink-0"></Icon>
           <span class="text-[13px] text-[#2c2820] font-medium truncate">
             Brignoles — Naissances 1792–1832
           </span>
@@ -311,7 +300,7 @@ export const RegistryViewer = () => {
               : "bg-white border-[#e0d8cc] text-[#6b6358] hover:bg-[#faf7f3]",
           ].join(" ")}
         >
-          <IndexIcon />
+          <Icon icon="lucide:list"></Icon>
           Index
           <Kbd>Ctrl I</Kbd>
         </button>
