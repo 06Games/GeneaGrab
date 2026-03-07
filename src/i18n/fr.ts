@@ -1,4 +1,6 @@
-export const fr = {
+import { RawDictionaries } from "../ui/i18n";
+
+export const fr: RawDictionaries = {
   mainViewer: {
     prev: "Image précédente ({{key}})",
     next: "Image suivante ({{key}})",

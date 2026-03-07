@@ -8,7 +8,7 @@ import App from "./App";
 import { I18nProvider } from "./ui/i18n";
 
 render(() => (
-	<I18nProvider>
+	<I18nProvider fallback={<p>Loading translations...</p>}>
 		<App />
 	</I18nProvider>
 ), document.getElementById("root") as HTMLElement);
