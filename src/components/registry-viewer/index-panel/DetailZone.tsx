@@ -1,5 +1,6 @@
-import { createSignal, Show, Index } from "solid-js";
-import type { EventDetail, PersonEntry } from "../../../types/registry";
+import { createEffect, Show, For } from "solid-js";
+import { createForm, reset, insert, remove, SubmitHandler } from "@modular-forms/solid";
+import type { EventDetail } from "../../../types/registry";
 import { EVENT_TYPE_OPTIONS } from "../../../types/registry";
 import { Button, Kbd, SectionLabel } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
@@ -10,44 +11,53 @@ import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
 
 interface DetailZoneProps {
   event: EventDetail | null;
-  onRef?: (el: HTMLDivElement) => void;
+  onRef?: (el: HTMLFormElement) => void;
   onFocusGrid?: () => void;
 }
 
+type ActForm = EventDetail;
+
+
 export const DetailZone = (props: DetailZoneProps) => {
   const { t } = useI18n();
-  const actions = useRegistryActions(); // Consume the context directly
-  const [people, setPeople] = createSignal<PersonEntry[]>(
-    props.event?.people ?? []
-  );
+  const actions = useRegistryActions();
 
-  const setRef = (el: HTMLDivElement) => { props.onRef?.(el); };
+  // Initialize Modular Forms
+  const [actForm, { Form, Field, FieldArray }] = createForm<ActForm>({
+    initialValues: props.event || {}
+  });
 
-  const addPerson = () => {
-    const newPerson: PersonEntry = {
-      person_id: crypto.randomUUID(),
-      role: "", first_name: "", last_name: "", sex: "", title: "", age: "",
-      is_deceased: false, occupation: "", origin_place: "", residence_place: "",
-      sequence_number: "", notes: "", relationship_type: "", relationship_to: ""
-    };
-    setPeople(prev => [...prev, newPerson]);
-  };
+  // Sync state when user selects a different record in the Grid
+  createEffect(() => {
+    if (props.event) {
+      reset(actForm, { initialValues: props.event });
+    } else {
+      reset(actForm, { initialValues: {} });
+    }
+  });
 
-  const updatePerson = (id: string, field: keyof PersonEntry, value: any) => {
-    setPeople(prev => prev.map(p => p.person_id === id ? { ...p, [field]: value } : p));
-  };
+  // Determine what type of submission to make
+  let submitAction: 'save' | 'validate' = 'save';
 
-  const removePerson = (id: string) => {
-    setPeople(prev => prev.filter(p => p.person_id !== id));
+  const handleSubmit: SubmitHandler<ActForm> = (values) => {
+    if (submitAction === 'validate') {
+      actions.onValidateAndNext?.(values);
+    } else {
+      actions.onSaveAct?.(values);
+    }
   };
 
   return (
-    <div ref={setRef} class="flex-1 flex flex-col min-w-0 overflow-hidden bg-tinted">
+    <Form onSubmit={handleSubmit} ref={props.onRef} class="flex-1 flex flex-col min-w-0 overflow-hidden bg-tinted">
       <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-subtle bg-panel">
         <div class="flex items-center gap-2 overflow-hidden">
           <span class="text-[13px] font-semibold text-main flex-shrink-0">
             {props.event ? t("detail.headerTitle", { id: props.event.event_id }) : t("detail.noSelection")}
           </span>
+          {/* Automatically shows a dirty state marker when modified! */}
+          <Show when={actForm.dirty}>
+            <span class="text-accent text-[16px] font-bold leading-none select-none" title="Unsaved changes">*</span>
+          </Show>
           <Show when={props.event}>
             <span class="text-[12px] text-dim truncate">{props.event!.title || props.event!.date }</span>
           </Show>
@@ -71,37 +81,66 @@ export const DetailZone = (props: DetailZoneProps) => {
           <section>
             <SectionLabel>{t("detail.sections.details")}</SectionLabel>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
-              <IndexField label={t("detail.labels.type")} value={props.event!.event_type} tabIndex={1} options={EVENT_TYPE_OPTIONS} />
-              <IndexField label={t("detail.labels.title")} value={props.event!.title} tabIndex={2} placeholder={t("detail.placeholders.title")} />
-              <IndexField label={t("detail.labels.actNumber")} value={props.event!.act_number} tabIndex={3} placeholder={t("detail.placeholders.actNumber")} />
-              <IndexField label={t("detail.labels.dateText")} value={props.event!.date} tabIndex={4} placeholder={t("detail.placeholders.dateText")} />
-              <IndexField label={t("detail.labels.dateNorm")} value={props.event!.date_normalized} tabIndex={5} placeholder={t("detail.placeholders.dateNorm")} />
-              <IndexField label={t("detail.labels.pageFolio")} value={props.event!.page} tabIndex={6} />
-              <IndexField label={t("detail.labels.town")} value={props.event!.town} tabIndex={7} defaultPinned />
-              <IndexField label={t("detail.labels.parish")} value={props.event!.parish} tabIndex={8} defaultPinned />
-              <IndexField label={t("detail.labels.hamlet")} value={props.event!.hamlet} tabIndex={9} defaultPinned />
-              <IndexField label={t("detail.labels.imageNumber")} value={props.event!.image_number} tabIndex={10} />
+              <Field name="event_type">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.type")} value={field.value} tabIndex={1} options={EVENT_TYPE_OPTIONS} />}
+              </Field>
+              <Field name="title">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.title")} value={field.value} tabIndex={2} placeholder={t("detail.placeholders.title")} />}
+              </Field>
+              <Field name="act_number">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.actNumber")} value={field.value} tabIndex={3} placeholder={t("detail.placeholders.actNumber")} />}
+              </Field>
+              <Field name="date">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.dateText")} value={field.value} tabIndex={4} placeholder={t("detail.placeholders.dateText")} />}
+              </Field>
+              <Field name="date_normalized">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.dateNorm")} value={field.value} tabIndex={5} placeholder={t("detail.placeholders.dateNorm")} />}
+              </Field>
+              <Field name="page">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.pageFolio")} value={field.value} tabIndex={6} />}
+              </Field>
+              <Field name="town">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.town")} value={field.value} tabIndex={7} defaultPinned />}
+              </Field>
+              <Field name="parish">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.parish")} value={field.value} tabIndex={8} defaultPinned />}
+              </Field>
+              <Field name="hamlet">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.hamlet")} value={field.value} tabIndex={9} defaultPinned />}
+              </Field>
+              <Field name="image_number">
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.imageNumber")} value={field.value} tabIndex={10} />}
+              </Field>
             </div>
           </section>
 
           <section>
             <SectionLabel>{t("detail.sections.people")}</SectionLabel>
             <div class="flex flex-col gap-2">
-              <Index each={people()}>
-                {(person, i) => (
-                  <PersonBlock
-                    person={person()}
-                    index={i}
-                    tabStart={20 + i * 20} 
-                    onChange={updatePerson}
-                    onRemove={removePerson}
-                  />
+              <FieldArray name="people">
+                {(fieldArray) => (
+                  <For each={fieldArray.items}>
+                    {(item, index) => (
+                      <PersonBlock
+                        index={index()}
+                        namePrefix={`people.${index()}.`}
+                        form={actForm}
+                        Field={Field}
+                        tabStart={20 + index() * 20} 
+                        onRemove={() => remove(actForm, 'people', { at: index() })}
+                      />
+                    )}
+                  </For>
                 )}
-              </Index>
+              </FieldArray>
             </div>
 
             <button
-              type="button" onClick={addPerson}
+              type="button" 
+              onClick={() => insert(actForm, 'people', { value: {
+                person_id: crypto.randomUUID(), role: "", first_name: "", last_name: "", sex: "", title: "", age: "",
+                is_deceased: false, occupation: "", origin_place: "", residence_place: "", sequence_number: "", notes: "", relationship_type: "", relationship_to: ""
+              }})}
               class="mt-2 w-full py-2 rounded-xl border-2 border-dashed border-subtle text-[13px] text-dim flex items-center justify-center gap-1.5 hover:text-muted hover:border-subtle-md hover:bg-panel transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <Icon icon="lucide:plus" width="16" height="16" class="block" /> {t("detail.addPerson")}
@@ -111,33 +150,43 @@ export const DetailZone = (props: DetailZoneProps) => {
           <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <SectionLabel>{t("detail.sections.transcription")}</SectionLabel>
-              <textarea
-                rows={4} value={props.event!.transcription_text} placeholder={t("detail.placeholders.transcription")}
-                spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
-              />
+              <Field name="transcription_text">
+                {(field, fieldProps) => (
+                  <textarea
+                    {...fieldProps}
+                    rows={4} value={field.value ?? ""} placeholder={t("detail.placeholders.transcription")}
+                    spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
+                  />
+                )}
+              </Field>
             </div>
             <div>
               <SectionLabel>{t("detail.sections.notes")}</SectionLabel>
-              <textarea
-                rows={4} value={props.event!.notes} placeholder={t("detail.placeholders.notes")}
-                spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
-              />
+              <Field name="notes">
+                {(field, fieldProps) => (
+                  <textarea
+                    {...fieldProps}
+                    rows={4} value={field.value ?? ""} placeholder={t("detail.placeholders.notes")}
+                    spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
+                  />
+                )}
+              </Field>
             </div>
           </section>
         </Show>
       </div>
 
       <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-subtle bg-panel">
-        <Button variant="ghost" size="sm" onClick={actions.onReset}>{t("detail.reset")}</Button>
+        <Button variant="ghost" size="sm" onClick={() => reset(actForm)} disabled={!props.event}>{t("detail.reset")}</Button>
         <div class="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => props.event && actions.onSaveAct?.({ ...props.event, people: people() })} disabled={!props.event}>
+          <Button type="submit" variant="outline" size="sm" onClick={() => submitAction = 'save'} disabled={!props.event}>
             {t("detail.save")} <Kbd>Ctrl S</Kbd>
           </Button>
-          <Button variant="primary" size="sm" onClick={() => props.event && actions.onValidateAndNext?.({ ...props.event, people: people() })} disabled={!props.event}>
+          <Button type="submit" variant="primary" size="sm" onClick={() => submitAction = 'validate'} disabled={!props.event}>
             {t("detail.validateAndNext")} <Kbd>↵</Kbd>
           </Button>
         </div>
       </div>
-    </div>
+    </Form>
   );
 };

@@ -1,10 +1,9 @@
-import { Show, createUniqueId } from "solid-js";
+import { Show, createUniqueId, JSX } from "solid-js";
 import { StickyPin } from "../../../ui/StickyPin";
 import { Icon } from "@iconify-icon/solid";
 
 interface IndexFieldProps {
   label: string;
-  value?: string | boolean;
   type?: "text" | "checkbox";
   placeholder?: string;
   tabIndex?: number;
@@ -12,11 +11,17 @@ interface IndexFieldProps {
   defaultPinned?: boolean;
   labelWidth?: string;
   onPinChange?: (pinned: boolean) => void;
-  onInput?: (value: any) => void;
   class?: string;
+  
+  name?: string;
+  value?: string | boolean | null;
+  ref?: (element: HTMLInputElement) => void;
+  onInput?: JSX.EventHandler<HTMLInputElement, InputEvent>;
+  onChange?: JSX.EventHandler<HTMLInputElement, Event>;
+  onBlur?: JSX.EventHandler<HTMLInputElement, FocusEvent>;
 }
 
-// IndexField — labelled input with optional pin, datalist or checkbox
+// IndexField
 export const IndexField = (props: IndexFieldProps) => {
   const uniqueId = createUniqueId();
   const listId = `dl-${uniqueId}`;
@@ -41,12 +46,16 @@ export const IndexField = (props: IndexFieldProps) => {
         <Show when={!isCheckbox}>
           <input
             id={fieldId}
+            ref={props.ref}
+            name={props.name}
             type="text"
             value={(props.value as string) ?? ""}
             placeholder={props.placeholder ?? ""}
             tabIndex={props.tabIndex}
             list={props.options ? listId : undefined}
-            onInput={(e) => props.onInput?.(e.currentTarget.value)}
+            onInput={props.onInput}
+            onChange={props.onChange}
+            onBlur={props.onBlur}
             autocomplete="off"
             spellcheck={false}
             class={[
@@ -65,14 +74,16 @@ export const IndexField = (props: IndexFieldProps) => {
 
         <Show when={isCheckbox}>
           <div class="flex items-center w-full h-full">
-
             <div class="relative w-5 h-5">
               <input
                 id={fieldId}
+                ref={props.ref}
+                name={props.name}
                 type="checkbox"
                 checked={!!props.value}
                 tabIndex={props.tabIndex}
-                onChange={(e) => props.onInput?.(e.currentTarget.checked)}
+                onChange={props.onChange}
+                onBlur={props.onBlur}
                 class={[
                   "appearance-none cursor-pointer m-0 w-full h-full rounded border",
                   "bg-tinted border-subtle",

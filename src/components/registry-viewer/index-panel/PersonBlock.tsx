@@ -1,5 +1,5 @@
 import { createSignal, Show } from "solid-js";
-import type { PersonEntry } from "../../../types/registry";
+import { getValue } from "@modular-forms/solid";
 import { ROLE_SUGGESTIONS, RELATION_SUGGESTIONS, PROFESSION_OPTIONS } from "../../../types/registry";
 import { IconButton } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
@@ -7,25 +7,30 @@ import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
 
 interface PersonBlockProps {
-  person: PersonEntry;
   index: number;
+  namePrefix: string;
+  form: any;
+  Field: any; 
   tabStart: number;
-  onChange: (id: string, field: keyof PersonEntry, value: any) => void;
-  onRemove: (id: string) => void;
+  onRemove: () => void;
 }
 
 export const PersonBlock = (props: PersonBlockProps) => {
   const [collapsed, setCollapsed] = createSignal(false);
-  const p = () => props.person;
   const { t } = useI18n();
 
+  const role = () => getValue(props.form, `${props.namePrefix}role`) as string | undefined;
+  const title = () => getValue(props.form, `${props.namePrefix}title`) as string | undefined;
+  const firstName = () => getValue(props.form, `${props.namePrefix}first_name`) as string | undefined;
+  const lastName = () => getValue(props.form, `${props.namePrefix}last_name`) as string | undefined;
+  const isDeceased = () => getValue(props.form, `${props.namePrefix}is_deceased`) as boolean | undefined;
+
   const displayName = () => {
-    const parts = [p().title, p().first_name, p().last_name].filter(Boolean);
+    const parts = [title(), firstName(), lastName()].filter(Boolean);
     return parts.length > 0 ? parts.join(" ") : undefined;
   };
 
-  const set = (field: keyof PersonEntry, value: any) =>
-    props.onChange(p().person_id, field, value);
+  const { Field } = props;
 
   return (
     <div class="border border-subtle rounded-xl overflow-hidden bg-panel shadow-sm">
@@ -41,11 +46,11 @@ export const PersonBlock = (props: PersonBlockProps) => {
           class="flex-1 flex items-center gap-2 text-left focus-visible:outline-none min-w-0"
         >
           <span class="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-accent-bg text-accent-text border border-accent-border flex-shrink-0">
-            {p().role || <span class="italic text-dim">{t("person.noRole")}</span>}
+            {role() || <span class="italic text-dim">{t("person.noRole")}</span>}
           </span>
           <Show when={displayName()}>
             <span class="text-[13px] text-muted truncate">
-              {p().is_deceased && <span class="text-xs mr-1 text-danger font-bold">†</span>}
+              {isDeceased() && <span class="text-xs mr-1 text-danger font-bold">†</span>}
               {displayName()}
             </span>
           </Show>
@@ -56,7 +61,7 @@ export const PersonBlock = (props: PersonBlockProps) => {
             <Icon icon="lucide:chevron-down" class="block" />
           </span>
         </IconButton>
-        <IconButton title={t("person.remove")} onClick={() => props.onRemove(p().person_id)} class="text-danger opacity-50 hover:opacity-100">
+        <IconButton title={t("person.remove")} onClick={props.onRemove} class="text-danger opacity-50 hover:opacity-100">
           <Icon icon="lucide:trash-2" class="block"></Icon>
         </IconButton>
       </div>
@@ -65,31 +70,55 @@ export const PersonBlock = (props: PersonBlockProps) => {
       <Show when={!collapsed()}>
         <div class="px-3 pt-3 pb-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2">
           
-          {/* Ligne 1 : Rôle & Identité */}
-          <IndexField label={t("person.role")} value={p().role} tabIndex={props.tabStart} options={ROLE_SUGGESTIONS} onInput={v => set("role", v)} class="lg:col-span-1" />
-          <IndexField label={t("person.firstNames")} value={p().first_name} tabIndex={props.tabStart + 1} onInput={v => set("first_name", v)} class="lg:col-span-1" />
-          <IndexField label={t("person.lastName")} value={p().last_name} tabIndex={props.tabStart + 2} onInput={v => set("last_name", v)} class="lg:col-span-1" />
+          <Field name={`${props.namePrefix}role`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.role")} tabIndex={props.tabStart} options={ROLE_SUGGESTIONS} class="lg:col-span-1" />}
+          </Field>
+          <Field name={`${props.namePrefix}first_name`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.firstNames")} tabIndex={props.tabStart + 1} class="lg:col-span-1" />}
+          </Field>
+          <Field name={`${props.namePrefix}last_name`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.lastName")} tabIndex={props.tabStart + 2} class="lg:col-span-1" />}
+          </Field>
 
-          {/* Ligne 2 : Profil */}
-          <IndexField label={t("person.title")} value={p().title} tabIndex={props.tabStart + 3} placeholder={t("person.title") + "..."} onInput={v => set("title", v)} class="lg:col-span-1" />
-          <IndexField label={t("person.sex")} value={p().sex} tabIndex={props.tabStart + 4} options={["M", "F", t("person.noRole")]} onInput={v => set("sex", v)} class="lg:col-span-1" />
+          <Field name={`${props.namePrefix}title`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.title")} tabIndex={props.tabStart + 3} placeholder={t("person.title") + "..."} class="lg:col-span-1" />}
+          </Field>
+          <Field name={`${props.namePrefix}sex`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.sex")} tabIndex={props.tabStart + 4} options={["M", "F", t("person.noRole")]} class="lg:col-span-1" />}
+          </Field>
+          
           <div class="flex gap-2 lg:col-span-1">
-            <IndexField label={t("person.age")} value={p().age} tabIndex={props.tabStart + 5} onInput={v => set("age", v)} class="flex-1 min-w-0" />
-            <IndexField label={t("person.deceased")} type="checkbox" value={p().is_deceased} tabIndex={props.tabStart + 6} onInput={v => set("is_deceased", v)} class="w-[85px] flex-shrink-0" labelWidth="w-auto" />
+            <Field name={`${props.namePrefix}age`}>
+              {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.age")} tabIndex={props.tabStart + 5} class="flex-1 min-w-0" />}
+            </Field>
+            <Field name={`${props.namePrefix}is_deceased`} type="boolean">
+              {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.deceased")} type="checkbox" tabIndex={props.tabStart + 6} class="w-[85px] flex-shrink-0" labelWidth="w-auto" />}
+            </Field>
           </div>
 
-          {/* Ligne 3 : Lieux & Métier */}
-          <IndexField label={t("person.profession")} value={p().occupation} tabIndex={props.tabStart + 7} options={PROFESSION_OPTIONS} defaultPinned onInput={v => set("occupation", v)} class="lg:col-span-1" />
-          <IndexField label={t("person.origin")} value={p().origin_place} tabIndex={props.tabStart + 8} defaultPinned onInput={v => set("origin_place", v)} class="lg:col-span-1" />
-          <IndexField label={t("person.residence")} value={p().residence_place} tabIndex={props.tabStart + 9} defaultPinned onInput={v => set("residence_place", v)} class="lg:col-span-1" />
+          <Field name={`${props.namePrefix}occupation`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.profession")} tabIndex={props.tabStart + 7} options={PROFESSION_OPTIONS} defaultPinned class="lg:col-span-1" />}
+          </Field>
+          <Field name={`${props.namePrefix}origin_place`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.origin")} tabIndex={props.tabStart + 8} defaultPinned class="lg:col-span-1" />}
+          </Field>
+          <Field name={`${props.namePrefix}residence_place`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.residence")} tabIndex={props.tabStart + 9} defaultPinned class="lg:col-span-1" />}
+          </Field>
 
-          {/* Ligne 4 : Liens de Parenté (Person Relationships) */}
-          <IndexField label={t("person.relationship")} value={p().relationship_type} tabIndex={props.tabStart + 10} options={RELATION_SUGGESTIONS} placeholder={t("person.relationship") + "..."} onInput={v => set("relationship_type", v)} class="lg:col-span-1" />
-          <IndexField label={t("person.relationshipTo")} value={p().relationship_to} tabIndex={props.tabStart + 11} placeholder={t("person.relationshipTo") + "..."} onInput={v => set("relationship_to", v)} class="lg:col-span-1" />
-          <IndexField label={t("person.sequenceNumber")} value={p().sequence_number} tabIndex={props.tabStart + 12} onInput={v => set("sequence_number", v)} class="lg:col-span-1" />
+          <Field name={`${props.namePrefix}relationship_type`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.relationship")} tabIndex={props.tabStart + 10} options={RELATION_SUGGESTIONS} placeholder={t("person.relationship") + "..."} class="lg:col-span-1" />}
+          </Field>
+          <Field name={`${props.namePrefix}relationship_to`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.relationshipTo")} tabIndex={props.tabStart + 11} placeholder={t("person.relationshipTo") + "..."} class="lg:col-span-1" />}
+          </Field>
+          <Field name={`${props.namePrefix}sequence_number`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.sequenceNumber")} tabIndex={props.tabStart + 12} class="lg:col-span-1" />}
+          </Field>
 
-          {/* Ligne 5 : Notes individuelles */}
-          <IndexField label={t("person.notesIndiv")} value={p().notes} tabIndex={props.tabStart + 13} onInput={v => set("notes", v)} class="md:col-span-2 lg:col-span-3" />
+          <Field name={`${props.namePrefix}notes`}>
+            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.notesIndiv")} tabIndex={props.tabStart + 13} class="md:col-span-2 lg:col-span-3" />}
+          </Field>
         </div>
       </Show>
     </div>

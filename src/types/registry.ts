@@ -21,14 +21,14 @@ export interface ImageMeta {
   actTypes: Map<EventType, number>;
 }
 
-export interface EventRow {
+export type EventRow = {
   event_id: number;
   date: string;
   event_type: EventType;
   title: string;
 }
 
-export interface PersonEntry {
+export type PersonEntry = {
   person_id: string;
   role: string;
   first_name: string;
@@ -46,7 +46,7 @@ export interface PersonEntry {
   relationship_to: string;
 }
 
-export interface EventDetail {
+export type EventDetail ={
   event_id: number;
   date: string;
   date_normalized: string;
