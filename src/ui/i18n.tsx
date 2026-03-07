@@ -4,6 +4,8 @@ import { fr } from "../i18n/fr";
 import { en } from "../i18n/en";
 
 const Dictionaries = { fr, en };
+type Locale = keyof typeof Dictionaries;
+
 export type RawDictionaries = typeof fr;
 type DeepKeyOf<T> = T extends object
   ? {
@@ -15,7 +17,6 @@ type DeepKeyOf<T> = T extends object
     }[Extract<keyof T, string>]
   : never;
 export type TranslationKey = DeepKeyOf<RawDictionaries>;
-type Locale = keyof typeof Dictionaries;
 
 type Translator = (key: TranslationKey, params?: Record<string, any>) => string;
 

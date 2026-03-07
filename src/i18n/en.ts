@@ -57,7 +57,7 @@ export const en: RawDictionaries = {
   },
   registryViewer: {
     index: "Index",
-    viewsAndActs: "{{views} views · {acts}} indexed acts"
+    viewsAndActs: "{{views}} views · {{acts}} indexed acts"
   },
   indexPanel: {
     title: "Index",

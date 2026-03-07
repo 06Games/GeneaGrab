@@ -55,7 +55,7 @@ export const fr = {
   },
   registryViewer: {
     index: "Index",
-    viewsAndActs: "{{views} vues · {acts}} actes indexés"
+    viewsAndActs: "{{views}} vues · {{acts}} actes indexés"
   },
   indexPanel: {
     title: "Index",
