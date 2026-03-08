@@ -3,25 +3,29 @@ import OpenSeadragon from "openseadragon";
 import { IconButton, Divider } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
+import { getBackendService } from "../../services/apiFactory";
 
 interface MainViewerProps {
   currentImage: number;
   totalImages: number;
-  imageSrc?: string;
+  registryId: string;
   onImageChange: (image: number) => void;
   viewerRef?: (el: HTMLElement) => void;
 }
 
 export const MainViewer = (props: MainViewerProps) => {
   const { t } = useI18n();
+  const api = getBackendService();
   let viewerContainerRef!: HTMLDivElement;
   let viewer: OpenSeadragon.Viewer | null = null;
 
   const [zoomDisplay, setZoomDisplay] = createSignal(100); 
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
+  const [imageSrc, setImageSrc] = createSignal<string | null>(null);
 
   createEffect(() => {
     setImageInput(String(props.currentImage));
+    setImageSrc(api.getImageUrl(props.registryId, props.currentImage, false));
   });
 
   const commitImageInput = () => {
@@ -64,7 +68,7 @@ export const MainViewer = (props: MainViewerProps) => {
     if (!viewer) return;
     viewer.open({
       type: 'image',
-      url: props.imageSrc
+      url: imageSrc()
     } as any);
   });
 
@@ -138,7 +142,7 @@ export const MainViewer = (props: MainViewerProps) => {
 
       <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
         <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
-        {!props.imageSrc && (
+        {!imageSrc() && (
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
              <div class="flex flex-col items-center gap-3 select-none">
               <Icon icon="lucide:image" class="text-subtle" width="50" height="50"></Icon>

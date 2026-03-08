@@ -10,6 +10,7 @@ import { useI18n } from "../../ui/i18n";
 import { RegistryActionsProvider } from "../../contexts/RegistryActionsContext";
 
 import type { RegistryMeta, ImageMeta, EventRow, EventDetail, UserImageMeta } from "../../types/registry";
+import { getBackendService } from "../../services/apiFactory";
 
 export interface RegistryViewerProps {
   registryMeta: RegistryMeta;
@@ -188,8 +189,8 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
 
         <div class="flex flex-1 min-h-0 overflow-hidden">
           <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <MainViewer currentImage={currentImage()} totalImages={props.registryMeta.total_images} onImageChange={setCurrentImage} />
-            <ThumbnailBar totalImages={props.registryMeta.total_images} currentImage={currentImage()} onImageChange={setCurrentImage} />
+            <MainViewer currentImage={currentImage()} totalImages={props.registryMeta.total_images} onImageChange={setCurrentImage} registryId={props.registryMeta.source_id} />
+            <ThumbnailBar totalImages={props.registryMeta.total_images} currentImage={currentImage()} onImageChange={setCurrentImage} registryId={props.registryMeta.source_id} />
           </main>
 
           <InfoNotesPanel

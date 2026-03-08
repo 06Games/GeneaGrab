@@ -1,3 +1,3 @@
 pub mod errors;
-pub mod models;
+pub mod comm_models;
 pub mod services;

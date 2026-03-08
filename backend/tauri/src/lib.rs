@@ -1,8 +1,10 @@
 use geneagrab_core::{
     errors::CoreError,
-    models::{EventDetail, EventRow, ImageMeta, RegistryMeta, UserImageMeta},
+    comm_models::{EventDetail, EventRow, ImageMeta, RegistryMeta, UserImageMeta},
 };
 use serde::Serialize;
+
+mod tiles;
 
 #[derive(Serialize)]
 pub struct CommandError(String);
@@ -36,6 +38,12 @@ async fn save_image_meta(
 }
 
 #[tauri::command]
+async fn get_image(registry_id: String, image_id: u32, thumbnail: bool) -> Result<Vec<u8>, CommandError> {
+    let res = geneagrab_core::services::fetch_image(registry_id, image_id, thumbnail).await?;
+    Ok(res)
+}
+
+#[tauri::command]
 async fn get_event_rows(registry_id: String) -> Result<Vec<EventRow>, CommandError> {
     let res = geneagrab_core::services::fetch_event_rows(registry_id).await?;
     Ok(res)
@@ -66,11 +74,17 @@ pub fn run() {
             }
             Ok(())
         })
+        
+        .register_uri_scheme_protocol("tiles", |_app, request| {
+            tiles::handle_tile_request(request)
+        })
+        
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![
             get_registry_meta,
             get_image_meta,
             save_image_meta,
+            get_image,
             get_event_rows,
             get_event_detail,
             save_act

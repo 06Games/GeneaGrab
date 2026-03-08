@@ -20,10 +20,10 @@ pub struct UserImageMeta {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImageMeta {
+    pub image_number: u32,
     pub name: Option<String>,
     pub date_range: Option<String>,
     pub notes: Option<String>,
-    pub image_number: u32,
     pub act_types: HashMap<String, u32>,
 }
 

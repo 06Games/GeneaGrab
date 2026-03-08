@@ -1,4 +1,7 @@
-use crate::{errors::CoreError, models::{EventDetail, EventRow, ImageMeta, RegistryMeta, UserImageMeta}};
+use crate::{
+    comm_models::{EventDetail, EventRow, ImageMeta, RegistryMeta, UserImageMeta},
+    errors::CoreError,
+};
 use std::collections::{HashMap, HashSet};
 
 pub async fn fetch_registry_meta(id: String) -> Result<RegistryMeta, CoreError> {
@@ -10,7 +13,7 @@ pub async fn fetch_registry_meta(id: String) -> Result<RegistryMeta, CoreError> 
 
     Ok(RegistryMeta {
         source_id: id,
-        archive_reference: "5 Mi 1/342 (core stub)".into(),
+        archive_reference: "5 Mi 1/342 (rust stub)".into(),
         source_types,
         town: "Brignoles".into(),
         repository_url: "https://archives.var.fr".into(),
@@ -27,16 +30,29 @@ pub async fn fetch_image_meta(_registry_id: String, image_id: u32) -> Result<Ima
     Ok(ImageMeta {
         name: None,
         date_range: Some("1793-11-01 to 1793-11-30".into()),
-        notes: Some("Stub data from core backend.".into()),
+        notes: Some("Stub data from rust backend.".into()),
         image_number: image_id,
         act_types,
     })
 }
 
-pub async fn save_image_meta(_registry_id: String, _image_id: u32, _meta: UserImageMeta) -> Result<(), CoreError> {
+pub async fn save_image_meta(
+    _registry_id: String,
+    _image_id: u32,
+    _meta: UserImageMeta,
+) -> Result<(), CoreError> {
     log::info!("save_image_meta called");
     // Persist via DB in the future
     Ok(())
+}
+
+pub async fn fetch_image(_registry_id: String, image_id: u32, _thumbnail: bool) -> Result<Vec<u8>, CoreError> {
+    log::info!("fetch_image called for image {}", image_id);
+
+    let image_path = format!("/home/evan/.local/share/GeneaGrab/Registries/Geneanet/17522/p2.jpg"); // TODO
+    let image_data = std::fs::read(image_path)
+        .map_err(|e| CoreError::Other(format!("Failed to read image: {}", e)))?;
+    Ok(image_data)
 }
 
 pub async fn fetch_event_rows(_registry_id: String) -> Result<Vec<EventRow>, CoreError> {
@@ -57,7 +73,7 @@ pub async fn fetch_event_rows(_registry_id: String) -> Result<Vec<EventRow>, Cor
     ])
 }
 
-pub async fn fetch_event(event_id: u32) -> Result<EventDetail, CoreError>  {
+pub async fn fetch_event(event_id: u32) -> Result<EventDetail, CoreError> {
     log::info!("fetch_event called for {}", event_id);
     if event_id == 3 {
         Ok(EventDetail {
@@ -73,11 +89,14 @@ pub async fn fetch_event(event_id: u32) -> Result<EventDetail, CoreError>  {
             parish: "".into(),
             hamlet: "".into(),
             transcription_text: "".into(),
-            notes: "Notes loaded natively from core backend.".into(),
+            notes: "Notes loaded natively from rust backend.".into(),
             people: vec![],
         })
     } else {
-        Err(CoreError::NotFound(format!("Event with ID {} not found", event_id)))
+        Err(CoreError::NotFound(format!(
+            "Event with ID {} not found",
+            event_id
+        )))
     }
 }
 

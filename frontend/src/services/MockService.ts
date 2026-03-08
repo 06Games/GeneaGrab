@@ -29,6 +29,10 @@ export class MockService implements BackendService {
     await this.delay(500);
   }
 
+  getImageUrl(registryId: string, imageId: number, thumbnail: boolean): string | null {
+    return null;
+  }
+
 
   async getEventRows(registryId: string): Promise<EventRow[]> {
     console.info(`[Mock API] getEventRows: ${registryId}`);

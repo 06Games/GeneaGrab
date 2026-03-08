@@ -1,17 +1,19 @@
 import { For, createEffect } from "solid-js";
 import { useI18n } from "../../ui/i18n";
 import { createVirtualizer } from "@tanstack/solid-virtual";
+import { getBackendService } from "../../services/apiFactory";
 
 interface ThumbnailBarProps {
   totalImages: number;
   currentImage: number;
-  thumbnails?: Map<number, string>;
+  registryId: string;
   onImageChange: (image: number) => void;
 }
 
 export const ThumbnailBar = (props: ThumbnailBarProps) => {
   let containerRef!: HTMLDivElement;
   const { t } = useI18n();
+  const api = getBackendService();
 
   const virtualizer = createVirtualizer({
     get count() { return props.totalImages; },
@@ -55,7 +57,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
           {(virtualItem) => {
             const image = virtualItem.index + 1;
             const isActive = () => props.currentImage === image;
-            const src = () => props.thumbnails?.get(image);
+            const src = () => api.getImageUrl(props.registryId, image, true);
 
             return (
               <button
