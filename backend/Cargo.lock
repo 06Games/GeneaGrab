@@ -1872,7 +1872,9 @@ dependencies = [
 name = "geneagrab-core"
 version = "4.0.0"
 dependencies = [
+ "log",
  "serde",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
