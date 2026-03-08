@@ -15,14 +15,14 @@ export interface RegistryMeta {
 /** Editable image metadata */
 export interface UserImageMeta {
   name?: string;
-  dateRange?: string;
+  date_range?: string;
   notes?: string;
 }
 
 /** Read-only image metadata */
 export interface ImageMeta extends UserImageMeta {
   image_number: number;
-  actTypes: Map<EventType, number>;
+  act_types: Map<EventType, number>;
 }
 
 export type EventRow = {

@@ -101,11 +101,11 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           }</span>
         </div>
 
-        <MetaRow label={t("infoPanel.period")} value={props.imageMeta.dateRange} />
-        <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta.actTypes.values()).reduce((a, b) => a + b, 0))} />
+        <MetaRow label={t("infoPanel.period")} value={props.imageMeta.date_range} />
+        <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta.act_types.values()).reduce((a, b) => a + b, 0))} />
 
         <div class="mt-2 flex flex-wrap gap-1.5">
-          <For each={Array.from(props.imageMeta.actTypes.entries())}>
+          <For each={Array.from(props.imageMeta.act_types.entries())}>
             {([type, count]) => {
               return (
                 <span class={[

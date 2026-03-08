@@ -3,7 +3,7 @@ import type { RegistryMeta, ImageMeta, EventRow, EventDetail, EventType } from "
 export const MOCK_REGISTRY_DATA: RegistryMeta = {
   source_id: "src-123",
   archive_reference: "5 Mi 1/342",
-  source_types: new Set(["Naissance", "Mariage", "Décès"]),
+  source_types: new Set(["Birth", "Marriage", "Death"]),
   town: "Brignoles",
   repository_url: "https://archives.var.fr",
   total_images: 348,
@@ -11,9 +11,9 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
 
 export const MOCK_IMAGE_META: ImageMeta = {
   image_number: 12,
-  dateRange: "1793-11-01 to 1793-11-30",
+  date_range: "1793-11-01 to 1793-11-30",
   notes: "Image in good condition, but handwriting is difficult to read in some areas.",
-  actTypes: new Map<EventType, number>([
+  act_types: new Map<EventType, number>([
     ["Birth", 2],
     ["Marriage", 1],
     ["Death", 1],
