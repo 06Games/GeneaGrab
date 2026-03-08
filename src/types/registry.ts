@@ -13,6 +13,7 @@ export interface RegistryMeta {
   source_types: Set<EventType | string>;
   town: string;
   repository_url: string;
+  total_images: number;
 }
 
 export interface ImageMeta {

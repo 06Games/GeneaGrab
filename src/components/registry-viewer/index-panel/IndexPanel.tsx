@@ -16,10 +16,6 @@ interface IndexPanelProps {
   onToggle: () => void;
   onDetach?: () => void;
   onSelectRow: (row: EventRow) => void;
-  onNewAct: () => void;
-  onSave?: (event: EventDetail) => void;
-  onValidateAndNext?: (event: EventDetail) => void;
-  onReset?: () => void;
 }
 
 const MIN_GRID_WIDTH = 250;
@@ -29,7 +25,7 @@ const DEFAULT_GRID_WIDTH = 480;
 export const IndexPanel = (props: IndexPanelProps) => {
   const [gridWidth, setGridWidth] = createSignal(DEFAULT_GRID_WIDTH);
   let gridRef!: HTMLDivElement;
-  let detailRef!: HTMLDivElement;
+  let detailRef!: HTMLFormElement;
   const { t } = useI18n();
 
   const onHandlePointerDown = (e: PointerEvent) => {
@@ -66,7 +62,6 @@ export const IndexPanel = (props: IndexPanelProps) => {
               rows={props.rows}
               selectedId={props.selectedEventId}
               onSelect={props.onSelectRow}
-              onNewAct={props.onNewAct}
               onRef={(el) => { gridRef = el; }}
               onFocusDetail={focusDetail}
             />
@@ -82,9 +77,6 @@ export const IndexPanel = (props: IndexPanelProps) => {
             event={props.selectedEvent}
             onRef={(el) => { detailRef = el; }}
             onFocusGrid={focusGrid}
-            onSave={props.onSave}
-            onValidateAndNext={props.onValidateAndNext}
-            onReset={props.onReset}
           />
         </div>
       </div>

@@ -15,7 +15,6 @@ export interface RegistryViewerProps {
   registryMeta: RegistryMeta;
   imageMeta: ImageMeta;
   eventRows: EventRow[];
-  totalImages: number;
   initialImage?: number;
   onImageChange?: (image: number) => void;
   getEventDetail: (id: number) => EventDetail | null;
@@ -23,7 +22,7 @@ export interface RegistryViewerProps {
   onValidateAndNext?: (event: EventDetail) => void;
 }
 
-type SyncMessage = 
+type SyncMessage =
   | { type: 'READY' }
   | { type: 'SYNC_STATE', selectedEventId: number | null }
   | { type: 'DETACHED_CLOSED' }
@@ -39,12 +38,12 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
   const isDetachedMode = urlParams.get('mode') === 'index';
   const activeRegistryId = urlParams.get('registryId') || props.registryMeta.source_id;
 
-  const [currentImage,    setCurrentImage]    = createSignal(props.initialImage ?? 1);
-  const [indexVisible,    setIndexVisible]    = createSignal(true);
-  const [indexHeight,     setIndexHeight]     = createSignal(DEFAULT_INDEX_HEIGHT);
+  const [currentImage, setCurrentImage] = createSignal(props.initialImage ?? 1);
+  const [indexVisible, setIndexVisible] = createSignal(true);
+  const [indexHeight, setIndexHeight] = createSignal(DEFAULT_INDEX_HEIGHT);
   const [selectedEventId, setSelectedEventId] = createSignal<number | null>(3);
-  const [notes,           setNotes]           = createSignal("");
-  const [saveStatus,      setSaveStatus]      = createSignal<"saved" | "saving" | "error">("saved");
+  const [notes, setNotes] = createSignal("");
+  const [saveStatus, setSaveStatus] = createSignal<"saved" | "saving" | "error">("saved");
 
   const { t } = useI18n();
 
@@ -137,8 +136,8 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
     const target = e.target as HTMLElement;
     const inInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
     if (!inInput) {
-      if (e.key === "ArrowLeft")  setCurrentImage(p => Math.max(1, p - 1));
-      if (e.key === "ArrowRight") setCurrentImage(p => Math.min(props.totalImages, p + 1));
+      if (e.key === "ArrowLeft") setCurrentImage(p => Math.max(1, p - 1));
+      if (e.key === "ArrowRight") setCurrentImage(p => Math.min(props.registryMeta.total_images, p + 1));
     }
     if (e.key === "i" && e.ctrlKey) { e.preventDefault(); setIndexVisible(v => !v); }
   };
@@ -175,7 +174,7 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
     <RegistryActionsProvider {...registryActions}>
       <div class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
         <header data-tauri-drag-region class="flex-shrink-0 flex items-center justify-between px-4 h-11 bg-panel border-b border-subtle shadow-sm">
-            <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
+          <div class="flex items-center gap-2 min-w-0 overflow-hidden pointer-events-none">
             <span class="text-[15px] font-bold text-accent flex-shrink-0">GeneaGrab</span>
             <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 text-subtle-md flex-shrink-0" />
             <span class="text-[13px] text-dim flex-shrink-0">AD83 · {props.registryMeta.archive_reference}</span>
@@ -186,17 +185,17 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
           </div>
 
           <button type="button" onClick={() => setIndexVisible(v => !v)} class={[
-              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
-              indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted",
-            ].join(" ")}>
+            "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+            indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted",
+          ].join(" ")}>
             <Icon icon="lucide:list" /> {t("registryViewer.index")} <Kbd>Ctrl I</Kbd>
           </button>
         </header>
 
         <div class="flex flex-1 min-h-0 overflow-hidden">
           <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-            <MainViewer currentImage={currentImage()} totalImages={props.totalImages} onImageChange={setCurrentImage} />
-            <ThumbnailBar totalImages={props.totalImages} currentImage={currentImage()} onImageChange={setCurrentImage} />
+            <MainViewer currentImage={currentImage()} totalImages={props.registryMeta.total_images} onImageChange={setCurrentImage} />
+            <ThumbnailBar totalImages={props.registryMeta.total_images} currentImage={currentImage()} onImageChange={setCurrentImage} />
           </main>
 
           <InfoNotesPanel
@@ -234,7 +233,7 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
         <footer class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle" role="status">
           <div class="flex items-center gap-4">
             <span class="text-[11px] text-dim">{currentImage()}</span>
-            <span class="text-[11px] text-dim">{t("registryViewer.viewsAndActs", { views: props.totalImages, acts: props.eventRows.length })}</span>
+            <span class="text-[11px] text-dim">{t("registryViewer.viewsAndActs", { views: props.registryMeta.total_images, acts: props.eventRows.length })}</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="text-[11px] text-dim tabular-nums">

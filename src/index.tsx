@@ -6,9 +6,12 @@ import "@fontsource/jetbrains-mono/600.css";
 import { render } from "solid-js/web";
 import App from "./App";
 import { I18nProvider } from "./ui/i18n";
+import { BackendProvider } from "./contexts/BackendContext";
 
 render(() => (
-	<I18nProvider fallback={<p>Loading translations...</p>}>
-		<App />
-	</I18nProvider>
+  <I18nProvider fallback={<p>Loading translations...</p>}>
+    <BackendProvider>
+      <App />
+    </BackendProvider>
+  </I18nProvider>
 ), document.getElementById("root") as HTMLElement);
