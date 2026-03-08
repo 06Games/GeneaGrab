@@ -1,13 +1,13 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "$schema": "https://schema.tauri.app/config/2",
   "productName": "GeneaGrab",
   "version": "4.0.0",
   "identifier": "com.06games.geneagrab",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "../../frontend/dist",
     "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "bun run dev",
-    "beforeBuildCommand": "bun run build"
+    "beforeDevCommand": "cd ../frontend && bun run dev",
+    "beforeBuildCommand": "cd ../frontend && bun run build"
   },
   "app": {
     "windows": [
