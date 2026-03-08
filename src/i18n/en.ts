@@ -88,6 +88,7 @@ export const en = {
       notes: "Indexer notes..."
     },
     emptyPrompt: {
+      text: "Select an act from the list",
       prefix: "or press",
       suffix: "to create a new one"
     },

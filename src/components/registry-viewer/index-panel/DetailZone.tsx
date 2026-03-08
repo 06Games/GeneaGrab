@@ -71,7 +71,7 @@ export const DetailZone = (props: DetailZoneProps) => {
         <Show when={!props.event}>
           <div class="flex-1 flex items-center justify-center py-12">
             <p class="text-[14px] text-dim text-center">
-              {t("detail.emptyPrompt")}<br />
+              {t("detail.emptyPrompt.text")}<br />
               <span class="text-[12px]"><span>{t("detail.emptyPrompt.prefix")}</span> <Kbd>N</Kbd> <span>{t("detail.emptyPrompt.suffix")}</span></span>
             </p>
           </div>

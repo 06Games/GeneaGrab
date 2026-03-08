@@ -90,6 +90,7 @@ export const fr: RawDictionaries = {
       notes: "Remarques de l'indexeur..."
     },
     emptyPrompt: {
+      text: "Sélectionnez un acte dans la liste",
       prefix: "ou appuyez sur",
       suffix: "pour en créer un nouveau"
     },
