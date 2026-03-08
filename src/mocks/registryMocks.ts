@@ -6,6 +6,7 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
   source_types: new Set(["Naissance", "Mariage", "Décès"]),
   town: "Brignoles",
   repository_url: "https://archives.var.fr",
+  total_images: 348,
 };
 
 export const MOCK_IMAGE_META: ImageMeta = {
