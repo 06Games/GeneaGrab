@@ -28,6 +28,10 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "category": "Productivity",
+    "publisher": "Evan Galli",
+    "shortDescription": "A tool to download images of digitised registers",
+    "longDescription": "GeneaGrab is a tool to download images of digitised registers available on the websites of various (mainly French) archive services.",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -35,5 +39,12 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "deep-link": {
+      "desktop": {
+        "schemes": ["geneagrab"]
+      }
+    }
   }
 }
