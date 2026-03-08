@@ -65,7 +65,7 @@ export function I18nProvider(props: { children: JSX.Element; fallback?: JSX.Elem
     setLocaleRaw(l);
   };
 
-  const baseTranslator = i18n.translator(() => data() || {}, i18n.resolveTemplate);
+  const baseTranslator = i18n.translator(() => data() || {} as Record<TranslationKey, string>, i18n.resolveTemplate);
 
   const t: Translator = (key, params) => {
     const res = baseTranslator(key, params) as string | undefined;

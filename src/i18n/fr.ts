@@ -44,12 +44,15 @@ export const fr: RawDictionaries = {
     title: "Registre",
     editMeta: "Modifier les métadonnées",
     unknown: "Inconnu",
-    folio: "Folio {{n}}",
+    image: {
+      default: "Image {{n}}",
+      customName: "Image {{n}} ({{name}})"
+    },
     indexedLabel: "Actes indexés",
     period: "Période",
     indexedActs: "{{count}} actes indexés",
     notesLabel: "Notes",
-    notesPlaceholder: "Annotations libres pour ce folio…",
+    notesPlaceholder: "Annotations libres pour cette image…",
     charsShort: "car.",
     saved: "Enregistré",
     saving: "Enregistrement…",

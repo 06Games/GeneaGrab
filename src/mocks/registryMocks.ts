@@ -10,32 +10,35 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
 };
 
 export const MOCK_IMAGE_META: ImageMeta = {
-  folio: "12r",
-  dateRange: "3 Frimaire An II",
+  image_number: 12,
+  userMeta: {
+    dateRange: "1793-11-01 to 1793-11-30",
+    notes: "Image in good condition, but handwriting is difficult to read in some areas."
+  },
   actTypes: new Map<EventType, number>([
-    ["Naissance", 2],
-    ["Mariage", 1],
-    ["Décès", 1],
+    ["Birth", 2],
+    ["Marriage", 1],
+    ["Death", 1],
   ]),
 };
 
 export const MOCK_EVENT_ROWS: EventRow[] = [
-  { event_id: 1, date: "03 Frim. II", event_type: "Naissance", title: "MARTIN, Jean-Baptiste" },
-  { event_id: 2, date: "03 Frim. II", event_type: "Naissance", title: "DUPONT, Marie" },
-  { event_id: 3, date: "05 Frim. II", event_type: "Mariage",   title: "ARNAUD, Pierre ∞ BLANC" },
-  { event_id: 4, date: "05 Frim. II", event_type: "Décès",     title: "BOYER, Antoinette" },
-  { event_id: 5, date: "07 Frim. II", event_type: "Naissance", title: "ISNARD, Louis" },
-  { event_id: 6, date: "12 Frim. II", event_type: "Naissance", title: "FABRE, Thérèse" },
-  { event_id: 7, date: "14 Frim. II", event_type: "Mariage",   title: "ROUX, Antoine ∞ AUBERT" },
-  { event_id: 8, date: "16 Frim. II", event_type: "Décès",     title: "PASCAL, Jean" },
+  { event_id: 1, date: "03 Frim. II", event_type: "Birth", title: "MARTIN, Jean-Baptiste" },
+  { event_id: 2, date: "03 Frim. II", event_type: "Birth", title: "DUPONT, Marie" },
+  { event_id: 3, date: "05 Frim. II", event_type: "Marriage",   title: "ARNAUD, Pierre ∞ BLANC" },
+  { event_id: 4, date: "05 Frim. II", event_type: "Death",     title: "BOYER, Antoinette" },
+  { event_id: 5, date: "07 Frim. II", event_type: "Birth", title: "ISNARD, Louis" },
+  { event_id: 6, date: "12 Frim. II", event_type: "Birth", title: "FABRE, Thérèse" },
+  { event_id: 7, date: "14 Frim. II", event_type: "Marriage",   title: "ROUX, Antoine ∞ AUBERT" },
+  { event_id: 8, date: "16 Frim. II", event_type: "Death",     title: "PASCAL, Jean" },
 ];
 
 export const MOCK_SELECTED_EVENT: EventDetail = {
   event_id: 3, 
   date: "05 Frimaire An II", 
   date_normalized: "1793-11-25",
-  event_type: "Mariage", 
-  title: "Mariage ARNAUD, Pierre ∞ BLANC",
+  event_type: "Marriage", 
+  title: "Marriage ARNAUD, Pierre ∞ BLANC",
   act_number: "47", 
   page: "12r", 
   image_number: "12",

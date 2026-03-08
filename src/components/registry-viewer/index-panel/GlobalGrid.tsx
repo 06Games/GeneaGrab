@@ -9,20 +9,20 @@ import {
   SortingState
 } from "@tanstack/solid-table";
 
-import type { EventRow } from "../../../types/registry";
+import type { EventRow, EventType } from "../../../types/registry";
 import { Button } from "../../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
 import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
 
-const EVENT_CHIP: Record<string, string> = {
-  Naissance: "text-event-birth bg-event-birth-bg",
-  Mariage: "text-event-marriage bg-event-marriage-bg",
-  Décès: "text-event-death bg-event-death-bg",
-  Sépulture: "text-event-burial bg-event-burial-bg",
-  Testament: "text-event-will bg-event-will-bg",
-  Recensement: "text-event-census bg-event-census-bg",
-  Autre: "text-event-other bg-event-other-bg",
+const EVENT_CHIP: Record<EventType, string> = {
+  Birth: "text-event-birth bg-event-birth-bg",
+  Marriage: "text-event-marriage bg-event-marriage-bg",
+  Death: "text-event-death bg-event-death-bg",
+  Burial: "text-event-burial bg-event-burial-bg",
+  Census: "text-event-census bg-event-census-bg",
+  Notarial: "text-event-notarial bg-event-notarial-bg",
+  Other: "text-event-other bg-event-other-bg",
 };
 
 interface GlobalGridProps {
@@ -142,8 +142,8 @@ export const GlobalGrid = (props: GlobalGridProps) => {
                 >
                   <span class="text-[12px] text-dim tabular-nums">{event().event_id}</span>
                   <span class="text-[13px] text-muted tabular-nums truncate">{event().date}</span>
-                  <span class={["text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit leading-none self-center", EVENT_CHIP[event().event_type || "Autre"] || EVENT_CHIP["Autre"]].join(" ")}>
-                    {(event().event_type || "Autre").substring(0, 5)}...
+                  <span class={["text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit leading-none self-center", EVENT_CHIP[event().event_type || "Other"] || EVENT_CHIP["Other"]].join(" ")}>
+                    {(event().event_type || "Other").substring(0, 5)}...
                   </span>
                   <span class="text-[13px] text-main truncate font-medium">{event().title || "-"}</span>
                 </button>

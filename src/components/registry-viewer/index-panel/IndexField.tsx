@@ -7,7 +7,7 @@ interface IndexFieldProps {
   type?: "text" | "checkbox";
   placeholder?: string;
   tabIndex?: number;
-  options?: string[];
+  options?: readonly string[];
   defaultPinned?: boolean;
   labelWidth?: string;
   onPinChange?: (pinned: boolean) => void;

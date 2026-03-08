@@ -5,13 +5,13 @@ import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 
 const ACT_TYPE_STYLES: Record<EventType, string> = {
-  Naissance:      "text-event-birth bg-event-birth-bg border-event-birth-border",
-  Mariage:        "text-event-marriage bg-event-marriage-bg border-event-marriage-border",
-  Décès:          "text-event-death bg-event-death-bg border-event-death-border",
-  Sépulture:      "text-event-burial bg-event-burial-bg border-event-burial-border",
-  Testament:      "text-event-will bg-event-will-bg border-event-will-border",
-  Recensement:    "text-event-census bg-event-census-bg border-event-census-border",
-  Autre:          "text-event-other bg-event-other-bg border-event-other-border",
+  Birth: "text-event-birth bg-event-birth-bg border-event-birth-border",
+  Marriage: "text-event-marriage bg-event-marriage-bg border-event-marriage-border",
+  Death: "text-event-death bg-event-death-bg border-event-death-border",
+  Burial: "text-event-burial bg-event-burial-bg border-event-burial-border",
+  Census: "text-event-census bg-event-census-bg border-event-census-border",
+  Notarial: "text-event-notarial bg-event-notarial-bg border-event-notarial-border",
+  Other: "text-event-other bg-event-other-bg border-event-other-border",
 };
 
 interface InfoNotesPanelProps {
@@ -29,9 +29,9 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   const [registryExpanded, setRegistryExpanded] = createSignal(false);
 
   const saveInfo = () => ({
-    saved:   { dot: "bg-success", label: t("infoPanel.saved") },
-    saving:  { dot: "bg-accent animate-pulse", label: t("infoPanel.saving") },
-    error:   { dot: "bg-danger", label: t("infoPanel.error") },
+    saved: { dot: "bg-success", label: t("infoPanel.saved") },
+    saving: { dot: "bg-accent animate-pulse", label: t("infoPanel.saving") },
+    error: { dot: "bg-danger", label: t("infoPanel.error") },
   })[props.saveStatus ?? "saved"];
 
   return (
@@ -76,12 +76,16 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       </div>
 
       {/* [B] Image metadata */}
-        <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
+      <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-[13px] font-semibold text-main">{t("infoPanel.folio", { n: props.image })}</span>
+          <span class="text-[13px] font-semibold text-main">{
+            props.imageMeta.userMeta.name
+              ? t("infoPanel.image.customName", { n: props.image, name: props.imageMeta.userMeta.name })
+              : t("infoPanel.image.default", { n: props.image })
+          }</span>
         </div>
 
-        <MetaRow label={t("infoPanel.period")}  value={props.imageMeta.dateRange} />
+        <MetaRow label={t("infoPanel.period")} value={props.imageMeta.userMeta.dateRange} />
         <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta.actTypes.values()).reduce((a, b) => a + b, 0))} />
 
         <div class="mt-2 flex flex-wrap gap-1.5">

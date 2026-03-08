@@ -1,11 +1,7 @@
-export type EventType = 
-  | "Naissance" 
-  | "Mariage" 
-  | "Décès" 
-  | "Sépulture" 
-  | "Testament" 
-  | "Recensement" 
-  | "Autre";
+export const EVENT_TYPE_OPTIONS = [
+  "Birth", "Marriage", "Death", "Burial", "Census", "Notarial", "Other", // TODO: Setup translations and use API-driven values for suggestions
+] as const;
+export type EventType = typeof EVENT_TYPE_OPTIONS[number];
 
 export interface RegistryMeta {
   source_id: string;
@@ -16,10 +12,18 @@ export interface RegistryMeta {
   total_images: number;
 }
 
+/** Editable image metadata */
+export interface UserImageMeta {
+  name?: string;
+  dateRange?: string;
+  notes?: string;
+}
+
+/** Read-only image metadata */
 export interface ImageMeta {
-  folio: string;
-  dateRange: string;
+  image_number: number;
   actTypes: Map<EventType, number>;
+  userMeta: UserImageMeta;
 }
 
 export type EventRow = {
@@ -47,7 +51,7 @@ export type PersonEntry = {
   relationship_to: string;
 }
 
-export type EventDetail ={
+export type EventDetail = {
   event_id: number;
   date: string;
   date_normalized: string;
@@ -64,10 +68,8 @@ export type EventDetail ={
   people: PersonEntry[];
 }
 
-// Shared UI Constants
-export const EVENT_TYPE_OPTIONS: EventType[] = [
-  "Naissance", "Mariage", "Décès", "Sépulture", "Testament", "Recensement", "Autre",
-];
+
+// TODO: Use previously written values for suggestions
 
 export const ROLE_SUGGESTIONS = [
   "Sujet principal", "Époux", "Épouse", "Père", "Mère", "Témoin", "Déclarant", "Parrain", "Marraine"

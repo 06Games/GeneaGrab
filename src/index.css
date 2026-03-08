@@ -48,9 +48,9 @@
   --color-event-burial-bg: var(--evt-burial-bg);
   --color-event-burial-border: var(--evt-burial-border);
   
-  --color-event-will: var(--evt-will);
-  --color-event-will-bg: var(--evt-will-bg);
-  --color-event-will-border: var(--evt-will-border);
+  --color-event-notarial: var(--evt-notarial);
+  --color-event-notarial-bg: var(--evt-notarial-bg);
+  --color-event-notarial-border: var(--evt-notarial-border);
   
   --color-event-census: var(--evt-census);
   --color-event-census-bg: var(--evt-census-bg);
@@ -105,9 +105,9 @@
   --evt-burial: #713f12;
   --evt-burial-bg: #ffedd5;
   --evt-burial-border: #fed7aa;
-  --evt-will: #4b5563;
-  --evt-will-bg: #f3f4f6;
-  --evt-will-border: #e5e7eb;
+  --evt-notarial: #4b5563;
+  --evt-notarial-bg: #f3f4f6;
+  --evt-notarial-border: #e5e7eb;
   --evt-census: #403937;
   --evt-census-bg: #f2e9e4;
   --evt-census-border: #e0d8cc;
@@ -165,9 +165,9 @@
     --evt-burial-bg: #472b15;
     --evt-burial-border: #6b401e;
     
-    --evt-will: #b3b3ba;
-    --evt-will-bg: #323236;
-    --evt-will-border: #4a4a50;
+    --evt-notarial: #b3b3ba;
+    --evt-notarial-bg: #323236;
+    --evt-notarial-border: #4a4a50;
     
     --evt-census: #c0b3b9;
     --evt-census-bg: #382d33;

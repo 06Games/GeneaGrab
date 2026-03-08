@@ -42,12 +42,15 @@ export const en = {
     title: "Register",
     editMeta: "Edit metadata",
     unknown: "Unknown",
-    folio: "Folio {{n}}",
+    image: {
+      default: "Image {{n}}",
+      customName: "Image {{n}} ({{name}})"
+    },
     indexedLabel: "Indexed acts",
     period: "Period",
     indexedActs: "{{count}} indexed acts",
     notesLabel: "Notes",
-    notesPlaceholder: "Freeform notes for this folio…",
+    notesPlaceholder: "Freeform notes for this image…",
     charsShort: "chars",
     saved: "Saved",
     saving: "Saving…",

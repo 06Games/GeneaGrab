@@ -2,5 +2,6 @@
     "cSpell.words": [
         "iconify",
         "nums"
-    ]
+    ],
+    "typescript.tsserver.experimental.enableProjectDiagnostics": true
 }
