@@ -29,8 +29,8 @@ export class MockService implements BackendService {
     await this.delay(500);
   }
 
-  getImageUrl(registryId: string, imageId: number, thumbnail: boolean): string | null {
-    return null;
+  getImageUrl(_registryId: string, _imageId: number, _thumbnail: boolean): string | null {
+    return "/src/assets/logo.svg";
   }
 
 

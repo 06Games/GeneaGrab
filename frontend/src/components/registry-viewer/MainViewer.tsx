@@ -40,6 +40,9 @@ export const MainViewer = (props: MainViewerProps) => {
   onMount(() => {
     if (props.viewerRef) props.viewerRef(viewerContainerRef);
 
+    // FIXME: Disable default keybindings
+    // FIXME: Scroll zoom
+    // TODO: Bind right-click to reset zoom and position like in v3
     viewer = OpenSeadragon({
       element: viewerContainerRef,
       showNavigationControl: false,
@@ -142,7 +145,7 @@ export const MainViewer = (props: MainViewerProps) => {
 
       <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
         <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
-        {!imageSrc() && (
+        {!imageSrc() && ( // TODO : Also check if image failed to load
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
              <div class="flex flex-col items-center gap-3 select-none">
               <Icon icon="lucide:image" class="text-subtle" width="50" height="50"></Icon>
