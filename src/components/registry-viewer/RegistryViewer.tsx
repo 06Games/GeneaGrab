@@ -9,7 +9,7 @@ import { useDetachedWindow } from "../../hooks/DetachedWindow";
 import { useI18n } from "../../ui/i18n";
 import { RegistryActionsProvider } from "../../contexts/RegistryActionsContext";
 
-import type { RegistryMeta, ImageMeta, EventRow, EventDetail } from "../../types/registry";
+import type { RegistryMeta, ImageMeta, EventRow, EventDetail, UserImageMeta } from "../../types/registry";
 
 export interface RegistryViewerProps {
   registryMeta: RegistryMeta;
@@ -17,6 +17,7 @@ export interface RegistryViewerProps {
   eventRows: EventRow[];
   initialImage?: number;
   onImageChange?: (image: number) => void;
+  onSaveImageMeta?: (meta: Partial<UserImageMeta>) => Promise<void>;
   getEventDetail: (id: number) => EventDetail | null;
   onSaveAct?: (event: EventDetail) => void;
   onValidateAndNext?: (event: EventDetail) => void;
@@ -42,8 +43,6 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
   const [indexVisible, setIndexVisible] = createSignal(true);
   const [indexHeight, setIndexHeight] = createSignal(DEFAULT_INDEX_HEIGHT);
   const [selectedEventId, setSelectedEventId] = createSignal<number | null>(3);
-  const [notes, setNotes] = createSignal("");
-  const [saveStatus, setSaveStatus] = createSignal<"saved" | "saving" | "error">("saved");
 
   const { t } = useI18n();
 
@@ -72,6 +71,10 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
 
   // Bundle the actions together to supply them to our context
   const registryActions = {
+    onSaveImageMeta: async (meta: Partial<UserImageMeta>) => {
+      console.info("Action: Save image meta", meta);
+      await props.onSaveImageMeta?.(meta);
+    },
     onSaveAct: (event: EventDetail) => {
       console.info("Action: Save", event);
       props.onSaveAct?.(event);
@@ -161,15 +164,6 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
     window.addEventListener("pointerup", onUp);
   };
 
-  let saveTimer: ReturnType<typeof setTimeout>;
-  const handleNotesChange = (value: string) => {
-    setNotes(value);
-    setSaveStatus("saving");
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(() => setSaveStatus("saved"), 800);
-  };
-  onCleanup(() => clearTimeout(saveTimer));
-
   return (
     <RegistryActionsProvider {...registryActions}>
       <div class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
@@ -202,9 +196,6 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
             registryMeta={props.registryMeta}
             imageMeta={props.imageMeta}
             image={currentImage().toString()}
-            notes={notes()}
-            onNotesChange={handleNotesChange}
-            saveStatus={saveStatus()}
           />
         </div>
 

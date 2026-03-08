@@ -26,6 +26,7 @@
   --color-accent-text: var(--accent-text);
   
   --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-danger: var(--danger);
   
   --color-viewer-bg: var(--viewer-bg);
@@ -86,6 +87,7 @@
   --accent-text: #7a4a1e;
   
   --success: #3a8c5c;
+  --warning: #d97706;
   --danger: #c0392b;
   
   /* Viewer specific */
@@ -142,6 +144,7 @@
     --accent-text: #f5c8a3;
     
     --success: #4ade80;
+    --warning: #d97706;
     --danger: #f87171;
     
     /* Viewer specific */

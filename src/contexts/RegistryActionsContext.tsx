@@ -1,7 +1,8 @@
 import { createContext, useContext, JSX } from "solid-js";
-import type { EventDetail } from "../types/registry";
+import type { EventDetail, UserImageMeta } from "../types/registry";
 
 export interface RegistryActions {
+  onSaveImageMeta?: (meta: Partial<UserImageMeta>) => Promise<void>;
   onSaveAct?: (event: EventDetail) => void;
   onValidateAndNext?: (event: EventDetail) => void;
   onNewAct?: () => void;

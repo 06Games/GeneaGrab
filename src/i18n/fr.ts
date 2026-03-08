@@ -56,7 +56,8 @@ export const fr: RawDictionaries = {
     charsShort: "car.",
     saved: "Enregistré",
     saving: "Enregistrement…",
-    error: "Erreur"
+    error: "Erreur",
+    unsaved: "Modifications non enregistrées"
   },
   registryViewer: {
     index: "Index",

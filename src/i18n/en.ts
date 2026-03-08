@@ -54,7 +54,8 @@ export const en = {
     charsShort: "chars",
     saved: "Saved",
     saving: "Saving…",
-    error: "Error"
+    error: "Error",
+    unsaved: "Unsaved changes"
   },
   registryViewer: {
     index: "Index",

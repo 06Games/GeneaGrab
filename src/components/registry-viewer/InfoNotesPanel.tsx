@@ -1,8 +1,9 @@
-import { createSignal, For, Show } from "solid-js";
+import { createSignal, For, onCleanup, Show } from "solid-js";
 import type { RegistryMeta, ImageMeta, EventType } from "../../types/registry";
 import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
+import { useRegistryActions } from "../../contexts/RegistryActionsContext";
 
 const ACT_TYPE_STYLES: Record<EventType, string> = {
   Birth: "text-event-birth bg-event-birth-bg border-event-birth-border",
@@ -18,21 +19,36 @@ interface InfoNotesPanelProps {
   registryMeta: RegistryMeta;
   imageMeta: ImageMeta;
   image: string;
-  notes: string;
-  onNotesChange: (value: string) => void;
   onEditRegistry?: () => void;
-  saveStatus?: "saved" | "saving" | "error";
 }
 
 export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   const { t } = useI18n();
+  const actions = useRegistryActions();
   const [registryExpanded, setRegistryExpanded] = createSignal(false);
+  const [saveStatus, setSaveStatus] = createSignal<"saved" | "unsaved" | "saving" | "error">("saved");
 
   const saveInfo = () => ({
     saved: { dot: "bg-success", label: t("infoPanel.saved") },
+    unsaved: { dot: "bg-dim", label: t("infoPanel.unsaved") },
     saving: { dot: "bg-accent animate-pulse", label: t("infoPanel.saving") },
     error: { dot: "bg-danger", label: t("infoPanel.error") },
-  })[props.saveStatus ?? "saved"];
+  })[saveStatus() ?? "saved"];
+
+
+  let saveTimer: ReturnType<typeof setTimeout>;
+  let lastMeta: Partial<ImageMeta> = {};
+  const saveImageMeta = (meta: Partial<ImageMeta>) => {
+    setSaveStatus("unsaved");
+    clearTimeout(saveTimer);
+    lastMeta = { ...lastMeta, ...meta }; // Accumulate changes to avoid multiple rapid saves
+    saveTimer = setTimeout(async () => {
+    setSaveStatus("saving");
+      const success = await actions.onSaveImageMeta?.(lastMeta).catch(() => false).then(() => true) ?? false;
+      setSaveStatus(success ? "saved" : "error");
+    }, 800);
+  };
+  onCleanup(() => clearTimeout(saveTimer));
 
   return (
     <aside
@@ -79,13 +95,13 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
           <span class="text-[13px] font-semibold text-main">{
-            props.imageMeta.userMeta.name
-              ? t("infoPanel.image.customName", { n: props.image, name: props.imageMeta.userMeta.name })
+            props.imageMeta.name
+              ? t("infoPanel.image.customName", { n: props.image, name: props.imageMeta.name })
               : t("infoPanel.image.default", { n: props.image })
           }</span>
         </div>
 
-        <MetaRow label={t("infoPanel.period")} value={props.imageMeta.userMeta.dateRange} />
+        <MetaRow label={t("infoPanel.period")} value={props.imageMeta.dateRange} />
         <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta.actTypes.values()).reduce((a, b) => a + b, 0))} />
 
         <div class="mt-2 flex flex-wrap gap-1.5">
@@ -114,14 +130,14 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
             {t("infoPanel.notesLabel")}
           </label>
           <span class="text-[11px] text-dim tabular-nums" aria-live="polite">
-            {props.notes.length} {t("infoPanel.charsShort")}
+            {props.imageMeta.notes?.length ?? 0} {t("infoPanel.charsShort")}
           </span>
         </div>
 
         <textarea
           id="image-notes"
-          value={props.notes}
-          onInput={(e) => props.onNotesChange(e.currentTarget.value)}
+          value={props.imageMeta.notes ?? ""}
+          onInput={(e) => saveImageMeta({ notes: e.currentTarget.value })}
           placeholder={t("infoPanel.notesPlaceholder")}
           spellcheck={false}
           class={[

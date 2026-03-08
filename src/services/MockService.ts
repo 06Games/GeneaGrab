@@ -1,6 +1,6 @@
 // src/services/MockService.ts
 import type { BackendService } from "./api";
-import type { EventDetail, RegistryMeta, EventRow, ImageMeta } from "../types/registry";
+import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta } from "../types/registry";
 import { 
   MOCK_REGISTRY_DATA, 
   MOCK_IMAGE_META, 
@@ -23,6 +23,12 @@ export class MockService implements BackendService {
     await this.delay(200);
     return MOCK_IMAGE_META;
   }
+
+  async saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void> {
+    console.info(`[Mock API] saveImageMeta: registry ${registryId}, image ${imageId}`, meta);
+    await this.delay(500);
+  }
+
 
   async getEventRows(registryId: string): Promise<EventRow[]> {
     console.info(`[Mock API] getEventRows: ${registryId}`);

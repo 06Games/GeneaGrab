@@ -3,32 +3,40 @@ import { useParams, useNavigate } from "@solidjs/router";
 import { createResource, Show, createSignal } from "solid-js";
 import { RegistryViewer } from "../components/registry-viewer/RegistryViewer";
 import { useBackend } from "../contexts/BackendContext";
-import type { EventDetail } from "../types/registry";
+import type { EventDetail, UserImageMeta } from "../types/registry";
 
 const ViewerPage = () => {
   const params = useParams();
   const navigate = useNavigate();
   const api = useBackend();
 
+  const registryId = params.id!;
+
   const [currentImageId, setCurrentImageId] = createSignal(
     params.imageId ? parseInt(params.imageId, 10) : 1
   );
 
-  const [registryMeta] = createResource(() => params.id, (id) => api.getRegistryMeta(id));
-  const [eventRows] = createResource(() => params.id, (id) => api.getEventRows(id));
+  const [registryMeta] = createResource(() => registryId, (id) => api.getRegistryMeta(id));
+  const [eventRows] = createResource(() => registryId, (id) => api.getEventRows(id));
   const [imageMeta] = createResource(
-    () => ({ regId: params.id!, imgId: currentImageId() }),
+    () => ({ regId: registryId, imgId: currentImageId() }),
     ({ regId, imgId }) => api.getImageMeta(regId, imgId)
   );
 
   const [detailCache, setDetailCache] = createSignal<Record<number, EventDetail>>({});
+
+const handleSaveImageMeta = async (meta: Partial<UserImageMeta>) => {
+  await api.saveImageMeta(registryId, currentImageId(), meta);
+  console.log("Successfully saved image meta to backend:", meta);
+}
+
   
   // Track which IDs are currently being fetched to prevent duplicates
   const fetchingIds = new Set<number>();
 
   const handleImageChange = (newImageId: number) => {
     setCurrentImageId(newImageId);
-    navigate(`/registry/${params.id}/${newImageId}`, { replace: true });
+    navigate(`/registry/${registryId}/${newImageId}`, { replace: true });
   };
 
   const handleGetEventDetail = (id: number): EventDetail | null => {
@@ -71,6 +79,7 @@ const ViewerPage = () => {
           eventRows={eventRows()!}
           initialImage={currentImageId()}
           onImageChange={handleImageChange}
+          onSaveImageMeta={handleSaveImageMeta}
           getEventDetail={handleGetEventDetail}
           onSaveAct={handleSaveAct}
           onValidateAndNext={handleSaveAct}

@@ -1,4 +1,4 @@
-import { RegistryMeta, EventRow, EventDetail, ImageMeta } from "../types/registry";
+import { RegistryMeta, EventRow, EventDetail, ImageMeta, UserImageMeta } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
@@ -6,6 +6,9 @@ export class TauriService implements BackendService {
         throw new Error("Method not implemented.");
     }
     getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {
+        throw new Error("Method not implemented.");
+    }
+    saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void> {
         throw new Error("Method not implemented.");
     }
 

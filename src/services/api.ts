@@ -1,9 +1,10 @@
-import type { EventDetail, RegistryMeta, EventRow, ImageMeta } from "../types/registry";
+import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta } from "../types/registry";
 
 export interface BackendService {
     // Registry
     getRegistryMeta(id: string): Promise<RegistryMeta>;
     getImageMeta(registryId: string, imageId: number): Promise<ImageMeta>;
+    saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void>;
 
     // Index
     getEventRows(registryId: string): Promise<EventRow[]>;

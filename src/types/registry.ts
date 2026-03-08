@@ -20,10 +20,9 @@ export interface UserImageMeta {
 }
 
 /** Read-only image metadata */
-export interface ImageMeta {
+export interface ImageMeta extends UserImageMeta {
   image_number: number;
   actTypes: Map<EventType, number>;
-  userMeta: UserImageMeta;
 }
 
 export type EventRow = {
