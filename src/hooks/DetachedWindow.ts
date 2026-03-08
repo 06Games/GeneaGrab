@@ -23,24 +23,53 @@ export interface DetachedWindowOptions<T = any> {
 
 export function useDetachedWindow<T = any>(defaultOptions: DetachedWindowOptions<T>) {
   const [isDetached, setIsDetached] = createSignal(false);
+  
   let channel: BroadcastChannel | null = null;
+  let unlistenTauri: (() => void) | null = null;
 
-  onMount(() => {
-    if (typeof window !== 'undefined') {
-      // Scope the channel to the specific window ID
-      channel = new BroadcastChannel(`gg_window_sync_${defaultOptions.id}`);
-      
-      channel.onmessage = (e: MessageEvent<T>) => {
-        defaultOptions.onMessage?.(e.data);
-      };
+  const isTauri = typeof window !== 'undefined' && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
+  const syncEventName = `gg_window_sync_${defaultOptions.id}`;
+
+  onMount(async () => {
+    if (typeof window === 'undefined') return;
+
+    if (isTauri) {
+      try {
+        const { listen } = await import('@tauri-apps/api/event');
+        const unlisten = await listen<T>(syncEventName, (event) => {
+          defaultOptions.onMessage?.(event.payload);
+        });
+        unlistenTauri = unlisten;
+        return;
+      } catch (e) {
+        console.warn("Failed to hook into Tauri events, falling back to BroadcastChannel.", e);
+      }
     }
+
+    channel = new BroadcastChannel(syncEventName);
+    channel.onmessage = (e: MessageEvent<T>) => {
+      defaultOptions.onMessage?.(e.data);
+    };
   });
 
   onCleanup(() => {
+    if (unlistenTauri) {
+      unlistenTauri();
+    }
     channel?.close();
   });
 
-  const sendMessage = (msg: T) => {
+  const sendMessage = async (msg: T) => {
+    if (isTauri) {
+      try {
+        const { emit } = await import('@tauri-apps/api/event');
+        await emit(syncEventName, msg);
+        return; 
+      } catch (e) {
+        console.warn("Failed to emit Tauri event, falling back to BroadcastChannel.", e);
+      }
+    }
+    
     channel?.postMessage(msg);
   };
 
@@ -59,8 +88,6 @@ export function useDetachedWindow<T = any>(defaultOptions: DetachedWindowOptions
       }
       targetUrl = urlObj.pathname + urlObj.search + urlObj.hash;
     }
-
-    const isTauri = typeof window !== 'undefined' && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
 
     if (isTauri) {
       try {
@@ -120,7 +147,6 @@ export function useDetachedWindow<T = any>(defaultOptions: DetachedWindowOptions
   };
 
   const closeSelf = async () => {
-    const isTauri = typeof window !== 'undefined' && ("__TAURI_INTERNALS__" in window || "__TAURI__" in window);
     if (isTauri) {
       try {
         const { getCurrentWindow } = await import('@tauri-apps/api/window');
