@@ -10,7 +10,6 @@ import { useI18n } from "../../ui/i18n";
 import { RegistryActionsProvider } from "../../contexts/RegistryActionsContext";
 
 import type { RegistryMeta, ImageMeta, EventRow, EventDetail, UserImageMeta } from "../../types/registry";
-import { getBackendService } from "../../services/apiFactory";
 
 export interface RegistryViewerProps {
   registryMeta: RegistryMeta;
@@ -35,14 +34,19 @@ const MIN_INDEX_HEIGHT = 200;
 const MAX_INDEX_HEIGHT = 700;
 const DEFAULT_INDEX_HEIGHT = 340;
 
+const MIN_THUMB_HEIGHT = 60;
+const MAX_THUMB_HEIGHT = 200;
+const DEFAULT_THUMB_HEIGHT = 125;
+
 export const RegistryViewer = (props: RegistryViewerProps) => {
   const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : "");
   const isDetachedMode = urlParams.get('mode') === 'index';
   const activeRegistryId = urlParams.get('registryId') || props.registryMeta.source_id;
 
   const [currentImage, setCurrentImage] = createSignal(props.initialImage ?? 1);
-  const [indexVisible, setIndexVisible] = createSignal(true);
+  const [indexVisible, setIndexVisible] = createSignal(false);
   const [indexHeight, setIndexHeight] = createSignal(DEFAULT_INDEX_HEIGHT);
+  const [thumbnailHeight, setThumbnailHeight] = createSignal(DEFAULT_THUMB_HEIGHT);
   const [selectedEventId, setSelectedEventId] = createSignal<number | null>(3);
 
   const { t } = useI18n();
@@ -165,6 +169,22 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
     window.addEventListener("pointerup", onUp);
   };
 
+  const onThumbnailResizePointerDown = (e: PointerEvent) => {
+    e.preventDefault();
+    const startY = e.clientY;
+    const startH = thumbnailHeight();
+    const onMove = (ev: PointerEvent) => {
+      const delta = startY - ev.clientY;
+      setThumbnailHeight(Math.max(MIN_THUMB_HEIGHT, Math.min(MAX_THUMB_HEIGHT, startH + delta)));
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
   return (
     <RegistryActionsProvider {...registryActions}>
       <div class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
@@ -190,7 +210,12 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
         <div class="flex flex-1 min-h-0 overflow-hidden">
           <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
             <MainViewer currentImage={currentImage()} totalImages={props.registryMeta.total_images} onImageChange={setCurrentImage} registryId={props.registryMeta.source_id} />
-            <ThumbnailBar totalImages={props.registryMeta.total_images} currentImage={currentImage()} onImageChange={setCurrentImage} registryId={props.registryMeta.source_id} />
+            <div class="flex-shrink-0 h-[6px] w-full cursor-row-resize z-10 group bg-app hover:bg-accent/25 active:bg-accent/50 transition-colors duration-150 flex items-center justify-center" onPointerDown={onThumbnailResizePointerDown} role="separator" aria-orientation="horizontal">
+              <div class="flex flex-row gap-[3px] opacity-0 group-hover:opacity-60 transition-opacity">
+                {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-accent" />)}
+              </div>
+            </div>
+            <ThumbnailBar height={thumbnailHeight()} totalImages={props.registryMeta.total_images} currentImage={currentImage()} onImageChange={setCurrentImage} registryId={props.registryMeta.source_id} />
           </main>
 
           <InfoNotesPanel
