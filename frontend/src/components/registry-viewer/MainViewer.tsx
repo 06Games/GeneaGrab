@@ -19,7 +19,7 @@ export const MainViewer = (props: MainViewerProps) => {
   let viewerContainerRef!: HTMLDivElement;
   let viewer: OpenSeadragon.Viewer | null = null;
 
-  const [zoomDisplay, setZoomDisplay] = createSignal(100); 
+  const [zoomDisplay, setZoomDisplay] = createSignal(100);
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
   const [imageSrc, setImageSrc] = createSignal<string | null>(null);
   const [imageError, setImageError] = createSignal(false);
@@ -54,7 +54,51 @@ export const MainViewer = (props: MainViewerProps) => {
       springStiffness: 10,
     });
 
+    const resizeObserver = new ResizeObserver(() => {
+      if (viewer && viewer.viewport) viewer.forceRedraw();
+    });
+    resizeObserver.observe(viewerContainerRef);
+
+    viewer.world.addHandler("add-item", (event) => {
+      const item = event.item;
+
+      const wakeUpAndDraw = () => {
+        if (!viewer) return;
+
+        // Force a coordinate change to wake up the rendering
+        viewer.viewport.zoomBy(1.00001);
+        viewer.forceRedraw();
+      };
+
+      if (item.getFullyLoaded())
+        wakeUpAndDraw();
+      else item.addHandler("fully-loaded-change", (e) => {
+        if (e.fullyLoaded) wakeUpAndDraw();
+      });
+    });
+
+    viewer.addHandler("open-failed", () => setImageError(true));
+
+    viewer.addHandler("animation", () => {
+      if (!viewer) return;
+      const currentZoom = viewer.viewport.getZoom(true);
+      const homeZoom = viewer.viewport.getHomeZoom();
+      if (homeZoom > 0) setZoomDisplay(Math.round((currentZoom / homeZoom) * 100));
+    });
+
+    createEffect(() => {
+      const url = imageSrc();
+      if (!url) return;
+
+      viewer!.open({
+        type: 'image',
+        url: url
+      } as any);
+    });
+
+
     viewer.addHandler("canvas-key", (e) => {
+      // Prevent default OpenSeadragon keyboard shortcuts
       e.preventDefaultAction = true;
     });
 
@@ -63,36 +107,15 @@ export const MainViewer = (props: MainViewerProps) => {
       e.preventDefault();
       viewer?.viewport.goHome();
     };
-    
     viewerContainerRef.addEventListener("contextmenu", handleContextMenu);
 
-    viewer.addHandler("open-failed", () => {
-      setImageError(true);
-    });
-
-    viewer.addHandler("animation", () => {
-      if (!viewer) return;
-      const currentZoom = viewer.viewport.getZoom(true);
-      const homeZoom = viewer.viewport.getHomeZoom();
-      if (homeZoom > 0) {
-        setZoomDisplay(Math.round((currentZoom / homeZoom) * 100));
-      }
-    });
-
     onCleanup(() => {
+      resizeObserver.disconnect();
       if (viewerContainerRef) {
         viewerContainerRef.removeEventListener("contextmenu", handleContextMenu);
       }
       viewer?.destroy();
     });
-  });
-
-  createEffect(() => {
-    if (!viewer) return;
-    viewer.open({
-      type: 'image',
-      url: imageSrc()
-    } as any);
   });
 
   const handleZoomIn = () => viewer?.viewport.zoomBy(1.3);
@@ -167,7 +190,7 @@ export const MainViewer = (props: MainViewerProps) => {
         <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
         {(!imageSrc() || imageError()) && (
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
-             <div class="flex flex-col items-center gap-3 select-none">
+            <div class="flex flex-col items-center gap-3 select-none">
               <Icon icon={imageError() ? "lucide:image-off" : "lucide:image"} class="text-subtle" width="50" height="50"></Icon>
               <span class="text-[13px] text-dim">{t("mainViewer.noImage", { n: props.currentImage })}</span>
             </div>
