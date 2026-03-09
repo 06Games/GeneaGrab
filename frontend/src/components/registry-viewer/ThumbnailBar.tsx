@@ -1,4 +1,4 @@
-import { For, createEffect } from "solid-js";
+import { For, createEffect, createSignal } from "solid-js";
 import { useI18n } from "../../ui/i18n";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import { getBackendService } from "../../services/apiFactory";
@@ -14,6 +14,8 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
   let containerRef!: HTMLDivElement;
   const { t } = useI18n();
   const api = getBackendService();
+
+  const [failedImages, setFailedImages] = createSignal<Set<number>>(new Set());
 
   const virtualizer = createVirtualizer({
     get count() { return props.totalImages; },
@@ -58,6 +60,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
             const image = virtualItem.index + 1;
             const isActive = () => props.currentImage === image;
             const src = () => api.getImageUrl(props.registryId, image, true);
+            const hasError = () => failedImages().has(image);
 
             return (
               <button
@@ -88,8 +91,18 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                     ? "border-accent shadow-md shadow-accent/20"
                     : "border-subtle opacity-60 group-hover:opacity-100 group-hover:border-subtle-md group-hover:shadow-sm",
                 ].join(" ")}>
-                  {src()
-                    ? <img src={src()} alt="" class="w-full h-full object-cover" loading="lazy" />
+                  {src() && !hasError()
+                    ? <img 
+                        src={src()!} 
+                        alt="" 
+                        class="w-full h-full object-cover" 
+                        loading="lazy" 
+                        onError={() => {
+                          const next = new Set(failedImages());
+                          next.add(image);
+                          setFailedImages(next);
+                        }}
+                      />
                     : <span class="text-[9px] text-dim font-mono leading-none">{image}</span>
                   }
                 </div>

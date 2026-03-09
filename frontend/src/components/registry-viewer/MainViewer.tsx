@@ -22,9 +22,11 @@ export const MainViewer = (props: MainViewerProps) => {
   const [zoomDisplay, setZoomDisplay] = createSignal(100); 
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
   const [imageSrc, setImageSrc] = createSignal<string | null>(null);
+  const [imageError, setImageError] = createSignal(false);
 
   createEffect(() => {
     setImageInput(String(props.currentImage));
+    setImageError(false);
     setImageSrc(api.getImageUrl(props.registryId, props.currentImage, false));
   });
 
@@ -40,9 +42,6 @@ export const MainViewer = (props: MainViewerProps) => {
   onMount(() => {
     if (props.viewerRef) props.viewerRef(viewerContainerRef);
 
-    // FIXME: Disable default keybindings
-    // FIXME: Scroll zoom
-    // TODO: Bind right-click to reset zoom and position like in v3
     viewer = OpenSeadragon({
       element: viewerContainerRef,
       showNavigationControl: false,
@@ -51,6 +50,24 @@ export const MainViewer = (props: MainViewerProps) => {
       gestureSettingsMouse: { clickToZoom: false, scrollToZoom: true },
       imageLoaderLimit: 5,
       animationTime: 0.3,
+      zoomPerScroll: 1.5,
+      springStiffness: 10,
+    });
+
+    viewer.addHandler("canvas-key", (e) => {
+      e.preventDefaultAction = true;
+    });
+
+    const handleContextMenu = (e: MouseEvent) => {
+      // Reset viewer on right-click
+      e.preventDefault();
+      viewer?.viewport.goHome();
+    };
+    
+    viewerContainerRef.addEventListener("contextmenu", handleContextMenu);
+
+    viewer.addHandler("open-failed", () => {
+      setImageError(true);
     });
 
     viewer.addHandler("animation", () => {
@@ -63,6 +80,9 @@ export const MainViewer = (props: MainViewerProps) => {
     });
 
     onCleanup(() => {
+      if (viewerContainerRef) {
+        viewerContainerRef.removeEventListener("contextmenu", handleContextMenu);
+      }
       viewer?.destroy();
     });
   });
@@ -145,10 +165,10 @@ export const MainViewer = (props: MainViewerProps) => {
 
       <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
         <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
-        {!imageSrc() && ( // TODO : Also check if image failed to load
+        {(!imageSrc() || imageError()) && (
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
              <div class="flex flex-col items-center gap-3 select-none">
-              <Icon icon="lucide:image" class="text-subtle" width="50" height="50"></Icon>
+              <Icon icon={imageError() ? "lucide:image-off" : "lucide:image"} class="text-subtle" width="50" height="50"></Icon>
               <span class="text-[13px] text-dim">{t("mainViewer.noImage", { n: props.currentImage })}</span>
             </div>
           </div>
