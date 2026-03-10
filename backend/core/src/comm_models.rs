@@ -1,5 +1,19 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, HashSet};
+
+/** Treat empty string as null */
+fn empty_string_patch_is_null<'de, D>(deserializer: D) -> Result<Option<Option<String>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let opt: Option<String> = Option::deserialize(deserializer)?;
+    
+    match opt {
+        None => Ok(Some(None)),
+        Some(s) if s.trim().is_empty() => Ok(Some(None)),
+        Some(s) => Ok(Some(Some(s))),
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RegistryMeta {
@@ -13,9 +27,12 @@ pub struct RegistryMeta {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserImageMeta {
-    pub name: Option<String>,
-    pub date_range: Option<String>,
-    pub notes: Option<String>,
+    #[serde(default, deserialize_with = "empty_string_patch_is_null")]
+    pub name: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_patch_is_null")]
+    pub date_range: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_patch_is_null")]
+    pub notes: Option<Option<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
