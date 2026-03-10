@@ -12,7 +12,7 @@ pub async fn fetch_registry_meta(id: String) -> Result<RegistryMeta, CoreError> 
     source_types.insert("Death".into());
 
     Ok(RegistryMeta {
-        source_id: id,
+        registry_id: id,
         archive_reference: "5 Mi 1/342 (rust stub)".into(),
         source_types,
         town: "Brignoles".into(),

@@ -4,7 +4,7 @@ export const EVENT_TYPE_OPTIONS = [
 export type EventType = typeof EVENT_TYPE_OPTIONS[number];
 
 export interface RegistryMeta {
-  source_id: string;
+  registry_id: string;
   archive_reference: string;
   source_types: Set<EventType | string>;
   town: string;

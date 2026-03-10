@@ -6,7 +6,7 @@ pub fn handle_tile_request(
     let path = request.uri().path();
     let parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
 
-    println!("Received tile request: {}", path);
+    log::info!("Received tile request: {}", path);
 
     if parts.len() >= 3 {
         let registry_id = parts[0].to_string();
@@ -26,7 +26,7 @@ pub fn handle_tile_request(
                     .unwrap()
             }
             Err(e) => {
-                println!("Failed to load image via custom protocol: {}", e);
+                log::error!("Failed to load image via custom protocol: {}", e);
                 tauri::http::Response::builder()
                     .status(tauri::http::StatusCode::INTERNAL_SERVER_ERROR)
                     .body(vec![])

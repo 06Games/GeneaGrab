@@ -1,7 +1,7 @@
 import type { RegistryMeta, ImageMeta, EventRow, EventDetail, EventType } from "../types/registry";
 
 export const MOCK_REGISTRY_DATA: RegistryMeta = {
-  source_id: "src-123",
+  registry_id: "src-123",
   archive_reference: "5 Mi 1/342",
   source_types: new Set(["Birth", "Marriage", "Death"]),
   town: "Brignoles",
