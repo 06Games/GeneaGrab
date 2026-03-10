@@ -1,70 +1,17 @@
-use geneagrab_core::{
-    errors::CoreError,
-    comm_models::{EventDetail, EventRow, ImageMeta, RegistryMeta, UserImageMeta},
-};
-use serde::Serialize;
+use sea_orm::Database;
+use tauri::Manager;
 
-mod tiles;
+pub mod commands; 
+pub mod state;   
+mod tiles; 
 
-#[derive(Serialize)]
-pub struct CommandError(String);
-
-impl From<CoreError> for CommandError {
-    fn from(err: CoreError) -> Self {
-        CommandError(err.to_string())
-    }
-}
-
-#[tauri::command]
-async fn get_registry_meta(id: String) -> Result<RegistryMeta, CommandError> {
-    let res = geneagrab_core::services::fetch_registry_meta(id).await?;
-    Ok(res)
-}
-
-#[tauri::command]
-async fn get_image_meta(registry_id: String, image_id: u32) -> Result<ImageMeta, CommandError> {
-    let res = geneagrab_core::services::fetch_image_meta(registry_id, image_id).await?;
-    Ok(res)
-}
-
-#[tauri::command]
-async fn save_image_meta(
-    registry_id: String,
-    image_id: u32,
-    meta: UserImageMeta,
-) -> Result<(), CommandError> {
-    geneagrab_core::services::save_image_meta(registry_id, image_id, meta).await?;
-    Ok(())
-}
-
-#[tauri::command]
-async fn get_image(registry_id: String, image_id: u32, thumbnail: bool) -> Result<Vec<u8>, CommandError> {
-    let res = geneagrab_core::services::fetch_image(registry_id, image_id, thumbnail).await?;
-    Ok(res)
-}
-
-#[tauri::command]
-async fn get_event_rows(registry_id: String) -> Result<Vec<EventRow>, CommandError> {
-    let res = geneagrab_core::services::fetch_event_rows(registry_id).await?;
-    Ok(res)
-}
-
-#[tauri::command]
-async fn get_event_detail(event_id: u32) -> Result<Option<EventDetail>, CommandError> {
-    let res = geneagrab_core::services::fetch_event(event_id).await?;
-    Ok(Some(res))
-}
-
-#[tauri::command]
-async fn save_act(event: EventDetail) -> Result<(), CommandError> {
-    geneagrab_core::services::save_act(event).await?;
-    Ok(())
-}
+use state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
+            // Setup logging
             if cfg!(debug_assertions) {
                 app.handle().plugin(
                     tauri_plugin_log::Builder::default()
@@ -72,23 +19,32 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            let db_url = "sqlite:///home/evan/.local/share/GeneaGrab/geneagrab.db?mode=rwc"; // TODO: Use dynamic app data dir
+            // Wait for the database connection to be established before running the app
+            let db = tauri::async_runtime::block_on(async {
+                Database::connect(db_url).await.expect("Failed to connect to database")
+            });
+            app.manage(AppState { db }); // Inject the DbConn into managed state
+
             Ok(())
         })
-        
-        .register_uri_scheme_protocol("tiles", |_app, request| {
-            tiles::handle_tile_request(request)
+        .register_uri_scheme_protocol("tiles", |ctx, request| {
+            let app_handle = ctx.app_handle();
+            let state = app_handle.state::<state::AppState>();
+            tiles::handle_tile_request(request, state)
         })
-        
+
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![
-            get_registry_meta,
-            get_image_meta,
-            save_image_meta,
-            get_image,
-            get_event_rows,
-            get_event_detail,
-            save_act
+            commands::registry::get_registry_meta,
+            commands::image::get_image_meta,
+            commands::image::save_image_meta,
+            commands::event::get_event_rows,
+            commands::event::get_event_detail,
+            commands::event::save_act
         ])
+        
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
