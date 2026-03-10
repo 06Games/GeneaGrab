@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RegistryMeta {
-    pub registry_id: String,
+    pub registry_id: u32,
     pub archive_reference: String,
     pub source_types: HashSet<String>,
     pub town: String,

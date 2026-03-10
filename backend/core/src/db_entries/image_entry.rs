@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "image_entry")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub id: String,
-    pub registry_entry_id: String,
+    #[sea_orm(primary_key, auto_increment = true)]
+    pub id: u32,
+    pub registry_entry_id: u32,
 
     pub width: Option<u32>,
     pub height: Option<u32>,

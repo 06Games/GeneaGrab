@@ -6,7 +6,7 @@ use crate::{
 };
 use std::collections::HashMap;
 
-pub async fn fetch_image_meta(db: &DbConn, registry_id: String, image_id: u32) -> Result<ImageMeta, CoreError> {
+pub async fn fetch_image_meta(db: &DbConn, registry_id: u32, image_id: u32) -> Result<ImageMeta, CoreError> {
     log::info!("fetch_image_meta called for registry {} image {}", registry_id, image_id);
 
     let image = image_entry::Entity::find()
@@ -31,7 +31,7 @@ pub async fn fetch_image_meta(db: &DbConn, registry_id: String, image_id: u32) -
 
 pub async fn save_image_meta(
     db: &DbConn,
-    registry_id: String,
+    registry_id: u32,
     image_id: u32,
     meta: UserImageMeta,
 ) -> Result<(), CoreError> {
@@ -59,7 +59,7 @@ pub async fn save_image_meta(
     Ok(())
 }
 
-pub async fn fetch_image(_db: &DbConn, _registry_id: String, image_id: u32, _thumbnail: bool) -> Result<Vec<u8>, CoreError> {
+pub async fn fetch_image(_db: &DbConn, _registry_id: u32, image_id: u32, _thumbnail: bool) -> Result<Vec<u8>, CoreError> {
     log::info!("fetch_image called for image {}", image_id);
 
     // Assuming images remain stored on the filesystem, not as BLOBs in the DB.

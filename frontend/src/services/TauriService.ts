@@ -14,7 +14,9 @@ export class TauriService implements BackendService {
 
     async getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {
         const res = await invoke<any>("get_image_meta", { registryId, imageId });
-        res.act_types = new Map(Object.entries(res.act_types ?? {}));
+        if (typeof res.act_types === "object" && res.act_types !== null)
+            res.act_types = new Map(Object.entries(res.act_types));
+        else res.act_types = new Map();
         return res as ImageMeta;
     }
 

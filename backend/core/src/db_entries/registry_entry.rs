@@ -14,8 +14,8 @@ pub struct ExtraData(pub HashMap<String, String>);
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "registry_entry")]
 pub struct Model {
-    #[sea_orm(primary_key, auto_increment = false)]
-    pub id: String,
+    #[sea_orm(primary_key, auto_increment = true)]
+    pub id: u32,
 
     pub source_id: String,
     pub registry_id: String,

@@ -1,3 +1,4 @@
+use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
 use tauri::Manager;
 
@@ -19,12 +20,25 @@ pub fn run() {
                         .build(),
                 )?;
             }
+            
+            let app_data_dir = app.path().app_data_dir().expect("Failed to get app data dir");
+            std::fs::create_dir_all(&app_data_dir).expect("Failed to create app data directory");
+            
+            // Construct DB URL
+            let db_path = app_data_dir.join("geneagrab.db");
+            log::info!("Using database at: {}", db_path.to_string_lossy());
+            let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
 
-            let db_url = "sqlite:///home/evan/.local/share/GeneaGrab/geneagrab.db?mode=rwc"; // TODO: Use dynamic app data dir
-            // Wait for the database connection to be established before running the app
+            // Connect to the DB and run migrations
             let db = tauri::async_runtime::block_on(async {
-                Database::connect(db_url).await.expect("Failed to connect to database")
+                let conn = Database::connect(&db_url).await.expect("Failed to connect to database");
+                
+                // Run all pending migrations automatically on startup
+                Migrator::up(&conn, None).await.expect("Failed to run migrations");
+                
+                conn
             });
+
             app.manage(AppState { db }); // Inject the DbConn into managed state
 
             Ok(())

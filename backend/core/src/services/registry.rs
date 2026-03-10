@@ -5,7 +5,7 @@ use crate::{
     errors::CoreError,
 };
 
-pub async fn fetch_registry_meta(db: &DbConn, id: String) -> Result<RegistryMeta, CoreError> {
+pub async fn fetch_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
     log::info!("fetch_registry_meta called with id: {}", id);
 
     let registry = registry_entry::Entity::find_by_id(id.clone())

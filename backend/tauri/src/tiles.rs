@@ -13,7 +13,7 @@ pub fn handle_tile_request(
     log::info!("Received tile request: {}", path);
 
     if parts.len() >= 3 {
-        let registry_id = parts[0].to_string();
+        let registry_id = parts[0].parse::<u32>().unwrap_or(0);
         let image_id = parts[1].parse::<u32>().unwrap_or(0);
         let thumbnail = parts[2] == "true";
 

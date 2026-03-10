@@ -4,7 +4,7 @@ use crate::state::{AppState, CommandError};
 
 #[tauri::command]
 pub async fn get_image_meta(
-    registry_id: String,
+    registry_id: u32,
     image_id: u32,
     state: State<'_, AppState>,
 ) -> Result<ImageMeta, CommandError> {
@@ -14,7 +14,7 @@ pub async fn get_image_meta(
 
 #[tauri::command]
 pub async fn save_image_meta(
-    registry_id: String,
+    registry_id: u32,
     image_id: u32,
     meta: UserImageMeta,
     state: State<'_, AppState>,
