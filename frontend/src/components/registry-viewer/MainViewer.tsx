@@ -27,7 +27,10 @@ export const MainViewer = (props: MainViewerProps) => {
   createEffect(() => {
     setImageInput(String(props.currentImage));
     setImageError(false);
-    setImageSrc(api.getImageUrl(props.registryId, props.currentImage, false));
+    if (props.currentImage < 1 || props.currentImage > props.totalImages)
+      setImageSrc(null);
+    else
+      setImageSrc(api.getImageUrl(props.registryId, props.currentImage, false));
   });
 
   const commitImageInput = () => {

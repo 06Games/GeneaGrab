@@ -90,6 +90,8 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         </Show>
       </div>
 
+      <Show when={props.imageMeta}>
+
       <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
           <span class="text-[13px] font-semibold text-main">{
@@ -153,6 +155,8 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           <span class="text-[11px] text-dim">{saveInfo().label}</span>
         </div>
       </div>
+
+      </Show>
     </aside>
   );
 };

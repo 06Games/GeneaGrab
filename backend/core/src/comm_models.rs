@@ -1,28 +1,50 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, HashSet};
+use std::str::FromStr;
+use std::fmt::Display;
 
-/** Treat empty string as null */
-fn empty_string_patch_is_null<'de, D>(deserializer: D) -> Result<Option<Option<String>>, D::Error>
+fn empty_string_as_none<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
 where
-    D: Deserializer<'de>,
+    D: serde::Deserializer<'de>,
+    T: FromStr,
+    T::Err: Display,
 {
     let opt: Option<String> = Option::deserialize(deserializer)?;
-    
     match opt {
-        None => Ok(Some(None)),
-        Some(s) if s.trim().is_empty() => Ok(Some(None)),
-        Some(s) => Ok(Some(Some(s))),
+        None => Ok(None),
+        Some(s) if s.trim().is_empty() => Ok(None),
+        Some(s) => s.parse::<T>()
+            .map(Some)
+            .map_err(serde::de::Error::custom),
+    }
+}
+
+fn empty_string_as_none_patch<'de, D, T>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: FromStr,
+    T::Err: Display,
+{
+    match empty_string_as_none(deserializer) {
+        Ok(opt) => Ok(Some(opt)),
+        Err(e) => Err(e),
     }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RegistryFilters {
+    #[serde(default, deserialize_with = "empty_string_as_none")]
     pub search_term: Option<String>,
+    #[serde(default, deserialize_with = "empty_string_as_none")]
     pub source_type: Option<String>,
+    #[serde(default, deserialize_with = "empty_string_as_none")]
     pub place: Option<String>,
+    #[serde(default, deserialize_with = "empty_string_as_none")]
     pub collection: Option<String>,
+    #[serde(default, deserialize_with = "empty_string_as_none")]
     pub date_from: Option<DateTime<Utc>>,
+    #[serde(default, deserialize_with = "empty_string_as_none")]
     pub date_to: Option<DateTime<Utc>>,
 }
 
@@ -51,11 +73,11 @@ pub struct RegistryMeta {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserImageMeta {
-    #[serde(default, deserialize_with = "empty_string_patch_is_null")]
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
     pub name: Option<Option<String>>,
-    #[serde(default, deserialize_with = "empty_string_patch_is_null")]
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
     pub date_range: Option<Option<String>>,
-    #[serde(default, deserialize_with = "empty_string_patch_is_null")]
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
     pub notes: Option<Option<String>>,
 }
 

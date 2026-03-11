@@ -17,10 +17,16 @@ const ViewerPage = () => {
   );
 
   const [registryMeta] = createResource(() => registryId, (id) => api.getRegistryMeta(id));
-  const [eventRows] = createResource(() => registryId, (id) => api.getEventRows(id));
+  const [eventRows] = createResource(() => registryId, (id) => api.getEventRows(id).catch(err => {
+    console.error("Failed to fetch event rows:", err);
+    return [];
+  }));
   const [imageMeta] = createResource(
     () => ({ regId: registryId, imgId: currentImageId() }),
-    ({ regId, imgId }) => api.getImageMeta(regId, imgId)
+    ({ regId, imgId }) => api.getImageMeta(regId, imgId).catch(err => {
+      console.error("Failed to fetch image meta:", err);
+      return null;
+    })
   );
 
   const [detailCache, setDetailCache] = createSignal<Record<number, EventDetail>>({});
@@ -70,7 +76,7 @@ const handleSaveImageMeta = async (meta: Partial<UserImageMeta>) => {
   return (
     <div class="w-screen h-screen bg-app">
       <Show 
-        when={registryMeta() && imageMeta() && eventRows()} 
+        when={registryMeta()} 
         fallback={<div class="flex items-center justify-center w-full h-full text-dim">Loading registry data...</div>}
       >
         <RegistryViewer 
