@@ -6,7 +6,7 @@ use std::fmt::Display;
 
 fn empty_string_as_none<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
 where
-    D: serde::Deserializer<'de>,
+    D: Deserializer<'de>,
     T: FromStr,
     T::Err: Display,
 {
@@ -22,7 +22,7 @@ where
 
 fn empty_string_as_none_patch<'de, D, T>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
 where
-    D: serde::Deserializer<'de>,
+    D: Deserializer<'de>,
     T: FromStr,
     T::Err: Display,
 {

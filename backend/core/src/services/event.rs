@@ -6,7 +6,7 @@ use sea_orm::DbConn;
 
 pub async fn fetch_event_rows(
     _db: &DbConn,
-    registry_id: String,
+    registry_id: u32,
 ) -> Result<Vec<EventRow>, CoreError> {
     log::info!("fetch_event_rows called for registry {}", registry_id);
 

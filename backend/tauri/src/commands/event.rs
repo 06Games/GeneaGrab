@@ -4,7 +4,7 @@ use crate::state::{AppState, CommandError};
 
 #[tauri::command]
 pub async fn get_event_rows(
-    registry_id: String,
+    registry_id: u32,
     state: State<'_, AppState>,
 ) -> Result<Vec<EventRow>, CommandError> {
     let res = geneagrab_core::services::event::fetch_event_rows(&state.db, registry_id).await?;
