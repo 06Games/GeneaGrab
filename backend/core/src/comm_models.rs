@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, HashSet};
 
@@ -13,6 +14,29 @@ where
         Some(s) if s.trim().is_empty() => Ok(Some(None)),
         Some(s) => Ok(Some(Some(s))),
     }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RegistryFilters {
+    pub search_term: Option<String>,
+    pub source_type: Option<String>,
+    pub place: Option<String>,
+    pub collection: Option<String>,
+    pub date_from: Option<DateTime<Utc>>,
+    pub date_to: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CursorPayload<T> {
+    pub limit: u64,
+    pub cursor: Option<u32>,
+    pub filters: Option<T>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CursorResponse<T> {
+    pub data: Vec<T>,
+    pub next_cursor: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

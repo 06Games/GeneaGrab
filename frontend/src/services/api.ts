@@ -1,9 +1,9 @@
-import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta, PluginOption } from "../types/registry";
+import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta, PluginOption, CursorPayload, CursorResponse, RegistryFilters } from "../types/registry";
 
 export interface BackendService {
     // Registry
-    getAllRegistries(): Promise<RegistryMeta[]>;
-    getRegistryMeta(id: string): Promise<RegistryMeta>;
+    getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>>;
+    getRegistryMeta(id: number): Promise<RegistryMeta>;
     addRegistry(url: string): Promise<RegistryMeta>;
     getPluginsForUrl(url: string): Promise<PluginOption[]>;
     
@@ -11,12 +11,13 @@ export interface BackendService {
     getAvailablePlaces(): Promise<string[]>;
     getAvailableCollections(): Promise<string[]>;
 
-    getImageMeta(registryId: string, imageId: number): Promise<ImageMeta>;
-    saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void>;
-    getImageUrl(registryId: string, imageId: number, thumbnail: boolean): string | null;
+    // Images
+    getImageMeta(registryId: number, imageId: number): Promise<ImageMeta>;
+    saveImageMeta(registryId: number, imageId: number, meta: Partial<UserImageMeta>): Promise<void>;
+    getImageUrl(registryId: number, imageId: number, thumbnail: boolean): string | null;
 
     // Index
-    getEventRows(registryId: string): Promise<EventRow[]>;
+    getEventRows(registryId: number): Promise<EventRow[]>;
     getEventDetail(eventId: number): Promise<EventDetail | null>;
     saveAct(event: EventDetail): Promise<void>;
 }

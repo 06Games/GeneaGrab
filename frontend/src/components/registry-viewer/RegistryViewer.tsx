@@ -42,7 +42,7 @@ const DEFAULT_THUMB_HEIGHT = 125;
 export const RegistryViewer = (props: RegistryViewerProps) => {
   const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : "");
   const isDetachedMode = urlParams.get('mode') === 'index';
-  const activeRegistryId = urlParams.get('registryId') || props.registryMeta.registry_id;
+  const activeRegistryId = urlParams.get('registryId') ? parseInt(urlParams.get('registryId')!, 10) : props.registryMeta.registry_id;
 
   const [currentImage, setCurrentImage] = createSignal(props.initialImage ?? 1);
   const [indexVisible, setIndexVisible] = createSignal(false);
@@ -55,7 +55,7 @@ export const RegistryViewer = (props: RegistryViewerProps) => {
   const { isDetached, setIsDetached, detach, closeSelf, sendMessage } = useDetachedWindow<SyncMessage>({
     id: `index-${activeRegistryId}`,
     title: `Index - ${props.registryMeta.archive_reference}`,
-    queryParams: { mode: 'index', registryId: activeRegistryId },
+    queryParams: { mode: 'index', registryId: activeRegistryId.toString() },
     width: 1400,
     height: 600,
     onMessage: (msg) => {

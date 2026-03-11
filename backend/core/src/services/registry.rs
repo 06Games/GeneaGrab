@@ -1,14 +1,14 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::{
-    comm_models::RegistryMeta,
+    comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta},
     db_entries::{
         image_entry,
         registry_entry::{self, ExtraData, RegistryTypes, StringCollection},
     },
     errors::CoreError,
 };
-use sea_orm::{ActiveModelTrait, DbConn, EntityTrait, TransactionTrait};
+use sea_orm::{ActiveModelTrait, DbConn, EntityTrait, QueryFilter, ColumnTrait, TransactionTrait};
 
 impl RegistryMeta {
     pub fn from_entry(registry: registry_entry::Model, total_images: u32) -> Self {
@@ -54,19 +54,66 @@ fn stub(url: String) -> Result<(registry_entry::Model, Vec<image_entry::Model>),
     Ok((registry, images))
 }
 
-pub async fn get_all_registries(db: &DbConn) -> Result<Vec<RegistryMeta>, CoreError> {
-    // TODO : Add pagination, filtering, and sorting
-    let registries = registry_entry::Entity::find()
+pub async fn get_all_registries(db: &DbConn, payload: CursorPayload<RegistryFilters>) -> Result<CursorResponse<RegistryMeta>, CoreError> {
+    let mut query = registry_entry::Entity::find();
+
+    // Dynamically apply filters if they exist
+    if let Some(filters) = payload.filters {
+        if let Some(term) = filters.search_term.filter(|s| !s.trim().is_empty()) {
+            let term = format!("%{}%", term);
+            query = query.filter(
+                sea_orm::Condition::any()
+                    .add(registry_entry::Column::ArchiveReference.like(&term))
+                    .add(registry_entry::Column::Title.like(&term))
+                    .add(registry_entry::Column::Author.like(&term))
+            );
+        }
+        
+        // Use custom expressions to query the raw serialized JSON arrays gracefully 
+        if let Some(t) = filters.source_type.filter(|s| !s.trim().is_empty()) {
+            query = query.filter(sea_orm::sea_query::Expr::cust_with_values("registry_types LIKE ?", vec![format!("%\"{}\"%", t)]));
+        }
+        if let Some(p) = filters.place.filter(|s| !s.trim().is_empty()) {
+            query = query.filter(sea_orm::sea_query::Expr::cust_with_values("places LIKE ?", vec![format!("%\"{}\"%", p)]));
+        }
+        if let Some(c) = filters.collection.filter(|s| !s.trim().is_empty()) {
+            query = query.filter(sea_orm::sea_query::Expr::cust_with_values("collection LIKE ?", vec![format!("%\"{}\"%", c)]));
+        }
+        
+        if let Some(d) = filters.date_from {
+            query = query.filter(registry_entry::Column::DateTo.gte(d)); 
+        }
+        if let Some(d) = filters.date_to {
+            query = query.filter(registry_entry::Column::DateFrom.lte(d));
+        }
+    }
+
+    let mut cursor_query = query.cursor_by(registry_entry::Column::Id);
+    if let Some(last_id) = payload.cursor {
+        cursor_query.after(last_id);
+    }
+
+    // Lookahead +1 to determine if there's a next page
+    let limit = payload.limit;
+    let mut data = cursor_query
+        .first(limit + 1)
         .all(db)
         .await
         .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?;
 
-    let metas = registries
-        .into_iter()
-        .map(|reg| RegistryMeta::from_entry(reg, 0))  // TODO: Maybe return less data
-        .collect();
+    let next_cursor = if data.len() > limit as usize {
+        data.pop();
+        data.last().map(|item| item.id)
+    } else {
+        None
+    };
 
-    Ok(metas)
+    let metas = data.into_iter().map(|reg| RegistryMeta::from_entry(reg, 0)).collect();
+
+    Ok(CursorResponse {
+        data: metas,
+        next_cursor,
+    })
 }
 
 pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {

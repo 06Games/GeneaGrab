@@ -1,5 +1,5 @@
 import type { BackendService } from "./api";
-import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta, PluginOption } from "../types/registry";
+import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta, PluginOption, CursorPayload, CursorResponse, RegistryFilters } from "../types/registry";
 import { 
   MOCK_REGISTRY_DATA, 
   MOCK_IMAGE_META, 
@@ -10,13 +10,45 @@ import {
 export class MockService implements BackendService {
   private delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-  async getAllRegistries(): Promise<RegistryMeta[]> {
-    console.info(`[Mock API] getAllRegistries`);
-    await this.delay(300);
-    return [MOCK_REGISTRY_DATA];
+  async getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> {
+    console.info(`[Mock API] getAllRegistries`, payload);
+    await this.delay(600);
+    
+    // Generate mock data for pagination
+    let data: RegistryMeta[] = [MOCK_REGISTRY_DATA];
+    for (let i = 1; i <= 60; i++) {
+        data.push({
+            ...MOCK_REGISTRY_DATA,
+            registry_id: i,
+            archive_reference: `5 Mi 1/${100 + i}`,
+            title: `Mock Registry Part ${i}`
+        });
+    }
+
+    // Apply simple filters for mock
+    if (payload.filters) {
+        if (payload.filters.search_term) {
+            const term = payload.filters.search_term.toLowerCase();
+            data = data.filter(d => 
+                d.archive_reference.toLowerCase().includes(term) || 
+                (d.title && d.title.toLowerCase().includes(term))
+            );
+        }
+    }
+
+    // Perform offset logic to simulate cursor
+    const cursorIndex = payload.cursor ? data.findIndex(d => d.registry_id === payload.cursor) : -1;
+    const start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
+    const paginated = data.slice(start, start + payload.limit);
+    
+    // Resolve next cursor
+    const hasMore = start + payload.limit < data.length;
+    const nextCursor = hasMore ? paginated[paginated.length - 1]?.registry_id : null;
+
+    return { data: paginated, next_cursor: nextCursor ?? null };
   }
 
-  async getRegistryMeta(id: string): Promise<RegistryMeta> {
+  async getRegistryMeta(id: number): Promise<RegistryMeta> {
     console.info(`[Mock API] getRegistryMeta: ${id}`);
     await this.delay(300);
     return MOCK_REGISTRY_DATA;
@@ -47,22 +79,22 @@ export class MockService implements BackendService {
     return ["État civil", "Registres paroissiaux", "Recensements", "Minutes notariales", "Registres matricules"];
   }
 
-  async getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {
+  async getImageMeta(registryId: number, imageId: number): Promise<ImageMeta> {
     console.info(`[Mock API] getImageMeta: registry ${registryId}, image ${imageId}`);
     await this.delay(200);
     return MOCK_IMAGE_META;
   }
 
-  async saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void> {
+  async saveImageMeta(registryId: number, imageId: number, meta: Partial<UserImageMeta>): Promise<void> {
     console.info(`[Mock API] saveImageMeta: registry ${registryId}, image ${imageId}`, meta);
     await this.delay(500);
   }
 
-  getImageUrl(_registryId: string, _imageId: number, _thumbnail: boolean): string | null {
+  getImageUrl(_registryId: number, _imageId: number, _thumbnail: boolean): string | null {
     return "/src/assets/logo.svg";
   }
 
-  async getEventRows(registryId: string): Promise<EventRow[]> {
+  async getEventRows(registryId: number): Promise<EventRow[]> {
     console.info(`[Mock API] getEventRows: ${registryId}`);
     await this.delay(400);
     return MOCK_EVENT_ROWS;

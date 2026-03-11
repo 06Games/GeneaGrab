@@ -9,7 +9,7 @@ const THUMBNAIL_VERTICAL_PADDING = 16; // Combined height for the image number l
 interface ThumbnailBarProps {
   totalImages: number;
   currentImage: number;
-  registryId: string;
+  registryId: number;
   height: number;
   onImageChange: (image: number) => void;
 }

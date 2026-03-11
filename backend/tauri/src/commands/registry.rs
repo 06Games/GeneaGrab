@@ -1,12 +1,13 @@
 use tauri::State;
-use geneagrab_core::comm_models::RegistryMeta;
+use geneagrab_core::comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta};
 use crate::state::{AppState, CommandError};
 
 #[tauri::command]
 pub async fn get_all_registries(
+    payload: CursorPayload<RegistryFilters>,
     state: State<'_, AppState>,
-) -> Result<Vec<RegistryMeta>, CommandError> {
-    let res = geneagrab_core::services::registry::get_all_registries(&state.db).await?;
+) -> Result<CursorResponse<RegistryMeta>, CommandError> {
+    let res = geneagrab_core::services::registry::get_all_registries(&state.db, payload).await?;
     Ok(res)
 }
 

@@ -10,7 +10,7 @@ const ViewerPage = () => {
   const navigate = useNavigate();
   const api = useBackend();
 
-  const registryId = params.id!;
+  const registryId = parseInt(params.id!, 10);
 
   const [currentImageId, setCurrentImageId] = createSignal(
     params.imageId ? parseInt(params.imageId, 10) : 1

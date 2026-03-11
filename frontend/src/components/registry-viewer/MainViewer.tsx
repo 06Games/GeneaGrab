@@ -8,7 +8,7 @@ import { getBackendService } from "../../services/apiFactory";
 interface MainViewerProps {
   currentImage: number;
   totalImages: number;
-  registryId: string;
+  registryId: number;
   onImageChange: (image: number) => void;
   viewerRef?: (el: HTMLElement) => void;
 }

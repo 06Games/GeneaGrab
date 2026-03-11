@@ -3,8 +3,28 @@ export const EVENT_TYPE_OPTIONS = [
 ] as const;
 export type EventType = typeof EVENT_TYPE_OPTIONS[number];
 
+export interface RegistryFilters {
+  search_term?: string | null;
+  source_type?: string | null;
+  place?: string | null;
+  collection?: string | null;
+  date_from?: string | null;
+  date_to?: string | null;
+}
+
+export interface CursorPayload<T> {
+  limit: number;
+  cursor?: number | null;
+  filters?: T | null;
+}
+
+export interface CursorResponse<T> {
+  data: T[];
+  next_cursor: number | null;
+}
+
 export interface RegistryMeta {
-  registry_id: string;
+  registry_id: number;
   source_id: string;
   archive_reference: string;
   source_types: Set<EventType | string>;

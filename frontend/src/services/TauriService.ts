@@ -1,20 +1,23 @@
 import { invoke } from "@tauri-apps/api/core";
-import { RegistryMeta, EventRow, EventDetail, ImageMeta, UserImageMeta, PluginOption } from "../types/registry";
+import { RegistryMeta, EventRow, EventDetail, ImageMeta, UserImageMeta, PluginOption, CursorPayload, CursorResponse, RegistryFilters } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
 
-    async getAllRegistries(): Promise<RegistryMeta[]> {
-        const res = await invoke<any[]>("get_all_registries");
-        return res.map(r => {
-            if (Array.isArray(r.source_types)) {
-                r.source_types = new Set(r.source_types);
-            }
-            return r as RegistryMeta;
-        });
+    async getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> {
+        const res = await invoke<any>("get_all_registries", { payload });
+        return {
+            data: res.data.map((r: any) => {
+                if (Array.isArray(r.source_types)) {
+                    r.source_types = new Set(r.source_types);
+                }
+                return r as RegistryMeta;
+            }),
+            next_cursor: res.next_cursor
+        };
     }
     
-    async getRegistryMeta(id: string): Promise<RegistryMeta> {
+    async getRegistryMeta(id: number): Promise<RegistryMeta> {
         const res = await invoke<any>("get_registry", { id });
         
         if (Array.isArray(res.source_types)) {
@@ -51,7 +54,7 @@ export class TauriService implements BackendService {
         return [];
     }
 
-    async getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {
+    async getImageMeta(registryId: number, imageId: number): Promise<ImageMeta> {
         const res = await invoke<any>("get_image_meta", { registryId, imageId });
         if (typeof res.act_types === "object" && res.act_types !== null)
             res.act_types = new Map(Object.entries(res.act_types));
@@ -59,15 +62,15 @@ export class TauriService implements BackendService {
         return res as ImageMeta;
     }
 
-    async saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void> {
+    async saveImageMeta(registryId: number, imageId: number, meta: Partial<UserImageMeta>): Promise<void> {
         await invoke("save_image_meta", { registryId, imageId, meta });
     }
 
-    getImageUrl(registryId: string, imageId: number, thumbnail: boolean): string | null {
+    getImageUrl(registryId: number, imageId: number, thumbnail: boolean): string | null {
         return `tiles://localhost/${registryId}/${imageId}/${thumbnail}`;
     }
 
-    async getEventRows(registryId: string): Promise<EventRow[]> {
+    async getEventRows(registryId: number): Promise<EventRow[]> {
         return await invoke<EventRow[]>("get_event_rows", { registryId });
     }
 
