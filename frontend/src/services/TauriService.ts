@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { RegistryMeta, EventRow, EventDetail, ImageMeta, UserImageMeta } from "../types/registry";
+import { RegistryMeta, EventRow, EventDetail, ImageMeta, UserImageMeta, PluginOption } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
@@ -29,6 +29,14 @@ export class TauriService implements BackendService {
             res.source_types = new Set(res.source_types);
         }
         return res as RegistryMeta;
+    }
+
+    async getPluginsForUrl(url: string): Promise<PluginOption[]> {
+        // TODO: Implement get_plugins_for_url command in Rust backend
+        console.warn("getPluginsForUrl not implemented in Tauri backend yet, returning mock data.");
+        return [
+          { id: "default", name: "Default Extractor" }
+        ];
     }
 
     async getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {

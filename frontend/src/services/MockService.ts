@@ -1,6 +1,6 @@
 // src/services/MockService.ts
 import type { BackendService } from "./api";
-import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta } from "../types/registry";
+import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta, PluginOption } from "../types/registry";
 import { 
   MOCK_REGISTRY_DATA, 
   MOCK_IMAGE_META, 
@@ -23,10 +23,20 @@ export class MockService implements BackendService {
     await this.delay(300);
     return MOCK_REGISTRY_DATA;
   }
-
+  
   async addRegistry(url: string): Promise<RegistryMeta> {
     console.info(`[Mock API] addRegistry: ${url}`);
-    throw new Error("Not implemented");
+    await this.delay(600);
+    return MOCK_REGISTRY_DATA;
+  }
+
+  async getPluginsForUrl(url: string): Promise<PluginOption[]> {
+    console.info(`[Mock API] getPluginsForUrl: ${url}`);
+    await this.delay(300);
+    return [
+      { id: "fs_plugin", name: "FamilySearch Extractor" },
+      { id: "gn_plugin", name: "Geneanet Extractor" }
+    ];
   }
 
   async getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {

@@ -67,6 +67,10 @@ export type EventDetail = {
   people: PersonEntry[];
 }
 
+export interface PluginOption {
+  id: string;
+  name: string;
+}
 
 // TODO: Use previously written values for suggestions
 

@@ -1,4 +1,23 @@
 export const en = {
+  home: {
+    title: "Registries",
+    addRegistry: "Add Registry",
+    searchPlaceholder: "Search reference or town...",
+    filterType: "All types",
+    loadMore: "Load more",
+    noResults: "No registries found matching your criteria."
+  },
+  addModal: {
+    title: "Add a new registry",
+    urlLabel: "Registry URL",
+    urlPlaceholder: "https://...",
+    pluginLabel: "Extraction Plugin",
+    pluginPlaceholder: "Select a plugin",
+    pluginLoading: "Loading plugins...",
+    pluginNone: "No plugins available for this URL",
+    cancel: "Cancel",
+    submit: "Add Registry"
+  },
   mainViewer: {
     prev: "Previous image ({{key}})",
     next: "Next image ({{key}})",

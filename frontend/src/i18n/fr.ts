@@ -1,6 +1,25 @@
 import { RawDictionaries } from "../ui/i18n";
 
 export const fr: RawDictionaries = {
+  home: {
+    title: "Registres",
+    addRegistry: "Ajouter un registre",
+    searchPlaceholder: "Rechercher une cote ou une ville...",
+    filterType: "Tous les types",
+    loadMore: "Charger plus",
+    noResults: "Aucun registre ne correspond à vos critères."
+  },
+  addModal: {
+    title: "Ajouter un nouveau registre",
+    urlLabel: "URL du registre",
+    urlPlaceholder: "https://...",
+    pluginLabel: "Plugin d'extraction",
+    pluginPlaceholder: "Sélectionner un plugin",
+    pluginLoading: "Chargement des plugins...",
+    pluginNone: "Aucun plugin disponible pour cette URL",
+    cancel: "Annuler",
+    submit: "Ajouter"
+  },
   mainViewer: {
     prev: "Image précédente ({{key}})",
     next: "Image suivante ({{key}})",
