@@ -53,7 +53,7 @@ export const AddRegistryModal = (props: { onClose: () => void, onAdded: () => vo
       <div class="bg-panel w-full max-w-md rounded-xl shadow-lg border border-subtle overflow-hidden flex flex-col">
         <div class="flex items-center justify-between px-5 py-4 border-b border-subtle bg-tinted">
           <h2 class="text-[15px] font-semibold text-main">{t("addModal.title")}</h2>
-          <button onClick={props.onClose} class="text-muted hover:text-main focus:outline-none"><Icon icon="lucide:x" class="w-5 h-5" /></button>
+          <button onClick={props.onClose} class="text-muted hover:text-main focus:outline-none"><Icon icon="lucide:x" class="block" /></button>
         </div>
 
         <form onSubmit={handleSubmit} class="p-5 flex flex-col gap-4">

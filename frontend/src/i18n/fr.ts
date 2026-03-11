@@ -4,10 +4,16 @@ export const fr: RawDictionaries = {
   home: {
     title: "Registres",
     addRegistry: "Ajouter un registre",
-    searchPlaceholder: "Rechercher une cote ou une ville...",
+    searchPlaceholder: "Rechercher une cote, un titre ou un auteur...",
     filterType: "Tous les types",
+    filterPlace: "Tous les lieux",
+    filterCollection: "Toutes les collections",
+    filterDateFrom: "À partir de",
+    filterDateTo: "Jusqu'à",
     loadMore: "Charger plus",
-    noResults: "Aucun registre ne correspond à vos critères."
+    noResults: "Aucun registre ne correspond à vos critères.",
+    imagesCount: "Images totales",
+    actsCount: "Actes indexés",
   },
   addModal: {
     title: "Ajouter un nouveau registre",
@@ -142,4 +148,3 @@ export const fr: RawDictionaries = {
     validateAndNext: "Valider & Suivant"
   }
 };
-

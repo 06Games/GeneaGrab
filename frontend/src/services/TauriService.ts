@@ -31,12 +31,24 @@ export class TauriService implements BackendService {
         return res as RegistryMeta;
     }
 
-    async getPluginsForUrl(url: string): Promise<PluginOption[]> {
+    async getPluginsForUrl(_url: string): Promise<PluginOption[]> {
         // TODO: Implement get_plugins_for_url command in Rust backend
         console.warn("getPluginsForUrl not implemented in Tauri backend yet, returning mock data.");
         return [
           { id: "default", name: "Default Extractor" }
         ];
+    }
+
+    async getAvailablePlaces(): Promise<string[]> {
+        // TODO: Implement backend extraction of unique places
+        console.warn("getAvailablePlaces not implemented");
+        return [];
+    }
+
+    async getAvailableCollections(): Promise<string[]> {
+        // TODO: Implement backend extraction of unique collections
+        console.warn("getAvailableCollections not implemented");
+        return [];
     }
 
     async getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {

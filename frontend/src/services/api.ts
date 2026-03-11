@@ -7,7 +7,10 @@ export interface BackendService {
     addRegistry(url: string): Promise<RegistryMeta>;
     getPluginsForUrl(url: string): Promise<PluginOption[]>;
     
-    // Image
+    // Filters metadata
+    getAvailablePlaces(): Promise<string[]>;
+    getAvailableCollections(): Promise<string[]>;
+
     getImageMeta(registryId: string, imageId: number): Promise<ImageMeta>;
     saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void>;
     getImageUrl(registryId: string, imageId: number, thumbnail: boolean): string | null;

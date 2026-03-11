@@ -1,15 +1,26 @@
 export const EVENT_TYPE_OPTIONS = [
-  "Birth", "Marriage", "Death", "Burial", "Census", "Notarial", "Other", // TODO: Setup translations and use API-driven values for suggestions
+  "Birth", "Marriage", "Death", "Burial", "Census", "Notarial", "Other",
 ] as const;
 export type EventType = typeof EVENT_TYPE_OPTIONS[number];
 
 export interface RegistryMeta {
   registry_id: string;
+  source_id: string;
   archive_reference: string;
   source_types: Set<EventType | string>;
-  town: string;
-  repository_url: string;
+  places: string[];
+  collection: string[];
+  ark_url?: string;
+  manifest_url?: string;
+  title?: string;
+  subtitle?: string;
+  author?: string;
+  date_from?: string;
+  date_to?: string;
+  notes?: string;
+  
   total_images: number;
+  acts_count?: number; 
 }
 
 /** Editable image metadata */

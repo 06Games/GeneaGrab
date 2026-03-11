@@ -2,11 +2,17 @@ import type { RegistryMeta, ImageMeta, EventRow, EventDetail, EventType } from "
 
 export const MOCK_REGISTRY_DATA: RegistryMeta = {
   registry_id: "src-123",
+  source_id: "var-archives",
   archive_reference: "5 Mi 1/342",
   source_types: new Set(["Birth", "Marriage", "Death"]),
-  town: "Brignoles",
-  repository_url: "https://archives.var.fr",
+  places: ["Brignoles", "Vins-sur-Caramy"],
+  collection: ["État civil"],
+  ark_url: "https://archives.var.fr/ark:/...",
+  title: "Registres d'état civil de Brignoles",
+  date_from: "1793",
+  date_to: "1794",
   total_images: 348,
+  acts_count: 42
 };
 
 export const MOCK_IMAGE_META: ImageMeta = {

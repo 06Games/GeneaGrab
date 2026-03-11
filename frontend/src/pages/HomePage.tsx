@@ -1,9 +1,10 @@
-import { createSignal, createResource, createMemo, Show, For } from "solid-js";
+import { createSignal, createResource, createMemo, Show, For, onCleanup } from "solid-js";
 import { useBackend } from "../contexts/BackendContext";
 import { useI18n } from "../ui/i18n";
 import { RegistryCard } from "../components/registry-list/RegistryCard";
 import { RegistryFilters } from "../components/registry-list/RegistryFilters";
 import { AddRegistryModal } from "../components/registry-list/AddRegistryModal";
+import { TopBar } from "../ui/TopBar";
 import { Button } from "../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 
@@ -13,7 +14,15 @@ const HomePage = () => {
   
   const [searchQuery, setSearchQuery] = createSignal("");
   const [selectedType, setSelectedType] = createSignal("");
+  const [selectedPlace, setSelectedPlace] = createSignal("");
+  const [selectedCollection, setSelectedCollection] = createSignal("");
+  const [dateFrom, setDateFrom] = createSignal("");
+  const [dateTo, setDateTo] = createSignal("");
+
   const [isModalOpen, setIsModalOpen] = createSignal(false);
+  
+  const [page, setPage] = createSignal(1);
+  const itemsPerPage = 12;
 
   // TODO: Replace with paginated/filtered API calls when the backend supports it
   const [registries, { refetch }] = createResource(() => api.getAllRegistries());
@@ -23,25 +32,47 @@ const HomePage = () => {
     return list.filter(reg => {
       const search = searchQuery().toLowerCase();
       const matchSearch = reg.archive_reference.toLowerCase().includes(search) ||
-                          reg.town.toLowerCase().includes(search);
+                          (reg.title && reg.title.toLowerCase().includes(search));
+      
       const matchType = selectedType() ? reg.source_types.has(selectedType()) : true;
-      return matchSearch && matchType;
+      const matchPlace = selectedPlace() ? reg.places?.includes(selectedPlace()) : true;
+      const matchCol = selectedCollection() ? reg.collection?.includes(selectedCollection()) : true;
+
+      let matchDate = true;
+      if (dateFrom() && reg.date_to && reg.date_to < dateFrom()) matchDate = false;
+      if (dateTo() && reg.date_from && reg.date_from > dateTo()) matchDate = false;
+
+      return matchSearch && matchType && matchPlace && matchCol && matchDate;
     });
+  });
+
+  const paginatedRegistries = createMemo(() => {
+    return filteredRegistries().slice(0, page() * itemsPerPage);
+  });
+
+  const hasMore = createMemo(() => paginatedRegistries().length < filteredRegistries().length);
+
+  createMemo(() => {
+    // Reset pagination when filters change
+    searchQuery();
+    selectedType();
+    selectedPlace();
+    selectedCollection();
+    dateFrom();
+    dateTo();
+    setPage(1);
   });
 
   return (
     <div class="min-h-screen bg-app text-main flex flex-col antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
-      <header class="bg-panel border-b border-subtle px-6 py-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-accent text-white flex items-center justify-center font-bold text-lg shadow-inner">
-            G
-          </div>
-          <h1 class="text-xl font-bold text-main">{t("home.title")}</h1>
-        </div>
-        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-          <Icon icon="lucide:plus" class="w-4 h-4" /> {t("home.addRegistry")}
-        </Button>
-      </header>
+      <TopBar 
+        breadcrumbs={[t("home.title")]}
+        right={
+          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+            <Icon icon="lucide:plus" class="w-4 h-4" /> {t("home.addRegistry")}
+          </Button>
+        }
+      />
 
       <main class="flex-1 max-w-6xl w-full mx-auto px-6 py-8 flex flex-col gap-6">
         <RegistryFilters
@@ -49,6 +80,14 @@ const HomePage = () => {
           onSearchChange={setSearchQuery}
           selectedType={selectedType()}
           onTypeChange={setSelectedType}
+          selectedPlace={selectedPlace()}
+          onPlaceChange={setSelectedPlace}
+          selectedCollection={selectedCollection()}
+          onCollectionChange={setSelectedCollection}
+          dateFrom={dateFrom()}
+          onDateFromChange={setDateFrom}
+          dateTo={dateTo()}
+          onDateToChange={setDateTo}
         />
 
         <Show when={registries.loading}>
@@ -65,14 +104,23 @@ const HomePage = () => {
         </Show>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <For each={filteredRegistries()}>
+          <For each={paginatedRegistries()}>
             {(registry) => <RegistryCard registry={registry} />}
           </For>
         </div>
 
-        <Show when={filteredRegistries().length > 0}>
-          <div class="flex justify-center mt-6">
-            <Button variant="outline">{t("home.loadMore")}</Button>
+        <Show when={hasMore()}>
+          <div 
+            ref={(el) => {
+              const observer = new IntersectionObserver((entries) => {
+                if (entries[0].isIntersecting) setPage(p => p + 1);
+              }, { rootMargin: "100px" });
+              observer.observe(el);
+              onCleanup(() => observer.disconnect());
+            }} 
+            class="h-10 flex items-center justify-center text-dim mt-4"
+          >
+            <Icon icon="lucide:loader-2" class="w-6 h-6 animate-spin" />
           </div>
         </Show>
       </main>

@@ -62,7 +62,6 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         </IconButton>
       </div>
 
-      {/* [A] Registry header — collapsible */}
       <div class="border-b border-subtle flex-shrink-0">
         <button
           type="button"
@@ -73,7 +72,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           <div class="overflow-hidden">
             <p class="text-[14px] font-medium text-main truncate">{props.registryMeta.archive_reference}</p>
             <p class="text-[12px] text-dim truncate mt-0.5">
-              {props.registryMeta.town} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
+              {props.registryMeta.places?.[0] || t("infoPanel.unknown")} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
             </p>
           </div>
           <span class={["text-dim flex-shrink-0 ml-2 inline-flex items-center justify-center transition-transform duration-150 origin-center", registryExpanded() ? "rotate-180" : ""].join(" ")}>
@@ -84,14 +83,13 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         <Show when={registryExpanded()}>
           <div class="px-4 pb-3 border-t border-hover">
             <div class="h-2" />
-            <For each={Object.entries(props.registryMeta) as [keyof RegistryMeta, string][]}>
+            <For each={Object.entries(props.registryMeta).filter(([_, v]) => typeof v === 'string' || typeof v === 'number') as [keyof RegistryMeta, string][]}>
               {([key, value]) => <MetaRow label={key} value={value} />}
             </For>
           </div>
         </Show>
       </div>
 
-      {/* [B] Image metadata */}
       <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
         <div class="flex items-center justify-between mb-2">
           <span class="text-[13px] font-semibold text-main">{
@@ -120,10 +118,8 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         </div>
       </div>
 
-      {/* Drag handle */}
       <ResizeHandle />
 
-      {/* [C] Notes — flex-grow */}
       <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
         <div class="flex items-center justify-between mb-2">
           <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer">

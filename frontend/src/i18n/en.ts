@@ -2,10 +2,16 @@ export const en = {
   home: {
     title: "Registries",
     addRegistry: "Add Registry",
-    searchPlaceholder: "Search reference or town...",
+    searchPlaceholder: "Search reference, title or author...",
     filterType: "All types",
+    filterPlace: "All places",
+    filterCollection: "All collections",
+    filterDateFrom: "From year",
+    filterDateTo: "To year",
     loadMore: "Load more",
-    noResults: "No registries found matching your criteria."
+    noResults: "No registries found matching your criteria.",
+    imagesCount: "Total images",
+    actsCount: "Indexed acts",
   },
   addModal: {
     title: "Add a new registry",
