@@ -17,7 +17,7 @@ const ACT_TYPE_STYLES: Record<EventType, string> = {
 
 interface InfoNotesPanelProps {
   registryMeta: RegistryMeta;
-  imageMeta: ImageMeta;
+  imageMeta?: ImageMeta;
   image: string;
   onEditRegistry?: () => void;
 }
@@ -35,15 +35,15 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
     error: { dot: "bg-danger", label: t("infoPanel.error") },
   })[saveStatus() ?? "saved"];
 
-
   let saveTimer: ReturnType<typeof setTimeout>;
   let lastMeta: Partial<ImageMeta> = {};
+  
   const saveImageMeta = (meta: Partial<ImageMeta>) => {
     setSaveStatus("unsaved");
     clearTimeout(saveTimer);
     lastMeta = { ...lastMeta, ...meta }; // Accumulate changes to avoid multiple rapid saves
     saveTimer = setTimeout(async () => {
-    setSaveStatus("saving");
+      setSaveStatus("saving");
       const success = await actions.onSaveImageMeta?.(lastMeta).catch(() => false).then(() => true) ?? false;
       setSaveStatus(success ? "saved" : "error");
     }, 800);
@@ -91,71 +91,71 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       </div>
 
       <Show when={props.imageMeta}>
+        {(imgMeta) => (
+          <>
+            <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[13px] font-semibold text-main">{
+                  imgMeta().name
+                    ? t("infoPanel.image.customName", { n: props.image, name: imgMeta().name })
+                    : t("infoPanel.image.default", { n: props.image })
+                }</span>
+              </div>
 
-      <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-[13px] font-semibold text-main">{
-            props.imageMeta.name
-              ? t("infoPanel.image.customName", { n: props.image, name: props.imageMeta.name })
-              : t("infoPanel.image.default", { n: props.image })
-          }</span>
-        </div>
+              <MetaRow label={t("infoPanel.period")} value={imgMeta().date_range} />
+              <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(imgMeta().act_types.values()).reduce((a, b) => a + b, 0))} />
 
-        <MetaRow label={t("infoPanel.period")} value={props.imageMeta.date_range} />
-        <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta.act_types.values()).reduce((a, b) => a + b, 0))} />
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                <For each={Array.from(imgMeta().act_types.entries())}>
+                  {([type, count]) => (
+                    <span class={[
+                      "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border",
+                      ACT_TYPE_STYLES[type],
+                    ].join(" ")}>
+                      {count}× {type}
+                    </span>
+                  )}
+                </For>
+              </div>
+            </div>
 
-        <div class="mt-2 flex flex-wrap gap-1.5">
-          <For each={Array.from(props.imageMeta.act_types.entries())}>
-            {([type, count]) => {
-              return (
-                <span class={[
-                  "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border",
-                  ACT_TYPE_STYLES[type],
-                ].join(" ")}>
-                  {count}× {type}
+            <ResizeHandle />
+
+            <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
+              <div class="flex items-center justify-between mb-2">
+                <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer">
+                  {t("infoPanel.notesLabel")}
+                </label>
+                <span class="text-[11px] text-dim tabular-nums" aria-live="polite">
+                  {imgMeta().notes?.length ?? 0} {t("infoPanel.charsShort")}
                 </span>
-              );
-            }}
-          </For>
-        </div>
-      </div>
+              </div>
 
-      <ResizeHandle />
+              <textarea
+                id="image-notes"
+                value={imgMeta().notes ?? ""}
+                onInput={(e) => saveImageMeta({ notes: e.currentTarget.value })}
+                placeholder={t("infoPanel.notesPlaceholder")}
+                spellcheck={false}
+                class={[
+                  "flex-1 resize-none rounded-lg border min-h-0",
+                  "bg-tinted px-3 py-2.5",
+                  "text-[13px] text-main leading-relaxed",
+                  "placeholder:text-subtle-md",
+                  "border-subtle focus:border-accent",
+                  "focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                  "transition-all duration-150",
+                  "scrollbar-thin scrollbar-thumb-subtle",
+                ].join(" ")}
+              />
 
-      <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
-        <div class="flex items-center justify-between mb-2">
-          <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer">
-            {t("infoPanel.notesLabel")}
-          </label>
-          <span class="text-[11px] text-dim tabular-nums" aria-live="polite">
-            {props.imageMeta.notes?.length ?? 0} {t("infoPanel.charsShort")}
-          </span>
-        </div>
-
-        <textarea
-          id="image-notes"
-          value={props.imageMeta.notes ?? ""}
-          onInput={(e) => saveImageMeta({ notes: e.currentTarget.value })}
-          placeholder={t("infoPanel.notesPlaceholder")}
-          spellcheck={false}
-          class={[
-            "flex-1 resize-none rounded-lg border min-h-0",
-            "bg-tinted px-3 py-2.5",
-            "text-[13px] text-main leading-relaxed",
-            "placeholder:text-subtle-md",
-            "border-subtle focus:border-accent",
-            "focus:ring-2 focus:ring-accent/15 focus:outline-none",
-            "transition-all duration-150",
-            "scrollbar-thin scrollbar-thumb-subtle",
-          ].join(" ")}
-        />
-
-        <div class="flex items-center gap-1.5 mt-2" aria-live="polite">
-          <div class={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${saveInfo().dot}`} />
-          <span class="text-[11px] text-dim">{saveInfo().label}</span>
-        </div>
-      </div>
-
+              <div class="flex items-center gap-1.5 mt-2" aria-live="polite">
+                <div class={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${saveInfo().dot}`} />
+                <span class="text-[11px] text-dim">{saveInfo().label}</span>
+              </div>
+            </div>
+          </>
+        )}
       </Show>
     </aside>
   );
