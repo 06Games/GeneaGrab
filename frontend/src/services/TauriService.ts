@@ -3,9 +3,28 @@ import { RegistryMeta, EventRow, EventDetail, ImageMeta, UserImageMeta } from ".
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
+
+    async getAllRegistries(): Promise<RegistryMeta[]> {
+        const res = await invoke<any[]>("get_all_registries");
+        return res.map(r => {
+            if (Array.isArray(r.source_types)) {
+                r.source_types = new Set(r.source_types);
+            }
+            return r as RegistryMeta;
+        });
+    }
+    
     async getRegistryMeta(id: string): Promise<RegistryMeta> {
-        const res = await invoke<any>("get_registry_meta", { id });
+        const res = await invoke<any>("get_registry", { id });
         
+        if (Array.isArray(res.source_types)) {
+            res.source_types = new Set(res.source_types);
+        }
+        return res as RegistryMeta;
+    }
+
+    async addRegistry(url: string): Promise<RegistryMeta> {
+        const res = await invoke<any>("add_registry", { url });
         if (Array.isArray(res.source_types)) {
             res.source_types = new Set(res.source_types);
         }

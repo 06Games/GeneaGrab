@@ -53,6 +53,46 @@ fn stub(url: String) -> Result<(registry_entry::Model, Vec<image_entry::Model>),
 
     Ok((registry, images))
 }
+
+pub async fn get_all_registries(db: &DbConn) -> Result<Vec<RegistryMeta>, CoreError> {
+    // TODO : Add pagination, filtering, and sorting
+    let registries = registry_entry::Entity::find()
+        .all(db)
+        .await
+        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?;
+
+    let metas = registries
+        .into_iter()
+        .map(|reg| RegistryMeta::from_entry(reg, 0))  // TODO: Maybe return less data
+        .collect();
+
+    Ok(metas)
+}
+
+pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
+    log::info!("fetch_registry_meta called with id: {}", id);
+
+    let registry = registry_entry::Entity::find_by_id(id.clone())
+        .one(db)
+        .await
+        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?
+        .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))?;
+
+    Ok(RegistryMeta {
+        registry_id: registry.id,
+        archive_reference: registry.archive_reference,
+        source_types: registry.registry_types.0,
+        town: registry
+            .places
+            .0
+            .first()
+            .cloned()
+            .unwrap_or_else(|| "Unknown".into()),
+        repository_url: registry.ark_url.unwrap_or_default(),
+        total_images: 0, // TODO: Run a COUNT() query on the image_entry table if needed
+    })
+}
+
 pub async fn add_registry(db: &DbConn, url: String) -> Result<RegistryMeta, CoreError> {
     log::info!("add_registry called with url: {}", url);
 
@@ -93,28 +133,4 @@ pub async fn add_registry(db: &DbConn, url: String) -> Result<RegistryMeta, Core
     let meta = RegistryMeta::from_entry(new_registry, num_images);
 
     Ok(meta)
-}
-
-pub async fn fetch_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
-    log::info!("fetch_registry_meta called with id: {}", id);
-
-    let registry = registry_entry::Entity::find_by_id(id.clone())
-        .one(db)
-        .await
-        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?
-        .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))?;
-
-    Ok(RegistryMeta {
-        registry_id: registry.id,
-        archive_reference: registry.archive_reference,
-        source_types: registry.registry_types.0,
-        town: registry
-            .places
-            .0
-            .first()
-            .cloned()
-            .unwrap_or_else(|| "Unknown".into()),
-        repository_url: registry.ark_url.unwrap_or_default(),
-        total_images: 0, // TODO: Run a COUNT() query on the image_entry table if needed
-    })
 }

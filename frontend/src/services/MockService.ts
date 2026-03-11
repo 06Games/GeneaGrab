@@ -12,10 +12,21 @@ export class MockService implements BackendService {
   // Utility to simulate network delay
   private delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
+  async getAllRegistries(): Promise<RegistryMeta[]> {
+    console.info(`[Mock API] getAllRegistries`);
+    await this.delay(300);
+    return [MOCK_REGISTRY_DATA];
+  }
+
   async getRegistryMeta(id: string): Promise<RegistryMeta> {
     console.info(`[Mock API] getRegistryMeta: ${id}`);
     await this.delay(300);
     return MOCK_REGISTRY_DATA;
+  }
+
+  async addRegistry(url: string): Promise<RegistryMeta> {
+    console.info(`[Mock API] addRegistry: ${url}`);
+    throw new Error("Not implemented");
   }
 
   async getImageMeta(registryId: string, imageId: number): Promise<ImageMeta> {

@@ -51,7 +51,9 @@ pub fn run() {
 
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![
-            commands::registry::get_registry_meta,
+            commands::registry::get_all_registries,
+            commands::registry::get_registry,
+            commands::registry::add_registry,
             commands::image::get_image_meta,
             commands::image::save_image_meta,
             commands::event::get_event_rows,

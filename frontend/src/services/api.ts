@@ -2,7 +2,9 @@ import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta } fr
 
 export interface BackendService {
     // Registry
+    getAllRegistries(): Promise<RegistryMeta[]>;
     getRegistryMeta(id: string): Promise<RegistryMeta>;
+    addRegistry(url: string): Promise<RegistryMeta>;
     getImageMeta(registryId: string, imageId: number): Promise<ImageMeta>;
     saveImageMeta(registryId: string, imageId: number, meta: Partial<UserImageMeta>): Promise<void>;
     getImageUrl(registryId: string, imageId: number, thumbnail: boolean): string | null;
