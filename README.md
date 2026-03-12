@@ -3,7 +3,7 @@
 
 ## Supported archive services
 
-> For some services, UserScripts (🧰) are available to make GeneaGrab easier to use. To install them, you can use [Tampermonkey](https://www.tampermonkey.net/) or any other alternative.
+> For some services, UserScripts (🧰) are available to make GeneaGrab easier to use. To install them, you can use [Violentmonkey](https://violentmonkey.github.io/) or any other alternative.
 
 ### :earth_africa: Worldwide
 
