@@ -11,7 +11,9 @@ import { BackendProvider } from "./contexts/BackendContext";
 render(() => (
   <I18nProvider fallback={<p>Loading translations...</p>}>
     <BackendProvider>
-      <App />
+      <div class="w-screen h-screen bg-app">
+        <App />
+      </div>
     </BackendProvider>
   </I18nProvider>
 ), document.getElementById("root") as HTMLElement);

@@ -83,6 +83,8 @@ export const en = {
     unsaved: "Unsaved changes"
   },
   registryViewer: {
+    loading: "Loading registry data...",
+    loadingError: "Failed to load registry",
     index: "Index",
     viewsAndActs: "{{views}} views · {{acts}} indexed acts"
   },

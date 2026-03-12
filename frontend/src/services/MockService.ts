@@ -10,7 +10,7 @@ import {
 export class MockService implements BackendService {
   private delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-  async getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> {
+  getAllRegistries = async (payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> => {
     console.info(`[Mock API] getAllRegistries`, payload);
     await this.delay(600);
     
@@ -48,19 +48,19 @@ export class MockService implements BackendService {
     return { data: paginated, next_cursor: nextCursor ?? null };
   }
 
-  async getRegistryMeta(id: number): Promise<RegistryMeta> {
+  getRegistryMeta = async (id: number): Promise<RegistryMeta> => {
     console.info(`[Mock API] getRegistryMeta: ${id}`);
     await this.delay(300);
     return MOCK_REGISTRY_DATA;
   }
 
-  async addRegistry(url: string): Promise<RegistryMeta> {
+  addRegistry = async (url: string): Promise<RegistryMeta> => {
     console.info(`[Mock API] addRegistry: ${url}`);
     await this.delay(600);
     return MOCK_REGISTRY_DATA;
   }
 
-  async getPluginsForUrl(url: string): Promise<PluginOption[]> {
+  getPluginsForUrl = async (url: string): Promise<PluginOption[]> => {
     console.info(`[Mock API] getPluginsForUrl: ${url}`);
     await this.delay(300);
     return [
@@ -69,38 +69,38 @@ export class MockService implements BackendService {
     ];
   }
 
-  async getAvailablePlaces(): Promise<string[]> {
+  getAvailablePlaces = async (): Promise<string[]> => {
     await this.delay(200);
     return ["Brignoles", "Toulon", "Draguignan", "Nice", "Antibes", "Cannes"];
   }
 
-  async getAvailableCollections(): Promise<string[]> {
+  getAvailableCollections = async (): Promise<string[]> => {
     await this.delay(200);
     return ["État civil", "Registres paroissiaux", "Recensements", "Minutes notariales", "Registres matricules"];
   }
 
-  async getImageMeta(registryId: number, imageId: number): Promise<ImageMeta> {
+  getImageMeta = async (registryId: number, imageId: number): Promise<ImageMeta> => {
     console.info(`[Mock API] getImageMeta: registry ${registryId}, image ${imageId}`);
     await this.delay(200);
     return MOCK_IMAGE_META;
   }
 
-  async saveImageMeta(registryId: number, imageId: number, meta: Partial<UserImageMeta>): Promise<void> {
+  saveImageMeta = async (registryId: number, imageId: number, meta: Partial<UserImageMeta>): Promise<void> => {
     console.info(`[Mock API] saveImageMeta: registry ${registryId}, image ${imageId}`, meta);
     await this.delay(500);
   }
 
-  getImageUrl(_registryId: number, _imageId: number, _thumbnail: boolean): string | null {
+  getImageUrl = (_registryId: number, _imageId: number, _thumbnail: boolean): string | null => {
     return "/src/assets/logo.svg";
   }
 
-  async getEventRows(registryId: number): Promise<EventRow[]> {
+  getEventRows = async (registryId: number): Promise<EventRow[]> => {
     console.info(`[Mock API] getEventRows: ${registryId}`);
     await this.delay(400);
     return MOCK_EVENT_ROWS;
   }
 
-  async getEventDetail(eventId: number): Promise<EventDetail | null> {
+  getEventDetail = async (eventId: number): Promise<EventDetail | null> => {
     console.info(`[Mock API] getEventDetail: ${eventId}`);
     await this.delay(200);
     if (eventId === MOCK_SELECTED_EVENT.event_id) {
@@ -109,7 +109,7 @@ export class MockService implements BackendService {
     return null;
   }
 
-  async saveAct(event: EventDetail): Promise<void> {
+  saveAct = async (event: EventDetail): Promise<void> => {
     console.info(`[Mock API] saveAct:`, event);
     await this.delay(600);
   }

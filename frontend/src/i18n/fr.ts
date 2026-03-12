@@ -85,6 +85,8 @@ export const fr: RawDictionaries = {
     unsaved: "Modifications non enregistrées"
   },
   registryViewer: {
+    loading: "Chargement des données du registre…",
+    loadingError: "Erreur de chargement du registre",
     index: "Index",
     viewsAndActs: "{{views}} vues · {{acts}} actes indexés"
   },
