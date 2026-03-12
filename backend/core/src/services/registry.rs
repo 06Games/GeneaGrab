@@ -4,26 +4,31 @@ use crate::{
     comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta},
     db_entries::{
         image_entry,
-        registry_entry::{self, ExtraData, RegistryTypes, StringCollection},
+        registry_entry::{self, StringList, StringMap, StringSet},
     },
     errors::CoreError,
 };
-use sea_orm::{ActiveModelTrait, DbConn, EntityTrait, QueryFilter, ColumnTrait, TransactionTrait};
+use sea_orm::{ActiveModelTrait, ColumnTrait, DbConn, EntityTrait, QueryFilter, TransactionTrait};
 
 impl RegistryMeta {
-    pub fn from_entry(registry: registry_entry::Model, total_images: u32) -> Self {
+    pub fn from_entry(registry: registry_entry::Model, total_images: u32, acts_count: u32) -> Self {
         Self {
-            registry_id: registry.id,
+            id: registry.id,
             archive_reference: registry.archive_reference,
             source_types: registry.registry_types.0,
-            town: registry
-                .places
-                .0
-                .first()
-                .cloned()
-                .unwrap_or_else(|| "Unknown".into()),
-            repository_url: registry.ark_url.unwrap_or_default(),
+            places: registry.places.0,
+            collection: registry.collection.0,
+            ark_url: registry.ark_url,
+
+            title: registry.title,
+            subtitle: registry.subtitle,
+            author: registry.author,
+            date_from: registry.date_from,
+            date_to: registry.date_to,
+            notes: registry.notes,
+
             total_images: total_images,
+            acts_count: acts_count,
         }
     }
 }
@@ -34,8 +39,8 @@ fn stub(url: String) -> Result<(registry_entry::Model, Vec<image_entry::Model>),
         source_id: "example_source_id".into(),
         registry_id: "example_registry_id".into(),
         archive_reference: "example_archive_reference".into(),
-        registry_types: RegistryTypes(HashSet::new()),
-        collection: StringCollection(vec![]),
+        registry_types: StringSet(HashSet::new()),
+        collection: StringList(vec![]),
         manifest_url: None,
         ark_url: Some(url.clone()),
         title: Some("Example Title".into()),
@@ -45,16 +50,19 @@ fn stub(url: String) -> Result<(registry_entry::Model, Vec<image_entry::Model>),
         date_from_normalized: None,
         date_to: None,
         date_to_normalized: None,
-        places: StringCollection(vec![]),
+        places: StringSet(HashSet::new()),
         notes: None,
-        extra: ExtraData(HashMap::new()),
+        extra: StringMap(HashMap::new()),
     };
     let images: Vec<image_entry::Model> = vec![];
 
     Ok((registry, images))
 }
 
-pub async fn get_all_registries(db: &DbConn, payload: CursorPayload<RegistryFilters>) -> Result<CursorResponse<RegistryMeta>, CoreError> {
+pub async fn get_all_registries(
+    db: &DbConn,
+    payload: CursorPayload<RegistryFilters>,
+) -> Result<CursorResponse<RegistryMeta>, CoreError> {
     let mut query = registry_entry::Entity::find();
 
     // Dynamically apply filters if they exist
@@ -65,23 +73,32 @@ pub async fn get_all_registries(db: &DbConn, payload: CursorPayload<RegistryFilt
                 sea_orm::Condition::any()
                     .add(registry_entry::Column::ArchiveReference.like(&term))
                     .add(registry_entry::Column::Title.like(&term))
-                    .add(registry_entry::Column::Author.like(&term))
+                    .add(registry_entry::Column::Author.like(&term)),
             );
         }
-        
-        // Use custom expressions to query the raw serialized JSON arrays gracefully 
+
+        // Use custom expressions to query the raw serialized JSON arrays gracefully
         if let Some(t) = filters.source_type.filter(|s| !s.trim().is_empty()) {
-            query = query.filter(sea_orm::sea_query::Expr::cust_with_values("registry_types LIKE ?", vec![format!("%\"{}\"%", t)]));
+            query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
+                "registry_types LIKE ?",
+                vec![format!("%\"{}\"%", t)],
+            ));
         }
         if let Some(p) = filters.place.filter(|s| !s.trim().is_empty()) {
-            query = query.filter(sea_orm::sea_query::Expr::cust_with_values("places LIKE ?", vec![format!("%\"{}\"%", p)]));
+            query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
+                "places LIKE ?",
+                vec![format!("%\"{}\"%", p)],
+            ));
         }
         if let Some(c) = filters.collection.filter(|s| !s.trim().is_empty()) {
-            query = query.filter(sea_orm::sea_query::Expr::cust_with_values("collection LIKE ?", vec![format!("%\"{}\"%", c)]));
+            query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
+                "collection LIKE ?",
+                vec![format!("%\"{}\"%", c)],
+            ));
         }
-        
+
         if let Some(d) = filters.date_from {
-            query = query.filter(registry_entry::Column::DateTo.gte(d)); 
+            query = query.filter(registry_entry::Column::DateTo.gte(d));
         }
         if let Some(d) = filters.date_to {
             query = query.filter(registry_entry::Column::DateFrom.lte(d));
@@ -108,7 +125,11 @@ pub async fn get_all_registries(db: &DbConn, payload: CursorPayload<RegistryFilt
         None
     };
 
-    let metas = data.into_iter().map(|reg| RegistryMeta::from_entry(reg, 0)).collect();
+    // TODO: Fetch actual image and act counts
+    let metas = data
+        .into_iter()
+        .map(|reg| RegistryMeta::from_entry(reg, 0, 0))
+        .collect();
 
     Ok(CursorResponse {
         data: metas,
@@ -125,19 +146,7 @@ pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreErro
         .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?
         .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))?;
 
-    Ok(RegistryMeta {
-        registry_id: registry.id,
-        archive_reference: registry.archive_reference,
-        source_types: registry.registry_types.0,
-        town: registry
-            .places
-            .0
-            .first()
-            .cloned()
-            .unwrap_or_else(|| "Unknown".into()),
-        repository_url: registry.ark_url.unwrap_or_default(),
-        total_images: 0, // TODO: Run a COUNT() query on the image_entry table if needed
-    })
+    Ok(RegistryMeta::from_entry(registry, 0, 0)) // TODO: Fetch actual image and act counts
 }
 
 pub async fn add_registry(db: &DbConn, url: String) -> Result<RegistryMeta, CoreError> {
@@ -177,7 +186,7 @@ pub async fn add_registry(db: &DbConn, url: String) -> Result<RegistryMeta, Core
         .await
         .map_err(|e| CoreError::Other(format!("Failed to commit transaction: {}", e)))?;
 
-    let meta = RegistryMeta::from_entry(new_registry, num_images);
+    let meta = RegistryMeta::from_entry(new_registry, num_images, 0);
 
     Ok(meta)
 }

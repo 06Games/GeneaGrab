@@ -13,7 +13,7 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
 
   return (
     <a
-      href={`/registry/${props.registry.registry_id}`}
+      href={`/registry/${props.registry.id}`}
       class="flex flex-col bg-panel border border-subtle rounded-xl p-4 transition-all duration-150 hover:border-accent hover:shadow-md hover:shadow-accent/5 focus:outline-none focus:ring-2 focus:ring-accent group"
     >
       <div class="flex items-start justify-between mb-2">
@@ -41,10 +41,10 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
           </div>
         </Show>
         
-        <Show when={props.registry.ark_url || props.registry.manifest_url}>
+        <Show when={props.registry.ark_url}>
           <div class="flex items-center gap-1.5 text-[12px] text-muted truncate">
             <Icon icon="lucide:globe" class="w-3.5 h-3.5 flex-shrink-0 text-dim" />
-            <span class="truncate">{getDomain(props.registry.ark_url || props.registry.manifest_url || '')}</span>
+            <span class="truncate">{getDomain(props.registry.ark_url || '')}</span>
           </div>
         </Show>
       </div>

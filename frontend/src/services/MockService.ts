@@ -19,7 +19,7 @@ export class MockService implements BackendService {
     for (let i = 1; i <= 60; i++) {
         data.push({
             ...MOCK_REGISTRY_DATA,
-            registry_id: i,
+            id: i,
             archive_reference: `5 Mi 1/${100 + i}`,
             title: `Mock Registry Part ${i}`
         });
@@ -37,13 +37,13 @@ export class MockService implements BackendService {
     }
 
     // Perform offset logic to simulate cursor
-    const cursorIndex = payload.cursor ? data.findIndex(d => d.registry_id === payload.cursor) : -1;
+    const cursorIndex = payload.cursor ? data.findIndex(d => d.id === payload.cursor) : -1;
     const start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
     const paginated = data.slice(start, start + payload.limit);
     
     // Resolve next cursor
     const hasMore = start + payload.limit < data.length;
-    const nextCursor = hasMore ? paginated[paginated.length - 1]?.registry_id : null;
+    const nextCursor = hasMore ? paginated[paginated.length - 1]?.id : null;
 
     return { data: paginated, next_cursor: nextCursor ?? null };
   }

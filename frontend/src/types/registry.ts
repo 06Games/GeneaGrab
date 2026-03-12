@@ -23,15 +23,15 @@ export interface CursorResponse<T> {
   next_cursor: number | null;
 }
 
+
 export interface RegistryMeta {
-  registry_id: number;
-  source_id: string;
+  id: number;
   archive_reference: string;
   source_types: Set<EventType | string>;
   places: string[];
   collection: string[];
   ark_url?: string;
-  manifest_url?: string;
+  
   title?: string;
   subtitle?: string;
   author?: string;
@@ -40,7 +40,7 @@ export interface RegistryMeta {
   notes?: string;
   
   total_images: number;
-  acts_count?: number; 
+  acts_count: number; 
 }
 
 /** Editable image metadata */

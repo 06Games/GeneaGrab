@@ -63,12 +63,22 @@ pub struct CursorResponse<T> {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RegistryMeta {
-    pub registry_id: u32,
+    pub id: u32,
     pub archive_reference: String,
     pub source_types: HashSet<String>,
-    pub town: String,
-    pub repository_url: String,
+    pub places: HashSet<String>,
+    pub collection: Vec<String>,
+    pub ark_url: Option<String>,
+
+    pub title: Option<String>,
+    pub subtitle: Option<String>,
+    pub author: Option<String>,
+    pub date_from: Option<String>,
+    pub date_to: Option<String>,
+    pub notes: Option<String>,
+
     pub total_images: u32,
+    pub acts_count: u32
 }
 
 #[derive(Debug, Serialize, Deserialize)]

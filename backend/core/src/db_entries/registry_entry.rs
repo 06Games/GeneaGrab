@@ -3,13 +3,13 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct RegistryTypes(pub HashSet<String>);
+pub struct StringSet(pub HashSet<String>);
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct StringCollection(pub Vec<String>);
+pub struct StringList(pub Vec<String>);
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct ExtraData(pub HashMap<String, String>);
+pub struct StringMap(pub HashMap<String, String>);
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "registry_entry")]
@@ -21,8 +21,8 @@ pub struct Model {
     pub registry_id: String,
     pub archive_reference: String,
     
-    pub registry_types: RegistryTypes,
-    pub collection: StringCollection,
+    pub registry_types: StringSet,
+    pub collection: StringList,
     
     pub manifest_url: Option<String>,
     pub ark_url: Option<String>,
@@ -35,10 +35,10 @@ pub struct Model {
     pub date_to: Option<String>,
     pub date_to_normalized: Option<DateTimeUtc>,
     
-    pub places: StringCollection, 
+    pub places: StringSet, 
     pub notes: Option<String>,
 
-    pub extra: ExtraData,
+    pub extra: StringMap,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
