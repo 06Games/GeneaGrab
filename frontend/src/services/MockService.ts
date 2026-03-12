@@ -57,8 +57,8 @@ export class MockService implements BackendService {
     return MOCK_REGISTRY_DATA;
   }
 
-  addRegistry = async (url: string): Promise<RegistryMeta> => {
-    console.info(`[Mock API] addRegistry: ${url}`);
+  addRegistry = async (url: string, pluginId: string): Promise<RegistryMeta> => {
+    console.info(`[Mock API] addRegistry: ${url}, plugin: ${pluginId}`);
     await this.delay(600);
     return MOCK_REGISTRY_DATA;
   }

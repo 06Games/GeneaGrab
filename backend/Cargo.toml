@@ -1,6 +1,3 @@
 [workspace]
 resolver = "2"
-members = [
-    "core", "migration",
-    "tauri"
-]
+members = ["core", "migration", "plugins/iiif", "tauri"]

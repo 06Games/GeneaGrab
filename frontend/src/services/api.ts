@@ -7,7 +7,7 @@ export interface BackendService {
     // Registry
     getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>>;
     getRegistryMeta(id: number): Promise<RegistryMeta>;
-    addRegistry(url: string): Promise<RegistryMeta>;
+    addRegistry(url: string, pluginId: string): Promise<RegistryMeta>;
     getPluginsForUrl(url: string): Promise<PluginOption[]>;
 
     // Filters metadata

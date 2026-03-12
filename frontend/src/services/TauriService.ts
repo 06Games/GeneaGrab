@@ -29,20 +29,17 @@ export class TauriService implements BackendService {
         return res as RegistryMeta;
     }
 
-    async addRegistry(url: string): Promise<RegistryMeta> {
-        const res = await invoke<any>("add_registry", { url });
+    async addRegistry(url: string, pluginId: string): Promise<RegistryMeta> {
+        const res = await invoke<any>("add_registry", { url, pluginId });
         if (Array.isArray(res.source_types)) {
             res.source_types = new Set(res.source_types);
         }
         return res as RegistryMeta;
     }
 
-    async getPluginsForUrl(_url: string): Promise<PluginOption[]> {
-        // TODO: Implement get_plugins_for_url command in Rust backend
-        console.warn("getPluginsForUrl not implemented in Tauri backend yet, returning mock data.");
-        return [
-            { id: "default", name: "Default Extractor" }
-        ];
+    async getPluginsForUrl(url: string): Promise<PluginOption[]> {
+        const res = await invoke<any>("get_plugins_for_url", { url });
+        return res.map((r: any) => r as PluginOption);
     }
 
     async getAvailablePlaces(): Promise<string[]> {

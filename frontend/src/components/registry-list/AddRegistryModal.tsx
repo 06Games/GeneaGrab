@@ -39,7 +39,7 @@ export const AddRegistryModal = (props: { onClose: () => void, onAdded: () => vo
     setIsSubmitting(true);
     try {
       // TODO: Add plugin_id parameter when backend supports it
-      await api.addRegistry(url()); 
+      await api.addRegistry(url(), selectedPlugin()); 
       props.onAdded();
     } catch (err) {
       console.error(err);
