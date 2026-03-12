@@ -1,4 +1,6 @@
-import type { RegistryMeta, ImageMeta, EventRow, EventDetail, EventType } from "../types/registry";
+import { EventDetail, EventRow } from "../types";
+import { ImageMeta } from "../types/image";
+import { ActType, RegistryMeta } from "../types/registry";
 
 export const MOCK_REGISTRY_DATA: RegistryMeta = {
   id: 123,
@@ -18,7 +20,7 @@ export const MOCK_IMAGE_META: ImageMeta = {
   image_number: 12,
   date_range: "1793-11-01 to 1793-11-30",
   notes: "Image in good condition, but handwriting is difficult to read in some areas.",
-  act_types: new Map<EventType, number>([
+  act_types: new Map<ActType, number>([
     ["Birth", 2],
     ["Marriage", 1],
     ["Death", 1],

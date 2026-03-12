@@ -1,4 +1,7 @@
-import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta, PluginOption, CursorPayload, CursorResponse, RegistryFilters } from "../types/registry";
+import { EventDetail, EventRow } from "../types";
+import { CursorPayload, CursorResponse } from "../types/cursor_requests";
+import { ImageMeta, UserImageMeta } from "../types/image";
+import { PluginOption, RegistryFilters, RegistryMeta } from "../types/registry";
 
 export interface BackendService {
     // Registry
@@ -6,7 +9,7 @@ export interface BackendService {
     getRegistryMeta(id: number): Promise<RegistryMeta>;
     addRegistry(url: string): Promise<RegistryMeta>;
     getPluginsForUrl(url: string): Promise<PluginOption[]>;
-    
+
     // Filters metadata
     getAvailablePlaces(): Promise<string[]>;
     getAvailableCollections(): Promise<string[]>;

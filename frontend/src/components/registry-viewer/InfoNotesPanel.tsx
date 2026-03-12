@@ -1,11 +1,12 @@
 import { createSignal, For, onCleanup, Show } from "solid-js";
-import type { RegistryMeta, ImageMeta, EventType } from "../../types/registry";
 import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { useRegistryActions } from "../../contexts/RegistryActionsContext";
+import { ImageMeta } from "../../types/image";
+import { ActType, RegistryMeta } from "../../types/registry";
 
-const ACT_TYPE_STYLES: Record<EventType, string> = {
+const ACT_TYPE_STYLES: Record<ActType, string> = {
   Birth: "text-event-birth bg-event-birth-bg border-event-birth-border",
   Marriage: "text-event-marriage bg-event-marriage-bg border-event-marriage-border",
   Death: "text-event-death bg-event-death-bg border-event-death-border",
@@ -37,7 +38,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
 
   let saveTimer: ReturnType<typeof setTimeout>;
   let lastMeta: Partial<ImageMeta> = {};
-  
+
   const saveImageMeta = (meta: Partial<ImageMeta>) => {
     setSaveStatus("unsaved");
     clearTimeout(saveTimer);

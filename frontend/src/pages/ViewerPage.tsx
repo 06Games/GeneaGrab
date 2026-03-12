@@ -11,8 +11,10 @@ import { useDetachedWindow } from "../hooks/DetachedWindow";
 import { useI18n } from "../ui/i18n";
 import { RegistryActionsProvider } from "../contexts/RegistryActionsContext";
 import { useBackend } from "../contexts/BackendContext";
+import { EventDetail } from "../types";
+import { UserImageMeta } from "../types/image";
+import { RegistryMeta } from "../types/registry";
 
-import type { RegistryMeta, EventDetail, UserImageMeta } from "../types/registry";
 
 type SyncMessage =
   | { type: 'READY' }
@@ -66,7 +68,7 @@ export const ViewerPage = () => {
   const getEventDetail = (id: number): EventDetail | null => {
     const cached = detailCache()[id];
     if (cached) return cached;
-    
+
     if (!fetchingIds.has(id)) {
       fetchingIds.add(id);
       api.getEventDetail(id).then(detail => {

@@ -1,16 +1,16 @@
 import { createSignal, Show } from "solid-js";
 import { getValue } from "@modular-forms/solid";
-import { ROLE_SUGGESTIONS, RELATION_SUGGESTIONS, PROFESSION_OPTIONS } from "../../../types/registry";
 import { IconButton } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
+import { ROLE_SUGGESTIONS, PROFESSION_OPTIONS, RELATION_SUGGESTIONS } from "../../../types";
 
 interface PersonBlockProps {
   index: number;
   namePrefix: string;
   form: any;
-  Field: any; 
+  Field: any;
   tabStart: number;
   onRemove: () => void;
 }
@@ -69,7 +69,7 @@ export const PersonBlock = (props: PersonBlockProps) => {
       {/* Fields */}
       <Show when={!collapsed()}>
         <div class="px-3 pt-3 pb-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2">
-          
+
           <Field name={`${props.namePrefix}role`}>
             {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.role")} tabIndex={props.tabStart} options={ROLE_SUGGESTIONS} class="lg:col-span-1" />}
           </Field>
@@ -86,7 +86,7 @@ export const PersonBlock = (props: PersonBlockProps) => {
           <Field name={`${props.namePrefix}sex`}>
             {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.sex")} tabIndex={props.tabStart + 4} options={["M", "F", t("person.noRole")]} class="lg:col-span-1" />}
           </Field>
-          
+
           <div class="flex gap-2 lg:col-span-1">
             <Field name={`${props.namePrefix}age`}>
               {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.age")} tabIndex={props.tabStart + 5} class="flex-1 min-w-0" />}

@@ -1,11 +1,14 @@
-import type { BackendService } from "./api";
-import type { EventDetail, RegistryMeta, EventRow, ImageMeta, UserImageMeta, PluginOption, CursorPayload, CursorResponse, RegistryFilters } from "../types/registry";
-import { 
-  MOCK_REGISTRY_DATA, 
-  MOCK_IMAGE_META, 
-  MOCK_EVENT_ROWS, 
-  MOCK_SELECTED_EVENT 
+import {
+  MOCK_EVENT_ROWS,
+  MOCK_IMAGE_META,
+  MOCK_REGISTRY_DATA,
+  MOCK_SELECTED_EVENT
 } from "../mocks/registryMocks";
+import { EventDetail, EventRow } from "../types";
+import { CursorPayload, CursorResponse } from "../types/cursor_requests";
+import { ImageMeta, UserImageMeta } from "../types/image";
+import { PluginOption, RegistryFilters, RegistryMeta } from "../types/registry";
+import type { BackendService } from "./api";
 
 export class MockService implements BackendService {
   private delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -13,34 +16,34 @@ export class MockService implements BackendService {
   getAllRegistries = async (payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> => {
     console.info(`[Mock API] getAllRegistries`, payload);
     await this.delay(600);
-    
+
     // Generate mock data for pagination
     let data: RegistryMeta[] = [MOCK_REGISTRY_DATA];
     for (let i = 1; i <= 60; i++) {
-        data.push({
-            ...MOCK_REGISTRY_DATA,
-            id: i,
-            archive_reference: `5 Mi 1/${100 + i}`,
-            title: `Mock Registry Part ${i}`
-        });
+      data.push({
+        ...MOCK_REGISTRY_DATA,
+        id: i,
+        archive_reference: `5 Mi 1/${100 + i}`,
+        title: `Mock Registry Part ${i}`
+      });
     }
 
     // Apply simple filters for mock
     if (payload.filters) {
-        if (payload.filters.search_term) {
-            const term = payload.filters.search_term.toLowerCase();
-            data = data.filter(d => 
-                d.archive_reference.toLowerCase().includes(term) || 
-                (d.title && d.title.toLowerCase().includes(term))
-            );
-        }
+      if (payload.filters.search_term) {
+        const term = payload.filters.search_term.toLowerCase();
+        data = data.filter(d =>
+          d.archive_reference.toLowerCase().includes(term) ||
+          (d.title && d.title.toLowerCase().includes(term))
+        );
+      }
     }
 
     // Perform offset logic to simulate cursor
     const cursorIndex = payload.cursor ? data.findIndex(d => d.id === payload.cursor) : -1;
     const start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
     const paginated = data.slice(start, start + payload.limit);
-    
+
     // Resolve next cursor
     const hasMore = start + payload.limit < data.length;
     const nextCursor = hasMore ? paginated[paginated.length - 1]?.id : null;

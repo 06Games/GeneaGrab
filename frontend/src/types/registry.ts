@@ -1,7 +1,7 @@
-export const EVENT_TYPE_OPTIONS = [
+export const ACT_TYPE_OPTIONS = [
   "Birth", "Marriage", "Death", "Burial", "Census", "Notarial", "Other",
 ] as const;
-export type EventType = typeof EVENT_TYPE_OPTIONS[number];
+export type ActType = typeof ACT_TYPE_OPTIONS[number];
 
 export interface RegistryFilters {
   search_term?: string | null;
@@ -12,107 +12,26 @@ export interface RegistryFilters {
   date_to?: string | null;
 }
 
-export interface CursorPayload<T> {
-  limit: number;
-  cursor?: number | null;
-  filters?: T | null;
-}
-
-export interface CursorResponse<T> {
-  data: T[];
-  next_cursor: number | null;
-}
-
-
 export interface RegistryMeta {
   id: number;
   archive_reference: string;
-  source_types: Set<EventType | string>;
+  source_types: Set<ActType | string>;
   places: string[];
   collection: string[];
   ark_url?: string;
-  
+
   title?: string;
   subtitle?: string;
   author?: string;
   date_from?: string;
   date_to?: string;
   notes?: string;
-  
+
   total_images: number;
-  acts_count: number; 
-}
-
-/** Editable image metadata */
-export interface UserImageMeta {
-  name?: string;
-  date_range?: string;
-  notes?: string;
-}
-
-/** Read-only image metadata */
-export interface ImageMeta extends UserImageMeta {
-  image_number: number;
-  act_types: Map<EventType, number>;
-}
-
-export type EventRow = {
-  event_id: number;
-  date: string;
-  event_type: EventType;
-  title: string;
-}
-
-export type PersonEntry = {
-  person_id: string;
-  role: string;
-  first_name: string;
-  last_name: string;
-  sex: string;
-  title: string;
-  age: string;
-  is_deceased: boolean;
-  occupation: string;
-  origin_place: string;
-  residence_place: string;
-  sequence_number: string;
-  notes: string;
-  relationship_type: string;
-  relationship_to: string;
-}
-
-export type EventDetail = {
-  event_id: number;
-  date: string;
-  date_normalized: string;
-  event_type: EventType;
-  title: string;
-  act_number: string;
-  page: string;
-  image_number: string;
-  town: string;
-  parish: string;
-  hamlet: string;
-  transcription_text: string;
-  notes: string;
-  people: PersonEntry[];
+  acts_count: number;
 }
 
 export interface PluginOption {
   id: string;
   name: string;
 }
-
-// TODO: Use previously written values for suggestions
-
-export const ROLE_SUGGESTIONS = [
-  "Sujet principal", "Époux", "Épouse", "Père", "Mère", "Témoin", "Déclarant", "Parrain", "Marraine"
-];
-
-export const RELATION_SUGGESTIONS = [
-  "Époux de", "Épouse de", "Fils de", "Fille de", "Frère de", "Sœur de", "Veuve de", "Veuf de"
-];
-
-export const PROFESSION_OPTIONS = [
-  "Laboureur", "Tisserand", "Notaire", "Charpentier", "Cordonnier", "Cultivateur", "Ménagère", "Journalier", "Propriétaire"
-];

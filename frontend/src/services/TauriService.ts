@@ -1,5 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
-import { RegistryMeta, EventRow, EventDetail, ImageMeta, UserImageMeta, PluginOption, CursorPayload, CursorResponse, RegistryFilters } from "../types/registry";
+import { EventDetail, EventRow } from "../types";
+import { CursorPayload, CursorResponse } from "../types/cursor_requests";
+import { ImageMeta, UserImageMeta } from "../types/image";
+import { PluginOption, RegistryFilters, RegistryMeta } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
@@ -16,10 +19,10 @@ export class TauriService implements BackendService {
             next_cursor: res.next_cursor
         };
     }
-    
+
     async getRegistryMeta(id: number): Promise<RegistryMeta> {
         const res = await invoke<any>("get_registry", { id });
-        
+
         if (Array.isArray(res.source_types)) {
             res.source_types = new Set(res.source_types);
         }
@@ -38,7 +41,7 @@ export class TauriService implements BackendService {
         // TODO: Implement get_plugins_for_url command in Rust backend
         console.warn("getPluginsForUrl not implemented in Tauri backend yet, returning mock data.");
         return [
-          { id: "default", name: "Default Extractor" }
+            { id: "default", name: "Default Extractor" }
         ];
     }
 

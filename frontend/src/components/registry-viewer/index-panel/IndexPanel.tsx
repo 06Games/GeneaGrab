@@ -1,10 +1,10 @@
 import { Show, createSignal } from "solid-js";
-import type { EventRow, EventDetail } from "../../../types/registry";
 import { Badge, IconButton, Kbd } from "../../../ui/primitives";
 import { GlobalGrid } from "./GlobalGrid";
 import { DetailZone } from "./DetailZone";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
+import { EventRow, EventDetail } from "../../../types";
 
 interface IndexPanelProps {
   visible: boolean;
@@ -30,8 +30,8 @@ export const IndexPanel = (props: IndexPanelProps) => {
 
   const onHandlePointerDown = (e: PointerEvent) => {
     e.preventDefault();
-    const startX  = e.clientX;
-    const startW  = gridWidth();
+    const startX = e.clientX;
+    const startW = gridWidth();
     const onMove = (ev: PointerEvent) => setGridWidth(Math.max(MIN_GRID_WIDTH, Math.min(MAX_GRID_WIDTH, startW + ev.clientX - startX)));
     const onUp = () => { window.removeEventListener("pointermove", onMove); window.removeEventListener("pointerup", onUp); };
     window.addEventListener("pointermove", onMove);

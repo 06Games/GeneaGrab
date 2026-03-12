@@ -3,7 +3,7 @@
         "iconify",
         "nums"
     ],
-    "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+    "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
     "rust-analyzer.linkedProjects": [
         "backend/Cargo.toml"
     ],

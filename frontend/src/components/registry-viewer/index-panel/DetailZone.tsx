@@ -1,13 +1,13 @@
 import { createEffect, Show, For } from "solid-js";
 import { createForm, reset, insert, remove, SubmitHandler } from "@modular-forms/solid";
-import type { EventDetail } from "../../../types/registry";
-import { EVENT_TYPE_OPTIONS } from "../../../types/registry";
+import { ACT_TYPE_OPTIONS } from "../../../types/registry";
 import { Button, Kbd, SectionLabel } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
 import { PersonBlock } from "./PersonBlock";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
 import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
+import { EventDetail } from "../../../types";
 
 interface DetailZoneProps {
   event: EventDetail | null;
@@ -59,7 +59,7 @@ export const DetailZone = (props: DetailZoneProps) => {
             <span class="text-accent text-[16px] font-bold leading-none select-none" title="Unsaved changes">*</span>
           </Show>
           <Show when={props.event}>
-            <span class="text-[12px] text-dim truncate">{props.event!.title || props.event!.date }</span>
+            <span class="text-[12px] text-dim truncate">{props.event!.title || props.event!.date}</span>
           </Show>
         </div>
         <div class="flex items-center gap-1.5 flex-shrink-0 text-[11px] text-dim">
@@ -82,7 +82,7 @@ export const DetailZone = (props: DetailZoneProps) => {
             <SectionLabel>{t("detail.sections.details")}</SectionLabel>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
               <Field name="event_type">
-                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.type")} value={field.value} tabIndex={1} options={EVENT_TYPE_OPTIONS} />}
+                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.type")} value={field.value} tabIndex={1} options={ACT_TYPE_OPTIONS} />}
               </Field>
               <Field name="title">
                 {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.title")} value={field.value} tabIndex={2} placeholder={t("detail.placeholders.title")} />}
@@ -126,7 +126,7 @@ export const DetailZone = (props: DetailZoneProps) => {
                         namePrefix={`people.${index()}.`}
                         form={actForm}
                         Field={Field}
-                        tabStart={20 + index() * 20} 
+                        tabStart={20 + index() * 20}
                         onRemove={() => remove(actForm, 'people', { at: index() })}
                       />
                     )}
@@ -136,11 +136,13 @@ export const DetailZone = (props: DetailZoneProps) => {
             </div>
 
             <button
-              type="button" 
-              onClick={() => insert(actForm, 'people', { value: {
-                person_id: crypto.randomUUID(), role: "", first_name: "", last_name: "", sex: "", title: "", age: "",
-                is_deceased: false, occupation: "", origin_place: "", residence_place: "", sequence_number: "", notes: "", relationship_type: "", relationship_to: ""
-              }})}
+              type="button"
+              onClick={() => insert(actForm, 'people', {
+                value: {
+                  person_id: crypto.randomUUID(), role: "", first_name: "", last_name: "", sex: "", title: "", age: "",
+                  is_deceased: false, occupation: "", origin_place: "", residence_place: "", sequence_number: "", notes: "", relationship_type: "", relationship_to: ""
+                }
+              })}
               class="mt-2 w-full py-2 rounded-xl border-2 border-dashed border-subtle text-[13px] text-dim flex items-center justify-center gap-1.5 hover:text-muted hover:border-subtle-md hover:bg-panel transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <Icon icon="lucide:plus" width="16" height="16" class="block" /> {t("detail.addPerson")}

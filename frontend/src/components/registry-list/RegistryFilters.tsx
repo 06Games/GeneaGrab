@@ -2,7 +2,7 @@ import { createResource, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { useBackend } from "../../contexts/BackendContext";
-import { EVENT_TYPE_OPTIONS } from "../../types/registry";
+import { ACT_TYPE_OPTIONS } from "../../types/registry";
 
 interface RegistryFiltersProps {
   searchQuery: string;
@@ -80,7 +80,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
             class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer"
           >
             <option value="">{t("home.filterType")}</option>
-            {EVENT_TYPE_OPTIONS.map(opt => (
+            {ACT_TYPE_OPTIONS.map(opt => (
               <option value={opt}>{opt}</option>
             ))}
           </select>

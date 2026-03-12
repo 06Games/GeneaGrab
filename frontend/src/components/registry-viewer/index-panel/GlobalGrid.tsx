@@ -1,21 +1,22 @@
 import { createSignal, Show, For } from "solid-js";
 import { createVirtualizer } from "@tanstack/solid-virtual";
-import { 
-  createSolidTable, 
-  getCoreRowModel, 
-  getSortedRowModel, 
+import {
+  createSolidTable,
+  getCoreRowModel,
+  getSortedRowModel,
   flexRender,
   ColumnDef,
   SortingState
 } from "@tanstack/solid-table";
 
-import type { EventRow, EventType } from "../../../types/registry";
+import type { EventRow } from "../../../types/index";
 import { Button } from "../../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
 import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
+import { ActType } from "../../../types/registry";
 
-const EVENT_CHIP: Record<EventType, string> = {
+const EVENT_CHIP: Record<ActType, string> = {
   Birth: "text-event-birth bg-event-birth-bg",
   Marriage: "text-event-marriage bg-event-marriage-bg",
   Death: "text-event-death bg-event-death-bg",
@@ -71,7 +72,7 @@ export const GlobalGrid = (props: GlobalGridProps) => {
   const handleKeyDown = (e: KeyboardEvent) => {
     const sortedRows = table.getRowModel().rows.map(r => r.original);
     const idx = sortedRows.findIndex(r => r.event_id === props.selectedId);
-    
+
     if (e.key === "ArrowUp") {
       e.preventDefault();
       if (idx > 0) props.onSelect(sortedRows[idx - 1]);
@@ -91,16 +92,16 @@ export const GlobalGrid = (props: GlobalGridProps) => {
       <div class="flex-shrink-0 grid px-3 py-2 border-b border-subtle bg-tinted" style={{ "grid-template-columns": "2.5rem 6.5rem 5rem 1fr" }} aria-hidden="true">
         <For each={table.getHeaderGroups()[0].headers}>
           {header => (
-            <div 
+            <div
               class="text-[11px] font-semibold uppercase tracking-wider text-dim cursor-pointer select-none flex items-center gap-1 hover:text-main transition-colors"
               onClick={header.column.getToggleSortingHandler()}
             >
               {flexRender(header.column.columnDef.header, header.getContext())}
               <Show when={header.column.getIsSorted()}>
                 {(sortDir) => (
-                  <Icon 
-                    icon={sortDir() === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'} 
-                    class="w-3 h-3 text-accent" 
+                  <Icon
+                    icon={sortDir() === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'}
+                    class="w-3 h-3 text-accent"
                   />
                 )}
               </Show>
@@ -110,11 +111,11 @@ export const GlobalGrid = (props: GlobalGridProps) => {
       </div>
 
       {/* Rows */}
-      <div 
-        class="flex-1 overflow-y-auto focus-visible:outline-none" 
-        role="listbox" 
-        tabIndex={0} 
-        onKeyDown={handleKeyDown} 
+      <div
+        class="flex-1 overflow-y-auto focus-visible:outline-none"
+        role="listbox"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
         ref={scrollRef}
       >
         <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
@@ -130,7 +131,7 @@ export const GlobalGrid = (props: GlobalGridProps) => {
                     "w-full grid px-3 py-2 text-left border-b border-hover transition-colors duration-75 focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-accent items-center",
                     isSelected() ? "bg-accent-bg border-l-[3px] border-l-accent" : "hover:bg-tinted border-l-[3px] border-l-transparent",
                   ].join(" ")}
-                  style={{ 
+                  style={{
                     "grid-template-columns": "2.5rem 6.5rem 5rem 1fr",
                     position: 'absolute',
                     top: 0,
