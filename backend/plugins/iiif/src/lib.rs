@@ -43,7 +43,10 @@ impl PluginBase for PluginImpl {
     }
 
     fn metadata(_: ()) -> Result<PluginMetadata, Error> {
-        todo!()
+        Ok(PluginMetadata {
+            id: "iiif".into(),
+            name: "IIIF".into(),
+        })
     }
 }
 

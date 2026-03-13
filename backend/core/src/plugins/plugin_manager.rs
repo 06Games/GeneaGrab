@@ -6,8 +6,13 @@ use std::sync::{Mutex, RwLock};
 
 use crate::errors::CoreError;
 
+struct PluginData {
+    plugin: Mutex<Plugin>,
+    metadata: PluginMetadata,
+}
+
 pub struct PluginManager {
-    registry: RwLock<HashMap<String, Mutex<Plugin>>>,
+    registry: RwLock<HashMap<String, PluginData>>,
 }
 
 impl Default for PluginManager {
@@ -25,7 +30,7 @@ impl PluginManager {
 
     pub fn register_plugin(&mut self, id: String, wasm_bytes: Vec<u8>) -> Result<(), CoreError> {
         let manifest = Manifest::new([Wasm::data(wasm_bytes)]).with_allowed_host("*");
-        let plugin = Plugin::new(&manifest, [], true)
+        let mut plugin = Plugin::new(&manifest, [], true)
             .map_err(|e| CoreError::Other(format!("Failed to initialize plugin: {}", e)))?;
 
         if !HostPluginBase::is_supported(&plugin) {
@@ -35,10 +40,20 @@ impl PluginManager {
             )));
         }
 
+        let meta = &plugin.metadata(()).map_err(|e| {
+            CoreError::Other(format!("Failed to get plugin metadata for '{}': {}", id, e))
+        })?;
+
         let mut map = self.registry.write().map_err(|e| {
             CoreError::LockError(format!("Failed to write to plugin registry: {}", e))
         })?;
-        map.insert(id, Mutex::new(plugin));
+        map.insert(
+            id,
+            PluginData {
+                plugin: Mutex::new(plugin),
+                metadata: meta.clone(),
+            },
+        );
         Ok(())
     }
 
@@ -47,13 +62,7 @@ impl PluginManager {
             .registry
             .read()
             .map_err(|e| CoreError::LockError(format!("Failed to read plugin registry: {}", e)))?;
-        Ok(map
-            .keys()
-            .map(|k| PluginMetadata {
-                id: k.clone(),
-                name: format!("{} Extractor", k),
-            })
-            .collect())
+        Ok(map.values().map(|data| data.metadata.clone()).collect())
     }
 
     pub fn execute<F, R>(&self, plugin_id: &str, action: F) -> Result<R, CoreError>
@@ -64,9 +73,10 @@ impl PluginManager {
             .registry
             .read()
             .map_err(|e| CoreError::LockError(format!("Failed to read plugin registry: {}", e)))?;
-        let plugin_mutex = map
+        let plugin_mutex = &map
             .get(plugin_id)
-            .ok_or_else(|| CoreError::NotFound(format!("Plugin {} not found", plugin_id)))?;
+            .ok_or_else(|| CoreError::NotFound(format!("Plugin {} not found", plugin_id)))?
+            .plugin;
 
         let mut plugin = plugin_mutex
             .lock()
