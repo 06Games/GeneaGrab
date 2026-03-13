@@ -1,5 +1,3 @@
-use std::sync::Mutex;
-
 use crate::{
     comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta},
     db_entries::{
@@ -9,6 +7,8 @@ use crate::{
     errors::CoreError,
     plugins::PluginManager,
 };
+use geneagrab_plugin_core::com_structs::ExtractRequest;
+use geneagrab_plugin_core::com_structs::HostPluginBase;
 use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, QueryFilter,
     TransactionTrait,
@@ -121,7 +121,7 @@ pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreErro
     let registry = registry_entry::Entity::find_by_id(id.clone())
         .one(db)
         .await
-        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?
+        .map_err(|e| CoreError::DbError(format!("DB error: {}", e)))?
         .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))?;
 
     Ok(RegistryMeta::from_entry(registry, 0, 0)) // TODO: Fetch actual image and act counts
@@ -129,7 +129,7 @@ pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreErro
 
 pub async fn add_registry(
     db: &DbConn,
-    plugin_manager: &Mutex<PluginManager>,
+    plugin_manager: &PluginManager,
     url: String,
     plugin_id: String,
 ) -> Result<RegistryMeta, CoreError> {
@@ -139,15 +139,14 @@ pub async fn add_registry(
         plugin_id
     );
 
-    let res = {
-        let manager = plugin_manager.lock().unwrap();
-        manager.extract(&plugin_id, &url)?
-    };
+    let res = plugin_manager.execute(&plugin_id, |plugin| {
+        plugin.extract_registry(ExtractRequest { url })
+    })?;
 
     let txn = db
         .begin()
         .await
-        .map_err(|e| CoreError::Other(format!("Failed to start transaction: {}", e)))?;
+        .map_err(|e| CoreError::DbError(format!("Failed to start transaction: {}", e)))?;
 
     let mut active_registry: registry_entry::ActiveModel =
         registry_entry::Model::from_registry(res.registry, 0).into();
@@ -155,7 +154,7 @@ pub async fn add_registry(
     let new_registry: registry_entry::Model = active_registry
         .insert(&txn)
         .await
-        .map_err(|e| CoreError::Other(format!("DB error inserting registry: {}", e)))?;
+        .map_err(|e| CoreError::DbError(format!("DB error inserting registry: {}", e)))?;
 
     let num_images = res.images.len() as u32;
     if !res.images.is_empty() {
@@ -173,12 +172,12 @@ pub async fn add_registry(
         image_entry::Entity::insert_many(image_active_models)
             .exec(&txn)
             .await
-            .map_err(|e| CoreError::Other(format!("DB error inserting images: {}", e)))?;
+            .map_err(|e| CoreError::DbError(format!("DB error inserting images: {}", e)))?;
     }
 
     txn.commit()
         .await
-        .map_err(|e| CoreError::Other(format!("Failed to commit transaction: {}", e)))?;
+        .map_err(|e| CoreError::DbError(format!("Failed to commit transaction: {}", e)))?;
 
     let meta = RegistryMeta::from_entry(new_registry, num_images, 0);
 

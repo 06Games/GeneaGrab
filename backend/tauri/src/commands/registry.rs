@@ -42,7 +42,7 @@ pub async fn get_plugins_for_url(
     _url: String,
     state: State<'_, AppState>,
 ) -> Result<Vec<PluginMetadata>, CommandError> {
-    let manager = state.plugin_manager.lock().unwrap();
+    let res = state.plugin_manager.list_plugins()?;
     // TODO: Implement plugin discovery logic based on the URL
-    Ok(manager.list_plugins())
+    Ok(res)
 }

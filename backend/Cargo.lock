@@ -2100,8 +2100,12 @@ dependencies = [
 name = "geneagrab-plugin-core"
 version = "4.0.0"
 dependencies = [
+ "anyhow",
  "chrono",
+ "extism",
+ "extism-pdk",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

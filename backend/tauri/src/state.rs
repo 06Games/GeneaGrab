@@ -1,11 +1,12 @@
+use std::sync::Arc;
+
 use geneagrab_core::{errors::CoreError, plugins::PluginManager};
 use sea_orm::DbConn;
 use serde::Serialize;
-use std::sync::Mutex;
 
 pub struct AppState {
     pub db: DbConn,
-    pub plugin_manager: Mutex<PluginManager>,
+    pub plugin_manager: Arc<PluginManager>,
 }
 
 #[derive(Serialize)]

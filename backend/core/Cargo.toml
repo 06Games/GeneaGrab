@@ -4,7 +4,7 @@ version = "4.0.0"
 edition = "2021"
 
 [dependencies]
-geneagrab-plugin-core = { path = "../plugin_core" }
+geneagrab-plugin-core = { path = "../plugin_core", features = ["host"] }
 serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 thiserror = "2.0.18"

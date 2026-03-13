@@ -9,3 +9,13 @@ chrono = { version = "0.4.44", default-features = false, features = [
     "alloc",
     "serde",
 ] }
+anyhow = "1.0"
+
+# Optional dependencies
+serde_json = { version = "1.0", optional = true }
+extism = { version = "1.0", optional = true }
+extism-pdk = { version = "1.0", optional = true }
+
+[features]
+host = ["dep:extism", "dep:serde_json"]
+guest = ["dep:extism-pdk"]

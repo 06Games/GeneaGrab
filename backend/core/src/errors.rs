@@ -14,6 +14,12 @@ pub enum CoreError {
     #[error("Unimplemented")]
     Unimplemented,
 
+    #[error("Lock error: {0}")]
+    LockError(String),
+
+    #[error("Plugin error: {0}")]
+    PluginError(String),
+
     #[error("{0}")]
     Other(String),
 }

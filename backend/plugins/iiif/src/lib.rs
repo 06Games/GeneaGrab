@@ -1,40 +1,50 @@
 use std::collections::{HashMap, HashSet};
 
-use extism_pdk::*;
+use extism_pdk::{http, Error, HttpRequest};
 use geneagrab_plugin_core::{
-    com_structs::{ExtractRequest, ExtractResponse},
-    data::{Image, Registry},
+    com_structs::{ExtractRequest, ExtractResponse, PluginBase},
+    data::{Image, PluginMetadata, Registry},
+    export_plugin_base,
 };
 
-#[plugin_fn]
-pub fn extract_registry(Json(req): Json<ExtractRequest>) -> FnResult<Json<ExtractResponse>> {
-    let http_req = HttpRequest::new(&req.url);
-    let http_res = http::request::<()>(&http_req, None)?;
+struct PluginImpl;
 
-    let _body = http_res.body();
+impl PluginBase for PluginImpl {
+    fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, Error> {
+        let http_req = HttpRequest::new(&req.url);
+        let http_res = http::request::<()>(&http_req, None)?;
 
-    let registry = Registry {
-        source_id: "example_source_id".into(),
-        registry_id: "example_registry_id".into(),
-        archive_reference: "example_archive_reference".into(),
-        registry_types: HashSet::new(),
-        collection: vec![],
-        manifest_url: None,
-        ark_url: Some(req.url.clone()),
-        title: Some("Example Title".into()),
-        subtitle: Some("Example Subtitle".into()),
-        author: Some("Example Author".into()),
-        date_from: None,
-        date_from_normalized: None,
-        date_to: None,
-        date_to_normalized: None,
-        places: HashSet::new(),
-        notes: None,
-        extra: HashMap::new(),
-    };
-    let images: Vec<Image> = vec![];
+        let _body = http_res.body();
 
-    let res = ExtractResponse { registry, images };
+        let registry = Registry {
+            source_id: "example_source_id".into(),
+            registry_id: "example_registry_id".into(),
+            archive_reference: "example_archive_reference".into(),
+            registry_types: HashSet::new(),
+            collection: vec![],
+            manifest_url: None,
+            ark_url: Some(req.url.clone()),
+            title: Some("Example Title".into()),
+            subtitle: Some("Example Subtitle".into()),
+            author: Some("Example Author".into()),
+            date_from: None,
+            date_from_normalized: None,
+            date_to: None,
+            date_to_normalized: None,
+            places: HashSet::new(),
+            notes: None,
+            extra: HashMap::new(),
+        };
+        let images: Vec<Image> = vec![];
 
-    Ok(Json(res))
+        let res = ExtractResponse { registry, images };
+
+        Ok(res)
+    }
+
+    fn metadata(_: ()) -> Result<PluginMetadata, Error> {
+        todo!()
+    }
 }
+
+export_plugin_base!(PluginImpl);

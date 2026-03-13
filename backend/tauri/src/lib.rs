@@ -1,4 +1,4 @@
-use std::sync::Mutex;
+use std::sync::Arc;
 
 use geneagrab_core::plugins::PluginManager;
 use migration::{Migrator, MigratorTrait};
@@ -59,7 +59,16 @@ pub fn run() {
                         if path.extension().and_then(|e| e.to_str()) == Some("wasm") {
                             let plugin_id = path.file_stem().unwrap().to_string_lossy().to_string();
                             if let Ok(wasm_bytes) = std::fs::read(&path) {
-                                plugin_manager.register_plugin(plugin_id, wasm_bytes);
+                                match plugin_manager.register_plugin(plugin_id, wasm_bytes) {
+                                    Ok(()) => {
+                                        log::info!("Registered plugin from {}", path.display())
+                                    }
+                                    Err(plugin_error) => log::error!(
+                                        "Failed to register plugin from {}: {}",
+                                        path.display(),
+                                        plugin_error
+                                    ),
+                                }
                             }
                         }
                     }
@@ -70,7 +79,7 @@ pub fn run() {
 
             app.manage(AppState {
                 db,
-                plugin_manager: Mutex::new(plugin_manager),
+                plugin_manager: Arc::new(plugin_manager),
             });
 
             Ok(())
