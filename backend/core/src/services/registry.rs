@@ -9,7 +9,10 @@ use crate::{
     errors::CoreError,
     plugins::PluginManager,
 };
-use sea_orm::{ActiveModelTrait, ColumnTrait, DbConn, EntityTrait, QueryFilter, TransactionTrait};
+use sea_orm::{
+    ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, QueryFilter,
+    TransactionTrait,
+};
 
 impl RegistryMeta {
     pub fn from_entry(registry: registry_entry::Model, total_images: u32, acts_count: u32) -> Self {
@@ -146,8 +149,9 @@ pub async fn add_registry(
         .await
         .map_err(|e| CoreError::Other(format!("Failed to start transaction: {}", e)))?;
 
-    let active_registry: registry_entry::ActiveModel =
+    let mut active_registry: registry_entry::ActiveModel =
         registry_entry::Model::from_registry(res.registry, 0).into();
+    active_registry.id = NotSet;
     let new_registry: registry_entry::Model = active_registry
         .insert(&txn)
         .await
@@ -158,7 +162,12 @@ pub async fn add_registry(
         let image_active_models: Vec<image_entry::ActiveModel> = res
             .images
             .into_iter()
-            .map(|img| image_entry::Model::from_image(img, 0, new_registry.id).into())
+            .map(|img| {
+                let mut active_image: image_entry::ActiveModel =
+                    image_entry::Model::from_image(img, 0, new_registry.id).into();
+                active_image.id = NotSet;
+                active_image
+            })
             .collect();
 
         image_entry::Entity::insert_many(image_active_models)
