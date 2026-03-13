@@ -1,12 +1,13 @@
-use std::collections::{HashMap, HashSet};
+use std::sync::Mutex;
 
 use crate::{
     comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta},
     db_entries::{
         image_entry,
-        registry_entry::{self, StringList, StringMap, StringSet},
+        registry_entry::{self},
     },
     errors::CoreError,
+    plugins::PluginManager,
 };
 use sea_orm::{ActiveModelTrait, ColumnTrait, DbConn, EntityTrait, QueryFilter, TransactionTrait};
 
@@ -31,32 +32,6 @@ impl RegistryMeta {
             acts_count: acts_count,
         }
     }
-}
-
-fn stub(url: String) -> Result<(registry_entry::Model, Vec<image_entry::Model>), CoreError> {
-    let registry = registry_entry::Model {
-        id: 0,
-        source_id: "example_source_id".into(),
-        registry_id: "example_registry_id".into(),
-        archive_reference: "example_archive_reference".into(),
-        registry_types: StringSet(HashSet::new()),
-        collection: StringList(vec![]),
-        manifest_url: None,
-        ark_url: Some(url.clone()),
-        title: Some("Example Title".into()),
-        subtitle: Some("Example Subtitle".into()),
-        author: Some("Example Author".into()),
-        date_from: None,
-        date_from_normalized: None,
-        date_to: None,
-        date_to_normalized: None,
-        places: StringSet(HashSet::new()),
-        notes: None,
-        extra: StringMap(HashMap::new()),
-    };
-    let images: Vec<image_entry::Model> = vec![];
-
-    Ok((registry, images))
 }
 
 pub async fn get_all_registries(
@@ -149,31 +124,41 @@ pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreErro
     Ok(RegistryMeta::from_entry(registry, 0, 0)) // TODO: Fetch actual image and act counts
 }
 
-pub async fn add_registry(db: &DbConn, url: String) -> Result<RegistryMeta, CoreError> {
-    log::info!("add_registry called with url: {}", url);
+pub async fn add_registry(
+    db: &DbConn,
+    plugin_manager: &Mutex<PluginManager>,
+    url: String,
+    plugin_id: String,
+) -> Result<RegistryMeta, CoreError> {
+    log::info!(
+        "add_registry called with url: {}, plugin_id: {}",
+        url,
+        plugin_id
+    );
 
-    let result: Result<(registry_entry::Model, Vec<image_entry::Model>), CoreError> = stub(url);
-    let (registry, images) = result?;
+    let res = {
+        let manager = plugin_manager.lock().unwrap();
+        manager.extract(&plugin_id, &url)?
+    };
 
     let txn = db
         .begin()
         .await
         .map_err(|e| CoreError::Other(format!("Failed to start transaction: {}", e)))?;
 
-    let active_registry: registry_entry::ActiveModel = registry.into();
+    let active_registry: registry_entry::ActiveModel =
+        registry_entry::Model::from_registry(res.registry, 0).into();
     let new_registry: registry_entry::Model = active_registry
         .insert(&txn)
         .await
         .map_err(|e| CoreError::Other(format!("DB error inserting registry: {}", e)))?;
 
-    let num_images = images.len() as u32;
-    if !images.is_empty() {
-        let image_active_models: Vec<image_entry::ActiveModel> = images
+    let num_images = res.images.len() as u32;
+    if !res.images.is_empty() {
+        let image_active_models: Vec<image_entry::ActiveModel> = res
+            .images
             .into_iter()
-            .map(|mut img| {
-                img.registry_entry_id = new_registry.id;
-                img.into()
-            })
+            .map(|img| image_entry::Model::from_image(img, 0, new_registry.id).into())
             .collect();
 
         image_entry::Entity::insert_many(image_active_models)

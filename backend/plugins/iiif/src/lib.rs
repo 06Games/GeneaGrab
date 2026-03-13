@@ -1,34 +1,40 @@
+use std::collections::{HashMap, HashSet};
+
 use extism_pdk::*;
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize)]
-pub struct ExtractRequest {
-    pub url: String,
-}
-
-// TODO
-#[derive(Serialize)]
-pub struct ExtractResponse {
-    pub archive_reference: String,
-    pub title: Option<String>,
-    pub total_images: u32
-}
+use geneagrab_plugin_core::{
+    com_structs::{ExtractRequest, ExtractResponse},
+    data::{Image, Registry},
+};
 
 #[plugin_fn]
 pub fn extract_registry(Json(req): Json<ExtractRequest>) -> FnResult<Json<ExtractResponse>> {
-    // Extism allows making HTTP calls directly from the WASM guest!
-    // The host must allow the domain in its manifest configuration.
     let http_req = HttpRequest::new(&req.url);
     let http_res = http::request::<()>(&http_req, None)?;
 
-    // Parse your IIIF/Ligeo/Bach manifest from `http_res.body()`
     let _body = http_res.body();
 
-    let res = ExtractResponse {
-        archive_reference: format!("Extracted from {}", req.url),
-        title: Some("Registry Name".into()),
-        total_images: 42
+    let registry = Registry {
+        source_id: "example_source_id".into(),
+        registry_id: "example_registry_id".into(),
+        archive_reference: "example_archive_reference".into(),
+        registry_types: HashSet::new(),
+        collection: vec![],
+        manifest_url: None,
+        ark_url: Some(req.url.clone()),
+        title: Some("Example Title".into()),
+        subtitle: Some("Example Subtitle".into()),
+        author: Some("Example Author".into()),
+        date_from: None,
+        date_from_normalized: None,
+        date_to: None,
+        date_to_normalized: None,
+        places: HashSet::new(),
+        notes: None,
+        extra: HashMap::new(),
     };
+    let images: Vec<Image> = vec![];
+
+    let res = ExtractResponse { registry, images };
 
     Ok(Json(res))
 }

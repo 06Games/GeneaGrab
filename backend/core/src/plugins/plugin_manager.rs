@@ -1,9 +1,10 @@
 use extism::{Manifest, Plugin, Wasm};
+use geneagrab_plugin_core::com_structs::{ExtractRequest, ExtractResponse};
+use geneagrab_plugin_core::data::PluginMetadata;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
 use crate::errors::CoreError;
-use crate::plugins::{ExtractRequest, ExtractResponse, PluginOption};
 
 pub struct PluginManager {
     registry: HashMap<String, Mutex<Plugin>>,
@@ -23,7 +24,6 @@ impl PluginManager {
     }
 
     pub fn register_plugin(&mut self, id: String, wasm_bytes: Vec<u8>) {
-        // TODO: Restrict allowed_hosts to specific domains based on the plugin id for better security
         let manifest = Manifest::new([Wasm::data(wasm_bytes)]).with_allowed_host("*");
 
         match Plugin::new(&manifest, [], true) {
@@ -36,10 +36,10 @@ impl PluginManager {
         }
     }
 
-    pub fn list_plugins(&self) -> Vec<PluginOption> {
+    pub fn list_plugins(&self) -> Vec<PluginMetadata> {
         self.registry
             .keys()
-            .map(|k| PluginOption {
+            .map(|k| PluginMetadata {
                 id: k.clone(),
                 name: format!("{} Extractor", k),
             })

@@ -2087,6 +2087,7 @@ version = "4.0.0"
 dependencies = [
  "chrono",
  "extism",
+ "geneagrab-plugin-core",
  "log",
  "sea-orm",
  "serde",
@@ -2096,10 +2097,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "geneagrab-plugin-core"
+version = "4.0.0"
+dependencies = [
+ "chrono",
+ "serde",
+]
+
+[[package]]
 name = "geneagrab-plugin-iiif"
 version = "4.0.0"
 dependencies = [
  "extism-pdk",
+ "geneagrab-plugin-core",
  "serde",
  "serde_json",
 ]
@@ -2109,6 +2119,7 @@ name = "geneagrab-tauri"
 version = "4.0.0"
 dependencies = [
  "geneagrab-core",
+ "geneagrab-plugin-core",
  "log",
  "migration",
  "sea-orm",

@@ -7,6 +7,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
+geneagrab-plugin-core = { path = "../../plugin_core" }
 extism-pdk = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
