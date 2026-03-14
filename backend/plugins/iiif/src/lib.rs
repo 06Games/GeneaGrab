@@ -1,15 +1,39 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+};
 
 use extism_pdk::{http, Error, HttpRequest};
 use geneagrab_plugin_core::{
-    com_structs::{ExtractRequest, ExtractResponse, PluginBase},
+    com_structs::{
+        ArkRequest, ExtractRequest, ExtractResponse, IdentifyRequest, IdentifyResponse, PluginBase,
+        TileRequest, TileResponse,
+    },
     data::{Image, PluginMetadata, Registry},
     export_plugin_base,
+};
+
+const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
+    id: Cow::Borrowed("iiif"),
+    name: Cow::Borrowed("IIIF"),
+    description: Some(Cow::Borrowed(
+        "A plugin for extracting data from IIIF manifests.",
+    )),
+    author: Some(Cow::Borrowed("Evan Galli")),
+    version: Some(Cow::Borrowed("1.0.0")),
+    source_url: Some(Cow::Borrowed(
+        "https://github.com/06Games/GeneaGrab/tree/v4/backend/plugins/iiif",
+    )),
+    suggested_websites: Cow::Borrowed(&[]),
 };
 
 struct PluginImpl;
 
 impl PluginBase for PluginImpl {
+    fn metadata(_: ()) -> Result<PluginMetadata, Error> {
+        Ok(PLUGIN_METADATA)
+    }
+
     fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, Error> {
         let http_req = HttpRequest::new(&req.url);
         let http_res = http::request::<()>(&http_req, None)?;
@@ -42,18 +66,16 @@ impl PluginBase for PluginImpl {
         Ok(res)
     }
 
-    fn metadata(_: ()) -> Result<PluginMetadata, Error> {
-        Ok(PluginMetadata {
-            id: "iiif".into(),
-            name: "IIIF".into(),
-            description: Some("A plugin for extracting data from IIIF manifests.".into()),
-            author: Some("Evan Galli".into()),
-            version: Some("1.0.0".into()),
-            source_url: Some(
-                "https://github.com/06Games/GeneaGrab/tree/v4/backend/plugins/iiif".into(),
-            ),
-            suggested_websites: vec![],
-        })
+    fn identify(_req: IdentifyRequest) -> Result<IdentifyResponse, Error> {
+        todo!()
+    }
+
+    fn generate_tile_request(_req: TileRequest) -> Result<TileResponse, Error> {
+        todo!()
+    }
+
+    fn get_ark(_req: ArkRequest) -> Result<String, Error> {
+        todo!()
     }
 }
 
