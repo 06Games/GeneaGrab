@@ -1,6 +1,6 @@
 mod base;
 mod macros;
-mod metadata;
+mod registry;
 
 pub use base::*;
-pub use metadata::{ExtractRequest, ExtractResponse};
+pub use registry::{ExtractRequest, ExtractResponse};

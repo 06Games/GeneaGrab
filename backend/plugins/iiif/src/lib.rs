@@ -46,6 +46,13 @@ impl PluginBase for PluginImpl {
         Ok(PluginMetadata {
             id: "iiif".into(),
             name: "IIIF".into(),
+            description: Some("A plugin for extracting data from IIIF manifests.".into()),
+            author: Some("Evan Galli".into()),
+            version: Some("1.0.0".into()),
+            source_url: Some(
+                "https://github.com/06Games/GeneaGrab/tree/v4/backend/plugins/iiif".into(),
+            ),
+            suggested_websites: vec![],
         })
     }
 }
