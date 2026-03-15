@@ -19,7 +19,6 @@ pub struct IdentifyRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct IdentifyResponse {
-    pub is_supported: bool,
     pub registry_id: Option<String>,
-    pub frame_number: Option<u32>,
+    pub image_number: Option<u32>,
 }

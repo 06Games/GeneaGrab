@@ -2109,6 +2109,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "geneagrab-plugin-geneanet"
+version = "4.0.0"
+dependencies = [
+ "extism-pdk",
+ "geneagrab-plugin-core",
+ "regex",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "geneagrab-plugin-iiif"
 version = "4.0.0"
 dependencies = [

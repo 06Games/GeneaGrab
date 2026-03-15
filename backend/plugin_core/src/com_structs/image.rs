@@ -22,7 +22,6 @@ pub struct TileResponse {
     pub headers: Option<HashMap<String, String>>,
 }
 
-// Replaces `Ark`
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ArkRequest {
     pub frame_number: u32,

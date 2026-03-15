@@ -34,6 +34,10 @@ impl PluginBase for PluginImpl {
         Ok(PLUGIN_METADATA)
     }
 
+    fn identify(_req: IdentifyRequest) -> Result<IdentifyResponse, Error> {
+        todo!()
+    }
+
     fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, Error> {
         let http_req = HttpRequest::new(&req.url);
         let http_res = http::request::<()>(&http_req, None)?;
@@ -64,10 +68,6 @@ impl PluginBase for PluginImpl {
         let res = ExtractResponse { registry, images };
 
         Ok(res)
-    }
-
-    fn identify(_req: IdentifyRequest) -> Result<IdentifyResponse, Error> {
-        todo!()
     }
 
     fn generate_tile_request(_req: TileRequest) -> Result<TileResponse, Error> {

@@ -39,10 +39,11 @@ pub async fn add_registry(
 
 #[tauri::command]
 pub async fn get_plugins_for_url(
-    _url: String,
+    url: String,
     state: State<'_, AppState>,
 ) -> Result<Vec<PluginMetadata>, CommandError> {
-    let res = state.plugin_manager.list_plugins()?;
-    // TODO: Implement plugin discovery logic based on the URL
-    Ok(res)
+    let res = geneagrab_core::services::registry::get_plugins_for_url(&state.plugin_manager, &url)
+        .await?;
+
+    Ok(res.into_iter().map(|(meta, _)| meta).collect()) // TODO: Keep the extracted info
 }

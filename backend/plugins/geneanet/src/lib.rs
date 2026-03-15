@@ -1,0 +1,77 @@
+use std::{borrow::Cow, sync::LazyLock};
+
+use extism_pdk::Error;
+use geneagrab_plugin_core::{
+    com_structs::{
+        ArkRequest, ExtractRequest, ExtractResponse, IdentifyRequest, IdentifyResponse, PluginBase,
+        TileRequest, TileResponse,
+    },
+    data::PluginMetadata,
+    export_plugin_base,
+};
+use regex::Regex;
+
+const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
+    id: Cow::Borrowed("geneanet"),
+    name: Cow::Borrowed("Geneanet"),
+    description: Some(Cow::Borrowed("A plugin for extracting data from Geneanet.")),
+    author: Some(Cow::Borrowed("Evan Galli")),
+    version: Some(Cow::Borrowed("1.0.0")),
+    source_url: Some(Cow::Borrowed(
+        "https://github.com/06Games/GeneaGrab/tree/v4/backend/plugins/geneanet",
+    )),
+    suggested_websites: Cow::Borrowed(&[std::borrow::Cow::Borrowed("https://www.geneanet.org/")]),
+};
+
+static URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(
+        r"(?:idcollection=(?<col1>\d*).*page=(?<page1>\d*))|(?:/(?<col2>\d+)(?:\z|/(?<page2>\d*)))",
+    )
+    .expect("Invalid regex pattern")
+});
+
+struct PluginImpl;
+
+impl PluginBase for PluginImpl {
+    fn metadata(_: ()) -> Result<PluginMetadata, Error> {
+        Ok(PLUGIN_METADATA)
+    }
+
+    fn identify(req: IdentifyRequest) -> Result<IdentifyResponse, Error> {
+        let captures = URL_REGEX.captures(&req.url);
+
+        let col_value = captures
+            .as_ref()
+            .and_then(|caps| caps.name("col1").or(caps.name("col2")))
+            .map(|m| m.as_str())
+            .filter(|s| !s.is_empty())
+            .ok_or(Error::msg("Collection ID not found"))?;
+
+        let image_number = captures
+            .as_ref()
+            .and_then(|caps| caps.name("page1").or(caps.name("page2")))
+            .map(|m| m.as_str())
+            .filter(|s| !s.is_empty())
+            .and_then(|s| s.parse::<u32>().ok())
+            .unwrap_or(1);
+
+        Ok(IdentifyResponse {
+            registry_id: Some(col_value.into()),
+            image_number: Some(image_number),
+        })
+    }
+
+    fn extract_registry(_req: ExtractRequest) -> Result<ExtractResponse, Error> {
+        todo!()
+    }
+
+    fn generate_tile_request(_req: TileRequest) -> Result<TileResponse, Error> {
+        todo!()
+    }
+
+    fn get_ark(_req: ArkRequest) -> Result<String, Error> {
+        todo!()
+    }
+}
+
+export_plugin_base!(PluginImpl);

@@ -1,3 +1,5 @@
+use std::{cmp::Reverse, collections::HashMap};
+
 use crate::{
     comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta},
     db_entries::{
@@ -7,8 +9,8 @@ use crate::{
     errors::CoreError,
     plugins::PluginManager,
 };
-use geneagrab_plugin_core::com_structs::ExtractRequest;
-use geneagrab_plugin_core::com_structs::HostPluginBase;
+use geneagrab_plugin_core::com_structs::{HostPluginBase, IdentifyRequest, IdentifyResponse};
+use geneagrab_plugin_core::{com_structs::ExtractRequest, data::PluginMetadata};
 use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, QueryFilter,
     TransactionTrait,
@@ -182,4 +184,37 @@ pub async fn add_registry(
     let meta = RegistryMeta::from_entry(new_registry, num_images, 0);
 
     Ok(meta)
+}
+
+pub async fn get_plugins_for_url(
+    plugin_manager: &PluginManager,
+    url: &str,
+) -> Result<Vec<(PluginMetadata, IdentifyResponse)>, CoreError> {
+    let plugins = plugin_manager.list_plugins()?;
+
+    let mut compatible_plugins: Vec<(PluginMetadata, IdentifyResponse)> = plugins
+        .into_iter()
+        .filter_map(|meta| {
+            let identified = plugin_manager
+                .execute(&meta.id, |plugin| {
+                    plugin.identify(IdentifyRequest {
+                        url: url.to_string(),
+                    })
+                })
+                .ok()?;
+
+            Some((meta, identified))
+        })
+        .collect();
+
+    // Prioritize plugins that explicitly list the website as compatible
+    compatible_plugins.sort_by_key(|(meta, _)| {
+        Reverse(
+            meta.suggested_websites
+                .iter()
+                .any(|site| url.starts_with(site.as_ref())),
+        )
+    });
+
+    Ok(compatible_plugins)
 }
