@@ -1,4 +1,4 @@
-use std::{cmp::Reverse, collections::HashMap};
+use std::cmp::Reverse;
 
 use crate::{
     comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta},
@@ -142,7 +142,8 @@ pub async fn add_registry(
     );
 
     let res = plugin_manager.execute(&plugin_id, |plugin| {
-        plugin.extract_registry(ExtractRequest { url })
+        let identified = plugin.identify(IdentifyRequest { url: url.clone() })?; // TODO: Avoid re-extracting data from the URL
+        plugin.extract_registry(ExtractRequest { url, identified })
     })?;
 
     let txn = db

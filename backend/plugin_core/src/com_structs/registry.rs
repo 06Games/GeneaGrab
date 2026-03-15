@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExtractRequest {
     pub url: String,
+    pub identified: IdentifyResponse
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -19,6 +20,6 @@ pub struct IdentifyRequest {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct IdentifyResponse {
-    pub registry_id: Option<String>,
+    pub registry_id: String,
     pub image_number: Option<u32>,
 }
