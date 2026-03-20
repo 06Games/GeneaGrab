@@ -20,7 +20,7 @@ pub struct Model {
 
     pub source_id: String,
     pub registry_id: String,
-    pub archive_reference: String,
+    pub archive_reference: Option<String>,
 
     pub registry_types: StringSet,
     pub collection: StringList,

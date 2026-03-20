@@ -47,7 +47,7 @@ impl PluginBase for PluginImpl {
         let registry = Registry {
             source_id: "example_source_id".into(),
             registry_id: "example_registry_id".into(),
-            archive_reference: "example_archive_reference".into(),
+            archive_reference: Some("example_archive_reference".into()),
             registry_types: HashSet::new(),
             collection: vec![],
             manifest_url: None,
