@@ -165,10 +165,6 @@ impl PluginBase for PluginImpl {
             }
         }
 
-        if archive_reference.is_empty() {
-            archive_reference = req.identified.registry_id.clone();
-        }
-
         let api_url = format!("https://www.geneanet.org/registres/api/images/{}?min_page=1&max_page=999999", req.identified.registry_id);
         let api_json = fetch_string(&api_url)?;
         
