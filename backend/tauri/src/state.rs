@@ -14,6 +14,7 @@ pub struct CommandError(String);
 
 impl From<CoreError> for CommandError {
     fn from(err: CoreError) -> Self {
+        log::error!("{}", err);
         CommandError(err.to_string())
     }
 }
