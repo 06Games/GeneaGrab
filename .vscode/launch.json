@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Tauri",
+            "program": "${workspaceFolder}/backend/target/debug/geneagrab-tauri",
+            "args": [],
+            "cwd": "${workspaceFolder}/backend/tauri",
+            "preLaunchTask": "build-backend-only",
+            "env": {
+                "TAURI_ENV": "dev"
+            }
+        }
+    ]
+}

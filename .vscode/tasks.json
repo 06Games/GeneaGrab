@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "install-plugins",
+            "type": "shell",
+            "command": "make plugins_install"
+        },
+        {
+            "label": "build-backend-only",
+            "type": "shell",
+            "command": "cargo build",
+            "options": {
+                "cwd": "${workspaceFolder}/backend/tauri"
+            },
+            "dependsOn": [
+                "install-plugins"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
