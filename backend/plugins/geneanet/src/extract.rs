@@ -1,10 +1,8 @@
 use std::collections::HashSet;
 
-use extism_pdk::{http, Error, HttpRequest};
+use extism_pdk::{http, info, trace, Error, HttpRequest};
 use geneagrab_plugin_core::{
-    com_structs::{
-        ExtractRequest, ExtractResponse,
-    },
+    com_structs::{ExtractRequest, ExtractResponse},
     data::{Image, RegistryBuilder},
 };
 use regex::{Match, Regex};
@@ -71,6 +69,8 @@ fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<String
 fn fetch_string(url: &str) -> Result<String, Error> {
     let req = HttpRequest::new(url);
     let res = http::request::<()>(&req, None)?;
+    info!("Sent request to {}, got status {}", url, res.status_code());
+    trace!("Response body: {:?}", res.body());
     String::from_utf8(res.body()).map_err(|e| Error::msg(format!("Invalid UTF-8: {}", e)))
 }
 
