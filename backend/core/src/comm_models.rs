@@ -1,8 +1,8 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, HashSet};
-use std::str::FromStr;
 use std::fmt::Display;
+use std::str::FromStr;
 
 fn empty_string_as_none<'de, D, T>(deserializer: D) -> Result<Option<T>, D::Error>
 where
@@ -14,9 +14,7 @@ where
     match opt {
         None => Ok(None),
         Some(s) if s.trim().is_empty() => Ok(None),
-        Some(s) => s.parse::<T>()
-            .map(Some)
-            .map_err(serde::de::Error::custom),
+        Some(s) => s.parse::<T>().map(Some).map_err(serde::de::Error::custom),
     }
 }
 
@@ -66,7 +64,7 @@ pub struct RegistryMeta {
     pub id: u32,
     pub archive_reference: Option<String>,
     pub source_types: HashSet<String>,
-    pub places: HashSet<String>,
+    pub places: HashSet<Vec<String>>,
     pub collection: Vec<String>,
     pub ark_url: Option<String>,
 
@@ -78,7 +76,7 @@ pub struct RegistryMeta {
     pub notes: Option<String>,
 
     pub total_images: u32,
-    pub acts_count: u32
+    pub acts_count: u32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

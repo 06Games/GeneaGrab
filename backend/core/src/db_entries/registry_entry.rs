@@ -3,14 +3,7 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct StringSet(pub HashSet<String>);
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct StringList(pub Vec<String>);
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, FromJsonQueryResult)]
-pub struct StringMap(pub HashMap<String, String>);
+use crate::db_entries::utils::JsonField;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "registry_entry")]
@@ -22,8 +15,8 @@ pub struct Model {
     pub registry_id: String,
     pub archive_reference: Option<String>,
 
-    pub registry_types: StringSet,
-    pub collection: StringList,
+    pub registry_types: JsonField<HashSet<String>>,
+    pub collection: JsonField<Vec<String>>,
 
     pub manifest_url: Option<String>,
     pub ark_url: Option<String>,
@@ -36,10 +29,10 @@ pub struct Model {
     pub date_to: Option<String>,
     pub date_to_normalized: Option<DateTimeUtc>,
 
-    pub places: StringSet,
+    pub places: JsonField<HashSet<Vec<String>>>,
     pub notes: Option<String>,
 
-    pub extra: StringMap,
+    pub extra: JsonField<HashMap<String, String>>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -87,8 +80,8 @@ impl Model {
             source_id: registry.source_id,
             registry_id: registry.registry_id,
             archive_reference: registry.archive_reference,
-            registry_types: StringSet(registry.registry_types),
-            collection: StringList(registry.collection),
+            registry_types: JsonField(registry.registry_types),
+            collection: JsonField(registry.collection),
             manifest_url: registry.manifest_url,
             ark_url: registry.ark_url,
             title: registry.title,
@@ -98,9 +91,9 @@ impl Model {
             date_from_normalized: registry.date_from_normalized,
             date_to: registry.date_to,
             date_to_normalized: registry.date_to_normalized,
-            places: StringSet(registry.places),
+            places: JsonField(registry.places),
             notes: registry.notes,
-            extra: StringMap(registry.extra),
+            extra: JsonField(registry.extra),
         }
     }
 }
