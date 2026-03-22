@@ -1,12 +1,14 @@
 {
     "cSpell.words": [
         "iconify",
-        "nums"
+        "nums",
+        "Zoomify"
     ],
     "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
     "rust-analyzer.linkedProjects": [
         "backend/Cargo.toml"
     ],
+    "rust-analyzer.cargo.features": "all",
     "json.schemaDownload.trustedDomains": {
         "https://schema.tauri.app/config/2": true
     }

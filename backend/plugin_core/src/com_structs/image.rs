@@ -2,6 +2,19 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
+use crate::data::{Image, Registry};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExtractImageRequest {
+    pub registry: Registry,
+    pub image: Image,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ExtractImageResponse {
+    pub image: Image,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileRequest {
     pub image_id: u32,

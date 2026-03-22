@@ -1,13 +1,10 @@
-use std::{
-    borrow::Cow,
-    sync::LazyLock,
-};
+use std::{borrow::Cow, sync::LazyLock};
 
 use extism_pdk::Error;
 use geneagrab_plugin_core::{
     com_structs::{
-        ArkRequest, ExtractRequest, ExtractResponse, IdentifyRequest, IdentifyResponse, PluginBase,
-        TileRequest, TileResponse,
+        ArkRequest, ExtractImageRequest, ExtractImageResponse, ExtractRequest, ExtractResponse,
+        IdentifyRequest, IdentifyResponse, PluginBase, TileRequest, TileResponse,
     },
     data::PluginMetadata,
     export_plugin_base,
@@ -15,6 +12,7 @@ use geneagrab_plugin_core::{
 use regex::Regex;
 
 mod extract;
+mod image;
 
 const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
     id: Cow::Borrowed("geneanet"),
@@ -70,8 +68,12 @@ impl PluginBase for PluginImpl {
         crate::extract::extract_registry(req)
     }
 
-    fn generate_tile_request(_req: TileRequest) -> Result<TileResponse, Error> {
-        todo!()
+    fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, Error> {
+        crate::image::extract_image(req)
+    }
+
+    fn generate_tile_request(req: TileRequest) -> Result<TileResponse, Error> {
+        crate::image::generate_tile_request(req)
     }
 
     fn get_ark(_req: ArkRequest) -> Result<String, Error> {

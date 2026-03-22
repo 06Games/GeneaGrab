@@ -13,6 +13,9 @@ define_extism_interface! {
         /* Parses the full metadata, dates, locations, and builds the Image array*/
         fn extract_registry(ExtractRequest) -> Result<ExtractResponse, Error>;
 
+        /*  */
+        fn extract_image(ExtractImageRequest) -> Result<ExtractImageResponse, Error>;
+
         /* Generates the HTTP URL for a single tile */
         fn generate_tile_request(TileRequest) -> Result<TileResponse, Error>;
 

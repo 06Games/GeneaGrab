@@ -1,11 +1,12 @@
 use std::collections::HashSet;
 
-use extism_pdk::{http, info, trace, Error, HttpRequest};
+use extism_pdk::Error;
 use geneagrab_plugin_core::{
     com_structs::{ExtractRequest, ExtractResponse},
     data::{Image, RegistryBuilder},
+    protocols::utils::{fetch_string, validate_regex_match, Fetcher},
 };
-use regex::{Match, Regex};
+use regex::Regex;
 use scraper::{Html, Selector};
 use url::Url;
 
@@ -67,21 +68,6 @@ fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<String
     types
 }
 
-fn fetch_string(url: &str) -> Result<String, Error> {
-    let req = HttpRequest::new(url);
-    let res = http::request::<()>(&req, None)?;
-    info!("Sent request to {}, got status {}", url, res.status_code());
-    trace!("Response body: {:?}", res.body());
-    String::from_utf8(res.body()).map_err(|e| Error::msg(format!("Invalid UTF-8: {}", e)))
-}
-
-fn validate_match(reg_match: Option<Match>) -> Option<String> {
-    reg_match
-        .map(|m| m.as_str().trim().to_string())
-        .map(|s| s.is_empty().then(|| None).unwrap_or(Some(s)))
-        .flatten()
-}
-
 fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), Error> {
     let document = Html::parse_document(&html);
 
@@ -119,10 +105,10 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), 
     }
     builder.places(HashSet::from([place]));
 
-    builder.date_from(validate_match(caps.name("from")));
-    builder.date_to(validate_match(caps.name("to")));
-    builder.archive_reference(validate_match(caps.name("cote")));
-    builder.notes(validate_match(caps.name("note")));
+    builder.date_from(validate_regex_match(caps.name("from")));
+    builder.date_to(validate_regex_match(caps.name("to")));
+    builder.archive_reference(validate_regex_match(caps.name("cote")));
+    builder.notes(validate_regex_match(caps.name("note")));
 
     let global_type = caps
         .name("globalType")
@@ -183,10 +169,10 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Error>
     Ok(images)
 }
 
-fn extract_registry_internal<F>(req: ExtractRequest, fetcher: F) -> Result<ExtractResponse, Error>
-where
-    F: Fn(&str) -> Result<String, Error>,
-{
+fn extract_registry_internal(
+    req: ExtractRequest,
+    fetcher: Fetcher,
+) -> Result<ExtractResponse, Error> {
     let view_url = format!(
         "https://www.geneanet.org/registres/view/{}",
         req.identified.registry_id

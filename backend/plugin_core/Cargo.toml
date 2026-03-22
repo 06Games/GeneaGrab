@@ -10,13 +10,17 @@ chrono = { version = "0.4.44", default-features = false, features = [
     "serde",
 ] }
 anyhow = "1.0"
+derive_builder = "0.20.2"
 
 # Optional dependencies
 serde_json = { version = "1.0", optional = true }
 extism = { version = "1.0", optional = true }
 extism-pdk = { version = "1.0", optional = true }
-derive_builder = "0.20.2"
+regex = { version = "1.12.3", optional = true }
+quick-xml = { version = "0.39.2", features = ["serialize"], optional = true }
+
 
 [features]
 host = ["dep:extism", "dep:serde_json"]
-guest = ["dep:extism-pdk"]
+guest = ["dep:extism-pdk", "dep:regex"]
+protocols-zoomify = ["dep:quick-xml"]
