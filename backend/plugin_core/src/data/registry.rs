@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Builder)]
+#[derive(Debug, Serialize, Deserialize, PartialEq, Builder)]
 pub struct Registry {
     pub source_id: String,
     pub registry_id: String,

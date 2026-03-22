@@ -1,0 +1,33 @@
+[
+    {
+        "request_url": "https://www.geneanet.org/registres/view/17293",
+        "registry_id": "17293",
+        "image_number": 1,
+        "mocks": [
+            {
+                "url": "https://www.geneanet.org/registres/view/17293",
+                "response_file": "17293_page.html"
+            },
+            {
+                "url": "https://www.geneanet.org/registres/api/images/17293?min_page=1&max_page=999999",
+                "response_file": "17293_images.json"
+            }
+        ],
+        "expected_image_count": 10,
+        "expected_registry": {
+            "source_id": "geneanet",
+            "registry_id": "17293",
+            "registry_types": [
+                "Mariages"
+            ],
+            "ark_url": "https://www.geneanet.org/registres/view/17293",
+            "date_from": "1574",
+            "date_to": "1582",
+            "places": [
+                "Roquebillière (Alpes-Maritimes, France)"
+            ],
+            "collection": [],
+            "extra": {}
+        }
+    }
+]

@@ -182,7 +182,10 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Error>
     Ok(images)
 }
 
-pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, Error> {
+fn extract_registry_internal<F>(req: ExtractRequest, fetcher: F) -> Result<ExtractResponse, Error>
+where
+    F: Fn(&str) -> Result<String, Error>,
+{
     let view_url = format!(
         "https://www.geneanet.org/registres/view/{}",
         req.identified.registry_id
@@ -195,7 +198,7 @@ pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, E
         .registry_id(req.identified.registry_id.clone())
         .ark_url(Some(view_url.clone()));
 
-    let html = fetch_string(&view_url)?;
+    let html = fetcher(&view_url)?;
     parse_viewer_page(&mut builder, html)?;
 
     let registry = builder.build()?;
@@ -204,9 +207,130 @@ pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, E
         "https://www.geneanet.org/registres/api/images/{}?min_page=1&max_page=999999",
         req.identified.registry_id
     );
-    let api_json = fetch_string(&api_url)?;
+
+    // Use the injected fetcher again
+    let api_json = fetcher(&api_url)?;
 
     let images = parse_image_api(parsed_view_url, api_json)?;
 
     Ok(ExtractResponse { registry, images })
+}
+
+pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, Error> {
+    extract_registry_internal(req, fetch_string)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use geneagrab_plugin_core::com_structs::IdentifyResponse;
+    use geneagrab_plugin_core::data::Registry;
+    use serde::Deserialize;
+    use std::fs;
+    use std::path::PathBuf;
+
+    struct TestCases<T> {
+        dir: PathBuf,
+        cases: Vec<T>,
+    }
+
+    #[derive(Deserialize)]
+    struct MockRequest {
+        url: String,
+        response_file: String,
+    }
+
+    #[derive(Deserialize)]
+    struct TestCase {
+        request_url: String,
+        registry_id: String,
+        image_number: Option<u32>,
+        mocks: Vec<MockRequest>,
+        expected_image_count: usize,
+        expected_registry: Registry,
+    }
+
+    fn load_test_cases<T>(test_name: &str) -> TestCases<T>
+    where
+        T: for<'de> Deserialize<'de>,
+    {
+        let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let test_data_dir = manifest_dir.join("test_data").join(test_name);
+
+        let cases_json = fs::read_to_string(test_data_dir.join("cases.json"))
+            .expect("Failed to read cases.json manifest");
+
+        let cases: Vec<T> = serde_json::from_str(&cases_json).expect("Failed to parse cases.json");
+
+        TestCases {
+            dir: test_data_dir,
+            cases,
+        }
+    }
+
+    fn mock_fetcher_factory(
+        mocks: Vec<MockRequest>,
+        base_dir: PathBuf,
+    ) -> impl Fn(&str) -> Result<String, Error> {
+        move |url: &str| -> Result<String, Error> {
+            let matching_mock = mocks.iter().find(|mock| mock.url == url);
+
+            if let Some(mock) = matching_mock {
+                let file_path = base_dir.join(&mock.response_file);
+                fs::read_to_string(&file_path).map_err(|e| {
+                    Error::msg(format!(
+                        "Mock failed to read file '{}' for URL {}: {}",
+                        mock.response_file, url, e
+                    ))
+                })
+            } else {
+                Err(Error::msg(format!(
+                    "No mock response found for URL: {}",
+                    url
+                )))
+            }
+        }
+    }
+
+    #[test]
+    fn test_extract_registry_integration() {
+        let test_cases: TestCases<TestCase> = load_test_cases("extract_registry");
+
+        for case in test_cases.cases {
+            let description = format!(
+                "Registry ID: {}, Image Number: {:?}",
+                case.registry_id, case.image_number
+            );
+
+            let req = ExtractRequest {
+                identified: IdentifyResponse {
+                    registry_id: case.registry_id.clone(),
+                    image_number: case.image_number,
+                },
+                url: case.request_url.clone(),
+            };
+
+            let result = extract_registry_internal(
+                req,
+                mock_fetcher_factory(case.mocks, test_cases.dir.clone()),
+            );
+
+            assert!(
+                result.is_ok(),
+                "[{}] extract_registry_internal failed: {:?}",
+                description,
+                result.err()
+            );
+
+            let response = result.unwrap();
+
+            assert_eq!(response.registry, case.expected_registry);
+            assert_eq!(
+                response.images.len(),
+                case.expected_image_count,
+                "[{}] parsed image count mismatch",
+                description
+            );
+        }
+    }
 }
