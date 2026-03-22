@@ -11,9 +11,10 @@ use crate::{
 };
 use geneagrab_plugin_core::com_structs::{HostPluginBase, IdentifyRequest, IdentifyResponse};
 use geneagrab_plugin_core::{com_structs::ExtractRequest, data::PluginMetadata};
+use sea_orm::QueryOrder;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, QueryFilter,
-    TransactionTrait,
+    ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, FromQueryResult,
+    QueryFilter, QuerySelect, TransactionTrait,
 };
 
 impl RegistryMeta {
@@ -37,6 +38,29 @@ impl RegistryMeta {
             acts_count: acts_count,
         }
     }
+}
+
+#[derive(FromQueryResult)]
+struct RegistryWithCounts {
+    #[sea_orm(nested)]
+    pub registry: registry_entry::Model,
+    pub image_count: i64,
+    pub event_count: i64,
+}
+
+fn add_count_subqueries(
+    query: sea_orm::Select<registry_entry::Entity>,
+) -> sea_orm::Select<registry_entry::Entity> {
+    query
+        .column_as(
+            sea_orm::sea_query::Expr::cust("(SELECT COUNT(*) FROM image_entry WHERE image_entry.registry_entry_id = registry_entry.id)"),
+            "image_count"
+        )
+        /* */.column_as(
+            //sea_orm::sea_query::Expr::cust("(SELECT COUNT(*) FROM event WHERE event.registry_id = registry_entry.id)"),
+            sea_orm::sea_query::Expr::cust("(SELECT 0)"), // TODO: Placeholder until events are implemented
+            "event_count"
+        )
 }
 
 pub async fn get_all_registries(
@@ -85,30 +109,34 @@ pub async fn get_all_registries(
         }
     }
 
-    let mut cursor_query = query.cursor_by(registry_entry::Column::Id);
+    let mut query = add_count_subqueries(query);
+
     if let Some(last_id) = payload.cursor {
-        cursor_query.after(last_id);
+        query = query.filter(registry_entry::Column::Id.gt(last_id));
     }
 
-    // Lookahead +1 to determine if there's a next page
     let limit = payload.limit;
-    let mut data = cursor_query
-        .first(limit + 1)
+
+    let mut data = query
+        .order_by_asc(registry_entry::Column::Id)
+        .limit(limit + 1) // Lookahead +1 to determine if there's a next page
+        .into_model::<RegistryWithCounts>()
         .all(db)
         .await
         .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?;
 
     let next_cursor = if data.len() > limit as usize {
         data.pop();
-        data.last().map(|item| item.id)
+        data.last().map(|item| item.registry.id)
     } else {
         None
     };
 
-    // TODO: Fetch actual image and act counts
     let metas = data
         .into_iter()
-        .map(|reg| RegistryMeta::from_entry(reg, 0, 0))
+        .map(|row| {
+            RegistryMeta::from_entry(row.registry, row.image_count as u32, row.event_count as u32)
+        })
         .collect();
 
     Ok(CursorResponse {
@@ -120,13 +148,18 @@ pub async fn get_all_registries(
 pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
     log::info!("fetch_registry_meta called with id: {}", id);
 
-    let registry = registry_entry::Entity::find_by_id(id.clone())
+    let row = add_count_subqueries(registry_entry::Entity::find_by_id(id.clone()))
+        .into_model::<RegistryWithCounts>()
         .one(db)
         .await
         .map_err(|e| CoreError::DbError(format!("DB error: {}", e)))?
         .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))?;
 
-    Ok(RegistryMeta::from_entry(registry, 0, 0)) // TODO: Fetch actual image and act counts
+    Ok(RegistryMeta::from_entry(
+        row.registry,
+        row.image_count as u32,
+        row.event_count as u32,
+    ))
 }
 
 pub async fn add_registry(
