@@ -6,6 +6,7 @@ use geneagrab_plugin_core::{
     data::{Image, RegistryBuilder},
 };
 use regex::{Match, Regex};
+use scraper::{Html, Selector};
 use url::Url;
 
 fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<String> {
@@ -82,65 +83,65 @@ fn validate_match(reg_match: Option<Match>) -> Option<String> {
 }
 
 fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), Error> {
-    let popup_regex = Regex::new(r#"(?s)id="popup-informations"[^>]*>(.*?)</div>"#)
-        .map_err(|e| Error::msg(e.to_string()))?;
+    let document = Html::parse_document(&html);
 
-    let popup_html = popup_regex
-        .captures(&html)
-        .and_then(|c| c.get(1))
-        .map(|m| m.as_str())
-        .unwrap_or("");
+    let popup_selector = Selector::parse("#popup-informations")
+        .map_err(|e| Error::msg(format!("Failed to parse popup selector: {}", e)))?;
+    let popup_element = document
+        .select(&popup_selector)
+        .next()
+        .ok_or(Error::msg("Popup information section not found in HTML"))?;
+    let popup_html = popup_element.inner_html();
 
     let info_regex = Regex::new(r#"(?s)<p>(?:\[.*?\] - )?(?P<location>.*?) \((?P<locationDetails>.*?)\) - (?P<globalType>.*?)(?: \((?P<type>.*?)\))?(?: - .*)? *\| (?P<from>.*?) - (?P<to>.*?)</p>.*?<p>(?P<cote>.*?)</p>(?:.*?<p>(?P<notaire>.*?)</p>)?.*?<p class="no-margin-bottom">(?P<betterType>.*?)(?:\..*| -.*)?</p>.*?<p>(?P<note>.*?)</p>"#).unwrap();
+    let caps = info_regex
+        .captures(&popup_html)
+        .ok_or(Error::msg("Failed to match registry info regex"))?;
 
-    if !popup_html.is_empty() {
-        if let Some(caps) = info_regex.captures(popup_html) {
-            let mut places = HashSet::new();
-            if let Some(loc_details) = caps.name("locationDetails") {
-                for part in loc_details.as_str().split(',').rev() {
-                    let trimmed = part.trim();
-                    if !trimmed.is_empty() {
-                        places.insert(trimmed.to_string());
-                    }
-                }
+    let mut place = Vec::new();
+    if let Some(loc_details) = caps.name("locationDetails") {
+        for part in loc_details.as_str().split(',').rev() {
+            let trimmed = part.trim();
+            if !trimmed.is_empty() {
+                place.push(trimmed.to_string());
             }
-            if let Some(loc) = caps.name("location") {
-                places.insert(loc.as_str().trim().to_string());
-            }
-
-            let district_regex = Regex::new(r#"Paroisse de (?P<location>.*?)(?:\.|-|<)"#).unwrap();
-            if let Some(dist_caps) = district_regex.captures(&html) {
-                if let Some(dist) = dist_caps.name("location") {
-                    places.insert(dist.as_str().trim().to_string());
-                }
-            }
-            builder.places(places);
-
-            builder.date_from(validate_match(caps.name("from")));
-            builder.date_to(validate_match(caps.name("to")));
-            builder.archive_reference(validate_match(caps.name("cote")));
-            builder.notes(validate_match(caps.name("note")));
-
-            let global_type = caps
-                .name("globalType")
-                .map(|m| m.as_str().to_lowercase())
-                .unwrap_or_default();
-            let type_str = caps
-                .name("type")
-                .map(|m| m.as_str().to_lowercase())
-                .unwrap_or_default();
-            let better_type = caps.name("betterType").map(|m| m.as_str().to_lowercase());
-
-            let combined_type = better_type.unwrap_or(type_str);
-            let is_civil_status = global_type.contains("état civil");
-
-            let mut registry_types = HashSet::new();
-            for t in combined_type.split(',') {
-                registry_types.extend(parse_geneanet_types(t.trim(), is_civil_status));
-            }
-            builder.registry_types(registry_types);
         }
     }
+    if let Some(loc) = caps.name("location") {
+        place.push(loc.as_str().trim().to_string());
+    }
+
+    let district_regex = Regex::new(r#"Paroisse de (?P<location>.*?)(?:\.|-|<)"#).unwrap();
+    if let Some(dist_caps) = district_regex.captures(&html) {
+        if let Some(dist) = dist_caps.name("location") {
+            place.push(dist.as_str().trim().to_string());
+        }
+    }
+    builder.places(HashSet::from([place]));
+
+    builder.date_from(validate_match(caps.name("from")));
+    builder.date_to(validate_match(caps.name("to")));
+    builder.archive_reference(validate_match(caps.name("cote")));
+    builder.notes(validate_match(caps.name("note")));
+
+    let global_type = caps
+        .name("globalType")
+        .map(|m| m.as_str().to_lowercase())
+        .unwrap_or_default();
+    let type_str = caps
+        .name("type")
+        .map(|m| m.as_str().to_lowercase())
+        .unwrap_or_default();
+    let better_type = caps.name("betterType").map(|m| m.as_str().to_lowercase());
+
+    let combined_type = better_type.unwrap_or(type_str);
+    let is_civil_status = global_type.contains("état civil");
+
+    let mut registry_types = HashSet::new();
+    for t in combined_type.split(',') {
+        registry_types.extend(parse_geneanet_types(t.trim(), is_civil_status));
+    }
+    builder.registry_types(registry_types);
 
     Ok(())
 }
@@ -223,8 +224,8 @@ pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, E
 #[cfg(test)]
 mod tests {
     use super::*;
+    use assert_json_diff::assert_json_include;
     use geneagrab_plugin_core::com_structs::IdentifyResponse;
-    use geneagrab_plugin_core::data::Registry;
     use serde::Deserialize;
     use std::fs;
     use std::path::PathBuf;
@@ -247,7 +248,7 @@ mod tests {
         image_number: Option<u32>,
         mocks: Vec<MockRequest>,
         expected_image_count: usize,
-        expected_registry: Registry,
+        expected_registry: serde_json::Value,
     }
 
     fn load_test_cases<T>(test_name: &str) -> TestCases<T>
@@ -324,7 +325,10 @@ mod tests {
 
             let response = result.unwrap();
 
-            assert_eq!(response.registry, case.expected_registry);
+            assert_json_include!(
+                actual: serde_json::to_value(&response.registry).unwrap(),
+                expected: serde_json::to_value(&case.expected_registry).unwrap()
+            );
             assert_eq!(
                 response.images.len(),
                 case.expected_image_count,

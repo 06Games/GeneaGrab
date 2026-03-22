@@ -18,16 +18,18 @@
             "source_id": "geneanet",
             "registry_id": "17293",
             "registry_types": [
-                "Mariages"
+                "Marriage"
             ],
             "ark_url": "https://www.geneanet.org/registres/view/17293",
             "date_from": "1574",
             "date_to": "1582",
             "places": [
-                "Roquebillière (Alpes-Maritimes, France)"
-            ],
-            "collection": [],
-            "extra": {}
+                [
+                    "France",
+                    "Alpes-Maritimes",
+                    "Roquebillière"
+                ]
+            ]
         }
     }
 ]

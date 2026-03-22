@@ -12,8 +12,10 @@ pub struct Registry {
     pub archive_reference: Option<String>,
 
     #[builder(default)]
+    #[serde(default)]
     pub registry_types: HashSet<String>,
     #[builder(default)]
+    #[serde(default)]
     pub collection: Vec<String>,
 
     #[builder(default)]
@@ -37,10 +39,12 @@ pub struct Registry {
     pub date_to_normalized: Option<DateTime<Utc>>,
 
     #[builder(default)]
-    pub places: HashSet<String>,
+    #[serde(default)]
+    pub places: HashSet<Vec<String>>,
     #[builder(default)]
     pub notes: Option<String>,
 
     #[builder(default)]
+    #[serde(default)]
     pub extra: HashMap<String, String>,
 }
