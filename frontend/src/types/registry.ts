@@ -16,7 +16,7 @@ export interface RegistryMeta {
   id: number;
   archive_reference: string;
   source_types: Set<ActType | string>;
-  places: string[];
+  places: string[][];
   collection: string[];
   ark_url?: string;
 

@@ -7,7 +7,7 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
   const { t } = useI18n();
 
   const getDomain = (url: string) => {
-    try { return new URL(url).hostname; } 
+    try { return new URL(url).hostname; }
     catch { return url; }
   };
 
@@ -35,12 +35,12 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
 
       <div class="flex flex-col gap-1.5 mb-4">
         <Show when={props.registry.places?.length > 0}>
-          <div class="flex items-center gap-1.5 text-[12px] text-muted truncate" title={props.registry.places.join(", ")}>
+          <div class="flex items-center gap-1.5 text-[12px] text-muted truncate" title={props.registry.places.map(p => p.join(", ")).join(" ; ")}>
             <Icon icon="lucide:map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-dim" />
-            <span class="truncate">{props.registry.places.join(", ")}</span>
+            <span class="truncate">{props.registry.places.map(p => p[p.length - 1]).join(", ")}</span>
           </div>
         </Show>
-        
+
         <Show when={props.registry.ark_url}>
           <div class="flex items-center gap-1.5 text-[12px] text-muted truncate">
             <Icon icon="lucide:globe" class="w-3.5 h-3.5 flex-shrink-0 text-dim" />

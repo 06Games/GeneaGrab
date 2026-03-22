@@ -225,7 +225,7 @@ export const ViewerPage = () => {
                 <TopBar
                   breadcrumbs={[
                     <a href="/">{t("home.title")}</a>,
-                    `${regMeta().archive_reference} · ${regMeta().places?.[0] || t("infoPanel.unknown")} · ${regMeta().source_types?.size > 0 ? Array.from(regMeta().source_types).join(", ") : t("infoPanel.unknown")}`
+                    `${regMeta().archive_reference} · ${regMeta().places?.[0]?.join(", ") || t("infoPanel.unknown")} · ${regMeta().source_types?.size > 0 ? Array.from(regMeta().source_types).join(", ") : t("infoPanel.unknown")}`
                   ]}
                   right={
                     <button type="button" onClick={() => setIndexVisible(v => !v)} class={[

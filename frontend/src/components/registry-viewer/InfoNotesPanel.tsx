@@ -73,7 +73,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           <div class="overflow-hidden">
             <p class="text-[14px] font-medium text-main truncate">{props.registryMeta.archive_reference}</p>
             <p class="text-[12px] text-dim truncate mt-0.5">
-              {props.registryMeta.places?.[0] || t("infoPanel.unknown")} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
+              {props.registryMeta.places?.[0]?.join(", ") || t("infoPanel.unknown")} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
             </p>
           </div>
           <span class={["text-dim flex-shrink-0 ml-2 inline-flex items-center justify-center transition-transform duration-150 origin-center", registryExpanded() ? "rotate-180" : ""].join(" ")}>
