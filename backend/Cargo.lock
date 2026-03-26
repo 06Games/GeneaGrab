@@ -2161,7 +2161,6 @@ dependencies = [
 name = "geneagrab-plugin-core"
 version = "4.0.0"
 dependencies = [
- "anyhow",
  "chrono",
  "derive_builder",
  "extism",
@@ -2170,6 +2169,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_json",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

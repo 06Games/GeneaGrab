@@ -1,16 +1,17 @@
-use anyhow::Error;
 use extism_pdk::{http, info, trace, HttpRequest};
 use regex::Match;
 
+use crate::com_structs::PluginError;
+
 pub trait Fetch {
-    fn fetch(&self, url: &str) -> Result<String, Error>;
+    fn fetch(&self, url: &str) -> Result<String, PluginError>;
 }
 
 impl<F> Fetch for F
 where
-    F: Fn(&str) -> Result<String, Error>,
+    F: Fn(&str) -> Result<String, PluginError>,
 {
-    fn fetch(&self, url: &str) -> Result<String, Error> {
+    fn fetch(&self, url: &str) -> Result<String, PluginError> {
         (self)(url)
     }
 }
@@ -18,12 +19,14 @@ where
 /**
 Fetches the content of a URL as a string
 */
-pub fn fetch_string(url: &str) -> Result<String, Error> {
+pub fn fetch_string(url: &str) -> Result<String, PluginError> {
     let req = HttpRequest::new(url);
-    let res = http::request::<()>(&req, None)?;
+    let res =
+        http::request::<()>(&req, None).map_err(|e| PluginError::NetworkError(e.to_string()))?;
     info!("Sent request to {}, got status {}", url, res.status_code());
     trace!("Response body: {:?}", res.body());
-    String::from_utf8(res.body()).map_err(|e| Error::msg(format!("Invalid UTF-8: {}", e)))
+    String::from_utf8(res.body())
+        .map_err(|e| PluginError::NetworkError(format!("Invalid UTF-8: {}", e)))
 }
 
 /**

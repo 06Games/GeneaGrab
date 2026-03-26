@@ -9,7 +9,7 @@ chrono = { version = "0.4.44", default-features = false, features = [
     "alloc",
     "serde",
 ] }
-anyhow = "1.0"
+thiserror = "2.0.18"
 derive_builder = "0.20.2"
 
 # Optional dependencies

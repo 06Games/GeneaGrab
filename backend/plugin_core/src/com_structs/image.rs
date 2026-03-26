@@ -15,13 +15,13 @@ pub struct ExtractImageResponse {
     pub image: Image,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TileRequest {
     pub image_id: u32,
     pub width: u32,
     pub height: u32,
     pub tile_size: u32,
-    pub z: u32,
+    pub zoom: u32,
     pub x: u32,
     pub y: u32,
     pub manifest_url: Option<String>,

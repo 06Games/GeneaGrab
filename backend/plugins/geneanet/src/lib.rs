@@ -1,10 +1,9 @@
 use std::{borrow::Cow, sync::LazyLock};
 
-use extism_pdk::Error;
 use geneagrab_plugin_core::{
     com_structs::{
         ArkRequest, ExtractImageRequest, ExtractImageResponse, ExtractRequest, ExtractResponse,
-        IdentifyRequest, IdentifyResponse, PluginBase, TileRequest, TileResponse,
+        IdentifyRequest, IdentifyResponse, PluginBase, PluginError, TileRequest, TileResponse,
     },
     data::PluginMetadata,
     export_plugin_base,
@@ -36,11 +35,11 @@ static URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 struct PluginImpl;
 
 impl PluginBase for PluginImpl {
-    fn metadata(_: ()) -> Result<PluginMetadata, Error> {
+    fn metadata(_: ()) -> Result<PluginMetadata, PluginError> {
         Ok(PLUGIN_METADATA)
     }
 
-    fn identify(req: IdentifyRequest) -> Result<IdentifyResponse, Error> {
+    fn identify(req: IdentifyRequest) -> Result<IdentifyResponse, PluginError> {
         let captures = URL_REGEX.captures(&req.url);
 
         let col_value = captures
@@ -48,7 +47,7 @@ impl PluginBase for PluginImpl {
             .and_then(|caps| caps.name("col1").or(caps.name("col2")))
             .map(|m| m.as_str())
             .filter(|s| !s.is_empty())
-            .ok_or(Error::msg("Collection ID not found"))?;
+            .ok_or(PluginError::InvalidField("Collection ID not found".into()))?;
 
         let image_number = captures
             .as_ref()
@@ -64,19 +63,19 @@ impl PluginBase for PluginImpl {
         })
     }
 
-    fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, Error> {
+    fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, PluginError> {
         crate::extract::extract_registry(req)
     }
 
-    fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, Error> {
+    fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, PluginError> {
         crate::image::extract_image(req)
     }
 
-    fn generate_tile_request(req: TileRequest) -> Result<TileResponse, Error> {
+    fn generate_tile_request(req: TileRequest) -> Result<TileResponse, PluginError> {
         crate::image::generate_tile_request(req)
     }
 
-    fn get_ark(_req: ArkRequest) -> Result<String, Error> {
+    fn get_ark(_req: ArkRequest) -> Result<String, PluginError> {
         todo!()
     }
 }

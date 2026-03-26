@@ -1,8 +1,7 @@
 use std::collections::HashSet;
 
-use extism_pdk::Error;
 use geneagrab_plugin_core::{
-    com_structs::{ExtractRequest, ExtractResponse},
+    com_structs::{ExtractRequest, ExtractResponse, PluginError},
     data::{Image, RegistryBuilder},
     protocols::utils::{fetch_string, validate_regex_match, Fetch},
 };
@@ -68,21 +67,26 @@ fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<String
     types
 }
 
-fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), Error> {
+fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), PluginError> {
     let document = Html::parse_document(&html);
 
     let popup_selector = Selector::parse("#popup-informations")
-        .map_err(|e| Error::msg(format!("Failed to parse popup selector: {}", e)))?;
-    let popup_element = document
-        .select(&popup_selector)
-        .next()
-        .ok_or(Error::msg("Popup information section not found in HTML"))?;
+        .map_err(|e| PluginError::ParsingError(format!("Failed to parse popup selector: {}", e)))?;
+    let popup_element =
+        document
+            .select(&popup_selector)
+            .next()
+            .ok_or(PluginError::ParsingError(
+                "Popup information section not found in HTML".into(),
+            ))?;
     let popup_html = popup_element.inner_html();
 
     let info_regex = Regex::new(r#"(?s)<p>(?:\[.*?\] - )?(?P<location>.*?) \((?P<locationDetails>.*?)\) - (?P<globalType>.*?)(?: \((?P<type>.*?)\))?(?: - .*)? *\| (?P<from>.*?) - (?P<to>.*?)</p>.*?<p>(?P<cote>.*?)</p>(?:.*?<p>(?P<notaire>.*?)</p>)?.*?<p class="no-margin-bottom">(?P<betterType>.*?)(?:\..*| -.*)?</p>.*?<p>(?P<note>.*?)</p>"#).unwrap();
     let caps = info_regex
         .captures(&popup_html)
-        .ok_or(Error::msg("Failed to match registry info regex"))?;
+        .ok_or(PluginError::ParsingError(
+            "Failed to match registry info regex".into(),
+        ))?;
 
     let mut place = Vec::new();
     if let Some(loc_details) = caps.name("locationDetails") {
@@ -132,9 +136,9 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), 
     Ok(())
 }
 
-fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Error> {
-    let json_array: Vec<serde_json::Value> = serde_json::from_str(&api_json)
-        .map_err(|e| Error::msg(format!("Failed to parse API JSON: {}", e)))?;
+fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, PluginError> {
+    let json_array: Vec<serde_json::Value> =
+        serde_json::from_str(&api_json).map_err(|e| PluginError::ParsingError(e.to_string()))?;
 
     let mut images = Vec::new();
     for item in json_array {
@@ -143,13 +147,15 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Error>
                 .get("image_base_url")
                 .and_then(|u| u.as_str())
                 .map(|u| base_url.join(u))
-                .transpose()?
+                .transpose()
+                .map_err(|e| PluginError::ParsingError(e.to_string()))?
                 .map(|u| u.to_string());
             let ark_url = item
                 .get("image_route")
                 .and_then(|u| u.as_str())
                 .map(|u| base_url.join(u))
-                .transpose()?
+                .transpose()
+                .map_err(|e| PluginError::ParsingError(e.to_string()))?
                 .map(|s| s.to_string());
 
             images.push(Image {
@@ -172,12 +178,13 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Error>
 fn extract_registry_internal(
     req: ExtractRequest,
     fetcher: impl Fetch,
-) -> Result<ExtractResponse, Error> {
+) -> Result<ExtractResponse, PluginError> {
     let view_url = format!(
         "https://www.geneanet.org/registres/view/{}",
         req.identified.registry_id
     );
-    let parsed_view_url: Url = Url::parse(&view_url)?;
+    let parsed_view_url: Url = Url::parse(&view_url)
+        .map_err(|e| PluginError::InvalidField(format!("Invalid view URL: {}", e)))?;
 
     let mut builder = RegistryBuilder::default();
     builder
@@ -188,7 +195,9 @@ fn extract_registry_internal(
     let html = fetcher.fetch(&view_url)?;
     parse_viewer_page(&mut builder, html)?;
 
-    let registry = builder.build()?;
+    let registry = builder
+        .build()
+        .map_err(|e| PluginError::ParsingError(format!("Failed to build registry: {}", e)))?;
 
     let api_url = format!(
         "https://www.geneanet.org/registres/api/images/{}?min_page=1&max_page=999999",
@@ -203,7 +212,7 @@ fn extract_registry_internal(
     Ok(ExtractResponse { registry, images })
 }
 
-pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, Error> {
+pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, PluginError> {
     extract_registry_internal(req, fetch_string)
 }
 
@@ -211,7 +220,7 @@ pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, E
 mod tests {
     use super::*;
     use assert_json_diff::assert_json_include;
-    use geneagrab_plugin_core::com_structs::IdentifyResponse;
+    use geneagrab_plugin_core::com_structs::{IdentifyResponse, PluginError};
     use serde::Deserialize;
     use std::fs;
     use std::path::PathBuf;
@@ -258,20 +267,20 @@ mod tests {
     fn mock_fetcher_factory(
         mocks: Vec<MockRequest>,
         base_dir: PathBuf,
-    ) -> impl Fn(&str) -> Result<String, Error> {
-        move |url: &str| -> Result<String, Error> {
+    ) -> impl Fn(&str) -> Result<String, PluginError> {
+        move |url: &str| -> Result<String, PluginError> {
             let matching_mock = mocks.iter().find(|mock| mock.url == url);
 
             if let Some(mock) = matching_mock {
                 let file_path = base_dir.join(&mock.response_file);
                 fs::read_to_string(&file_path).map_err(|e| {
-                    Error::msg(format!(
+                    PluginError::NetworkError(format!(
                         "Mock failed to read file '{}' for URL {}: {}",
                         mock.response_file, url, e
                     ))
                 })
             } else {
-                Err(Error::msg(format!(
+                Err(PluginError::NetworkError(format!(
                     "No mock response found for URL: {}",
                     url
                 )))
