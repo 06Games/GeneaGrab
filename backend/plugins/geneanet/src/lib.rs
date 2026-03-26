@@ -75,8 +75,10 @@ impl PluginBase for PluginImpl {
         crate::image::generate_tile_request(req)
     }
 
-    fn get_ark(_req: ArkRequest) -> Result<String, PluginError> {
-        todo!()
+    fn get_ark(req: ArkRequest) -> Result<String, PluginError> {
+        req.image_ark.ok_or(PluginError::MissingField(
+            "ARK URL not found for image".into(),
+        ))
     }
 }
 

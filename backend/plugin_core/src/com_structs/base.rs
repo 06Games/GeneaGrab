@@ -2,16 +2,16 @@ use crate::{com_structs::*, data::PluginMetadata, define_extism_interface};
 
 define_extism_interface! {
     trait PluginBase, host_ext HostPluginBase, guest_macro export_plugin_base {
-        /* Returns metadata about the plugin.*/
+        /* Returns metadata about the plugin. */
         fn metadata(()) -> Result<PluginMetadata, PluginError>;
 
-        /* Checks if the plugin can handle the URL and extracts basic info*/
+        /* Checks if the plugin can handle the URL and extracts basic info */
         fn identify(IdentifyRequest) -> Result<IdentifyResponse, PluginError>;
 
-        /* Parses the full metadata, dates, locations, and builds the Image array*/
+        /* Parses the full metadata, dates, locations, and builds the Image array */
         fn extract_registry(ExtractRequest) -> Result<ExtractResponse, PluginError>;
 
-        /*  */
+        /* Parses the image metadata. */
         fn extract_image(ExtractImageRequest) -> Result<ExtractImageResponse, PluginError>;
 
         /* Generates the HTTP URL for a single tile */
