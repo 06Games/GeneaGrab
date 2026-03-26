@@ -4,7 +4,7 @@ use extism_pdk::Error;
 use geneagrab_plugin_core::{
     com_structs::{ExtractRequest, ExtractResponse},
     data::{Image, RegistryBuilder},
-    protocols::utils::{fetch_string, validate_regex_match, Fetcher},
+    protocols::utils::{fetch_string, validate_regex_match, Fetch},
 };
 use regex::Regex;
 use scraper::{Html, Selector};
@@ -171,7 +171,7 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Error>
 
 fn extract_registry_internal(
     req: ExtractRequest,
-    fetcher: Fetcher,
+    fetcher: impl Fetch,
 ) -> Result<ExtractResponse, Error> {
     let view_url = format!(
         "https://www.geneanet.org/registres/view/{}",
@@ -185,7 +185,7 @@ fn extract_registry_internal(
         .registry_id(req.identified.registry_id.clone())
         .ark_url(Some(view_url.clone()));
 
-    let html = fetcher(&view_url)?;
+    let html = fetcher.fetch(&view_url)?;
     parse_viewer_page(&mut builder, html)?;
 
     let registry = builder.build()?;
@@ -196,7 +196,7 @@ fn extract_registry_internal(
     );
 
     // Use the injected fetcher again
-    let api_json = fetcher(&api_url)?;
+    let api_json = fetcher.fetch(&api_url)?;
 
     let images = parse_image_api(parsed_view_url, api_json)?;
 

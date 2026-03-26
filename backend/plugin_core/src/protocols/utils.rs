@@ -2,7 +2,18 @@ use anyhow::Error;
 use extism_pdk::{http, info, trace, HttpRequest};
 use regex::Match;
 
-pub type Fetcher = fn(&str) -> Result<String, Error>;
+pub trait Fetch {
+    fn fetch(&self, url: &str) -> Result<String, Error>;
+}
+
+impl<F> Fetch for F
+where
+    F: Fn(&str) -> Result<String, Error>,
+{
+    fn fetch(&self, url: &str) -> Result<String, Error> {
+        (self)(url)
+    }
+}
 
 /**
 Fetches the content of a URL as a string
