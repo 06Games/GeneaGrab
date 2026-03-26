@@ -1,9 +1,9 @@
-use tauri::State;
 use crate::state::AppState;
+use tauri::State;
 
 pub fn handle_tile_request(
     request: tauri::http::Request<Vec<u8>>,
-    state: State<'_, AppState>
+    state: State<'_, AppState>,
 ) -> tauri::http::Response<Vec<u8>> {
     // TODO: Maybe switch to IIIF standard and add tiling when the image is still loading from the archive's website
 
@@ -18,17 +18,22 @@ pub fn handle_tile_request(
         let thumbnail = parts[2] == "true";
 
         match tauri::async_runtime::block_on(async {
-            geneagrab_core::services::image::fetch_image(&state.db, registry_id, image_id, thumbnail).await
+            geneagrab_core::services::image::fetch_image(
+                &state.db,
+                &state.plugin_manager,
+                registry_id,
+                image_id,
+                thumbnail,
+            )
+            .await
         }) {
-            Ok(image_bytes) => {
-                tauri::http::Response::builder()
-                    .header("Access-Control-Allow-Origin", "*")
-                    .header("Content-Type", "image/jpeg")
-                    .header("Cache-Control", "public, max-age=86400")
-                    .status(tauri::http::StatusCode::OK)
-                    .body(image_bytes)
-                    .unwrap()
-            }
+            Ok(image_bytes) => tauri::http::Response::builder()
+                .header("Access-Control-Allow-Origin", "*")
+                .header("Content-Type", "image/jpeg")
+                .header("Cache-Control", "public, max-age=86400")
+                .status(tauri::http::StatusCode::OK)
+                .body(image_bytes)
+                .unwrap(),
             Err(e) => {
                 log::error!("Failed to load image via custom protocol: {}", e);
                 tauri::http::Response::builder()

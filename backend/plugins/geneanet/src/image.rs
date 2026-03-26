@@ -8,14 +8,15 @@ use geneagrab_plugin_core::{
     },
 };
 
+pub(crate) fn is_image_missing_data(req: ExtractImageRequest) -> Result<(), PluginError> {
+    Zoomify::try_from(req.image)?;
+    Ok(())
+}
+
 fn extract_image_internal(
     req: ExtractImageRequest,
     fetcher: impl Fetch,
 ) -> Result<ExtractImageResponse, PluginError> {
-    if req.image.tile_size.is_some() {
-        return Ok(ExtractImageResponse { image: req.image });
-    }
-
     let mut image = req.image.clone();
 
     let base_url = image

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::data::{Image, Registry};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ExtractImageRequest {
     pub registry: Registry,
     pub image: Image,

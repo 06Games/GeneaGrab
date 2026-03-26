@@ -145,7 +145,15 @@ pub async fn get_all_registries(
     })
 }
 
-pub async fn get_registry(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
+pub(crate) async fn get_registry(db: &DbConn, id: u32) -> Result<registry_entry::Model, CoreError> {
+    registry_entry::Entity::find_by_id(id.clone())
+        .one(db)
+        .await
+        .map_err(|e| CoreError::DbError(format!("DB error: {}", e)))?
+        .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))
+}
+
+pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
     log::info!("fetch_registry_meta called with id: {}", id);
 
     let row = add_count_subqueries(registry_entry::Entity::find_by_id(id.clone()))

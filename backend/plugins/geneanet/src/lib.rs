@@ -67,6 +67,10 @@ impl PluginBase for PluginImpl {
         crate::extract::extract_registry(req)
     }
 
+    fn is_image_missing_data(req: ExtractImageRequest) -> Result<(), PluginError> {
+        crate::image::is_image_missing_data(req)
+    }
+
     fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, PluginError> {
         crate::image::extract_image(req)
     }

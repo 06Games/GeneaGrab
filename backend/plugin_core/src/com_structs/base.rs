@@ -11,6 +11,9 @@ define_extism_interface! {
         /* Parses the full metadata, dates, locations, and builds the Image array */
         fn extract_registry(ExtractRequest) -> Result<ExtractResponse, PluginError>;
 
+        /* Checks if the image is missing data and needs to be extracted */
+        fn is_image_missing_data(ExtractImageRequest) -> Result<(), PluginError>;
+
         /* Parses the image metadata. */
         fn extract_image(ExtractImageRequest) -> Result<ExtractImageResponse, PluginError>;
 
