@@ -3,7 +3,10 @@ use std::collections::HashSet;
 use geneagrab_plugin_core::{
     com_structs::{ExtractRequest, ExtractResponse, PluginError},
     data::{Image, RegistryBuilder},
-    protocols::utils::{fetch_string, validate_regex_match, Fetch},
+    protocols::{
+        fetchers::{Fetcher, SimpleFetcher},
+        utils::validate_regex_match,
+    },
 };
 use regex::Regex;
 use scraper::{Html, Selector};
@@ -177,7 +180,7 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Plugin
 
 fn extract_registry_internal(
     req: ExtractRequest,
-    fetcher: impl Fetch,
+    fetcher: impl Fetcher,
 ) -> Result<ExtractResponse, PluginError> {
     let view_url = format!(
         "https://www.geneanet.org/registres/view/{}",
@@ -192,7 +195,7 @@ fn extract_registry_internal(
         .registry_id(req.identified.registry_id.clone())
         .ark_url(Some(view_url.clone()));
 
-    let html = fetcher.fetch(&view_url)?;
+    let html = fetcher.fetch(view_url.into())?;
     parse_viewer_page(&mut builder, html)?;
 
     let registry = builder
@@ -205,7 +208,7 @@ fn extract_registry_internal(
     );
 
     // Use the injected fetcher again
-    let api_json = fetcher.fetch(&api_url)?;
+    let api_json = fetcher.fetch(api_url.into())?;
 
     let images = parse_image_api(parsed_view_url, api_json)?;
 
@@ -213,7 +216,7 @@ fn extract_registry_internal(
 }
 
 pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, PluginError> {
-    extract_registry_internal(req, fetch_string)
+    extract_registry_internal(req, SimpleFetcher {})
 }
 
 #[cfg(test)]
@@ -221,6 +224,7 @@ mod tests {
     use super::*;
     use assert_json_diff::assert_json_include;
     use geneagrab_plugin_core::com_structs::{IdentifyResponse, PluginError};
+    use geneagrab_plugin_core::protocols::fetchers::Request;
     use serde::Deserialize;
     use std::fs;
     use std::path::PathBuf;
@@ -267,22 +271,22 @@ mod tests {
     fn mock_fetcher_factory(
         mocks: Vec<MockRequest>,
         base_dir: PathBuf,
-    ) -> impl Fn(&str) -> Result<String, PluginError> {
-        move |url: &str| -> Result<String, PluginError> {
-            let matching_mock = mocks.iter().find(|mock| mock.url == url);
+    ) -> impl Fn(Request) -> Result<String, PluginError> {
+        move |req: Request| -> Result<String, PluginError> {
+            let matching_mock = mocks.iter().find(|mock| mock.url == req.url);
 
             if let Some(mock) = matching_mock {
                 let file_path = base_dir.join(&mock.response_file);
                 fs::read_to_string(&file_path).map_err(|e| {
                     PluginError::NetworkError(format!(
                         "Mock failed to read file '{}' for URL {}: {}",
-                        mock.response_file, url, e
+                        mock.response_file, req.url, e
                     ))
                 })
             } else {
                 Err(PluginError::NetworkError(format!(
                     "No mock response found for URL: {}",
-                    url
+                    req.url
                 )))
             }
         }

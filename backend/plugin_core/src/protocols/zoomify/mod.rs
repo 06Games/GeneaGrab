@@ -3,15 +3,17 @@ use serde::Deserialize;
 use crate::{
     com_structs::{PluginError, TileRequest},
     data::Image,
-    protocols::utils::Fetch,
+    protocols::fetchers::Fetcher,
 };
 
 #[derive(Debug, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
 struct ImageProperties {
+    #[serde(rename = "@WIDTH")]
     width: u32,
+    #[serde(rename = "@HEIGHT")]
     height: u32,
-    tilesize: u32,
+    #[serde(rename = "@TILESIZE")]
+    tile_size: u32,
 }
 
 /// Represents a Zoomify-enabled image source
@@ -66,26 +68,17 @@ impl From<TileRequest> for Zoomify {
 
 impl Zoomify {
     /// Initialize by fetching metadata from the server
-    pub fn fetch(base_url: &str, fetcher: impl Fetch) -> Result<Self, PluginError> {
+    pub fn fetch(base_url: &str, fetcher: impl Fetcher) -> Result<Self, PluginError> {
         let base_url = base_url.trim_end_matches('/').to_string();
-        let xml_url = format!("{}/ImageProperties.xml", base_url);
-        let raw_xml = fetcher.fetch(&xml_url)?;
+        let raw_xml = fetcher.fetch(format!("{}/ImageProperties.xml", base_url).into())?;
 
-        // Some Zoomify servers omit a root node; we wrap it to be safe
-        let wrapped = format!("<r>{}</r>", raw_xml);
-
-        #[derive(Deserialize)]
-        struct Root {
-            #[serde(rename = "IMAGE_PROPERTIES")]
-            props: ImageProperties,
-        }
-        let parsed: Root = quick_xml::de::from_str(&wrapped)
+        let parsed = quick_xml::de::from_str::<ImageProperties>(&raw_xml)
             .map_err(|e| PluginError::ParsingError(e.to_string()))?;
 
         Ok(Self {
-            width: parsed.props.width,
-            height: parsed.props.height,
-            tile_size: parsed.props.tilesize,
+            width: parsed.width,
+            height: parsed.height,
+            tile_size: parsed.tile_size,
             base_url: Some(base_url),
         })
     }

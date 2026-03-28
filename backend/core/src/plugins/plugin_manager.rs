@@ -1,4 +1,4 @@
-use extism::{Manifest, Plugin, Wasm};
+use extism::{Manifest, Plugin, PluginBuilder, Wasm};
 use geneagrab_plugin_core::com_structs::HostPluginBase;
 use geneagrab_plugin_core::data::PluginMetadata;
 use std::collections::HashMap;
@@ -30,7 +30,10 @@ impl PluginManager {
 
     pub fn register_plugin(&mut self, id: String, wasm_bytes: Vec<u8>) -> Result<(), CoreError> {
         let manifest = Manifest::new([Wasm::data(wasm_bytes)]).with_allowed_host("*");
-        let mut plugin = Plugin::new(&manifest, [], true)
+        let mut plugin = PluginBuilder::new(&manifest)
+            .with_http_response_headers(true)
+            .with_wasi(true)
+            .build()
             .map_err(|e| CoreError::Other(format!("Failed to initialize plugin: {}", e)))?;
 
         if !HostPluginBase::is_supported(&plugin) {

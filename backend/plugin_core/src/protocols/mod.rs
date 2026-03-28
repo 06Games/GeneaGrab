@@ -1,3 +1,4 @@
+pub mod fetchers;
 pub mod utils;
 
 #[cfg(feature = "protocols-zoomify")]

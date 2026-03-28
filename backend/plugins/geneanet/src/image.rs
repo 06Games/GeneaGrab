@@ -3,7 +3,7 @@ use geneagrab_plugin_core::{
         ExtractImageRequest, ExtractImageResponse, PluginError, TileRequest, TileResponse,
     },
     protocols::{
-        utils::{fetch_string, Fetch},
+        fetchers::{Fetcher, FlareSolverrFetcher},
         zoomify::Zoomify,
     },
 };
@@ -15,7 +15,7 @@ pub(crate) fn is_image_missing_data(req: ExtractImageRequest) -> Result<(), Plug
 
 fn extract_image_internal(
     req: ExtractImageRequest,
-    fetcher: impl Fetch,
+    fetcher: impl Fetcher,
 ) -> Result<ExtractImageResponse, PluginError> {
     let mut image = req.image.clone();
 
@@ -33,7 +33,7 @@ fn extract_image_internal(
     Ok(ExtractImageResponse { image })
 }
 pub(crate) fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, PluginError> {
-    extract_image_internal(req, fetch_string)
+    extract_image_internal(req, FlareSolverrFetcher::default()) // Image API is now under Cloudflare protection
 }
 
 pub(crate) fn generate_tile_request(req: TileRequest) -> Result<TileResponse, PluginError> {
