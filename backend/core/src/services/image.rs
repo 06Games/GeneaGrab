@@ -136,10 +136,14 @@ pub async fn fetch_image(
         image: image.clone().into(),
     };
 
-    if let Err(e) = plugin_manager.execute(&registry.source_id, |plugin| {
+    if let Some(field) = plugin_manager.execute(&registry.source_id, |plugin| {
         plugin.is_image_missing_data(extract_req.clone())
-    }) {
-        log::info!("Image {} is missing data ({}), extracting...", image_id, e);
+    })? {
+        log::info!(
+            "Image {} is missing data ({}), extracting...",
+            image_id,
+            field
+        );
         let res = plugin_manager.execute(&registry.source_id, |plugin| {
             plugin.extract_image(extract_req)
         })?;

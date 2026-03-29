@@ -8,9 +8,14 @@ use geneagrab_plugin_core::{
     },
 };
 
-pub(crate) fn is_image_missing_data(req: ExtractImageRequest) -> Result<(), PluginError> {
-    Zoomify::try_from(req.image)?;
-    Ok(())
+pub(crate) fn is_image_missing_data(
+    req: ExtractImageRequest,
+) -> Result<Option<String>, PluginError> {
+    match Zoomify::try_from(req.image) {
+        Ok(_) => Ok(None),
+        Err(PluginError::MissingField(field)) => Ok(Some(field)),
+        Err(e) => Err(e),
+    }
 }
 
 fn extract_image_internal(

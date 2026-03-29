@@ -2,7 +2,7 @@ use extism::{Manifest, Plugin, PluginBuilder, Wasm};
 use geneagrab_plugin_core::com_structs::HostPluginBase;
 use geneagrab_plugin_core::data::PluginMetadata;
 use std::collections::HashMap;
-use std::sync::{Mutex, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 
 use crate::errors::CoreError;
 
@@ -11,8 +11,9 @@ struct PluginData {
     metadata: PluginMetadata,
 }
 
+#[derive(Clone)]
 pub struct PluginManager {
-    registry: RwLock<HashMap<String, PluginData>>,
+    registry: Arc<RwLock<HashMap<String, PluginData>>>,
 }
 
 impl Default for PluginManager {
@@ -24,12 +25,12 @@ impl Default for PluginManager {
 impl PluginManager {
     pub fn new() -> Self {
         Self {
-            registry: RwLock::new(HashMap::new()),
+            registry: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
     pub fn register_plugin(
-        &mut self,
+        &self,
         id: String,
         plugin_config: HashMap<String, String>,
         wasm_bytes: Vec<u8>,

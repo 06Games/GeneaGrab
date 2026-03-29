@@ -1,12 +1,10 @@
-use std::sync::Arc;
-
 use geneagrab_core::{errors::CoreError, plugins::PluginManager};
 use sea_orm::DbConn;
 use serde::Serialize;
 
 pub struct AppState {
     pub db: DbConn,
-    pub plugin_manager: Arc<PluginManager>,
+    pub plugin_manager: PluginManager,
 }
 
 #[derive(Serialize)]

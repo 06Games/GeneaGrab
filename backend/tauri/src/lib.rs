@@ -1,9 +1,7 @@
-use std::sync::Arc;
-
-use geneagrab_core::plugins::PluginManager;
+use geneagrab_core::{plugins::PluginManager, services::plugin};
 use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
-use tauri::Manager;
+use tauri::{Manager, State};
 
 pub mod commands;
 pub mod state;
@@ -53,49 +51,43 @@ pub fn run() {
                 conn
             });
 
-            let mut plugin_manager = PluginManager::new();
-            let plugins_dir = app_data_dir.join("plugins");
-
-            if plugins_dir.exists() {
-                if let Ok(entries) = std::fs::read_dir(&plugins_dir) {
-                    for entry in entries.flatten() {
-                        let path = entry.path();
-                        if path.extension().and_then(|e| e.to_str()) == Some("wasm") {
-                            let plugin_id = path.file_stem().unwrap().to_string_lossy().to_string();
-                            if let Ok(wasm_bytes) = std::fs::read(&path) {
-                                let plugin_config = std::collections::HashMap::new(); // TODO
-                                match plugin_manager.register_plugin(
-                                    plugin_id,
-                                    plugin_config,
-                                    wasm_bytes,
-                                ) {
-                                    Ok(()) => {
-                                        log::info!("Registered plugin from {}", path.display())
-                                    }
-                                    Err(plugin_error) => log::error!(
-                                        "Failed to register plugin from {}: {}",
-                                        path.display(),
-                                        plugin_error
-                                    ),
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                let _ = std::fs::create_dir_all(&plugins_dir);
-            }
-
             app.manage(AppState {
                 db,
-                plugin_manager: Arc::new(plugin_manager),
+                plugin_manager: PluginManager::new(),
+            });
+
+            let app_handle = app.handle().clone();
+            let plugins_dir = app_data_dir.join("plugins").clone();
+            tauri::async_runtime::spawn(async move {
+                let state: State<'_, AppState> = app_handle.state();
+                let plugins = plugin::scan_plugins_dir(&plugins_dir)
+                    .await
+                    .expect("Failed to scan plugins directory");
+                for plugin_path in plugins {
+                    match plugin::register_plugin(
+                        &state.db,
+                        state.plugin_manager.clone(),
+                        plugin_path.clone(),
+                    )
+                    .await
+                    {
+                        Ok(_) => {
+                            log::info!("Successfully registered plugin: {}", plugin_path.display())
+                        }
+                        Err(e) => log::error!(
+                            "Failed to register plugin {}: {}",
+                            plugin_path.display(),
+                            e
+                        ),
+                    }
+                }
             });
 
             Ok(())
         })
         .register_uri_scheme_protocol("tiles", |ctx, request| {
             let app_handle = ctx.app_handle();
-            let state = app_handle.state::<state::AppState>();
+            let state = app_handle.state::<AppState>();
             tiles::handle_tile_request(request, state)
         })
         // Register all IPC commands
