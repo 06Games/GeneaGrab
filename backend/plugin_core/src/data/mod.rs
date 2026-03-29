@@ -1,3 +1,4 @@
+pub mod http;
 mod image;
 mod plugin;
 mod registry;

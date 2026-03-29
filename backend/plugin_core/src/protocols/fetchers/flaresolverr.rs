@@ -3,8 +3,7 @@ use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{
-    com_structs::PluginError,
-    protocols::fetchers::{FetchMethod, Fetcher, Request, SimpleFetcher},
+    com_structs::PluginError, data::http::{FetchMethod, Request}, protocols::fetchers::{Fetcher, HostFetcher, SimpleFetcher}
 };
 
 /**
@@ -143,7 +142,7 @@ impl FlareSolverrFetcher {
                 build_cookie_header_string(&solution.cookies),
             ));
         }
-        Ok(SimpleFetcher {}.fetch(req)?)
+        Ok(HostFetcher {}.fetch(req)?)
     }
 }
 

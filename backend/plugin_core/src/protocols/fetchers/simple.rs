@@ -1,9 +1,6 @@
 use extism_pdk::{http, info, trace, HttpRequest};
 
-use crate::{
-    com_structs::PluginError,
-    protocols::fetchers::{Fetcher, Request},
-};
+use crate::{com_structs::PluginError, data::http::Request, protocols::fetchers::Fetcher};
 
 /**
 A simple fetcher that uses the built-in HTTP client.
