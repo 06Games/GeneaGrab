@@ -1,10 +1,6 @@
 use serde::Deserialize;
 
-use crate::{
-    com_structs::{PluginError, TileRequest},
-    data::Image,
-    protocols::fetchers::Fetcher,
-};
+use crate::{com_structs::PluginError, data::Image, protocols::fetchers::Fetcher};
 
 #[derive(Debug, Deserialize)]
 struct ImageProperties {
@@ -50,19 +46,6 @@ impl TryFrom<Image> for Zoomify {
                 .manifest_url
                 .map(|url| url.trim_end_matches('/').to_string()),
         })
-    }
-}
-
-impl From<TileRequest> for Zoomify {
-    fn from(req: TileRequest) -> Self {
-        Self {
-            width: req.width,
-            height: req.height,
-            tile_size: req.tile_size,
-            base_url: req
-                .manifest_url
-                .map(|url| url.trim_end_matches('/').to_string()),
-        }
     }
 }
 

@@ -1,11 +1,13 @@
 use crate::{
     comm_models::{ImageMeta, UserImageMeta},
-    db_entries::image_entry,
+    db_entries::{image_entry, registry_entry},
     errors::CoreError,
     plugins::PluginManager,
     services::registry,
 };
-use geneagrab_plugin_core::com_structs::{ExtractImageRequest, HostPluginBase};
+use geneagrab_plugin_core::com_structs::{
+    ExtractImageRequest, HostPluginBase, TileRequest, TileResponse,
+};
 use sea_orm::{
     sea_query::Nullable,
     ActiveValue::{self, Set},
@@ -79,7 +81,7 @@ pub async fn fetch_image_meta(
 
     let image = get_image(db, registry_id, image_id).await?;
 
-    // TODO: Map actual act_types if you add them to your image_entry schema
+    // TODO: Map actual act_types
     let act_types = HashMap::new();
 
     Ok(ImageMeta {
@@ -120,17 +122,16 @@ pub async fn save_image_meta(
     set_image(db, registry_id, image_id, update_model).await
 }
 
-pub async fn fetch_image(
+pub async fn prepare_image(
     db: &DbConn,
     plugin_manager: &PluginManager,
     registry_id: u32,
     image_id: u32,
-    _thumbnail: bool,
-) -> Result<Vec<u8>, CoreError> {
+) -> Result<(registry_entry::Model, image_entry::Model), CoreError> {
     log::info!("fetch_image called for image {}", image_id);
 
     let registry = registry::get_registry(db, registry_id).await?;
-    let image = get_image(db, registry_id, image_id).await?;
+    let mut image = get_image(db, registry_id, image_id).await?;
     let extract_req = ExtractImageRequest {
         registry: registry.clone().into(),
         image: image.clone().into(),
@@ -167,12 +168,35 @@ pub async fn fetch_image(
         } else {
             log::warn!("Didn't find new data for image {}, but image is said to be missing data. Trying to proceed anyway.", image_id);
         }
+        image = get_image(db, registry_id, image_id).await?; // Refetch the image with updated data
     }
 
-    let image_path = format!("/home/evan/.local/share/GeneaGrab/Registries/Geneanet/17522/p2.jpg");
+    Ok((registry, image))
+}
 
-    let image_data = std::fs::read(image_path)
-        .map_err(|e| CoreError::Other(format!("Failed to read image: {}", e)))?;
+pub async fn fetch_image_tile(
+    _db: &DbConn,
+    plugin_manager: &PluginManager,
+    registry: registry_entry::Model,
+    image: image_entry::Model,
+    thumbnail: bool,
+) -> Result<TileResponse, CoreError> {
+    log::info!(
+        "fetch_image_tile called for image {}, thumbnail={}",
+        image.id,
+        thumbnail
+    );
+
+    let req = TileRequest {
+        image: image.clone().into(),
+        zoom: 0, // TODO: Calculate zoom level based on requested tile and image metadata
+        x: 0,    // TODO: Get from request
+        y: 0,    // TODO: Get from request
+    };
+
+    let image_data = plugin_manager
+        .execute(&registry.source_id, |plugin| plugin.fetch_tile(req))
+        .await?;
 
     Ok(image_data)
 }

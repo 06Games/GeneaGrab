@@ -18,7 +18,7 @@ define_extism_interface! {
         fn extract_image(ExtractImageRequest) -> Result<ExtractImageResponse, PluginError>;
 
         /* Generates the HTTP URL for a single tile */
-        fn generate_tile_request(TileRequest) -> Result<TileResponse, PluginError>;
+        fn fetch_tile(TileRequest) -> Result<TileResponse, PluginError>;
 
         /* Generates the permalink for citing a specific page */
         fn get_ark(ArkRequest) -> Result<String, PluginError>;

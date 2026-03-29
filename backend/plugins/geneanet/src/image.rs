@@ -42,11 +42,21 @@ pub(crate) fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResp
     extract_image_internal(req, FlareSolverrFetcher::from_config()?)
 }
 
-pub(crate) fn generate_tile_request(req: TileRequest) -> Result<TileResponse, PluginError> {
-    let zoomify: Zoomify = req.clone().into();
+fn fetch_tile_internal(
+    req: TileRequest,
+    fetcher: impl Fetcher,
+) -> Result<TileResponse, PluginError> {
+    let zoomify: Zoomify = req.image.clone().try_into()?;
+    let tile_url = zoomify.tile_url(req.zoom, req.x, req.y)?;
+    let tile_data = fetcher.fetch(tile_url.into())?;
 
     Ok(TileResponse {
-        url: zoomify.tile_url(req.zoom, req.x, req.y)?,
-        headers: None,
+        data: tile_data.as_bytes().to_vec(),
+        mime_type: "image/jpeg".into(),
     })
+}
+
+pub(crate) fn fetch_tile(req: TileRequest) -> Result<TileResponse, PluginError> {
+    // Tile API is now under Cloudflare protection
+    fetch_tile_internal(req, FlareSolverrFetcher::from_config()?)
 }

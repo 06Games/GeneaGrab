@@ -2191,6 +2191,7 @@ dependencies = [
 name = "geneagrab-tauri"
 version = "4.0.0"
 dependencies = [
+ "anyhow",
  "geneagrab-core",
  "geneagrab-plugin-core",
  "log",

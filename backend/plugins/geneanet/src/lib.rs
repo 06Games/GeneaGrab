@@ -75,8 +75,8 @@ impl PluginBase for PluginImpl {
         crate::image::extract_image(req)
     }
 
-    fn generate_tile_request(req: TileRequest) -> Result<TileResponse, PluginError> {
-        crate::image::generate_tile_request(req)
+    fn fetch_tile(req: TileRequest) -> Result<TileResponse, PluginError> {
+        crate::image::fetch_tile(req)
     }
 
     fn get_ark(req: ArkRequest) -> Result<String, PluginError> {

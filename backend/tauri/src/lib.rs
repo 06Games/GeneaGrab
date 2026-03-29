@@ -88,7 +88,9 @@ pub fn run() {
         .register_uri_scheme_protocol("tiles", |ctx, request| {
             let app_handle = ctx.app_handle();
             let state = app_handle.state::<AppState>();
-            tiles::handle_tile_request(request, state)
+            tauri::async_runtime::block_on(async {
+                tiles::handle_tile_request(request, state).await.unwrap()
+            })
         })
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![

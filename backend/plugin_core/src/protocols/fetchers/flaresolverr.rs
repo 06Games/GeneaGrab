@@ -24,16 +24,8 @@ impl FlareSolverrFetcher {
     pub fn from_config() -> Result<Self, PluginError> {
         let flaresolverr_url = config::get("flaresolverr_url")
             .map_err(|e| PluginError::LibraryError(format!("Failed to get config: {}", e)))?
-            .unwrap_or_default();
+            .unwrap_or_else(|| "http://localhost:8191".to_string());
         Ok(Self::new(flaresolverr_url))
-    }
-}
-
-impl Default for FlareSolverrFetcher {
-    fn default() -> Self {
-        Self {
-            flaresolverr_url: "http://localhost:8191".to_string(),
-        }
     }
 }
 
@@ -56,12 +48,25 @@ struct FlareSolverrResponse {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct FlareSolverrSolution {
     response: String,
+    user_agent: String,
+    cookies: Vec<FlareSolverrCookie>,
 }
 
-impl Fetcher for FlareSolverrFetcher {
-    fn fetch(&self, req: Request) -> Result<String, PluginError> {
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct FlareSolverrCookie {
+    pub name: String,
+    pub value: String,
+}
+
+impl FlareSolverrFetcher {
+    /**
+    Performs a fetch through FlareSolverr.
+    */
+    fn internal_fetch(&self, req: Request) -> Result<FlareSolverrSolution, PluginError> {
         let url = Url::parse(&req.url)
             .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {}", e)))?;
         let domain = url
@@ -110,8 +115,60 @@ impl Fetcher for FlareSolverrFetcher {
             PluginError::ParsingError("No solution in FlareSolverr response".into())
         })?;
 
+        Ok(solution)
+    }
+
+    /**
+    Returns the response body given by Flaresolverr with some cleaning to try to recover the original response.
+    */
+    fn clean_response(&self, solution: FlareSolverrSolution) -> Result<String, PluginError> {
         Ok(remove_xml_viewer(solution.response))
     }
+
+    /**
+    Performs the original request with the obtained cookies and user agent from FlareSolverr.
+    Safer than `dirty_fetch` when the response isn't HTML, but uses two requests.
+    */
+    fn safe_fetch(
+        &self,
+        solution: FlareSolverrSolution,
+        req: Request,
+    ) -> Result<String, PluginError> {
+        let mut req = req;
+        req.headers
+            .push(("User-Agent".to_string(), solution.user_agent));
+        if !solution.cookies.is_empty() {
+            req.headers.push((
+                "Cookie".to_string(),
+                build_cookie_header_string(&solution.cookies),
+            ));
+        }
+        Ok(SimpleFetcher {}.fetch(req)?)
+    }
+}
+
+impl Fetcher for FlareSolverrFetcher {
+    fn fetch(&self, req: Request) -> Result<String, PluginError> {
+        let solution = self.internal_fetch(req.clone())?;
+
+        // Could be improved... but it's good enough for now
+        if req.url.ends_with(".jpg") || req.url.ends_with(".png") || req.url.ends_with(".jpeg") {
+            self.safe_fetch(solution, req)
+        } else {
+            self.clean_response(solution)
+        }
+    }
+}
+
+/**
+Converts a list of cookies into a single Cookie header string.
+*/
+fn build_cookie_header_string(cookies: &[FlareSolverrCookie]) -> String {
+    cookies
+        .iter()
+        .map(|c| format!("{}={}", c.name, c.value))
+        .collect::<Vec<String>>()
+        .join("; ")
 }
 
 /**

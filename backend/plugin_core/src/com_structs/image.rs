@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use serde::{Deserialize, Serialize};
 
 use crate::data::{Image, Registry};
@@ -17,22 +15,16 @@ pub struct ExtractImageResponse {
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct TileRequest {
-    pub image_id: u32,
-    pub width: u32,
-    pub height: u32,
-    pub tile_size: u32,
+    pub image: Image,
     pub zoom: u32,
     pub x: u32,
     pub y: u32,
-    pub manifest_url: Option<String>,
-    pub ark_url: Option<String>,
-    pub extra_data: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct TileResponse {
-    pub url: String,
-    pub headers: Option<HashMap<String, String>>,
+    pub data: Vec<u8>,
+    pub mime_type: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
