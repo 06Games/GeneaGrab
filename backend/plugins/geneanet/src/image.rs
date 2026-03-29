@@ -33,7 +33,8 @@ fn extract_image_internal(
     Ok(ExtractImageResponse { image })
 }
 pub(crate) fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, PluginError> {
-    extract_image_internal(req, FlareSolverrFetcher::default()) // Image API is now under Cloudflare protection
+    // Image API is now under Cloudflare protection
+    extract_image_internal(req, FlareSolverrFetcher::from_config()?)
 }
 
 pub(crate) fn generate_tile_request(req: TileRequest) -> Result<TileResponse, PluginError> {

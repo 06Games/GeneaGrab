@@ -63,7 +63,12 @@ pub fn run() {
                         if path.extension().and_then(|e| e.to_str()) == Some("wasm") {
                             let plugin_id = path.file_stem().unwrap().to_string_lossy().to_string();
                             if let Ok(wasm_bytes) = std::fs::read(&path) {
-                                match plugin_manager.register_plugin(plugin_id, wasm_bytes) {
+                                let plugin_config = std::collections::HashMap::new(); // TODO
+                                match plugin_manager.register_plugin(
+                                    plugin_id,
+                                    plugin_config,
+                                    wasm_bytes,
+                                ) {
                                     Ok(()) => {
                                         log::info!("Registered plugin from {}", path.display())
                                     }

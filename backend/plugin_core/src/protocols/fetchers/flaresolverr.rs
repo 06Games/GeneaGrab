@@ -1,3 +1,4 @@
+use extism_pdk::config;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -6,15 +7,32 @@ use crate::{
     protocols::fetchers::{FetchMethod, Fetcher, Request, SimpleFetcher},
 };
 
+/**
+Proxies requests through FlareSolverr to bypass Cloudflare protections.
+*/
 pub struct FlareSolverrFetcher {
-    pub flaresolverr_url: String,
+    flaresolverr_url: String,
+}
+
+impl FlareSolverrFetcher {
+    pub fn new(flaresolverr_url: String) -> Self {
+        Self {
+            flaresolverr_url: flaresolverr_url.trim_end_matches('/').to_string(),
+        }
+    }
+
+    pub fn from_config() -> Result<Self, PluginError> {
+        let flaresolverr_url = config::get("flaresolverr_url")
+            .map_err(|e| PluginError::LibraryError(format!("Failed to get config: {}", e)))?
+            .unwrap_or_default();
+        Ok(Self::new(flaresolverr_url))
+    }
 }
 
 impl Default for FlareSolverrFetcher {
     fn default() -> Self {
-        // TODO : Remove this and make the URL configurable
         Self {
-            flaresolverr_url: "http://localhost:8191/v1".to_string(),
+            flaresolverr_url: "http://localhost:8191".to_string(),
         }
     }
 }
@@ -69,7 +87,7 @@ impl Fetcher for FlareSolverrFetcher {
             .map_err(|_| PluginError::InvalidField("Failed to serialize payload".into()))?;
 
         let req = Request {
-            url: self.flaresolverr_url.clone(),
+            url: format!("{}/v1", self.flaresolverr_url.clone()),
             headers: vec![("Content-Type".to_string(), "application/json".to_string())],
             method: FetchMethod::POST,
             body: Some(body),

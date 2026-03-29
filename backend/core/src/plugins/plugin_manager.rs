@@ -28,8 +28,15 @@ impl PluginManager {
         }
     }
 
-    pub fn register_plugin(&mut self, id: String, wasm_bytes: Vec<u8>) -> Result<(), CoreError> {
-        let manifest = Manifest::new([Wasm::data(wasm_bytes)]).with_allowed_host("*");
+    pub fn register_plugin(
+        &mut self,
+        id: String,
+        plugin_config: HashMap<String, String>,
+        wasm_bytes: Vec<u8>,
+    ) -> Result<(), CoreError> {
+        let manifest = Manifest::new([Wasm::data(wasm_bytes)])
+            .with_allowed_host("*")
+            .with_config(plugin_config.iter());
         let mut plugin = PluginBuilder::new(&manifest)
             .with_http_response_headers(true)
             .with_wasi(true)
