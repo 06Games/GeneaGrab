@@ -53,7 +53,7 @@ pub fn run() {
 
             app.manage(AppState {
                 db,
-                plugin_manager: PluginManager::new(),
+                plugin_manager: PluginManager::default(),
             });
 
             let app_handle = app.handle().clone();

@@ -182,10 +182,12 @@ pub async fn add_registry(
         plugin_id
     );
 
-    let res = plugin_manager.execute(&plugin_id, |plugin| {
-        let identified = plugin.identify(IdentifyRequest { url: url.clone() })?; // TODO: Avoid re-extracting data from the URL
-        plugin.extract_registry(ExtractRequest { url, identified })
-    })?;
+    let res = plugin_manager
+        .execute(&plugin_id, |plugin| {
+            let identified = plugin.identify(IdentifyRequest { url: url.clone() })?; // TODO: Avoid re-extracting data from the URL
+            plugin.extract_registry(ExtractRequest { url, identified })
+        })
+        .await?;
 
     let txn = db
         .begin()
@@ -233,21 +235,20 @@ pub async fn get_plugins_for_url(
     url: &str,
 ) -> Result<Vec<(PluginMetadata, IdentifyResponse)>, CoreError> {
     let plugins = plugin_manager.list_plugins()?;
+    let mut compatible_plugins = Vec::new();
 
-    let mut compatible_plugins: Vec<(PluginMetadata, IdentifyResponse)> = plugins
-        .into_iter()
-        .filter_map(|meta| {
-            let identified = plugin_manager
-                .execute(&meta.id, |plugin| {
-                    plugin.identify(IdentifyRequest {
-                        url: url.to_string(),
-                    })
+    for meta in plugins {
+        if let Ok(identified) = plugin_manager
+            .execute(&meta.id, |plugin| {
+                plugin.identify(IdentifyRequest {
+                    url: url.to_string(),
                 })
-                .ok()?;
-
-            Some((meta, identified))
-        })
-        .collect();
+            })
+            .await
+        {
+            compatible_plugins.push((meta, identified));
+        }
+    }
 
     // Prioritize plugins that explicitly list the website as compatible
     compatible_plugins.sort_by_key(|(meta, _)| {

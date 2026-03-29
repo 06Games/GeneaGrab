@@ -136,17 +136,22 @@ pub async fn fetch_image(
         image: image.clone().into(),
     };
 
-    if let Some(field) = plugin_manager.execute(&registry.source_id, |plugin| {
-        plugin.is_image_missing_data(extract_req.clone())
-    })? {
+    if let Some(field) = plugin_manager
+        .execute(&registry.source_id, |plugin| {
+            plugin.is_image_missing_data(extract_req.clone())
+        })
+        .await?
+    {
         log::info!(
             "Image {} is missing data ({}), extracting...",
             image_id,
             field
         );
-        let res = plugin_manager.execute(&registry.source_id, |plugin| {
-            plugin.extract_image(extract_req)
-        })?;
+        let res = plugin_manager
+            .execute(&registry.source_id, |plugin| {
+                plugin.extract_image(extract_req)
+            })
+            .await?;
 
         let mut image_model: image_entry::ActiveModel = image.into();
         let mut has_updates = false;

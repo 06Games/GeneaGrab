@@ -18,26 +18,23 @@ pub struct PluginManager {
 
 impl Default for PluginManager {
     fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl PluginManager {
-    pub fn new() -> Self {
         Self {
             registry: Arc::new(RwLock::new(HashMap::new())),
         }
     }
+}
 
+impl PluginManager {
     pub fn register_plugin(
         &self,
-        id: String,
+        id: &str,
         plugin_config: HashMap<String, String>,
         wasm_bytes: Vec<u8>,
     ) -> Result<(), CoreError> {
         let manifest = Manifest::new([Wasm::data(wasm_bytes)])
             .with_allowed_host("*")
             .with_config(plugin_config.iter());
+
         let mut plugin = PluginBuilder::new(&manifest)
             .with_http_response_headers(true)
             .with_wasi(true)
@@ -51,7 +48,7 @@ impl PluginManager {
             )));
         }
 
-        let meta = &plugin.metadata(()).map_err(|e| {
+        let meta = plugin.metadata(()).map_err(|e| {
             CoreError::Other(format!("Failed to get plugin metadata for '{}': {}", id, e))
         })?;
 
@@ -59,7 +56,7 @@ impl PluginManager {
             CoreError::LockError(format!("Failed to write to plugin registry: {}", e))
         })?;
         map.insert(
-            id,
+            id.to_string(),
             PluginData {
                 plugin: Mutex::new(plugin),
                 metadata: meta.clone(),
@@ -76,7 +73,7 @@ impl PluginManager {
         Ok(map.values().map(|data| data.metadata.clone()).collect())
     }
 
-    pub fn execute<F, R>(&self, plugin_id: &str, action: F) -> Result<R, CoreError>
+    pub async fn execute<F, R>(&self, plugin_id: &str, action: F) -> Result<R, CoreError>
     where
         F: FnOnce(&mut extism::Plugin) -> Result<R, extism::Error>,
     {
