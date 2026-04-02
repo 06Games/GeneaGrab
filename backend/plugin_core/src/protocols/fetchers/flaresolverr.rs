@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use extism_pdk::config;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -56,7 +54,6 @@ struct FlareSolverrSolution {
     response: String,
     user_agent: String,
     cookies: Vec<FlareSolverrCookie>,
-    headers: HashMap<String, String>,
 }
 
 #[derive(Deserialize)]
@@ -147,15 +144,12 @@ impl FlareSolverrFetcher {
                 build_cookie_header_string(&solution.cookies),
             ));
         }
-        req.headers
-            .push(("sec-fetch-dest".to_string(), "image".to_string()));
-        req.headers
-            .push(("sec-fetch-mode".to_string(), "no-cors".to_string()));
-        req.headers
-            .push(("sec-fetch-site".to_string(), "same-origin".to_string()));
+
+        let url = Url::parse(&req.url)
+            .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {}", e)))?;
         req.headers.push((
             "Referer".to_string(),
-            "https://www.geneanet.org/".to_string(),
+            format!("{}://{}", url.scheme(), url.host_str().unwrap_or_default()),
         ));
 
         Ok(HostFetcher {}.fetch_raw(req)?)

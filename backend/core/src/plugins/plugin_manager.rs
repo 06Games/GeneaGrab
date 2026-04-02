@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 use tokio::runtime::Handle;
-use wreq::header::{self, HeaderMap, HeaderName, HeaderValue};
+use wreq::header::{HeaderName, HeaderValue};
 use wreq::{Client, Method};
 use wreq_util::Emulation;
 
