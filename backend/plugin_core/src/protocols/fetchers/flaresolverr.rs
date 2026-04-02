@@ -125,8 +125,8 @@ impl FlareSolverrFetcher {
     /**
     Returns the response body given by Flaresolverr with some cleaning to try to recover the original response.
     */
-    fn clean_response(&self, solution: FlareSolverrSolution) -> Result<String, PluginError> {
-        Ok(remove_xml_viewer(solution.response))
+    fn clean_response(&self, solution: FlareSolverrSolution) -> Result<Vec<u8>, PluginError> {
+        Ok(remove_xml_viewer(solution.response).into_bytes())
     }
 
     /**
@@ -137,7 +137,7 @@ impl FlareSolverrFetcher {
         &self,
         solution: FlareSolverrSolution,
         req: Request,
-    ) -> Result<String, PluginError> {
+    ) -> Result<Vec<u8>, PluginError> {
         let mut req = req;
         req.headers
             .push(("User-Agent".to_string(), solution.user_agent));
@@ -147,18 +147,23 @@ impl FlareSolverrFetcher {
                 build_cookie_header_string(&solution.cookies),
             ));
         }
-        req.headers.extend(
-            solution
-                .headers
-                .into_iter()
-                .collect::<Vec<(String, String)>>(),
-        );
-        Ok(HostFetcher {}.fetch(req)?)
+        req.headers
+            .push(("sec-fetch-dest".to_string(), "image".to_string()));
+        req.headers
+            .push(("sec-fetch-mode".to_string(), "no-cors".to_string()));
+        req.headers
+            .push(("sec-fetch-site".to_string(), "same-origin".to_string()));
+        req.headers.push((
+            "Referer".to_string(),
+            "https://www.geneanet.org/".to_string(),
+        ));
+
+        Ok(HostFetcher {}.fetch_raw(req)?)
     }
 }
 
 impl Fetcher for FlareSolverrFetcher {
-    fn fetch(&self, req: Request) -> Result<String, PluginError> {
+    fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, PluginError> {
         let solution = self.internal_fetch(req.clone())?;
 
         // Could be improved... but it's good enough for now

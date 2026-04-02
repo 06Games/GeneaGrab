@@ -224,7 +224,7 @@ mod tests {
     use super::*;
     use assert_json_diff::assert_json_include;
     use geneagrab_plugin_core::com_structs::{IdentifyResponse, PluginError};
-    use geneagrab_plugin_core::protocols::fetchers::Request;
+    use geneagrab_plugin_core::data::http::Request;
     use serde::Deserialize;
     use std::fs;
     use std::path::PathBuf;
@@ -271,13 +271,13 @@ mod tests {
     fn mock_fetcher_factory(
         mocks: Vec<MockRequest>,
         base_dir: PathBuf,
-    ) -> impl Fn(Request) -> Result<String, PluginError> {
-        move |req: Request| -> Result<String, PluginError> {
+    ) -> impl Fn(Request) -> Result<Vec<u8>, PluginError> {
+        move |req: Request| -> Result<Vec<u8>, PluginError> {
             let matching_mock = mocks.iter().find(|mock| mock.url == req.url);
 
             if let Some(mock) = matching_mock {
                 let file_path = base_dir.join(&mock.response_file);
-                fs::read_to_string(&file_path).map_err(|e| {
+                fs::read(&file_path).map_err(|e| {
                     PluginError::NetworkError(format!(
                         "Mock failed to read file '{}' for URL {}: {}",
                         mock.response_file, req.url, e

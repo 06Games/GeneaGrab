@@ -5,6 +5,9 @@
             "type": "lldb",
             "request": "launch",
             "name": "Tauri",
+            "sourceLanguages": [
+                "rust"
+            ],
             "program": "${workspaceFolder}/backend/target/debug/geneagrab-tauri",
             "args": [],
             "cwd": "${workspaceFolder}/backend/tauri",

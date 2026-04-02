@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 use std::sync::{Arc, Mutex, MutexGuard, RwLock};
 use tokio::runtime::Handle;
-use wreq::header::{HeaderMap, HeaderName, HeaderValue};
+use wreq::header::{self, HeaderMap, HeaderName, HeaderValue};
 use wreq::{Client, Method};
 use wreq_util::Emulation;
 
@@ -86,7 +86,6 @@ impl PluginManager {
             .with_config(plugin_config.iter());
         let http_client = Client::builder()
             .emulation(Emulation::Firefox135)
-            .default_headers(HeaderMap::new())
             .build()
             .map_err(|e| CoreError::Other(format!("Failed to create HTTP client: {}", e)))?;
 

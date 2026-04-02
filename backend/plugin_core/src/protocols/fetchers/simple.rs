@@ -8,7 +8,7 @@ A simple fetcher that uses the built-in HTTP client.
 pub struct SimpleFetcher;
 
 impl Fetcher for SimpleFetcher {
-    fn fetch(&self, req: Request) -> Result<String, PluginError> {
+    fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, PluginError> {
         let mut http_req = HttpRequest::new(&req.url).with_method(req.method);
         for (key, value) in req.headers {
             http_req = http_req.with_header(&key, &value);
@@ -32,8 +32,7 @@ impl Fetcher for SimpleFetcher {
             )));
         }
 
-        String::from_utf8(res.body())
-            .map_err(|e| PluginError::NetworkError(format!("Invalid UTF-8: {}", e)))
+        Ok(res.body().to_vec())
     }
 }
 
