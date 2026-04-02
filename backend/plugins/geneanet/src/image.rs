@@ -48,10 +48,10 @@ fn fetch_tile_internal(
 ) -> Result<TileResponse, PluginError> {
     let zoomify: Zoomify = req.image.clone().try_into()?;
     let tile_url = zoomify.tile_url(req.zoom, req.x, req.y)?;
-    let tile_data = fetcher.fetch(tile_url.into())?;
+    let tile_data = fetcher.fetch_raw(tile_url.into())?;
 
     Ok(TileResponse {
-        data: tile_data.as_bytes().to_vec(),
+        data: tile_data,
         mime_type: "image/jpeg".into(),
     })
 }
