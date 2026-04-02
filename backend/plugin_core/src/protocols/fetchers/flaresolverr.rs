@@ -1,9 +1,13 @@
+use std::collections::HashMap;
+
 use extism_pdk::config;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
 use crate::{
-    com_structs::PluginError, data::http::{FetchMethod, Request}, protocols::fetchers::{Fetcher, HostFetcher, SimpleFetcher}
+    com_structs::PluginError,
+    data::http::{FetchMethod, Request},
+    protocols::fetchers::{Fetcher, HostFetcher, SimpleFetcher},
 };
 
 /**
@@ -52,6 +56,7 @@ struct FlareSolverrSolution {
     response: String,
     user_agent: String,
     cookies: Vec<FlareSolverrCookie>,
+    headers: HashMap<String, String>,
 }
 
 #[derive(Deserialize)]
@@ -142,6 +147,12 @@ impl FlareSolverrFetcher {
                 build_cookie_header_string(&solution.cookies),
             ));
         }
+        req.headers.extend(
+            solution
+                .headers
+                .into_iter()
+                .collect::<Vec<(String, String)>>(),
+        );
         Ok(HostFetcher {}.fetch(req)?)
     }
 }
