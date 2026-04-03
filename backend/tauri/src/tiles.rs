@@ -14,24 +14,26 @@ pub async fn handle_tile_request(
     request: Request<Vec<u8>>,
     state: State<'_, AppState>,
 ) -> Result<Response<Vec<u8>>, Error> {
-    // TODO: Maybe switch to IIIF standard and add tiling when the image is still loading from the archive's website
-
     let path = request.uri().path();
     let parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
 
     log::info!("Received tile request: {}", path);
 
-    if parts.len() >= 3 {
+    if parts.len() >= 5 {
         let registry_id = parts[0].parse::<u32>().unwrap_or(0);
         let image_id = parts[1].parse::<u32>().unwrap_or(0);
-        let thumbnail = parts[2] == "true";
+        let zoom = parts[2].parse::<u32>().unwrap_or(0);
+        let x = parts[3].parse::<u32>().unwrap_or(0);
+        let y = parts[4].parse::<u32>().unwrap_or(0);
 
         match fetch_tiles(
             &state.db,
             &state.plugin_manager,
             registry_id,
             image_id,
-            thumbnail,
+            zoom,
+            x,
+            y,
         )
         .await
         {
@@ -55,11 +57,13 @@ async fn fetch_tiles(
     plugin_manager: &PluginManager,
     registry_id: u32,
     image_id: u32,
-    thumbnail: bool,
+    level: u32,
+    x: u32,
+    y: u32,
 ) -> Result<TileResponse, Error> {
     let (registry, image) =
         image::prepare_image(&db, &plugin_manager, registry_id, image_id).await?;
-    Ok(image::fetch_image_tile(db, plugin_manager, registry, image, thumbnail).await?)
+    Ok(image::fetch_image_tile(db, plugin_manager, registry, image, level, x, y).await?)
 }
 
 fn build_tile_response(image_data: TileResponse) -> Result<Response<Vec<u8>>, Error> {

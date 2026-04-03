@@ -3,7 +3,7 @@ import { useI18n } from "../../ui/i18n";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import { getBackendService } from "../../services/apiFactory";
 
-const THUMBNAIL_ASPECT_RATIO = 1.3; 
+const THUMBNAIL_ASPECT_RATIO = 1.3;
 const THUMBNAIL_VERTICAL_PADDING = 16; // Combined height for the image number label and gap below the thumbnail
 
 interface ThumbnailBarProps {
@@ -35,9 +35,9 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
 
   // Automatically scroll to the selected thumbnail
   createEffect(() => {
-    virtualizer.scrollToIndex(props.currentImage - 1, { 
-      align: "center", 
-      behavior: "smooth" 
+    virtualizer.scrollToIndex(props.currentImage - 1, {
+      align: "center",
+      behavior: "smooth"
     });
   });
 
@@ -55,18 +55,18 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
       ].join(" ")}
     >
       {/* Fakes the total scrollable width */}
-      <div 
-        style={{ 
-          width: `${virtualizer.getTotalSize()}px`, 
-          height: '100%', 
-          position: 'relative' 
+      <div
+        style={{
+          width: `${virtualizer.getTotalSize()}px`,
+          height: '100%',
+          position: 'relative'
         }}
       >
         <For each={virtualizer.getVirtualItems()}>
           {(virtualItem) => {
             const image = virtualItem.index + 1;
             const isActive = () => props.currentImage === image;
-            const src = () => api.getImageUrl(props.registryId, image, true);
+            const src = () => api.getImageUrl(props.registryId, image, 0, 0, 0);
             const hasError = () => failedImages().has(image);
 
             return (
@@ -99,17 +99,17 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                     : "border-subtle opacity-60 group-hover:opacity-100 group-hover:border-subtle-md group-hover:shadow-sm",
                 ].join(" ")}>
                   {src() && !hasError()
-                    ? <img 
-                        src={src()!} 
-                        alt="" 
-                        class="w-full h-full object-contain" 
-                        loading="lazy" 
-                        onError={() => {
-                          const next = new Set(failedImages());
-                          next.add(image);
-                          setFailedImages(next);
-                        }}
-                      />
+                    ? <img
+                      src={src()!}
+                      alt=""
+                      class="w-full h-full object-contain"
+                      loading="lazy"
+                      onError={() => {
+                        const next = new Set(failedImages());
+                        next.add(image);
+                        setFailedImages(next);
+                      }}
+                    />
                     : <span class="text-[9px] text-dim font-mono leading-none">{image}</span>
                   }
                 </div>

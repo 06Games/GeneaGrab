@@ -90,6 +90,9 @@ pub async fn fetch_image_meta(
         notes: image.notes,
         image_number: image.image_number,
         act_types,
+        width: image.width,
+        height: image.height,
+        tile_size: image.tile_size,
     })
 }
 
@@ -179,19 +182,23 @@ pub async fn fetch_image_tile(
     plugin_manager: &PluginManager,
     registry: registry_entry::Model,
     image: image_entry::Model,
-    thumbnail: bool,
+    level: u32,
+    x: u32,
+    y: u32,
 ) -> Result<TileResponse, CoreError> {
     log::info!(
-        "fetch_image_tile called for image {}, thumbnail={}",
+        "fetch_image_tile called for image id={}, level={}, x={}, y={}",
         image.id,
-        thumbnail
+        level,
+        x,
+        y
     );
 
     let req = TileRequest {
         image: image.clone().into(),
-        zoom: 0, // TODO: Calculate zoom level based on requested tile and image metadata
-        x: 0,    // TODO: Get from request
-        y: 0,    // TODO: Get from request
+        zoom: level,
+        x,
+        y,
     };
 
     let image_data = plugin_manager

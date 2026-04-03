@@ -4,9 +4,11 @@ import { IconButton, Divider } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { getBackendService } from "../../services/apiFactory";
+import { ImageMeta } from "../../types/image";
 
 interface MainViewerProps {
   currentImage: number;
+  imageMeta: ImageMeta | undefined;
   totalImages: number;
   registryId: number;
   onImageChange: (image: number) => void;
@@ -21,16 +23,11 @@ export const MainViewer = (props: MainViewerProps) => {
 
   const [zoomDisplay, setZoomDisplay] = createSignal(100);
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
-  const [imageSrc, setImageSrc] = createSignal<string | null>(null);
   const [imageError, setImageError] = createSignal(false);
 
   createEffect(() => {
     setImageInput(String(props.currentImage));
-    setImageError(false);
-    if (props.currentImage < 1 || props.currentImage > props.totalImages)
-      setImageSrc(null);
-    else
-      setImageSrc(api.getImageUrl(props.registryId, props.currentImage, false));
+    setImageError(props.currentImage < 1 || props.currentImage > props.totalImages);
   });
 
   const commitImageInput = () => {
@@ -90,13 +87,21 @@ export const MainViewer = (props: MainViewerProps) => {
     });
 
     createEffect(() => {
-      const url = imageSrc();
-      if (!url) return;
+      if (props.currentImage < 1 || props.currentImage > props.totalImages)
+        return;
+
+      const tileSize = props.imageMeta?.tile_size ?? 256;
+      const zoomOffset = Math.log2(tileSize);
 
       viewer!.open({
-        type: 'image',
-        url: url
+        type: 'custom',
+        width: props.imageMeta?.width,
+        height: props.imageMeta?.height,
+        tileSize: tileSize,
+        minLevel: zoomOffset,
+        getTileUrl: (level: number, x: number, y: number) => api.getImageUrl(props.registryId, props.currentImage, level - zoomOffset, x, y)
       } as any);
+
     });
 
 
@@ -191,10 +196,10 @@ export const MainViewer = (props: MainViewerProps) => {
 
       <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
         <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
-        {(!imageSrc() || imageError()) && (
+        {(imageError()) && (
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
             <div class="flex flex-col items-center gap-3 select-none">
-              <Icon icon={imageError() ? "lucide:image-off" : "lucide:image"} class="text-subtle" width="50" height="50"></Icon>
+              <Icon icon="lucide:image-off" class="text-subtle" width="50" height="50"></Icon>
               <span class="text-[13px] text-dim">{t("mainViewer.noImage", { n: props.currentImage })}</span>
             </div>
           </div>

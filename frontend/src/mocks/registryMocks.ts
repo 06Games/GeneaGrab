@@ -6,7 +6,7 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
   id: 123,
   archive_reference: "5 Mi 1/342",
   source_types: new Set(["Birth", "Marriage", "Death"]),
-  places: ["Brignoles", "Vins-sur-Caramy"],
+  places: [["Brignoles"], ["Vins-sur-Caramy"]],
   collection: ["État civil"],
   ark_url: "https://archives.var.fr/ark:/...",
   title: "Registres d'état civil de Brignoles",
@@ -18,6 +18,9 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
 
 export const MOCK_IMAGE_META: ImageMeta = {
   image_number: 12,
+  width: 512,
+  height: 512,
+  tile_size: 512,
   date_range: "1793-11-01 to 1793-11-30",
   notes: "Image in good condition, but handwriting is difficult to read in some areas.",
   act_types: new Map<ActType, number>([

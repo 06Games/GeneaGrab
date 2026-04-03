@@ -239,7 +239,7 @@ export const ViewerPage = () => {
 
                 <div class="flex flex-1 min-h-0 overflow-hidden">
                   <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
-                    <MainViewer currentImage={currentImage()} totalImages={regMeta().total_images} onImageChange={setCurrentImage} registryId={registryId} />
+                    <MainViewer currentImage={currentImage()} imageMeta={imageMeta()} totalImages={regMeta().total_images} onImageChange={setCurrentImage} registryId={registryId} />
                     <div class="flex-shrink-0 h-[6px] w-full cursor-row-resize z-10 group bg-app hover:bg-accent/25 active:bg-accent/50 transition-colors duration-150 flex items-center justify-center" onPointerDown={onThumbnailResizePointerDown} role="separator" aria-orientation="horizontal">
                       <div class="flex flex-row gap-[3px] opacity-0 group-hover:opacity-60 transition-opacity">
                         {[0, 1, 2].map(() => <div class="w-1 h-1 rounded-full bg-accent" />)}

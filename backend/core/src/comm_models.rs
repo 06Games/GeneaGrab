@@ -96,6 +96,9 @@ pub struct ImageMeta {
     pub date_range: Option<String>,
     pub notes: Option<String>,
     pub act_types: HashMap<String, u32>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
+    pub tile_size: Option<u32>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

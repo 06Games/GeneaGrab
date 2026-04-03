@@ -17,7 +17,7 @@ export interface BackendService {
     // Images
     getImageMeta(registryId: number, imageId: number): Promise<ImageMeta>;
     saveImageMeta(registryId: number, imageId: number, meta: Partial<UserImageMeta>): Promise<void>;
-    getImageUrl(registryId: number, imageId: number, thumbnail: boolean): string | null;
+    getImageUrl(registryId: number, imageId: number, level: number, x: number, y: number): string | null;
 
     // Index
     getEventRows(registryId: number): Promise<EventRow[]>;
