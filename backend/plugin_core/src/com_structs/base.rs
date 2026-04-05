@@ -19,8 +19,5 @@ define_extism_interface! {
 
         /* Generates the HTTP URL for a single tile */
         fn fetch_tile(TileRequest) -> Result<TileResponse, PluginError>;
-
-        /* Generates the permalink for citing a specific page */
-        fn get_ark(ArkRequest) -> Result<String, PluginError>;
     }
 }

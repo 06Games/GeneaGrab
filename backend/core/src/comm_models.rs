@@ -99,6 +99,7 @@ pub struct ImageMeta {
     pub width: Option<u32>,
     pub height: Option<u32>,
     pub tile_size: Option<u32>,
+    pub ark_url: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

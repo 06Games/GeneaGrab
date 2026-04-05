@@ -26,11 +26,3 @@ pub struct TileResponse {
     pub data: Vec<u8>,
     pub mime_type: String,
 }
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ArkRequest {
-    pub frame_number: u32,
-    pub registry_ark: Option<String>,
-    pub image_ark: Option<String>,
-    pub extra_data: Option<String>,
-}

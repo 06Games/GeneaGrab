@@ -81,13 +81,13 @@ export const Button = (props: ButtonProps) => {
     "transition-colors duration-100 focus-visible:outline-none",
     "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1",
     "disabled:opacity-40 disabled:cursor-not-allowed",
-    size === "sm"  ? "px-2.5 py-1 text-[13px]" : "px-3.5 py-1.5 text-[14px]",
+    size === "sm" ? "px-2.5 py-1 text-[13px]" : "px-3.5 py-1.5 text-[14px]",
   ];
 
   const variants = {
-    ghost:   "text-muted hover:text-main hover:bg-hover",
-    outline: "text-main border border-subtle bg-panel hover:bg-app hover:border-subtle-md",
-    primary: "text-white bg-accent hover:bg-accent-hover shadow-sm",
+    ghost: "text-muted enabled:hover:text-main enabled:hover:bg-hover",
+    outline: "text-main border border-subtle bg-panel enabled:hover:bg-app enabled:hover:border-subtle-md",
+    primary: "text-white bg-accent enabled:hover:bg-accent-hover shadow-sm",
   };
 
   return (
@@ -109,6 +109,7 @@ interface IconButtonProps {
   title?: string;
   onClick?: JSX.EventHandler<HTMLButtonElement, MouseEvent>;
   active?: boolean;
+  disabled?: boolean;
   class?: string;
   children: JSX.Element;
 }
@@ -118,13 +119,15 @@ export const IconButton = (props: IconButtonProps) => (
     type="button"
     title={props.title}
     onClick={props.onClick}
+    disabled={props.disabled}
     class={[
       "flex items-center justify-center w-8 h-8 rounded-md",
       "transition-colors duration-100",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+      "disabled:opacity-40 disabled:cursor-not-allowed",
       props.active
         ? "text-accent bg-accent-bg"
-        : "text-muted hover:text-main hover:bg-hover",
+        : "text-muted enabled:hover:text-main enabled:hover:bg-hover",
       props.class,
     ].filter(Boolean).join(" ")}
   >

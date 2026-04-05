@@ -2,7 +2,7 @@ use std::{borrow::Cow, sync::LazyLock};
 
 use geneagrab_plugin_core::{
     com_structs::{
-        ArkRequest, ExtractImageRequest, ExtractImageResponse, ExtractRequest, ExtractResponse,
+        ExtractImageRequest, ExtractImageResponse, ExtractRequest, ExtractResponse,
         IdentifyRequest, IdentifyResponse, PluginBase, PluginError, TileRequest, TileResponse,
     },
     data::PluginMetadata,
@@ -77,12 +77,6 @@ impl PluginBase for PluginImpl {
 
     fn fetch_tile(req: TileRequest) -> Result<TileResponse, PluginError> {
         crate::image::fetch_tile(req)
-    }
-
-    fn get_ark(req: ArkRequest) -> Result<String, PluginError> {
-        req.image_ark.ok_or(PluginError::MissingField(
-            "ARK URL not found for image".into(),
-        ))
     }
 }
 

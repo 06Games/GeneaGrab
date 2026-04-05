@@ -93,6 +93,7 @@ pub async fn fetch_image_meta(
         width: image.width,
         height: image.height,
         tile_size: image.tile_size,
+        ark_url: image.ark_url,
     })
 }
 

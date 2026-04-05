@@ -23,6 +23,7 @@ export const MOCK_IMAGE_META: ImageMeta = {
   tile_size: 512,
   date_range: "1793-11-01 to 1793-11-30",
   notes: "Image in good condition, but handwriting is difficult to read in some areas.",
+  ark_url: "",
   act_types: new Map<ActType, number>([
     ["Birth", 2],
     ["Marriage", 1],

@@ -101,7 +101,6 @@ export const MainViewer = (props: MainViewerProps) => {
         minLevel: zoomOffset,
         getTileUrl: (level: number, x: number, y: number) => api.getImageUrl(props.registryId, props.currentImage, level - zoomOffset, x, y)
       } as any);
-
     });
 
 
@@ -134,6 +133,10 @@ export const MainViewer = (props: MainViewerProps) => {
     const currentRot = viewer.viewport.getRotation();
     viewer.viewport.setRotation((currentRot + 90) % 360);
   };
+  const handleCopyUrl = () => {
+    const url = props.imageMeta?.ark_url;
+    if (url) navigator.clipboard.writeText(url);
+  }
 
   return (
     <div class="relative flex-1 flex flex-col overflow-hidden bg-viewer-bg min-h-0">
@@ -168,7 +171,7 @@ export const MainViewer = (props: MainViewerProps) => {
 
         <Divider vertical class="mx-2 h-5" />
 
-        <IconButton title={t("mainViewer.zoomOut", { key: "−" })} onClick={handleZoomOut}>
+        <IconButton title={t("mainViewer.zoomOut", { key: "-" })} onClick={handleZoomOut}>
           <Icon icon="lucide:zoom-out"></Icon>
         </IconButton>
         <span class="text-[13px] text-muted tabular-nums w-10 text-center select-none">
@@ -189,7 +192,7 @@ export const MainViewer = (props: MainViewerProps) => {
         <IconButton title={t("mainViewer.download")}>
           <Icon icon="lucide:download"></Icon>
         </IconButton>
-        <IconButton title={t("mainViewer.copyUrl")}>
+        <IconButton title={t("mainViewer.copyUrl")} onClick={handleCopyUrl} disabled={!props.imageMeta?.ark_url}>
           <Icon icon="lucide:link"></Icon>
         </IconButton>
       </div>
