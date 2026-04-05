@@ -66,7 +66,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
           {(virtualItem) => {
             const image = virtualItem.index + 1;
             const isActive = () => props.currentImage === image;
-            const src = () => api.getImageUrl(props.registryId, image, 0, 0, 0);
+            const src = () => api.getTileUrl(props.registryId, image, 0, 0, 0);
             const hasError = () => failedImages().has(image);
 
             return (

@@ -19,5 +19,8 @@ define_extism_interface! {
 
         /** Gets a single tile */
         fn fetch_tile(TileRequest) -> Result<TileResponse, PluginError>;
+
+        /** Gets the whole image or returns None if we should rely on the tiles instead */
+        fn download_image(DownloadRequest) -> Result<Option<TileResponse>, PluginError>;
     }
 }

@@ -2,8 +2,9 @@ use std::{borrow::Cow, sync::LazyLock};
 
 use geneagrab_plugin_core::{
     com_structs::{
-        ExtractImageRequest, ExtractImageResponse, ExtractRequest, ExtractResponse,
-        IdentifyRequest, IdentifyResponse, PluginBase, PluginError, TileRequest, TileResponse,
+        DownloadRequest, ExtractImageRequest, ExtractImageResponse, ExtractRequest,
+        ExtractResponse, IdentifyRequest, IdentifyResponse, PluginBase, PluginError, TileRequest,
+        TileResponse,
     },
     data::PluginMetadata,
     export_plugin_base,
@@ -77,6 +78,10 @@ impl PluginBase for PluginImpl {
 
     fn fetch_tile(req: TileRequest) -> Result<TileResponse, PluginError> {
         crate::image::fetch_tile(req)
+    }
+
+    fn download_image(req: DownloadRequest) -> Result<Option<TileResponse>, PluginError> {
+        crate::image::download_image(req)
     }
 }
 

@@ -1,6 +1,7 @@
 use geneagrab_plugin_core::{
     com_structs::{
-        ExtractImageRequest, ExtractImageResponse, PluginError, TileRequest, TileResponse,
+        DownloadRequest, ExtractImageRequest, ExtractImageResponse, PluginError, TileRequest,
+        TileResponse,
     },
     protocols::{
         fetchers::{Fetcher, FlareSolverrFetcher},
@@ -59,4 +60,8 @@ fn fetch_tile_internal(
 pub(crate) fn fetch_tile(req: TileRequest) -> Result<TileResponse, PluginError> {
     // Tile API is now under Cloudflare protection
     fetch_tile_internal(req, FlareSolverrFetcher::from_config()?)
+}
+
+pub(crate) fn download_image(_req: DownloadRequest) -> Result<Option<TileResponse>, PluginError> {
+    Ok(None) // Sometimes, the images are freely downloadable. We might want to check for that in the future.
 }

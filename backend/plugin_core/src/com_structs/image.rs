@@ -26,3 +26,8 @@ pub struct TileResponse {
     pub data: Vec<u8>,
     pub mime_type: String,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct DownloadRequest {
+    pub image: Image,
+}

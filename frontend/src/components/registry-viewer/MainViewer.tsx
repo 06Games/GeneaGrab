@@ -99,7 +99,7 @@ export const MainViewer = (props: MainViewerProps) => {
         height: props.imageMeta?.height,
         tileSize: tileSize,
         minLevel: zoomOffset,
-        getTileUrl: (level: number, x: number, y: number) => api.getImageUrl(props.registryId, props.currentImage, level - zoomOffset, x, y)
+        getTileUrl: (level: number, x: number, y: number) => api.getTileUrl(props.registryId, props.currentImage, level - zoomOffset, x, y)
       } as any);
     });
 

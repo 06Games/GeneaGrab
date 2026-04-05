@@ -6,7 +6,7 @@ use crate::{
     services::registry,
 };
 use geneagrab_plugin_core::com_structs::{
-    ExtractImageRequest, HostPluginBase, TileRequest, TileResponse,
+    DownloadRequest, ExtractImageRequest, HostPluginBase, TileRequest, TileResponse,
 };
 use sea_orm::{
     sea_query::Nullable,
@@ -207,4 +207,27 @@ pub async fn fetch_image_tile(
         .await?;
 
     Ok(image_data)
+}
+
+pub async fn download_image(
+    _db: &DbConn,
+    plugin_manager: &PluginManager,
+    registry: registry_entry::Model,
+    image: image_entry::Model,
+) -> Result<TileResponse, CoreError> {
+    log::info!("download_image called for image id={}", image.id,);
+
+    let req = DownloadRequest {
+        image: image.clone().into(),
+    };
+
+    let image_data = plugin_manager
+        .execute(&registry.source_id, |plugin| plugin.download_image(req))
+        .await?;
+
+    if let Some(res) = image_data {
+        return Ok(res);
+    }
+
+    todo!("Construct a full-res image using tiles")
 }

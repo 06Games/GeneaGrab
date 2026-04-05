@@ -66,8 +66,12 @@ export class TauriService implements BackendService {
         await invoke("save_image_meta", { registryId, imageId, meta });
     }
 
-    getImageUrl(registryId: number, imageId: number, level: number, x: number, y: number): string | null {
+    getTileUrl(registryId: number, imageId: number, level: number, x: number, y: number): string | null {
         return `tiles://localhost/${registryId}/${imageId}/${level}/${x}/${y}`;
+    }
+
+    getImageUrl(registryId: number, imageId: number): string | null {
+        return `tiles://localhost/${registryId}/${imageId}`;
     }
 
     async getEventRows(registryId: number): Promise<EventRow[]> {
