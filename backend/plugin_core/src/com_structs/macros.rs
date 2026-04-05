@@ -6,12 +6,20 @@ macro_rules! define_extism_interface {
         trait $TraitName:ident,
         host_ext $HostExtName:ident,
         guest_macro $export_macro:ident {
-            $( fn $method:ident($req:ty) -> Result<$res:ty, $err:ty>; )*
+
+            $(
+                $(#[$attr:meta])*
+                fn $method:ident($req:ty) -> Result<$res:ty, $err:ty>;
+            )*
         }
     ) => {
         // Common
         pub trait $TraitName {
-            $( fn $method(req: $req) -> Result<$res, $err>; )*
+
+            $(
+                $(#[$attr])*
+                fn $method(req: $req) -> Result<$res, $err>;
+            )*
         }
 
         // Plugin only
@@ -20,6 +28,7 @@ macro_rules! define_extism_interface {
         macro_rules! $export_macro {
             ($impl_type:ty) => {
                 $(
+                    $(#[$attr])*
                     #[extism_pdk::plugin_fn]
                     pub fn $method(req_str: String) -> extism_pdk::FnResult<String> {
                         let req: $req = serde_json::from_str(&req_str)
@@ -40,7 +49,11 @@ macro_rules! define_extism_interface {
         // Host only
         #[cfg(feature = "host")]
         pub trait $HostExtName {
-            $( fn $method(&mut self, req: $req) -> Result<$res, extism::Error>; )*
+
+            $(
+                $(#[$attr])*
+                fn $method(&mut self, req: $req) -> Result<$res, extism::Error>;
+            )*
             fn is_supported(&self) -> bool;
         }
 
