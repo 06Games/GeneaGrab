@@ -51,9 +51,13 @@ impl TryFrom<Image> for Zoomify {
 
 impl Zoomify {
     /// Initialize by fetching metadata from the server
-    pub fn fetch(base_url: &str, fetcher: impl Fetcher) -> Result<Self, PluginError> {
+    ///
+    /// # Errors
+    ///
+    /// Network or parsing errors
+    pub fn fetch(base_url: &str, fetcher: &impl Fetcher) -> Result<Self, PluginError> {
         let base_url = base_url.trim_end_matches('/').to_string();
-        let raw_xml = fetcher.fetch(format!("{}/ImageProperties.xml", base_url).into())?;
+        let raw_xml = fetcher.fetch(format!("{base_url}/ImageProperties.xml").into())?;
 
         let parsed = quick_xml::de::from_str::<ImageProperties>(&raw_xml)
             .map_err(|e| PluginError::ParsingError(e.to_string()))?;
@@ -67,13 +71,19 @@ impl Zoomify {
     }
 
     /// The maximum zoom level available
+    #[must_use]
     pub fn max_level(&self) -> u32 {
-        let max_dim = self.width.max(self.height) as f64;
-        let ratio = max_dim / self.tile_size as f64;
-        ratio.log2().ceil() as u32
+        let max_dim = self.width.max(self.height);
+        let ratio = max_dim.div_ceil(self.tile_size);
+        if ratio <= 1 {
+            0
+        } else {
+            (ratio - 1).ilog2() + 1
+        }
     }
 
     /// Returns the geometry for a specific level index
+    #[must_use]
     pub fn level(&self, index: u32) -> ZoomLevel {
         let max = self.max_level();
         let index = index.min(max);
@@ -87,13 +97,17 @@ impl Zoomify {
             index,
             width: l_width,
             height: l_height,
-            tiles_x: (l_width as f32 / self.tile_size as f32).ceil() as u32,
-            tiles_y: (l_height as f32 / self.tile_size as f32).ceil() as u32,
+            tiles_x: l_width.div_ceil(self.tile_size),
+            tiles_y: l_height.div_ceil(self.tile_size),
             scale_factor,
         }
     }
 
     /// Helper to generate a tile URL for a specific level and coordinate
+    ///
+    /// # Errors
+    ///
+    /// If a required field is missing from the current struct or if there's an incoherence between what we know from Zoomify and what was given
     pub fn tile_url(&self, level: u32, x: u32, y: u32) -> Result<String, PluginError> {
         let base_url = self
             .base_url
@@ -108,6 +122,6 @@ impl Zoomify {
             return Err(PluginError::InvalidField("tile_coordinates".into()));
         }
 
-        Ok(format!("{}/TileGroup0/{}-{}-{}.jpg", base_url, level, x, y))
+        Ok(format!("{base_url}/TileGroup0/{level}-{x}-{y}.jpg"))
     }
 }

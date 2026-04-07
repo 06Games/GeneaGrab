@@ -60,6 +60,7 @@ impl From<Model> for Image {
 }
 
 impl Model {
+    #[must_use] 
     pub fn from_image(image: Image, id: u32, registry_entry_id: u32) -> Self {
         Self {
             id,

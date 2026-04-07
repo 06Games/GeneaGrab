@@ -1,3 +1,4 @@
+#[allow(clippy::wildcard_imports)]
 use crate::{com_structs::*, data::PluginMetadata, define_extism_interface};
 
 define_extism_interface! {

@@ -18,6 +18,7 @@ use sea_orm::{
 };
 
 impl RegistryMeta {
+    #[must_use]
     pub fn from_entry(registry: registry_entry::Model, total_images: u32, acts_count: u32) -> Self {
         Self {
             id: registry.id,
@@ -72,7 +73,7 @@ pub async fn get_all_registries(
     // Dynamically apply filters if they exist
     if let Some(filters) = payload.filters {
         if let Some(term) = filters.search_term.filter(|s| !s.trim().is_empty()) {
-            let term = format!("%{}%", term);
+            let term = format!("%{term}%");
             query = query.filter(
                 sea_orm::Condition::any()
                     .add(registry_entry::Column::ArchiveReference.like(&term))
@@ -123,7 +124,7 @@ pub async fn get_all_registries(
         .into_model::<RegistryWithCounts>()
         .all(db)
         .await
-        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?;
+        .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
 
     let next_cursor = if data.len() > limit as usize {
         data.pop();
@@ -149,19 +150,19 @@ pub(crate) async fn get_registry(db: &DbConn, id: u32) -> Result<registry_entry:
     registry_entry::Entity::find_by_id(id)
         .one(db)
         .await
-        .map_err(|e| CoreError::DbError(format!("DB error: {}", e)))?
-        .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))
+        .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?
+        .ok_or_else(|| CoreError::NotFound(format!("Registry {id} not found")))
 }
 
 pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
-    log::info!("fetch_registry_meta called with id: {}", id);
+    log::info!("fetch_registry_meta called with id: {id}");
 
     let row = add_count_subqueries(registry_entry::Entity::find_by_id(id))
         .into_model::<RegistryWithCounts>()
         .one(db)
         .await
-        .map_err(|e| CoreError::DbError(format!("DB error: {}", e)))?
-        .ok_or_else(|| CoreError::NotFound(format!("Registry {} not found", id)))?;
+        .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?
+        .ok_or_else(|| CoreError::NotFound(format!("Registry {id} not found")))?;
 
     Ok(RegistryMeta::from_entry(
         row.registry,
@@ -176,11 +177,7 @@ pub async fn add_registry(
     url: String,
     plugin_id: String,
 ) -> Result<RegistryMeta, CoreError> {
-    log::info!(
-        "add_registry called with url: {}, plugin_id: {}",
-        url,
-        plugin_id
-    );
+    log::info!("add_registry called with url: {url}, plugin_id: {plugin_id}");
 
     let res = plugin_manager
         .execute(&plugin_id, |plugin| {
@@ -192,7 +189,7 @@ pub async fn add_registry(
     let txn = db
         .begin()
         .await
-        .map_err(|e| CoreError::DbError(format!("Failed to start transaction: {}", e)))?;
+        .map_err(|e| CoreError::DbError(format!("Failed to start transaction: {e}")))?;
 
     let mut active_registry: registry_entry::ActiveModel =
         registry_entry::Model::from_registry(res.registry, 0).into();
@@ -200,9 +197,10 @@ pub async fn add_registry(
     let new_registry: registry_entry::Model = active_registry
         .insert(&txn)
         .await
-        .map_err(|e| CoreError::DbError(format!("DB error inserting registry: {}", e)))?;
+        .map_err(|e| CoreError::DbError(format!("DB error inserting registry: {e}")))?;
 
-    let num_images = res.images.len() as u32;
+    let num_images = u32::try_from(res.images.len())
+        .map_err(|e| CoreError::InvalidInput(format!("Invalid number of images: {e}")))?;
     if !res.images.is_empty() {
         let image_active_models: Vec<image_entry::ActiveModel> = res
             .images
@@ -218,12 +216,12 @@ pub async fn add_registry(
         image_entry::Entity::insert_many(image_active_models)
             .exec(&txn)
             .await
-            .map_err(|e| CoreError::DbError(format!("DB error inserting images: {}", e)))?;
+            .map_err(|e| CoreError::DbError(format!("DB error inserting images: {e}")))?;
     }
 
     txn.commit()
         .await
-        .map_err(|e| CoreError::DbError(format!("Failed to commit transaction: {}", e)))?;
+        .map_err(|e| CoreError::DbError(format!("Failed to commit transaction: {e}")))?;
 
     let meta = RegistryMeta::from_entry(new_registry, num_images, 0);
 

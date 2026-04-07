@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use geneagrab_core::{plugins::PluginManager, services::plugin};
 use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
@@ -9,6 +11,7 @@ mod tiles;
 
 use state::AppState;
 
+#[allow(clippy::missing_panics_doc)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -71,8 +74,8 @@ pub fn run() {
                     )
                     .await
                     {
-                        Ok(_) => {
-                            log::info!("Successfully registered plugin: {}", plugin_path.display())
+                        Ok(()) => {
+                            log::info!("Successfully registered plugin: {}", plugin_path.display());
                         }
                         Err(e) => log::error!(
                             "Failed to register plugin {}: {}",

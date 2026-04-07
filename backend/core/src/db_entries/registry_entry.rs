@@ -74,6 +74,7 @@ impl From<Model> for Registry {
 }
 
 impl Model {
+    #[must_use] 
     pub fn from_registry(registry: Registry, id: u32) -> Self {
         Self {
             id,

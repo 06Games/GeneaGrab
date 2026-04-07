@@ -1,3 +1,5 @@
+#![allow(clippy::missing_errors_doc)]
+
 use crate::{com_structs::PluginError, data::http::Request};
 
 pub trait Fetcher {

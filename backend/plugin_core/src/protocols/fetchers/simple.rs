@@ -32,7 +32,7 @@ impl Fetcher for SimpleFetcher {
             )));
         }
 
-        Ok(res.body().to_vec())
+        Ok(res.body().clone())
     }
 }
 

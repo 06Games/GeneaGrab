@@ -21,7 +21,7 @@ pub(crate) fn is_image_missing_data(
 
 fn extract_image_internal(
     req: &ExtractImageRequest,
-    fetcher: impl Fetcher,
+    fetcher: &impl Fetcher,
 ) -> Result<ExtractImageResponse, PluginError> {
     let mut image = req.image.clone();
 
@@ -42,7 +42,7 @@ pub(crate) fn extract_image(
     req: &ExtractImageRequest,
 ) -> Result<ExtractImageResponse, PluginError> {
     // Image API is now under Cloudflare protection
-    extract_image_internal(req, FlareSolverrFetcher::from_config()?)
+    extract_image_internal(req, &FlareSolverrFetcher::from_config()?)
 }
 
 fn fetch_tile_internal(

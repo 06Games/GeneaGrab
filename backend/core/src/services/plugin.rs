@@ -13,7 +13,7 @@ pub async fn get_plugin_config(
     Ok(query
         .all(db)
         .await
-        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?
+        .map_err(|e| CoreError::Other(format!("DB error: {e}")))?
         .into_iter()
         .map(|settings| (settings.key, settings.value))
         .collect::<HashMap<String, String>>())
@@ -31,7 +31,7 @@ pub async fn scan_plugins_dir(plugins_dir: &PathBuf) -> Result<Vec<PathBuf>, Cor
     }
 
     Ok(std::fs::read_dir(plugins_dir)
-        .map_err(|e| CoreError::Other(format!("Failed to read plugins directory: {}", e)))?
+        .map_err(|e| CoreError::Other(format!("Failed to read plugins directory: {e}")))?
         .flatten()
         .map(|entry| entry.path())
         .filter(|path| path.extension().and_then(|e| e.to_str()) == Some("wasm"))

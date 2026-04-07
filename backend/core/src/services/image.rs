@@ -42,8 +42,8 @@ pub(crate) async fn get_image(
         .filter(image_entry::Column::ImageNumber.eq(image_id))
         .one(db)
         .await
-        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?
-        .ok_or_else(|| CoreError::NotFound(format!("Image {} not found", image_id)))
+        .map_err(|e| CoreError::Other(format!("DB error: {e}")))?
+        .ok_or_else(|| CoreError::NotFound(format!("Image {image_id} not found")))
 }
 
 pub(crate) async fn set_image(
@@ -58,7 +58,7 @@ pub(crate) async fn set_image(
         .set(image)
         .exec(db)
         .await
-        .map_err(|e| CoreError::Other(format!("DB error: {}", e)))?;
+        .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
 
     // Check if any rows were actually updated
     if update_result.rows_affected == 0 {
@@ -74,9 +74,7 @@ pub async fn fetch_image_meta(
     image_id: u32,
 ) -> Result<ImageMeta, CoreError> {
     log::info!(
-        "fetch_image_meta called for registry {} image {}",
-        registry_id,
-        image_id
+        "fetch_image_meta called for registry {registry_id} image {image_id}"
     );
 
     let image = get_image(db, registry_id, image_id).await?;
@@ -104,9 +102,7 @@ pub async fn save_image_meta(
     meta: UserImageMeta,
 ) -> Result<(), CoreError> {
     log::info!(
-        "save_image_meta called for registry {} image {}",
-        registry_id,
-        image_id
+        "save_image_meta called for registry {registry_id} image {image_id}"
     );
 
     let mut update_model = image_entry::ActiveModel {
@@ -132,7 +128,7 @@ pub async fn prepare_image(
     registry_id: u32,
     image_id: u32,
 ) -> Result<(registry_entry::Model, image_entry::Model), CoreError> {
-    log::info!("fetch_image called for image {}", image_id);
+    log::info!("fetch_image called for image {image_id}");
 
     let registry = registry::get_registry(db, registry_id).await?;
     let mut image = get_image(db, registry_id, image_id).await?;
@@ -148,9 +144,7 @@ pub async fn prepare_image(
         .await?
     {
         log::info!(
-            "Image {} is missing data ({}), extracting...",
-            image_id,
-            field
+            "Image {image_id} is missing data ({field}), extracting..."
         );
         let res = plugin_manager
             .execute(&registry.source_id, |plugin| {
@@ -170,7 +164,7 @@ pub async fn prepare_image(
         if has_updates {
             set_image(db, registry_id, image_id, image_model).await?;
         } else {
-            log::warn!("Didn't find new data for image {}, but image is said to be missing data. Trying to proceed anyway.", image_id);
+            log::warn!("Didn't find new data for image {image_id}, but image is said to be missing data. Trying to proceed anyway.");
         }
         image = get_image(db, registry_id, image_id).await?; // Refetch the image with updated data
     }

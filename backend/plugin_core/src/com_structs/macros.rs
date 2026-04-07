@@ -17,6 +17,7 @@ macro_rules! define_extism_interface {
         pub trait $TraitName {
 
             $(
+                #[allow(clippy::missing_errors_doc)]
                 $(#[$attr])*
                 fn $method(req: $req) -> Result<$res, $err>;
             )*
@@ -51,6 +52,7 @@ macro_rules! define_extism_interface {
         pub trait $HostExtName {
 
             $(
+                #[allow(clippy::missing_errors_doc)]
                 $(#[$attr])*
                 fn $method(&mut self, req: $req) -> Result<$res, extism::Error>;
             )*

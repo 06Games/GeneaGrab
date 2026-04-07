@@ -1,3 +1,4 @@
+#![allow(clippy::doc_markdown)]
 use extism_pdk::config;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -16,17 +17,21 @@ pub struct FlareSolverrFetcher {
 }
 
 impl FlareSolverrFetcher {
-    pub fn new(flaresolverr_url: String) -> Self {
+    #[must_use]
+    pub fn new(flaresolverr_url: &str) -> Self {
         Self {
             flaresolverr_url: flaresolverr_url.trim_end_matches('/').to_string(),
         }
     }
 
+    /// # Errors
+    ///
+    /// If the config value couldn't be retrieved
     pub fn from_config() -> Result<Self, PluginError> {
         let flaresolverr_url = config::get("flaresolverr_url")
-            .map_err(|e| PluginError::LibraryError(format!("Failed to get config: {}", e)))?
+            .map_err(|e| PluginError::LibraryError(format!("Failed to get config: {e}")))?
             .unwrap_or_else(|| "http://localhost:8191".to_string());
-        Ok(Self::new(flaresolverr_url))
+        Ok(Self::new(&flaresolverr_url))
     }
 }
 
@@ -69,11 +74,11 @@ impl FlareSolverrFetcher {
     */
     fn internal_fetch(&self, req: Request) -> Result<FlareSolverrSolution, PluginError> {
         let url = Url::parse(&req.url)
-            .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {}", e)))?;
+            .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {e}")))?;
         let domain = url
             .domain()
             .ok_or_else(|| PluginError::InvalidField("URL has no domain".into()))?;
-        let session_id = format!("geneagrab-{}", domain);
+        let session_id = format!("geneagrab-{domain}");
 
         let (cmd, post_data) = match req.method {
             FetchMethod::GET => ("request.get", None),
@@ -102,7 +107,7 @@ impl FlareSolverrFetcher {
         let res = SimpleFetcher {}.fetch(req)?;
 
         let parsed_res: FlareSolverrResponse = serde_json::from_str(&res).map_err(|e| {
-            PluginError::ParsingError(format!("Failed to parse FlareSolverr response: {}", e))
+            PluginError::ParsingError(format!("Failed to parse FlareSolverr response: {e}"))
         })?;
 
         if parsed_res.status != "ok" {
@@ -122,19 +127,15 @@ impl FlareSolverrFetcher {
     /**
     Returns the response body given by Flaresolverr with some cleaning to try to recover the original response.
     */
-    fn clean_response(&self, solution: FlareSolverrSolution) -> Result<Vec<u8>, PluginError> {
-        Ok(remove_xml_viewer(solution.response).into_bytes())
+    fn clean_response(solution: FlareSolverrSolution) -> std::vec::Vec<u8> {
+        remove_xml_viewer(solution.response).into_bytes()
     }
 
     /**
     Performs the original request with the obtained cookies and user agent from FlareSolverr.
     Safer than `dirty_fetch` when the response isn't HTML, but uses two requests.
     */
-    fn safe_fetch(
-        &self,
-        solution: FlareSolverrSolution,
-        req: Request,
-    ) -> Result<Vec<u8>, PluginError> {
+    fn safe_fetch(solution: FlareSolverrSolution, req: Request) -> Result<Vec<u8>, PluginError> {
         let mut req = req;
         req.headers
             .push(("User-Agent".to_string(), solution.user_agent));
@@ -146,7 +147,7 @@ impl FlareSolverrFetcher {
         }
 
         let url = Url::parse(&req.url)
-            .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {}", e)))?;
+            .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {e}")))?;
         req.headers.push((
             "Referer".to_string(),
             format!("{}://{}", url.scheme(), url.host_str().unwrap_or_default()),
@@ -161,10 +162,17 @@ impl Fetcher for FlareSolverrFetcher {
         let solution = self.internal_fetch(req.clone())?;
 
         // Could be improved... but it's good enough for now
-        if req.url.ends_with(".jpg") || req.url.ends_with(".png") || req.url.ends_with(".jpeg") {
-            self.safe_fetch(solution, req)
+        if std::path::Path::new(&req.url)
+            .extension()
+            .is_some_and(|ext| {
+                ext.eq_ignore_ascii_case("jpg")
+                    || ext.eq_ignore_ascii_case("png")
+                    || ext.eq_ignore_ascii_case("jpeg")
+            })
+        {
+            FlareSolverrFetcher::safe_fetch(solution, req)
         } else {
-            self.clean_response(solution)
+            Ok(FlareSolverrFetcher::clean_response(solution))
         }
     }
 }
