@@ -1,11 +1,12 @@
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
+use strum::Display;
 
 /**
 Represents an HTTP method for fetch requests.
 Not all methods may be supported by all fetchers.
 */
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Display)]
 pub enum FetchMethod {
     GET,
     POST,
@@ -14,27 +15,6 @@ pub enum FetchMethod {
     HEAD,
     OPTIONS,
     PATCH,
-}
-
-impl From<FetchMethod> for String {
-    fn from(method: FetchMethod) -> Self {
-        match method {
-            FetchMethod::GET => "GET",
-            FetchMethod::POST => "POST",
-            FetchMethod::PUT => "PUT",
-            FetchMethod::DELETE => "DELETE",
-            FetchMethod::HEAD => "HEAD",
-            FetchMethod::OPTIONS => "OPTIONS",
-            FetchMethod::PATCH => "PATCH",
-        }
-        .to_string()
-    }
-}
-
-impl ToString for FetchMethod {
-    fn to_string(&self) -> String {
-        (*self).into()
-    }
 }
 
 /**

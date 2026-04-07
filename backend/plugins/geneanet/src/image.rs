@@ -20,7 +20,7 @@ pub(crate) fn is_image_missing_data(
 }
 
 fn extract_image_internal(
-    req: ExtractImageRequest,
+    req: &ExtractImageRequest,
     fetcher: impl Fetcher,
 ) -> Result<ExtractImageResponse, PluginError> {
     let mut image = req.image.clone();
@@ -38,14 +38,16 @@ fn extract_image_internal(
 
     Ok(ExtractImageResponse { image })
 }
-pub(crate) fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, PluginError> {
+pub(crate) fn extract_image(
+    req: &ExtractImageRequest,
+) -> Result<ExtractImageResponse, PluginError> {
     // Image API is now under Cloudflare protection
     extract_image_internal(req, FlareSolverrFetcher::from_config()?)
 }
 
 fn fetch_tile_internal(
-    req: TileRequest,
-    fetcher: impl Fetcher,
+    req: &TileRequest,
+    fetcher: &impl Fetcher,
 ) -> Result<TileResponse, PluginError> {
     let zoomify: Zoomify = req.image.clone().try_into()?;
     let tile_url = zoomify.tile_url(req.zoom, req.x, req.y)?;
@@ -57,11 +59,12 @@ fn fetch_tile_internal(
     })
 }
 
-pub(crate) fn fetch_tile(req: TileRequest) -> Result<TileResponse, PluginError> {
+pub(crate) fn fetch_tile(req: &TileRequest) -> Result<TileResponse, PluginError> {
     // Tile API is now under Cloudflare protection
-    fetch_tile_internal(req, FlareSolverrFetcher::from_config()?)
+    fetch_tile_internal(req, &FlareSolverrFetcher::from_config()?)
 }
 
+#[allow(clippy::unnecessary_wraps, reason = "WIP")]
 pub(crate) fn download_image(_req: DownloadRequest) -> Result<Option<TileResponse>, PluginError> {
     Ok(None) // Sometimes, the images are freely downloadable. We might want to check for that in the future.
 }

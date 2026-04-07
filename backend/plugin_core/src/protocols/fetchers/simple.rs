@@ -9,7 +9,7 @@ pub struct SimpleFetcher;
 
 impl Fetcher for SimpleFetcher {
     fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, PluginError> {
-        let mut http_req = HttpRequest::new(&req.url).with_method(req.method);
+        let mut http_req = HttpRequest::new(&req.url).with_method(req.method.to_string());
         for (key, value) in req.headers {
             http_req = http_req.with_header(&key, &value);
         }

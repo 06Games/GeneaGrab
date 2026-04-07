@@ -152,7 +152,7 @@ impl FlareSolverrFetcher {
             format!("{}://{}", url.scheme(), url.host_str().unwrap_or_default()),
         ));
 
-        Ok(HostFetcher {}.fetch_raw(req)?)
+        HostFetcher {}.fetch_raw(req)
     }
 }
 

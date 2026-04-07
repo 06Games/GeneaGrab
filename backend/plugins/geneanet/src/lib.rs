@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::{borrow::Cow, sync::LazyLock};
 
 use geneagrab_plugin_core::{
@@ -36,7 +38,7 @@ static URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 struct PluginImpl;
 
 impl PluginBase for PluginImpl {
-    fn metadata(_: ()) -> Result<PluginMetadata, PluginError> {
+    fn metadata((): ()) -> Result<PluginMetadata, PluginError> {
         Ok(PLUGIN_METADATA)
     }
 
@@ -65,7 +67,7 @@ impl PluginBase for PluginImpl {
     }
 
     fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, PluginError> {
-        crate::extract::extract_registry(req)
+        crate::extract::extract_registry(&req)
     }
 
     fn is_image_missing_data(req: ExtractImageRequest) -> Result<Option<String>, PluginError> {
@@ -73,11 +75,11 @@ impl PluginBase for PluginImpl {
     }
 
     fn extract_image(req: ExtractImageRequest) -> Result<ExtractImageResponse, PluginError> {
-        crate::image::extract_image(req)
+        crate::image::extract_image(&req)
     }
 
     fn fetch_tile(req: TileRequest) -> Result<TileResponse, PluginError> {
-        crate::image::fetch_tile(req)
+        crate::image::fetch_tile(&req)
     }
 
     fn download_image(req: DownloadRequest) -> Result<Option<TileResponse>, PluginError> {

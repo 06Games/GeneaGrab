@@ -34,8 +34,8 @@ impl RegistryMeta {
             date_to: registry.date_to,
             notes: registry.notes,
 
-            total_images: total_images,
-            acts_count: acts_count,
+            total_images,
+            acts_count,
         }
     }
 }
@@ -146,7 +146,7 @@ pub async fn get_all_registries(
 }
 
 pub(crate) async fn get_registry(db: &DbConn, id: u32) -> Result<registry_entry::Model, CoreError> {
-    registry_entry::Entity::find_by_id(id.clone())
+    registry_entry::Entity::find_by_id(id)
         .one(db)
         .await
         .map_err(|e| CoreError::DbError(format!("DB error: {}", e)))?
@@ -156,7 +156,7 @@ pub(crate) async fn get_registry(db: &DbConn, id: u32) -> Result<registry_entry:
 pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
     log::info!("fetch_registry_meta called with id: {}", id);
 
-    let row = add_count_subqueries(registry_entry::Entity::find_by_id(id.clone()))
+    let row = add_count_subqueries(registry_entry::Entity::find_by_id(id))
         .into_model::<RegistryWithCounts>()
         .one(db)
         .await

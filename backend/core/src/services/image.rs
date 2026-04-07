@@ -38,7 +38,7 @@ pub(crate) async fn get_image(
     image_id: u32,
 ) -> Result<image_entry::Model, CoreError> {
     image_entry::Entity::find()
-        .filter(image_entry::Column::RegistryEntryId.eq(registry_id.clone()))
+        .filter(image_entry::Column::RegistryEntryId.eq(registry_id))
         .filter(image_entry::Column::ImageNumber.eq(image_id))
         .one(db)
         .await

@@ -70,11 +70,11 @@ fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<String
     types
 }
 
-fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), PluginError> {
-    let document = Html::parse_document(&html);
+fn parse_viewer_page(builder: &mut RegistryBuilder, html: &str) -> Result<(), PluginError> {
+    let document = Html::parse_document(html);
 
     let popup_selector = Selector::parse("#popup-informations")
-        .map_err(|e| PluginError::ParsingError(format!("Failed to parse popup selector: {}", e)))?;
+        .map_err(|e| PluginError::ParsingError(format!("Failed to parse popup selector: {e}")))?;
     let popup_element =
         document
             .select(&popup_selector)
@@ -104,8 +104,8 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), 
         place.push(loc.as_str().trim().to_string());
     }
 
-    let district_regex = Regex::new(r#"Paroisse de (?P<location>.*?)(?:\.|-|<)"#).unwrap();
-    if let Some(dist_caps) = district_regex.captures(&html) {
+    let district_regex = Regex::new(r"Paroisse de (?P<location>.*?)(?:\.|-|<)").unwrap();
+    if let Some(dist_caps) = district_regex.captures(html) {
         if let Some(dist) = dist_caps.name("location") {
             place.push(dist.as_str().trim().to_string());
         }
@@ -139,13 +139,15 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: String) -> Result<(), 
     Ok(())
 }
 
-fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, PluginError> {
+fn parse_image_api(base_url: &Url, api_json: &str) -> Result<Vec<Image>, PluginError> {
     let json_array: Vec<serde_json::Value> =
-        serde_json::from_str(&api_json).map_err(|e| PluginError::ParsingError(e.to_string()))?;
+        serde_json::from_str(api_json).map_err(|e| PluginError::ParsingError(e.to_string()))?;
 
     let mut images = Vec::new();
     for item in json_array {
-        if let Some(page_num) = item.get("page").and_then(|p| p.as_u64()) {
+        if let Some(page_num) = item.get("page").and_then(serde_json::Value::as_u64) {
+            let page_num =
+                u32::try_from(page_num).map_err(|e| PluginError::ParsingError(e.to_string()))?;
             let manifest_url = item
                 .get("image_base_url")
                 .and_then(|u| u.as_str())
@@ -167,7 +169,7 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Plugin
                 tile_size: None,
                 manifest_url,
                 ark_url,
-                image_number: page_num as u32,
+                image_number: page_num,
                 name: None,       // Irrelevant
                 date_range: None, // Could be retrieved from https://www.geneanet.org/registres/api/tool-panel/marqueur_date/view/{registry_id}/{page_num}?lang=fr
                 notes: None, // Could be populated with transcribed text from https://www.geneanet.org/registres/api/tool-panel/transcription/view/{registry_id}/{page_num}?lang=fr
@@ -179,15 +181,15 @@ fn parse_image_api(base_url: Url, api_json: String) -> Result<Vec<Image>, Plugin
 }
 
 fn extract_registry_internal(
-    req: ExtractRequest,
-    fetcher: impl Fetcher,
+    req: &ExtractRequest,
+    fetcher: &impl Fetcher,
 ) -> Result<ExtractResponse, PluginError> {
     let view_url = format!(
         "https://www.geneanet.org/registres/view/{}",
         req.identified.registry_id
     );
     let parsed_view_url: Url = Url::parse(&view_url)
-        .map_err(|e| PluginError::InvalidField(format!("Invalid view URL: {}", e)))?;
+        .map_err(|e| PluginError::InvalidField(format!("Invalid view URL: {e}")))?;
 
     let mut builder = RegistryBuilder::default();
     builder
@@ -196,11 +198,11 @@ fn extract_registry_internal(
         .ark_url(Some(view_url.clone()));
 
     let html = fetcher.fetch(view_url.into())?;
-    parse_viewer_page(&mut builder, html)?;
+    parse_viewer_page(&mut builder, &html)?;
 
     let registry = builder
         .build()
-        .map_err(|e| PluginError::ParsingError(format!("Failed to build registry: {}", e)))?;
+        .map_err(|e| PluginError::ParsingError(format!("Failed to build registry: {e}")))?;
 
     let api_url = format!(
         "https://www.geneanet.org/registres/api/images/{}?min_page=1&max_page=999999",
@@ -210,13 +212,13 @@ fn extract_registry_internal(
     // Use the injected fetcher again
     let api_json = fetcher.fetch(api_url.into())?;
 
-    let images = parse_image_api(parsed_view_url, api_json)?;
+    let images = parse_image_api(&parsed_view_url, &api_json)?;
 
     Ok(ExtractResponse { registry, images })
 }
 
-pub(crate) fn extract_registry(req: ExtractRequest) -> Result<ExtractResponse, PluginError> {
-    extract_registry_internal(req, SimpleFetcher {})
+pub(crate) fn extract_registry(req: &ExtractRequest) -> Result<ExtractResponse, PluginError> {
+    extract_registry_internal(req, &SimpleFetcher {})
 }
 
 #[cfg(test)]
@@ -311,8 +313,8 @@ mod tests {
             };
 
             let result = extract_registry_internal(
-                req,
-                mock_fetcher_factory(case.mocks, test_cases.dir.clone()),
+                &req,
+                &mock_fetcher_factory(case.mocks, test_cases.dir.clone()),
             );
 
             assert!(
@@ -331,8 +333,7 @@ mod tests {
             assert_eq!(
                 response.images.len(),
                 case.expected_image_count,
-                "[{}] parsed image count mismatch",
-                description
+                "[{description}] parsed image count mismatch"
             );
         }
     }

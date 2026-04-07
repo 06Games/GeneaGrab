@@ -76,8 +76,7 @@ async fn fetch_tiles(
     x: u32,
     y: u32,
 ) -> Result<TileResponse, Error> {
-    let (registry, image) =
-        image::prepare_image(&db, &plugin_manager, registry_id, image_id).await?;
+    let (registry, image) = image::prepare_image(db, plugin_manager, registry_id, image_id).await?;
     Ok(image::fetch_image_tile(db, plugin_manager, registry, image, level, x, y).await?)
 }
 
@@ -87,8 +86,7 @@ async fn download_image(
     registry_id: u32,
     image_id: u32,
 ) -> Result<TileResponse, Error> {
-    let (registry, image) =
-        image::prepare_image(&db, &plugin_manager, registry_id, image_id).await?;
+    let (registry, image) = image::prepare_image(db, plugin_manager, registry_id, image_id).await?;
     Ok(image::download_image(db, plugin_manager, registry, image).await?)
 }
 

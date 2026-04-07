@@ -7,7 +7,7 @@ use log::{info, trace};
 use serde::ser::StdError;
 use std::collections::HashMap;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex, MutexGuard, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 use tokio::runtime::Handle;
 use wreq::header::{HeaderName, HeaderValue};
 use wreq::{Client, Method};
@@ -33,10 +33,7 @@ impl Default for PluginManager {
     }
 }
 
-async fn http_request_impl(
-    req: Request,
-    client: MutexGuard<'_, Client>,
-) -> Result<Vec<u8>, Box<dyn StdError>> {
+async fn http_request_impl(req: Request, client: Client) -> Result<Vec<u8>, Box<dyn StdError>> {
     let headers = req
         .headers
         .iter()
@@ -64,8 +61,11 @@ async fn http_request_impl(
 
 host_fn!(http_request (user_data: Client;req: Json<Request>) -> Vec<u8> {
     let request_data = req.0;
-    let client = user_data.get()?;
-    let client = client.lock().unwrap();
+    let client = {
+        let lock = user_data.get()?;
+        let guard = lock.lock().unwrap();
+        guard.clone()
+    };
     tokio::task::block_in_place(|| {
         Handle::current().block_on(async {
             http_request_impl(request_data, client).await
