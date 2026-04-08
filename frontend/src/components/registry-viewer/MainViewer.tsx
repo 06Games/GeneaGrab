@@ -133,6 +133,23 @@ export const MainViewer = (props: MainViewerProps) => {
     const currentRot = viewer.viewport.getRotation();
     viewer.viewport.setRotation((currentRot + 90) % 360);
   };
+  const handleDownloadImage = async () => {
+    const url = api.getImageUrl(props.registryId, props.currentImage);
+    if (!url) {
+      console.error("Could not get image URL for download");
+      return;
+    }
+    const image = await fetch(url);
+    if (!image.ok) {
+      console.error("Could not fetch image for download");
+      return;
+    }
+    const blob = await image.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `image-${props.registryId}-${props.currentImage}.jpg`;
+    link.click();
+  }
   const handleCopyUrl = () => {
     const url = props.imageMeta?.ark_url;
     if (url) navigator.clipboard.writeText(url);
@@ -189,7 +206,7 @@ export const MainViewer = (props: MainViewerProps) => {
 
         <Divider vertical class="mx-2 h-5" />
 
-        <IconButton title={t("mainViewer.download")}>
+        <IconButton title={t("mainViewer.download")} onClick={handleDownloadImage}>
           <Icon icon="lucide:download"></Icon>
         </IconButton>
         <IconButton title={t("mainViewer.copyUrl")} onClick={handleCopyUrl} disabled={!props.imageMeta?.ark_url}>

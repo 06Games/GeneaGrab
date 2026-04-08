@@ -8,12 +8,14 @@ use crate::{
 use geneagrab_plugin_core::com_structs::{
     DownloadRequest, ExtractImageRequest, HostPluginBase, TileRequest, TileResponse,
 };
+use image::{DynamicImage, GenericImage, RgbImage};
 use sea_orm::{
     sea_query::Nullable,
     ActiveValue::{self, Set},
     ColumnTrait, DbConn, EntityTrait, QueryFilter, Value,
 };
 use std::collections::HashMap;
+use std::io::Cursor;
 
 pub fn patch_field<T>(field: &mut ActiveValue<Option<T>>, val: Option<Option<T>>) -> bool
 where
@@ -73,9 +75,7 @@ pub async fn fetch_image_meta(
     registry_id: u32,
     image_id: u32,
 ) -> Result<ImageMeta, CoreError> {
-    log::info!(
-        "fetch_image_meta called for registry {registry_id} image {image_id}"
-    );
+    log::info!("fetch_image_meta called for registry {registry_id} image {image_id}");
 
     let image = get_image(db, registry_id, image_id).await?;
 
@@ -101,9 +101,7 @@ pub async fn save_image_meta(
     image_id: u32,
     meta: UserImageMeta,
 ) -> Result<(), CoreError> {
-    log::info!(
-        "save_image_meta called for registry {registry_id} image {image_id}"
-    );
+    log::info!("save_image_meta called for registry {registry_id} image {image_id}");
 
     let mut update_model = image_entry::ActiveModel {
         ..Default::default()
@@ -143,9 +141,7 @@ pub async fn prepare_image(
         })
         .await?
     {
-        log::info!(
-            "Image {image_id} is missing data ({field}), extracting..."
-        );
+        log::info!("Image {image_id} is missing data ({field}), extracting...");
         let res = plugin_manager
             .execute(&registry.source_id, |plugin| {
                 plugin.extract_image(extract_req)
@@ -204,12 +200,12 @@ pub async fn fetch_image_tile(
 }
 
 pub async fn download_image(
-    _db: &DbConn,
+    db: &DbConn,
     plugin_manager: &PluginManager,
     registry: registry_entry::Model,
     image: image_entry::Model,
 ) -> Result<TileResponse, CoreError> {
-    log::info!("download_image called for image id={}", image.id,);
+    log::info!("download_image called for image id={}", image.id);
 
     let req = DownloadRequest {
         image: image.clone().into(),
@@ -223,5 +219,73 @@ pub async fn download_image(
         return Ok(res);
     }
 
-    todo!("Construct a full-res image using tiles")
+    // Construct a full-res image using tiles
+    let width = image
+        .width
+        .ok_or_else(|| CoreError::Other("Missing width".into()))?;
+    let height = image
+        .height
+        .ok_or_else(|| CoreError::Other("Missing height".into()))?;
+    let tile_size = image.tile_size.unwrap_or(256);
+
+    // Calculate max level: L = ceil(log2(max(W, H) / T))
+    let max_dim = width.max(height);
+    let max_level = if max_dim <= tile_size {
+        0
+    } else {
+        ((max_dim as f32 / tile_size as f32).ceil()).log2().ceil() as u32
+    };
+
+    let tiles_x = width.div_ceil(tile_size);
+    let tiles_y = height.div_ceil(tile_size);
+
+    log::info!(
+        "Stitching image {} from tiles at level {} ({}x{} tiles, total {}x{})",
+        image.id,
+        max_level,
+        tiles_x,
+        tiles_y,
+        width,
+        height
+    );
+
+    let mut canvas = RgbImage::new(width, height);
+
+    for y in 0..tiles_y {
+        for x in 0..tiles_x {
+            let tile = fetch_image_tile(
+                db,
+                plugin_manager,
+                registry.clone(),
+                image.clone(),
+                max_level,
+                x,
+                y,
+            )
+            .await?;
+
+            let tile_img = image::load_from_memory(&tile.data)
+                .map_err(|e| CoreError::Other(format!("Failed to decode tile {x},{y}: {e}")))?;
+
+            let tile_rgb = tile_img.to_rgb8();
+
+            // Calculate position, ensuring we don't go out of bounds if the last tile is partial
+            let pos_x = x * tile_size;
+            let pos_y = y * tile_size;
+
+            canvas
+                .copy_from(&tile_rgb, pos_x, pos_y)
+                .map_err(|e| CoreError::Other(format!("Failed to stitch tile {x},{y}: {e}")))?;
+        }
+    }
+
+    let mut buffer = Cursor::new(Vec::new());
+    DynamicImage::ImageRgb8(canvas)
+        .write_to(&mut buffer, image::ImageFormat::Jpeg)
+        .map_err(|e| CoreError::Other(format!("Failed to encode final image: {e}")))?;
+
+    Ok(TileResponse {
+        data: buffer.into_inner(),
+        mime_type: "image/jpeg".to_string(),
+    })
 }
