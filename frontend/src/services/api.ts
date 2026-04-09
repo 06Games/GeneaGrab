@@ -19,6 +19,7 @@ export interface BackendService {
     saveImageMeta(registryId: number, imageId: number, meta: Partial<UserImageMeta>): Promise<void>;
     getTileUrl(registryId: number, imageId: number, level: number, x: number, y: number): string | null;
     getImageUrl(registryId: number, imageId: number): string | null;
+    onDownloadProgress(registryId: number, imageId: number, cb: (current: number, total: number) => void): Promise<() => void>;
 
     // Index
     getEventRows(registryId: number): Promise<EventRow[]>;

@@ -1,4 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
@@ -72,6 +73,14 @@ export class TauriService implements BackendService {
 
     getImageUrl(registryId: number, imageId: number): string | null {
         return `tiles://localhost/${registryId}/${imageId}`;
+    }
+
+    async onDownloadProgress(registryId: number, imageId: number, cb: (current: number, total: number) => void): Promise<() => void> {
+        return await listen<{ registry_id: number, image_id: number, current: number, total: number }>('download-progress', (event) => {
+            if (event.payload.registry_id === registryId && event.payload.image_id === imageId) {
+                cb(event.payload.current, event.payload.total);
+            }
+        });
     }
 
     async getEventRows(registryId: number): Promise<EventRow[]> {

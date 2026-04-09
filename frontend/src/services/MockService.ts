@@ -101,6 +101,16 @@ export class MockService implements BackendService {
     return "/src/assets/logo.svg";
   }
 
+  onDownloadProgress = async (_registryId: number, _imageId: number, cb: (current: number, total: number) => void): Promise<() => void> => {
+    let current = 0;
+    const total = 10;
+    const interval = setInterval(() => {
+      current += 1;
+      cb(current, total);
+    }, 150);
+    return () => clearInterval(interval);
+  }
+
   getEventRows = async (registryId: number): Promise<EventRow[]> => {
     console.info(`[Mock API] getEventRows: ${registryId}`);
     await this.delay(400);

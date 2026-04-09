@@ -20,6 +20,9 @@ pub enum CoreError {
     #[error("Plugin error: {0}")]
     PluginError(String),
 
+    #[error("Number error: {0}")]
+    NumberError(#[from] std::num::TryFromIntError),
+
     #[error("{0}")]
     Other(String),
 }

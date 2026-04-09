@@ -92,7 +92,7 @@ pub fn run() {
             let app_handle: AppHandle = ctx.app_handle().clone();
             tauri::async_runtime::spawn(async move {
                 let state = app_handle.state::<AppState>();
-                responder.respond(tiles::handle_tile_request(request, state).await.unwrap());
+                responder.respond(tiles::handle_tile_request(request, state, app_handle.clone()).await.unwrap());
             });
         })
         // Register all IPC commands

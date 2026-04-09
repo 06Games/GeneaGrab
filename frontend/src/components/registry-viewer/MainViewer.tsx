@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onMount, onCleanup } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, Show } from "solid-js";
 import OpenSeadragon from "openseadragon";
 import { IconButton, Divider } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
@@ -24,6 +24,7 @@ export const MainViewer = (props: MainViewerProps) => {
   const [zoomDisplay, setZoomDisplay] = createSignal(100);
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
   const [imageError, setImageError] = createSignal(false);
+  const [downloadProgress, setDownloadProgress] = createSignal<{ current: number, total: number } | null>(null);
 
   createEffect(() => {
     setImageInput(String(props.currentImage));
@@ -133,23 +134,37 @@ export const MainViewer = (props: MainViewerProps) => {
     const currentRot = viewer.viewport.getRotation();
     viewer.viewport.setRotation((currentRot + 90) % 360);
   };
+
   const handleDownloadImage = async () => {
-    const url = api.getImageUrl(props.registryId, props.currentImage);
-    if (!url) {
-      console.error("Could not get image URL for download");
-      return;
+    if (downloadProgress()) return;
+
+    let unlisten: (() => void) | undefined;
+
+    try {
+      setDownloadProgress({ current: 0, total: 100 });
+      unlisten = await api.onDownloadProgress(props.registryId, props.currentImage, (current, total) => {
+        setDownloadProgress({ current, total });
+      });
+
+      const url = api.getImageUrl(props.registryId, props.currentImage);
+      if (!url) throw new Error("No image URL");
+
+      const image = await fetch(url);
+      if (!image.ok) throw new Error("Fetch failed");
+
+      const blob = await image.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `image-${props.registryId}-${props.currentImage}.jpg`;
+      link.click();
+    } catch (e) {
+      console.error("Could not download image", e);
+    } finally {
+      if (unlisten) unlisten();
+      setDownloadProgress(null);
     }
-    const image = await fetch(url);
-    if (!image.ok) {
-      console.error("Could not fetch image for download");
-      return;
-    }
-    const blob = await image.blob();
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `image-${props.registryId}-${props.currentImage}.jpg`;
-    link.click();
   }
+
   const handleCopyUrl = () => {
     const url = props.imageMeta?.ark_url;
     if (url) navigator.clipboard.writeText(url);
@@ -206,9 +221,24 @@ export const MainViewer = (props: MainViewerProps) => {
 
         <Divider vertical class="mx-2 h-5" />
 
-        <IconButton title={t("mainViewer.download")} onClick={handleDownloadImage}>
-          <Icon icon="lucide:download"></Icon>
-        </IconButton>
+        <Show when={downloadProgress()} fallback={
+          <IconButton title={t("mainViewer.download")} onClick={handleDownloadImage}>
+            <Icon icon="lucide:download"></Icon>
+          </IconButton>
+        }>
+          {(progress) => (
+            <div class="relative inline-grid place-items-center w-8 h-8 rounded-md cursor-wait" title={`${progress().current} / ${progress().total}`}>
+              <Icon icon="lucide:download" class="col-start-1 row-start-1 opacity-30"></Icon>
+
+              <Icon
+                icon="lucide:download"
+                class="col-start-1 row-start-1 text-accent transition-all duration-300"
+                style={{ "clip-path": `inset(0 0 ${100 - (progress().current / Math.max(1, progress().total)) * 100}% 0)` }}
+              ></Icon>
+            </div>
+          )}
+        </Show>
+
         <IconButton title={t("mainViewer.copyUrl")} onClick={handleCopyUrl} disabled={!props.imageMeta?.ark_url}>
           <Icon icon="lucide:link"></Icon>
         </IconButton>

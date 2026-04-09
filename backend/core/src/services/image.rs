@@ -203,12 +203,16 @@ pub async fn fetch_image_tile(
     Ok(image_data)
 }
 
-pub async fn download_image(
+pub async fn download_image<F>(
     db: &DbConn,
     plugin_manager: &PluginManager,
     registry: registry_entry::Model,
     image: image_entry::Model,
-) -> Result<TileResponse, CoreError> {
+    mut progress_callback: F,
+) -> Result<TileResponse, CoreError>
+where
+    F: FnMut(u32, u32) + Send,
+{
     log::info!("download_image called for image id={}", image.id);
 
     let req = DownloadRequest {
@@ -220,6 +224,7 @@ pub async fn download_image(
         .await?;
 
     if let Some(res) = image_data {
+        progress_callback(1, 1);
         return Ok(res);
     }
 
@@ -256,6 +261,9 @@ pub async fn download_image(
         }
     }
 
+    let total_tiles = u32::try_from(coords.len())?;
+    let mut completed_tiles = 0;
+
     let registry_ref = &registry;
     let image_ref = &image;
 
@@ -285,6 +293,9 @@ pub async fn download_image(
         canvas
             .copy_from(&tile_rgb, pos_x, pos_y)
             .map_err(|e| CoreError::Other(format!("Failed to stitch tile {x},{y}: {e}")))?;
+
+        completed_tiles += 1;
+        progress_callback(completed_tiles, total_tiles);
     }
 
     let mut buffer = Cursor::new(Vec::new());
