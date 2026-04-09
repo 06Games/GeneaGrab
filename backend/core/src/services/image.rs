@@ -5,8 +5,12 @@ use crate::{
     plugins::PluginManager,
     services::registry,
 };
-use geneagrab_plugin_core::com_structs::{
-    DownloadRequest, ExtractImageRequest, HostPluginBase, TileRequest, TileResponse,
+use futures::StreamExt;
+use geneagrab_plugin_core::{
+    com_structs::{
+        DownloadRequest, ExtractImageRequest, HostPluginBase, TileRequest, TileResponse,
+    },
+    utils::ImageGeometry,
 };
 use image::{DynamicImage, GenericImage, RgbImage};
 use sea_orm::{
@@ -171,8 +175,8 @@ pub async fn prepare_image(
 pub async fn fetch_image_tile(
     _db: &DbConn,
     plugin_manager: &PluginManager,
-    registry: registry_entry::Model,
-    image: image_entry::Model,
+    registry: &registry_entry::Model,
+    image: &image_entry::Model,
     level: u32,
     x: u32,
     y: u32,
@@ -228,55 +232,59 @@ pub async fn download_image(
         .ok_or_else(|| CoreError::Other("Missing height".into()))?;
     let tile_size = image.tile_size.unwrap_or(256);
 
-    // Calculate max level: L = ceil(log2(max(W, H) / T))
-    let max_dim = width.max(height);
-    let max_level = if max_dim <= tile_size {
-        0
-    } else {
-        ((max_dim as f32 / tile_size as f32).ceil()).log2().ceil() as u32
-    };
-
-    let tiles_x = width.div_ceil(tile_size);
-    let tiles_y = height.div_ceil(tile_size);
+    // Utilize our shared geometry logic
+    let geometry = ImageGeometry::new(width, height, tile_size);
+    let max_level = geometry.max_level();
+    let base_layer = geometry.level(max_level);
 
     log::info!(
         "Stitching image {} from tiles at level {} ({}x{} tiles, total {}x{})",
         image.id,
         max_level,
-        tiles_x,
-        tiles_y,
-        width,
-        height
+        base_layer.tiles_x,
+        base_layer.tiles_y,
+        base_layer.width,
+        base_layer.height
     );
 
-    let mut canvas = RgbImage::new(width, height);
+    let mut canvas = RgbImage::new(base_layer.width, base_layer.height);
 
-    for y in 0..tiles_y {
-        for x in 0..tiles_x {
-            let tile = fetch_image_tile(
-                db,
-                plugin_manager,
-                registry.clone(),
-                image.clone(),
-                max_level,
-                x,
-                y,
-            )
-            .await?;
-
-            let tile_img = image::load_from_memory(&tile.data)
-                .map_err(|e| CoreError::Other(format!("Failed to decode tile {x},{y}: {e}")))?;
-
-            let tile_rgb = tile_img.to_rgb8();
-
-            // Calculate position, ensuring we don't go out of bounds if the last tile is partial
-            let pos_x = x * tile_size;
-            let pos_y = y * tile_size;
-
-            canvas
-                .copy_from(&tile_rgb, pos_x, pos_y)
-                .map_err(|e| CoreError::Other(format!("Failed to stitch tile {x},{y}: {e}")))?;
+    let mut coords = Vec::new();
+    for y in 0..base_layer.tiles_y {
+        for x in 0..base_layer.tiles_x {
+            coords.push((x, y));
         }
+    }
+
+    let registry_ref = &registry;
+    let image_ref = &image;
+
+    // Fetch tiles concurrently
+    let max_concurrent_requests = 5;
+    let mut stream = futures::stream::iter(coords)
+        .map(|(x, y)| async move {
+            let tile =
+                fetch_image_tile(db, plugin_manager, registry_ref, image_ref, max_level, x, y)
+                    .await?;
+            Ok::<((u32, u32), TileResponse), CoreError>(((x, y), tile))
+        })
+        .buffer_unordered(max_concurrent_requests);
+
+    // Process responses as they complete
+    while let Some(result) = stream.next().await {
+        let ((x, y), tile) = result?;
+
+        let tile_img = image::load_from_memory(&tile.data)
+            .map_err(|e| CoreError::Other(format!("Failed to decode tile {x},{y}: {e}")))?;
+
+        let tile_rgb = tile_img.to_rgb8();
+
+        let pos_x = x * tile_size;
+        let pos_y = y * tile_size;
+
+        canvas
+            .copy_from(&tile_rgb, pos_x, pos_y)
+            .map_err(|e| CoreError::Other(format!("Failed to stitch tile {x},{y}: {e}")))?;
     }
 
     let mut buffer = Cursor::new(Vec::new());

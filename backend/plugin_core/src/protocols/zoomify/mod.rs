@@ -1,6 +1,11 @@
 use serde::Deserialize;
 
-use crate::{com_structs::PluginError, data::Image, protocols::fetchers::Fetcher};
+use crate::{
+    com_structs::PluginError,
+    data::Image,
+    protocols::fetchers::Fetcher,
+    utils::ImageGeometry,
+};
 
 #[derive(Debug, Deserialize)]
 struct ImageProperties {
@@ -14,34 +19,24 @@ struct ImageProperties {
 
 /// Represents a Zoomify-enabled image source
 pub struct Zoomify {
-    pub width: u32,
-    pub height: u32,
-    pub tile_size: u32,
+    pub geometry: ImageGeometry,
     base_url: Option<String>,
-}
-
-/// Information about a specific zoom level's geometry
-pub struct ZoomLevel {
-    pub index: u32,
-    pub width: u32,
-    pub height: u32,
-    pub tiles_x: u32,
-    pub tiles_y: u32,
-    pub scale_factor: u32,
 }
 
 impl TryFrom<Image> for Zoomify {
     type Error = PluginError;
 
     fn try_from(value: Image) -> Result<Self, Self::Error> {
+        let width = value
+            .width
+            .ok_or_else(|| PluginError::MissingField("width".into()))?;
+        let height = value
+            .height
+            .ok_or_else(|| PluginError::MissingField("height".into()))?;
+        let tile_size = value.tile_size.unwrap_or(256);
+
         Ok(Self {
-            width: value
-                .width
-                .ok_or_else(|| PluginError::MissingField("width".into()))?,
-            height: value
-                .height
-                .ok_or_else(|| PluginError::MissingField("height".into()))?,
-            tile_size: value.tile_size.unwrap_or(256),
+            geometry: ImageGeometry::new(width, height, tile_size),
             base_url: value
                 .manifest_url
                 .map(|url| url.trim_end_matches('/').to_string()),
@@ -63,44 +58,9 @@ impl Zoomify {
             .map_err(|e| PluginError::ParsingError(e.to_string()))?;
 
         Ok(Self {
-            width: parsed.width,
-            height: parsed.height,
-            tile_size: parsed.tile_size,
+            geometry: ImageGeometry::new(parsed.width, parsed.height, parsed.tile_size),
             base_url: Some(base_url),
         })
-    }
-
-    /// The maximum zoom level available
-    #[must_use]
-    pub fn max_level(&self) -> u32 {
-        let max_dim = self.width.max(self.height);
-        let ratio = max_dim.div_ceil(self.tile_size);
-        if ratio <= 1 {
-            0
-        } else {
-            (ratio - 1).ilog2() + 1
-        }
-    }
-
-    /// Returns the geometry for a specific level index
-    #[must_use]
-    pub fn level(&self, index: u32) -> ZoomLevel {
-        let max = self.max_level();
-        let index = index.min(max);
-        let scale_factor = 2u32.pow(max - index);
-
-        // Dimensions at this specific zoom level
-        let l_width = self.width / scale_factor;
-        let l_height = self.height / scale_factor;
-
-        ZoomLevel {
-            index,
-            width: l_width,
-            height: l_height,
-            tiles_x: l_width.div_ceil(self.tile_size),
-            tiles_y: l_height.div_ceil(self.tile_size),
-            scale_factor,
-        }
     }
 
     /// Helper to generate a tile URL for a specific level and coordinate
@@ -114,7 +74,7 @@ impl Zoomify {
             .as_ref()
             .ok_or_else(|| PluginError::MissingField("base_url".into()))?;
 
-        let properties = self.level(level);
+        let properties = self.geometry.level(level);
         if level != properties.index {
             return Err(PluginError::InvalidField("zoom".into()));
         }

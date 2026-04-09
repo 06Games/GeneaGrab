@@ -32,9 +32,9 @@ fn extract_image_internal(
 
     let zoomify = Zoomify::fetch(&base_url, fetcher)?;
 
-    image.width = Some(zoomify.width);
-    image.height = Some(zoomify.height);
-    image.tile_size = Some(zoomify.tile_size);
+    image.width = Some(zoomify.geometry.width);
+    image.height = Some(zoomify.geometry.height);
+    image.tile_size = Some(zoomify.geometry.tile_size);
 
     Ok(ExtractImageResponse { image })
 }
