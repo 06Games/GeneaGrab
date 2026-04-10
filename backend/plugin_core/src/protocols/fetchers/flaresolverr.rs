@@ -1,4 +1,6 @@
 #![allow(clippy::doc_markdown)]
+use std::{fmt::Display, string::ToString};
+
 use extism_pdk::config;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -56,16 +58,60 @@ struct FlareSolverrResponse {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct FlareSolverrSolution {
+    url: String,
     response: String,
     user_agent: String,
     cookies: Vec<FlareSolverrCookie>,
 }
 
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct FlareSolverrCookie {
     pub name: String,
     pub value: String,
+}
+
+impl Display for FlareSolverrCookie {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}={}", self.name, self.value)
+    }
+}
+
+#[derive(Serialize, Deserialize)]
+struct Clearance {
+    user_agent: String,
+    cookies: Vec<FlareSolverrCookie>,
+    referer: String,
+}
+
+impl TryFrom<FlareSolverrSolution> for Clearance {
+    type Error = url::ParseError;
+
+    fn try_from(value: FlareSolverrSolution) -> Result<Self, Self::Error> {
+        let url = Url::parse(&value.url)?;
+        Ok(Self {
+            user_agent: value.user_agent,
+            cookies: value.cookies,
+            referer: format!("{}://{}", url.scheme(), url.host_str().unwrap_or_default()),
+        })
+    }
+}
+
+impl IntoIterator for Clearance {
+    type Item = (String, String);
+    type IntoIter = std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        vec![
+            ("User-Agent".to_string(), self.user_agent),
+            (
+                "Cookie".to_string(),
+                build_cookie_header_string(&self.cookies),
+            ),
+            ("Referer".to_string(), self.referer),
+        ]
+        .into_iter()
+    }
 }
 
 impl FlareSolverrFetcher {
@@ -135,24 +181,9 @@ impl FlareSolverrFetcher {
     Performs the original request with the obtained cookies and user agent from FlareSolverr.
     Safer than `dirty_fetch` when the response isn't HTML, but uses two requests.
     */
-    fn safe_fetch(solution: FlareSolverrSolution, req: Request) -> Result<Vec<u8>, PluginError> {
+    fn safe_fetch(clearance: Clearance, req: Request) -> Result<Vec<u8>, PluginError> {
         let mut req = req;
-        req.headers
-            .push(("User-Agent".to_string(), solution.user_agent));
-        if !solution.cookies.is_empty() {
-            req.headers.push((
-                "Cookie".to_string(),
-                build_cookie_header_string(&solution.cookies),
-            ));
-        }
-
-        let url = Url::parse(&req.url)
-            .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {e}")))?;
-        req.headers.push((
-            "Referer".to_string(),
-            format!("{}://{}", url.scheme(), url.host_str().unwrap_or_default()),
-        ));
-
+        req.headers.extend(clearance);
         HostFetcher {}.fetch_raw(req)
     }
 }
@@ -170,7 +201,12 @@ impl Fetcher for FlareSolverrFetcher {
                     || ext.eq_ignore_ascii_case("jpeg")
             })
         {
-            FlareSolverrFetcher::safe_fetch(solution, req)
+            FlareSolverrFetcher::safe_fetch(
+                solution
+                    .try_into()
+                    .map_err(|e: url::ParseError| PluginError::ParsingError(e.to_string()))?,
+                req,
+            )
         } else {
             Ok(FlareSolverrFetcher::clean_response(solution))
         }
@@ -183,7 +219,7 @@ Converts a list of cookies into a single Cookie header string.
 fn build_cookie_header_string(cookies: &[FlareSolverrCookie]) -> String {
     cookies
         .iter()
-        .map(|c| format!("{}={}", c.name, c.value))
+        .map(ToString::to_string)
         .collect::<Vec<String>>()
         .join("; ")
 }
