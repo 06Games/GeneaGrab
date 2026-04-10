@@ -1,7 +1,7 @@
 #![allow(clippy::doc_markdown)]
 use std::{fmt::Display, string::ToString};
 
-use extism_pdk::config;
+use extism_pdk::{config, var, Json};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -11,9 +11,7 @@ use crate::{
     protocols::fetchers::{Fetcher, HostFetcher, SimpleFetcher},
 };
 
-/**
-Proxies requests through FlareSolverr to bypass Cloudflare protections.
-*/
+/// Proxies requests through FlareSolverr to bypass Cloudflare protections.
 pub struct FlareSolverrFetcher {
     flaresolverr_url: String,
 }
@@ -55,7 +53,7 @@ struct FlareSolverrResponse {
     solution: Option<FlareSolverrSolution>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct FlareSolverrSolution {
     url: String,
@@ -64,7 +62,7 @@ struct FlareSolverrSolution {
     cookies: Vec<FlareSolverrCookie>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 struct FlareSolverrCookie {
     pub name: String,
@@ -85,14 +83,13 @@ struct Clearance {
 }
 
 impl TryFrom<FlareSolverrSolution> for Clearance {
-    type Error = url::ParseError;
+    type Error = PluginError;
 
     fn try_from(value: FlareSolverrSolution) -> Result<Self, Self::Error> {
-        let url = Url::parse(&value.url)?;
         Ok(Self {
             user_agent: value.user_agent,
             cookies: value.cookies,
-            referer: format!("{}://{}", url.scheme(), url.host_str().unwrap_or_default()),
+            referer: build_referer(&value.url)?,
         })
     }
 }
@@ -115,9 +112,7 @@ impl IntoIterator for Clearance {
 }
 
 impl FlareSolverrFetcher {
-    /**
-    Performs a fetch through FlareSolverr.
-    */
+    /// Performs a fetch through FlareSolverr.
     fn internal_fetch(&self, req: Request) -> Result<FlareSolverrSolution, PluginError> {
         let url = Url::parse(&req.url)
             .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {e}")))?;
@@ -170,17 +165,13 @@ impl FlareSolverrFetcher {
         Ok(solution)
     }
 
-    /**
-    Returns the response body given by Flaresolverr with some cleaning to try to recover the original response.
-    */
+    /// Returns the response body given by Flaresolverr with some cleaning to try to recover the original response.
     fn clean_response(solution: FlareSolverrSolution) -> std::vec::Vec<u8> {
         remove_xml_viewer(solution.response).into_bytes()
     }
 
-    /**
-    Performs the original request with the obtained cookies and user agent from FlareSolverr.
-    Safer than `dirty_fetch` when the response isn't HTML, but uses two requests.
-    */
+    /// Performs the original request with the obtained cookies and user agent from FlareSolverr.
+    /// Safer than `dirty_fetch` when the response isn't HTML, but uses two requests.
     fn safe_fetch(clearance: Clearance, req: Request) -> Result<Vec<u8>, PluginError> {
         let mut req = req;
         req.headers.extend(clearance);
@@ -190,32 +181,55 @@ impl FlareSolverrFetcher {
 
 impl Fetcher for FlareSolverrFetcher {
     fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, PluginError> {
+        let host = build_referer(&req.url)?;
+        let cache_key = format!("flaresolverr_{host}");
+
+        if needs_safe_request(&req.url) {
+            if let Ok(Some(cached_solution)) = var::get::<Json<Clearance>>(&cache_key) {
+                // Try to fetch using the cached session
+                if let Ok(data) = FlareSolverrFetcher::safe_fetch(cached_solution.0, req.clone()) {
+                    return Ok(data);
+                }
+            }
+        }
+
         let solution = self.internal_fetch(req.clone())?;
+        var::set(&cache_key, Json::<Clearance>(solution.clone().try_into()?))
+            .map_err(|e| PluginError::LibraryError(format!("Couldn't store cache: {e}")))?;
 
         // Could be improved... but it's good enough for now
-        if std::path::Path::new(&req.url)
-            .extension()
-            .is_some_and(|ext| {
-                ext.eq_ignore_ascii_case("jpg")
-                    || ext.eq_ignore_ascii_case("png")
-                    || ext.eq_ignore_ascii_case("jpeg")
-            })
-        {
-            FlareSolverrFetcher::safe_fetch(
-                solution
-                    .try_into()
-                    .map_err(|e: url::ParseError| PluginError::ParsingError(e.to_string()))?,
-                req,
-            )
+        if needs_safe_request(&req.url) {
+            FlareSolverrFetcher::safe_fetch(solution.try_into()?, req)
         } else {
             Ok(FlareSolverrFetcher::clean_response(solution))
         }
     }
 }
 
-/**
-Converts a list of cookies into a single Cookie header string.
-*/
+/// Determine if a request needs a second pass without FlareSolverr (because of the browser modifying the response)
+fn needs_safe_request(url: &str) -> bool {
+    std::path::Path::new(url).extension().is_some_and(|ext| {
+        ext.eq_ignore_ascii_case("jpg")
+            || ext.eq_ignore_ascii_case("png")
+            || ext.eq_ignore_ascii_case("jpeg")
+    })
+}
+
+/// Build the Referer header for a request
+fn build_referer(url: &str) -> Result<String, PluginError> {
+    let url =
+        Url::parse(url).map_err(|e| PluginError::ParsingError(format!("Invalid url: {e}")))?;
+    Ok(format!(
+        "{}://{}",
+        url.scheme(),
+        url.host_str()
+            .ok_or(PluginError::ParsingError(String::from(
+                "Can't generate referer with empty host"
+            )))?
+    ))
+}
+
+/// Converts a list of cookies into a single Cookie header string.
 fn build_cookie_header_string(cookies: &[FlareSolverrCookie]) -> String {
     cookies
         .iter()
@@ -224,9 +238,7 @@ fn build_cookie_header_string(cookies: &[FlareSolverrCookie]) -> String {
         .join("; ")
 }
 
-/**
-FlareSolverr wraps XML responses in viewer, this function removes that wrapper if it exists.
-*/
+/// FlareSolverr wraps XML responses in viewer, this function removes that wrapper if it exists.
 fn remove_xml_viewer(response: String) -> String {
     let viewer_tag = "<div id=\"webkit-xml-viewer-source-xml\">";
     if let Some(start_idx) = response.find(viewer_tag) {
