@@ -94,22 +94,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
 
-      - name: Build and Package Tauri App
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          projectPath: ./backend/tauri
-          includeRelease: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          tagName: v__VERSION__
-          releaseName: "GeneaGrab v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
-          prerelease: false
-          args: ${{ matrix.args }}
+      - name: Install Tauri CLI
+        run: bun add -g @tauri-apps/cli@^2.0.0
+
+      - name: Build Tauri App
+        working-directory: ./backend/tauri
+        run: bunx tauri build ${{ matrix.args }}
 
       - name: Upload App Artifacts
-        if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/upload-artifact@v4
         with:
           name: geneagrab-app-${{ matrix.id }}
@@ -119,9 +111,9 @@ jobs:
             backend/target/**/release/bundle/**/*.deb
             backend/target/**/release/bundle/**/*.msi
             backend/target/**/release/bundle/**/*.exe
-          if-no-files-found: ignore
+          if-no-files-found: error
 
-  upload-plugin-assets:
+  upload-release-assets:
     needs:
       - build-plugins
       - build-tauri
@@ -131,14 +123,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Plugins Artifact
+      - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: geneagrab-plugins
-          path: dist-plugins
+          path: artifacts
 
-      - name: Upload Plugins to Release
+      - name: Create Release and Upload Assets
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload ${{ github.ref_name }} dist-plugins/*.wasm --clobber --repo ${{ github.repository }}
+          gh release create ${{ github.ref_name }} --title "GeneaGrab ${{ github.ref_name }}" --notes "See the assets to download this version and install." --draft || true
+          find artifacts -type f \( -name "*.wasm" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.msi" -o -name "*.exe" \) -exec gh release upload ${{ github.ref_name }} {} --clobber --repo ${{ github.repository }} \;
