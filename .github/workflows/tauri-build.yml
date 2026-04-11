@@ -106,7 +106,12 @@ jobs:
         with:
           name: geneagrab-app-${{ matrix.id }}
           path: |
-            backend/target/**/release/bundle/
+            backend/target/**/release/bundle/**/*.dmg
+            backend/target/**/release/bundle/**/*.AppImage
+            backend/target/**/release/bundle/**/*.rpm
+            backend/target/**/release/bundle/**/*.deb
+            backend/target/**/release/bundle/**/*.msi
+            backend/target/**/release/bundle/**/*.exe
           if-no-files-found: error
 
   upload-release-assets:
