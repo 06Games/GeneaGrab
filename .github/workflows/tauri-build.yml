@@ -106,11 +106,7 @@ jobs:
         with:
           name: geneagrab-app-${{ matrix.id }}
           path: |
-            backend/target/**/release/bundle/**/*.dmg
-            backend/target/**/release/bundle/**/*.AppImage
-            backend/target/**/release/bundle/**/*.deb
-            backend/target/**/release/bundle/**/*.msi
-            backend/target/**/release/bundle/**/*.exe
+            backend/target/**/release/bundle/
           if-no-files-found: error
 
   upload-release-assets:
@@ -133,4 +129,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create ${{ github.ref_name }} --title "GeneaGrab ${{ github.ref_name }}" --notes "See the assets to download this version and install." --draft || true
-          find artifacts -type f \( -name "*.wasm" -o -name "*.dmg" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.msi" -o -name "*.exe" \) -exec gh release upload ${{ github.ref_name }} {} --clobber --repo ${{ github.repository }} \;
+          find artifacts -type f -exec gh release upload ${{ github.ref_name }} {} --clobber --repo ${{ github.repository }} \;
