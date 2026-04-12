@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "GeneaGrab",
+  "productName": "geneagrab",
   "version": "4.0.0",
   "identifier": "com.06games.geneagrab",
   "build": {
@@ -43,7 +43,9 @@
   "plugins": {
     "deep-link": {
       "desktop": {
-        "schemes": ["geneagrab"]
+        "schemes": [
+          "geneagrab"
+        ]
       }
     }
   }
