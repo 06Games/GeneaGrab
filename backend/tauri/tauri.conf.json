@@ -25,6 +25,7 @@
       "csp": null
     }
   },
+  "mainBinaryName": "geneagrab",
   "bundle": {
     "active": true,
     "targets": "all",
