@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onMount, onCleanup, Show } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, Show, Switch, Match, createMemo } from "solid-js";
 import OpenSeadragon from "openseadragon";
 import { IconButton, Divider } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
@@ -15,6 +15,16 @@ interface MainViewerProps {
   viewerRef?: (el: HTMLElement) => void;
 }
 
+enum ImageStatus {
+  Loading,
+  Error,
+  Loaded,
+}
+type ViewerState =
+  | { type: ImageStatus.Loading }
+  | { type: ImageStatus.Loaded }
+  | { type: ImageStatus.Error; message: string };
+
 export const MainViewer = (props: MainViewerProps) => {
   const { t } = useI18n();
   const api = getBackendService();
@@ -23,12 +33,13 @@ export const MainViewer = (props: MainViewerProps) => {
 
   const [zoomDisplay, setZoomDisplay] = createSignal(100);
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
-  const [imageError, setImageError] = createSignal(false);
+  const [imageStatus, setImageStatus] = createSignal<ViewerState>({ type: ImageStatus.Loading });
   const [downloadProgress, setDownloadProgress] = createSignal<{ current: number, total: number } | null>(null);
 
   createEffect(() => {
+    const isImageNumValid = props.currentImage >= 1 && props.currentImage <= props.totalImages;
     setImageInput(String(props.currentImage));
-    setImageError(props.currentImage < 1 || props.currentImage > props.totalImages);
+    setImageStatus(isImageNumValid ? { type: ImageStatus.Loading } : { type: ImageStatus.Error, message: t("mainViewer.invalidImage", { n: props.currentImage }) });
   });
 
   const commitImageInput = () => {
@@ -69,6 +80,8 @@ export const MainViewer = (props: MainViewerProps) => {
         // Force a coordinate change to wake up the rendering
         viewer.viewport.zoomBy(1.00001);
         viewer.forceRedraw();
+
+        if (imageStatus().type == ImageStatus.Loading) setImageStatus({ type: ImageStatus.Loaded });
       };
 
       if (item.getFullyLoaded())
@@ -77,9 +90,15 @@ export const MainViewer = (props: MainViewerProps) => {
         if (e.fullyLoaded) wakeUpAndDraw();
       });
     });
-
-    viewer.addHandler("open-failed", () => setImageError(true));
-
+    viewer.addHandler("tile-load-failed", (e) => {
+      if (imageStatus().type == ImageStatus.Loading)
+        setImageStatus({ type: ImageStatus.Error, message: t("mainViewer.imageError", { n: props.currentImage, e: e.message }) });
+      console.error("Tile Load Failed:", e);
+    });
+    viewer.addHandler("open-failed", (e) => {
+      setImageStatus({ type: ImageStatus.Error, message: t("mainViewer.imageError", { n: props.currentImage, e: e.message }) });
+      console.error("Open Failed:", e);
+    });
     viewer.addHandler("animation", () => {
       if (!viewer) return;
       const currentZoom = viewer.viewport.getZoom(true);
@@ -94,7 +113,6 @@ export const MainViewer = (props: MainViewerProps) => {
       const tileSize = props.imageMeta?.tile_size ?? 256;
       const zoomOffset = Math.log2(tileSize);
 
-      // TODO: Add spinner and display errors
       viewer!.open({
         type: 'custom',
         width: props.imageMeta?.width,
@@ -247,14 +265,24 @@ export const MainViewer = (props: MainViewerProps) => {
 
       <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
         <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
-        {(imageError()) && (
-          <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
-            <div class="flex flex-col items-center gap-3 select-none">
-              <Icon icon="lucide:image-off" class="text-subtle" width="50" height="50"></Icon>
-              <span class="text-[13px] text-dim">{t("mainViewer.noImage", { n: props.currentImage })}</span>
+
+        <Show when={imageStatus().type !== ImageStatus.Loaded && imageStatus()}>
+          {(state) => (
+            <div class="pointer-events-none absolute inset-0 flex items-center justify-center bg-viewer-bg z-20">
+              <div class="flex flex-col items-center gap-3 select-none">
+                <Switch>
+                  <Match when={state().type === ImageStatus.Error}>
+                    <Icon icon="lucide:image-off" class="text-subtle" width="50" height="50" />
+                    <span class="text-[13px] text-dim text-center whitespace-pre-line">{(state() as any).message}</span>
+                  </Match>
+                  <Match when={state().type === ImageStatus.Loading}>
+                    <Icon icon="lucide:loader-2" class="animate-spin text-subtle" width="25" height="25" />
+                  </Match>
+                </Switch>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </Show>
       </div>
     </div>
   );

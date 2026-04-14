@@ -35,7 +35,8 @@ export const fr: RawDictionaries = {
     rotate: "Pivoter 90° ({{key}})",
     download: "Télécharger l'image pleine résolution",
     copyUrl: "Copier l'URL de l'image",
-    noImage: "vue {{n}} — aucune image",
+    invalidImage: "Le numéro d'image est invalide ({{n}})",
+    imageError: "Erreur lors du chargement de l'image {{n}} :\n{{e}}",
     ariaImageNumber: "Numéro d'image"
   },
   stickyPin: {

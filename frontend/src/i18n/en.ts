@@ -33,7 +33,8 @@ export const en = {
     rotate: "Rotate 90° ({{key}})",
     download: "Download full-resolution image",
     copyUrl: "Copy image URL",
-    noImage: "view {{n}} — no image",
+    invalidImage: "Invalid image number ({{n}})",
+    imageError: "Couldn't load image {{n}}:\n{{e}}",
     ariaImageNumber: "Image number"
   },
   stickyPin: {
