@@ -94,6 +94,7 @@ export const MainViewer = (props: MainViewerProps) => {
       const tileSize = props.imageMeta?.tile_size ?? 256;
       const zoomOffset = Math.log2(tileSize);
 
+      // TODO: Add spinner and display errors
       viewer!.open({
         type: 'custom',
         width: props.imageMeta?.width,

@@ -84,6 +84,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
         <Show when={registryExpanded()}>
           <div class="px-4 pb-3 border-t border-hover">
             <div class="h-2" />
+            {/*TODO: Rework this.*/}
             <For each={Object.entries(props.registryMeta).filter(([_, v]) => typeof v === 'string' || typeof v === 'number') as [keyof RegistryMeta, string][]}>
               {([key, value]) => <MetaRow label={key} value={value} />}
             </For>
