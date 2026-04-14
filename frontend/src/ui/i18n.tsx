@@ -6,12 +6,8 @@ export type RawDictionaries = typeof EnglishDict;
 
 type DeepKeyOf<T> = T extends object
   ? {
-    [K in Extract<keyof T, string>]: T[K] extends object
-    ? T[K] extends Array<unknown>
-    ? `${K}`
-    : `${K}` | `${K}.${DeepKeyOf<T[K]>}`
-    : `${K}`
-  }[Extract<keyof T, string>]
+      [K in Extract<keyof T, string>]: T[K] extends object ? (T[K] extends Array<unknown> ? `${K}` : `${K}` | `${K}.${DeepKeyOf<T[K]>}`) : `${K}`;
+    }[Extract<keyof T, string>]
   : never;
 
 export type TranslationKey = DeepKeyOf<RawDictionaries>;
@@ -39,7 +35,7 @@ export function I18nProvider(props: { children: JSX.Element; fallback?: JSX.Elem
     try {
       const stored = localStorage.getItem("locale") as Locale | null;
       if (stored && stored in loaders) return stored;
-    } catch { }
+    } catch {}
 
     const navLangs = navigator.languages as string[];
     if (navLangs) {
@@ -61,11 +57,11 @@ export function I18nProvider(props: { children: JSX.Element; fallback?: JSX.Elem
   const setLocale = (l: Locale) => {
     try {
       if (typeof localStorage !== "undefined") localStorage.setItem("locale", l);
-    } catch { }
+    } catch {}
     setLocaleRaw(l);
   };
 
-  const baseTranslator = i18n.translator(() => data() || {} as Record<TranslationKey, string>, i18n.resolveTemplate);
+  const baseTranslator = i18n.translator(() => data() || ({} as Record<TranslationKey, string>), i18n.resolveTemplate);
 
   const t: Translator = (key, params) => {
     const res = baseTranslator(key, params) as string | undefined;

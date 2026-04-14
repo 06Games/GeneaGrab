@@ -1,5 +1,5 @@
-import { TauriService } from "./TauriService";
 import { MockService } from "./MockService";
+import { TauriService } from "./TauriService";
 import type { BackendService } from "./api";
 
 export function getBackendService(): BackendService {

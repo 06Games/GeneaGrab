@@ -12,7 +12,7 @@ interface IndexFieldProps {
   labelWidth?: string;
   onPinChange?: (pinned: boolean) => void;
   class?: string;
-  
+
   name?: string;
   value?: string | boolean | null;
   ref?: (element: HTMLInputElement) => void;
@@ -34,10 +34,7 @@ export const IndexField = (props: IndexFieldProps) => {
       <label
         for={fieldId}
         title={props.label}
-        class={[
-          props.labelWidth || "w-24",
-          "flex-shrink-0 text-[12px] text-dim text-right truncate select-none cursor-pointer"
-        ].join(" ")}
+        class={[props.labelWidth || "w-24", "flex-shrink-0 text-[12px] text-dim text-right truncate select-none cursor-pointer"].join(" ")}
       >
         {props.label}
       </label>
@@ -67,7 +64,9 @@ export const IndexField = (props: IndexFieldProps) => {
           />
           <Show when={props.options}>
             <datalist id={listId}>
-              {props.options!.map(opt => <option value={opt} />)}
+              {props.options!.map((opt) => (
+                <option value={opt} />
+              ))}
             </datalist>
           </Show>
         </Show>
@@ -89,7 +88,7 @@ export const IndexField = (props: IndexFieldProps) => {
                   "bg-tinted border-subtle",
                   "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
                   "checked:bg-accent checked:border-accent",
-                  "transition-all duration-100"
+                  "transition-all duration-100",
                 ].join(" ")}
               />
               <Show when={!!props.value}>

@@ -1,13 +1,6 @@
 import { createSignal, Show, For } from "solid-js";
 import { createVirtualizer } from "@tanstack/solid-virtual";
-import {
-  createSolidTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  flexRender,
-  ColumnDef,
-  SortingState
-} from "@tanstack/solid-table";
+import { createSolidTable, getCoreRowModel, getSortedRowModel, flexRender, ColumnDef, SortingState } from "@tanstack/solid-table";
 
 import type { EventRow } from "../../../types/index";
 import { Button } from "../../../ui/primitives";
@@ -51,10 +44,14 @@ export const GlobalGrid = (props: GlobalGridProps) => {
 
   // Initialize Solid Table
   const table = createSolidTable({
-    get data() { return props.rows; },
+    get data() {
+      return props.rows;
+    },
     columns,
     state: {
-      get sorting() { return sorting(); },
+      get sorting() {
+        return sorting();
+      },
     },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
@@ -63,15 +60,17 @@ export const GlobalGrid = (props: GlobalGridProps) => {
 
   // Initialize Virtualizer
   const virtualizer = createVirtualizer({
-    get count() { return table.getRowModel().rows.length; },
+    get count() {
+      return table.getRowModel().rows.length;
+    },
     getScrollElement: () => scrollRef,
     estimateSize: () => 41, // Approx height of each row
     overscan: 10,
   });
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    const sortedRows = table.getRowModel().rows.map(r => r.original);
-    const idx = sortedRows.findIndex(r => r.event_id === props.selectedId);
+    const sortedRows = table.getRowModel().rows.map((r) => r.original);
+    const idx = sortedRows.findIndex((r) => r.event_id === props.selectedId);
 
     if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -89,21 +88,20 @@ export const GlobalGrid = (props: GlobalGridProps) => {
   return (
     <div class="flex flex-col h-full border-r border-subtle bg-panel flex-shrink-0" style={{ "min-width": "240px" }} ref={props.onRef}>
       {/* Column Headers */}
-      <div class="flex-shrink-0 grid px-3 py-2 border-b border-subtle bg-tinted" style={{ "grid-template-columns": "2.5rem 6.5rem 5rem 1fr" }} aria-hidden="true">
+      <div
+        class="flex-shrink-0 grid px-3 py-2 border-b border-subtle bg-tinted"
+        style={{ "grid-template-columns": "2.5rem 6.5rem 5rem 1fr" }}
+        aria-hidden="true"
+      >
         <For each={table.getHeaderGroups()[0].headers}>
-          {header => (
+          {(header) => (
             <div
               class="text-[11px] font-semibold uppercase tracking-wider text-dim cursor-pointer select-none flex items-center gap-1 hover:text-main transition-colors"
               onClick={header.column.getToggleSortingHandler()}
             >
               {flexRender(header.column.columnDef.header, header.getContext())}
               <Show when={header.column.getIsSorted()}>
-                {(sortDir) => (
-                  <Icon
-                    icon={sortDir() === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'}
-                    class="w-3 h-3 text-accent"
-                  />
-                )}
+                {(sortDir) => <Icon icon={sortDir() === "asc" ? "lucide:arrow-up" : "lucide:arrow-down"} class="w-3 h-3 text-accent" />}
               </Show>
             </div>
           )}
@@ -111,14 +109,8 @@ export const GlobalGrid = (props: GlobalGridProps) => {
       </div>
 
       {/* Rows */}
-      <div
-        class="flex-1 overflow-y-auto focus-visible:outline-none"
-        role="listbox"
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        ref={scrollRef}
-      >
-        <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+      <div class="flex-1 overflow-y-auto focus-visible:outline-none" role="listbox" tabIndex={0} onKeyDown={handleKeyDown} ref={scrollRef}>
+        <div style={{ height: `${virtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
           <For each={virtualizer.getVirtualItems()}>
             {(virtualRow) => {
               const event = () => table.getRowModel().rows[virtualRow.index].original;
@@ -126,24 +118,32 @@ export const GlobalGrid = (props: GlobalGridProps) => {
 
               return (
                 <button
-                  type="button" role="option" aria-selected={isSelected()} onClick={() => props.onSelect(event())}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected()}
+                  onClick={() => props.onSelect(event())}
                   class={[
                     "w-full grid px-3 py-2 text-left border-b border-hover transition-colors duration-75 focus-visible:outline-none focus-visible:ring-inset focus-visible:ring-2 focus-visible:ring-accent items-center",
                     isSelected() ? "bg-accent-bg border-l-[3px] border-l-accent" : "hover:bg-tinted border-l-[3px] border-l-transparent",
                   ].join(" ")}
                   style={{
                     "grid-template-columns": "2.5rem 6.5rem 5rem 1fr",
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
-                    width: '100%',
+                    width: "100%",
                     transform: `translateY(${virtualRow.start}px)`,
-                    height: `${virtualRow.size}px`
+                    height: `${virtualRow.size}px`,
                   }}
                 >
                   <span class="text-[12px] text-dim tabular-nums">{event().event_id}</span>
                   <span class="text-[13px] text-muted tabular-nums truncate">{event().date}</span>
-                  <span class={["text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit leading-none self-center", EVENT_CHIP[event().event_type || "Other"] || EVENT_CHIP["Other"]].join(" ")}>
+                  <span
+                    class={[
+                      "text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit leading-none self-center",
+                      EVENT_CHIP[event().event_type || "Other"] || EVENT_CHIP["Other"],
+                    ].join(" ")}
+                  >
                     {(event().event_type || "Other").substring(0, 5)}...
                   </span>
                   <span class="text-[13px] text-main truncate font-medium">{event().title || "-"}</span>

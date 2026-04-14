@@ -14,7 +14,7 @@ const HomePage = () => {
   const api = useBackend();
   const { t } = useI18n();
   let scrollRef!: HTMLDivElement;
-  
+
   const [searchQuery, setSearchQuery] = createSignal("");
   const [selectedType, setSelectedType] = createSignal("");
   const [selectedPlace, setSelectedPlace] = createSignal("");
@@ -23,13 +23,13 @@ const HomePage = () => {
   const [dateTo, setDateTo] = createSignal("");
 
   const [isModalOpen, setIsModalOpen] = createSignal(false);
-  
+
   // Data / Pagination state
   const [items, setItems] = createSignal<RegistryMeta[]>([]);
   const [nextCursor, setNextCursor] = createSignal<number | null>(null);
   const [hasNextPage, setHasNextPage] = createSignal(true);
   const [isFetching, setIsFetching] = createSignal(false);
-  
+
   const [columns, setColumns] = createSignal(1);
 
   onMount(() => {
@@ -41,7 +41,7 @@ const HomePage = () => {
         setColumns(cols);
       }
     });
-    
+
     if (scrollRef) observer.observe(scrollRef);
     onCleanup(() => observer.disconnect());
   });
@@ -59,10 +59,10 @@ const HomePage = () => {
   const fetchPage = async (cursor: number | null, isInitial: boolean) => {
     if (isFetching()) return;
     setIsFetching(true);
-    
+
     try {
       const payload = {
-        limit: 20, 
+        limit: 20,
         cursor: cursor,
         filters: {
           search_term: searchQuery(),
@@ -70,15 +70,15 @@ const HomePage = () => {
           place: selectedPlace(),
           collection: selectedCollection(),
           date_from: dateFrom(),
-          date_to: dateTo()
-        }
+          date_to: dateTo(),
+        },
       };
-      
+
       const res = await api.getAllRegistries(payload);
-      
+
       if (isInitial) setItems(res.data);
-      else setItems(prev => [...prev, ...res.data]);
-      
+      else setItems((prev) => [...prev, ...res.data]);
+
       setNextCursor(res.next_cursor);
       setHasNextPage(res.next_cursor !== null);
     } catch (err) {
@@ -89,16 +89,18 @@ const HomePage = () => {
   };
 
   createEffect((prevDeps) => {
-    const currentDeps = [searchQuery(), selectedType(), selectedPlace(), selectedCollection(), dateFrom(), dateTo()].join('|');
+    const currentDeps = [searchQuery(), selectedType(), selectedPlace(), selectedCollection(), dateFrom(), dateTo()].join("|");
     if (prevDeps !== currentDeps) {
-      setItems([]); 
+      setItems([]);
       fetchPage(null, true);
     }
     return currentDeps;
   }, "");
 
   const virtualizer = createVirtualizer({
-    get count() { return hasNextPage() ? chunkedRows().length + 1 : chunkedRows().length; },
+    get count() {
+      return hasNextPage() ? chunkedRows().length + 1 : chunkedRows().length;
+    },
     getScrollElement: () => scrollRef,
     estimateSize: () => 188,
     gap: 16,
@@ -108,21 +110,17 @@ const HomePage = () => {
   createEffect(() => {
     const virtualItems = virtualizer.getVirtualItems();
     if (!virtualItems.length) return;
-    
+
     const lastRenderedItem = virtualItems[virtualItems.length - 1];
 
-    if (
-      lastRenderedItem.index >= chunkedRows().length - 1 &&
-      hasNextPage() &&
-      !isFetching()
-    ) {
+    if (lastRenderedItem.index >= chunkedRows().length - 1 && hasNextPage() && !isFetching()) {
       fetchPage(untrack(nextCursor), false);
     }
   });
 
   return (
     <div class="h-screen bg-app text-main flex flex-col antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
-      <TopBar 
+      <TopBar
         breadcrumbs={[t("home.title")]}
         right={
           <Button variant="primary" onClick={() => setIsModalOpen(true)}>
@@ -147,8 +145,10 @@ const HomePage = () => {
           onDateToChange={setDateTo}
         />
 
-        <div ref={scrollRef} class="flex-1 overflow-y-auto pr-2 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none">
-          
+        <div
+          ref={scrollRef}
+          class="flex-1 overflow-y-auto pr-2 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
+        >
           <Show when={!isFetching() && items().length === 0}>
             <div class="py-16 flex flex-col items-center justify-center text-dim border-2 border-dashed border-subtle rounded-xl h-full">
               <Icon icon="lucide:folder-search" class="w-12 h-12 mb-3 text-subtle-md" />
@@ -156,38 +156,36 @@ const HomePage = () => {
             </div>
           </Show>
 
-          <div style={{ height: `${virtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
+          <div style={{ height: `${virtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
             <For each={virtualizer.getVirtualItems()}>
               {(virtualRow) => (
                 <div
                   ref={virtualizer.measureElement}
                   data-index={virtualRow.index}
                   style={{
-                    position: 'absolute',
+                    position: "absolute",
                     top: 0,
                     left: 0,
-                    width: '100%',
+                    width: "100%",
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >
-                  <Show 
-                    when={virtualRow.index < chunkedRows().length} 
+                  <Show
+                    when={virtualRow.index < chunkedRows().length}
                     fallback={
                       <div class="w-full flex justify-center items-center h-[188px] text-dim">
                         <Icon icon="lucide:loader-2" class="animate-spin" width="24" height="24" />
                       </div>
                     }
                   >
-                    <div 
-                      class="grid" 
-                      style={{ 
+                    <div
+                      class="grid"
+                      style={{
                         "grid-template-columns": `repeat(${columns()}, minmax(0, 1fr))`,
-                        "gap": "16px" 
+                        gap: "16px",
                       }}
                     >
-                      <For each={chunkedRows()[virtualRow.index]}>
-                        {(item) => <RegistryCard registry={item} />}
-                      </For>
+                      <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} />}</For>
                     </div>
                   </Show>
                 </div>

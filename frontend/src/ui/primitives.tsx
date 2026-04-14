@@ -2,14 +2,13 @@ import { JSX } from "solid-js";
 
 // ─── Divider ─────────────────────────────────────────────────────────────────
 
-interface DividerProps { vertical?: boolean; class?: string }
+interface DividerProps {
+  vertical?: boolean;
+  class?: string;
+}
 
 export const Divider = (props: DividerProps) => (
-  <div class={[
-    "bg-subtle flex-shrink-0",
-    props.vertical ? "w-px self-stretch" : "h-px w-full",
-    props.class,
-  ].filter(Boolean).join(" ")} />
+  <div class={["bg-subtle flex-shrink-0", props.vertical ? "w-px self-stretch" : "h-px w-full", props.class].filter(Boolean).join(" ")} />
 );
 
 // ─── ResizeHandle ─────────────────────────────────────────────────────────────
@@ -27,16 +26,13 @@ export const ResizeHandle = (props: ResizeHandleProps) => (
       "group relative flex items-center justify-center select-none z-10 flex-shrink-0",
       "bg-active hover:bg-accent/25 active:bg-accent/45",
       "transition-colors duration-150",
-      props.vertical
-        ? "w-[6px] h-full cursor-col-resize"
-        : "h-[6px] w-full cursor-row-resize",
+      props.vertical ? "w-[6px] h-full cursor-col-resize" : "h-[6px] w-full cursor-row-resize",
       props.class,
-    ].filter(Boolean).join(" ")}
+    ]
+      .filter(Boolean)
+      .join(" ")}
   >
-    <div class={[
-      "flex gap-[3px] opacity-0 group-hover:opacity-70 transition-opacity",
-      props.vertical ? "flex-col" : "flex-row",
-    ].join(" ")}>
+    <div class={["flex gap-[3px] opacity-0 group-hover:opacity-70 transition-opacity", props.vertical ? "flex-col" : "flex-row"].join(" ")}>
       {[0, 1, 2].map(() => (
         <div class="w-1 h-1 rounded-full bg-accent" />
       ))}
@@ -46,15 +42,17 @@ export const ResizeHandle = (props: ResizeHandleProps) => (
 
 // ─── Badge ────────────────────────────────────────────────────────────────────
 
-interface BadgeProps { class?: string; children: JSX.Element }
+interface BadgeProps {
+  class?: string;
+  children: JSX.Element;
+}
 
 export const Badge = (props: BadgeProps) => (
-  <span class={[
-    "inline-flex items-center px-2 py-0.5 rounded-full",
-    "text-[11px] font-medium",
-    "border border-subtle bg-tinted text-accent-text",
-    props.class,
-  ].filter(Boolean).join(" ")}>
+  <span
+    class={["inline-flex items-center px-2 py-0.5 rounded-full", "text-[11px] font-medium", "border border-subtle bg-tinted text-accent-text", props.class]
+      .filter(Boolean)
+      .join(" ")}
+  >
     {props.children}
   </span>
 );
@@ -125,11 +123,11 @@ export const IconButton = (props: IconButtonProps) => (
       "transition-colors duration-100",
       "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
       "disabled:opacity-40 disabled:cursor-not-allowed",
-      props.active
-        ? "text-accent bg-accent-bg"
-        : "text-muted enabled:hover:text-main enabled:hover:bg-hover",
+      props.active ? "text-accent bg-accent-bg" : "text-muted enabled:hover:text-main enabled:hover:bg-hover",
       props.class,
-    ].filter(Boolean).join(" ")}
+    ]
+      .filter(Boolean)
+      .join(" ")}
   >
     {props.children}
   </button>
@@ -137,42 +135,51 @@ export const IconButton = (props: IconButtonProps) => (
 
 // ─── Kbd ──────────────────────────────────────────────────────────────────────
 
-interface KbdProps { class?: string; children: JSX.Element }
+interface KbdProps {
+  class?: string;
+  children: JSX.Element;
+}
 
 export const Kbd = (props: KbdProps) => (
-  <kbd class={[
-    "px-1.5 py-0.5 rounded text-[10px] font-mono",
-    "bg-hover border border-subtle-md text-muted",
-    "shadow-[0_1px_0_var(--subtle-md)]",
-    props.class,
-  ].filter(Boolean).join(" ")}>
+  <kbd
+    class={["px-1.5 py-0.5 rounded text-[10px] font-mono", "bg-hover border border-subtle-md text-muted", "shadow-[0_1px_0_var(--subtle-md)]", props.class]
+      .filter(Boolean)
+      .join(" ")}
+  >
     {props.children}
   </kbd>
 );
 
 // ─── MetaRow ──────────────────────────────────────────────────────────────────
 
-interface MetaRowProps { label: string; value?: string | null }
+interface MetaRowProps {
+  label: string;
+  value?: string | null;
+}
 
 export const MetaRow = (props: MetaRowProps) => (
   <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-baseline py-1">
     <span class="text-[12px] text-dim truncate capitalize">{props.label}</span>
-    {props.value
-      ? <span class="text-[13px] text-main truncate" title={props.value}>{props.value}</span>
-      : <span class="text-[13px] text-subtle-md italic">—</span>
-    }
+    {props.value ? (
+      <span class="text-[13px] text-main truncate" title={props.value}>
+        {props.value}
+      </span>
+    ) : (
+      <span class="text-[13px] text-subtle-md italic">—</span>
+    )}
   </div>
 );
 
 // ─── SectionLabel ─────────────────────────────────────────────────────────────
 
-interface SectionLabelProps { children: JSX.Element; class?: string }
+interface SectionLabelProps {
+  children: JSX.Element;
+  class?: string;
+}
 
 export const SectionLabel = (props: SectionLabelProps) => (
   <div class={["flex items-center gap-2 mb-2", props.class].filter(Boolean).join(" ")}>
-    <span class="text-[11px] font-semibold uppercase tracking-wider text-dim">
-      {props.children}
-    </span>
+    <span class="text-[11px] font-semibold uppercase tracking-wider text-dim">{props.children}</span>
     <div class="flex-1 h-px bg-subtle" />
   </div>
 );

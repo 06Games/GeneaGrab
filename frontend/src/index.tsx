@@ -8,12 +8,15 @@ import App from "./App";
 import { I18nProvider } from "./ui/i18n";
 import { BackendProvider } from "./contexts/BackendContext";
 
-render(() => (
-  <I18nProvider fallback={<p>Loading translations...</p>}>
-    <BackendProvider>
-      <div class="w-screen h-screen bg-app">
-        <App />
-      </div>
-    </BackendProvider>
-  </I18nProvider>
-), document.getElementById("root") as HTMLElement);
+render(
+  () => (
+    <I18nProvider fallback={<p>Loading translations...</p>}>
+      <BackendProvider>
+        <div class="w-screen h-screen bg-app">
+          <App />
+        </div>
+      </BackendProvider>
+    </I18nProvider>
+  ),
+  document.getElementById("root") as HTMLElement,
+);

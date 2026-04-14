@@ -7,11 +7,7 @@ const BackendContext = createContext<BackendService>();
 export function BackendProvider(props: { children: JSX.Element }) {
   const api = getBackendService();
 
-  return (
-    <BackendContext.Provider value={api}>
-      {props.children}
-    </BackendContext.Provider>
-  );
+  return <BackendContext.Provider value={api}>{props.children}</BackendContext.Provider>;
 }
 
 // Custom hook for components to consume the API

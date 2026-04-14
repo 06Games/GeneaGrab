@@ -49,9 +49,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
             class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
           >
             <option value="">{t("home.filterPlace")}</option>
-            <Show when={places()}>
-              {(list) => list().map(opt => <option value={opt}>{opt}</option>)}
-            </Show>
+            <Show when={places()}>{(list) => list().map((opt) => <option value={opt}>{opt}</option>)}</Show>
           </select>
           <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
         </div>
@@ -65,9 +63,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
             class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
           >
             <option value="">{t("home.filterCollection")}</option>
-            <Show when={collections()}>
-              {(list) => list().map(opt => <option value={opt}>{opt}</option>)}
-            </Show>
+            <Show when={collections()}>{(list) => list().map((opt) => <option value={opt}>{opt}</option>)}</Show>
           </select>
           <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
         </div>
@@ -80,7 +76,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
             class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer"
           >
             <option value="">{t("home.filterType")}</option>
-            {ACT_TYPE_OPTIONS.map(opt => (
+            {ACT_TYPE_OPTIONS.map((opt) => (
               <option value={opt}>{opt}</option>
             ))}
           </select>
@@ -111,4 +107,4 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
       </div>
     </div>
   );
-}
+};

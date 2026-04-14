@@ -40,11 +40,7 @@ export const PersonBlock = (props: PersonBlockProps) => {
           <Icon icon="lucide:grip-vertical" class="block"></Icon>
         </span>
 
-        <button
-          type="button"
-          onClick={() => setCollapsed(v => !v)}
-          class="flex-1 flex items-center gap-2 text-left focus-visible:outline-none min-w-0"
-        >
+        <button type="button" onClick={() => setCollapsed((v) => !v)} class="flex-1 flex items-center gap-2 text-left focus-visible:outline-none min-w-0">
           <span class="text-[12px] font-semibold px-2 py-0.5 rounded-full bg-accent-bg text-accent-text border border-accent-border flex-shrink-0">
             {role() || <span class="italic text-dim">{t("person.noRole")}</span>}
           </span>
@@ -56,7 +52,7 @@ export const PersonBlock = (props: PersonBlockProps) => {
           </Show>
         </button>
 
-        <IconButton onClick={() => setCollapsed(v => !v)}>
+        <IconButton onClick={() => setCollapsed((v) => !v)}>
           <span class={["transition-transform duration-150 inline-flex items-center justify-center origin-center", collapsed() ? "-rotate-90" : ""].join(" ")}>
             <Icon icon="lucide:chevron-down" class="block" />
           </span>
@@ -69,55 +65,140 @@ export const PersonBlock = (props: PersonBlockProps) => {
       {/* Fields */}
       <Show when={!collapsed()}>
         <div class="px-3 pt-3 pb-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2">
-
           <Field name={`${props.namePrefix}role`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.role")} tabIndex={props.tabStart} options={ROLE_SUGGESTIONS} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField
+                {...fieldProps}
+                value={field.value}
+                label={t("person.role")}
+                tabIndex={props.tabStart}
+                options={ROLE_SUGGESTIONS}
+                class="lg:col-span-1"
+              />
+            )}
           </Field>
           <Field name={`${props.namePrefix}first_name`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.firstNames")} tabIndex={props.tabStart + 1} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField {...fieldProps} value={field.value} label={t("person.firstNames")} tabIndex={props.tabStart + 1} class="lg:col-span-1" />
+            )}
           </Field>
           <Field name={`${props.namePrefix}last_name`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.lastName")} tabIndex={props.tabStart + 2} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField {...fieldProps} value={field.value} label={t("person.lastName")} tabIndex={props.tabStart + 2} class="lg:col-span-1" />
+            )}
           </Field>
 
           <Field name={`${props.namePrefix}title`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.title")} tabIndex={props.tabStart + 3} placeholder={t("person.title") + "..."} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField
+                {...fieldProps}
+                value={field.value}
+                label={t("person.title")}
+                tabIndex={props.tabStart + 3}
+                placeholder={t("person.title") + "..."}
+                class="lg:col-span-1"
+              />
+            )}
           </Field>
           <Field name={`${props.namePrefix}sex`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.sex")} tabIndex={props.tabStart + 4} options={["M", "F", t("person.noRole")]} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField
+                {...fieldProps}
+                value={field.value}
+                label={t("person.sex")}
+                tabIndex={props.tabStart + 4}
+                options={["M", "F", t("person.noRole")]}
+                class="lg:col-span-1"
+              />
+            )}
           </Field>
 
           <div class="flex gap-2 lg:col-span-1">
             <Field name={`${props.namePrefix}age`}>
-              {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.age")} tabIndex={props.tabStart + 5} class="flex-1 min-w-0" />}
+              {(field: any, fieldProps: any) => (
+                <IndexField {...fieldProps} value={field.value} label={t("person.age")} tabIndex={props.tabStart + 5} class="flex-1 min-w-0" />
+              )}
             </Field>
             <Field name={`${props.namePrefix}is_deceased`} type="boolean">
-              {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.deceased")} type="checkbox" tabIndex={props.tabStart + 6} class="w-[85px] flex-shrink-0" labelWidth="w-auto" />}
+              {(field: any, fieldProps: any) => (
+                <IndexField
+                  {...fieldProps}
+                  value={field.value}
+                  label={t("person.deceased")}
+                  type="checkbox"
+                  tabIndex={props.tabStart + 6}
+                  class="w-[85px] flex-shrink-0"
+                  labelWidth="w-auto"
+                />
+              )}
             </Field>
           </div>
 
           <Field name={`${props.namePrefix}occupation`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.profession")} tabIndex={props.tabStart + 7} options={PROFESSION_OPTIONS} defaultPinned class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField
+                {...fieldProps}
+                value={field.value}
+                label={t("person.profession")}
+                tabIndex={props.tabStart + 7}
+                options={PROFESSION_OPTIONS}
+                defaultPinned
+                class="lg:col-span-1"
+              />
+            )}
           </Field>
           <Field name={`${props.namePrefix}origin_place`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.origin")} tabIndex={props.tabStart + 8} defaultPinned class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField {...fieldProps} value={field.value} label={t("person.origin")} tabIndex={props.tabStart + 8} defaultPinned class="lg:col-span-1" />
+            )}
           </Field>
           <Field name={`${props.namePrefix}residence_place`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.residence")} tabIndex={props.tabStart + 9} defaultPinned class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField {...fieldProps} value={field.value} label={t("person.residence")} tabIndex={props.tabStart + 9} defaultPinned class="lg:col-span-1" />
+            )}
           </Field>
 
           <Field name={`${props.namePrefix}relationship_type`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.relationship")} tabIndex={props.tabStart + 10} options={RELATION_SUGGESTIONS} placeholder={t("person.relationship") + "..."} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField
+                {...fieldProps}
+                value={field.value}
+                label={t("person.relationship")}
+                tabIndex={props.tabStart + 10}
+                options={RELATION_SUGGESTIONS}
+                placeholder={t("person.relationship") + "..."}
+                class="lg:col-span-1"
+              />
+            )}
           </Field>
           <Field name={`${props.namePrefix}relationship_to`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.relationshipTo")} tabIndex={props.tabStart + 11} placeholder={t("person.relationshipTo") + "..."} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField
+                {...fieldProps}
+                value={field.value}
+                label={t("person.relationshipTo")}
+                tabIndex={props.tabStart + 11}
+                placeholder={t("person.relationshipTo") + "..."}
+                class="lg:col-span-1"
+              />
+            )}
           </Field>
           <Field name={`${props.namePrefix}sequence_number`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.sequenceNumber")} tabIndex={props.tabStart + 12} class="lg:col-span-1" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField {...fieldProps} value={field.value} label={t("person.sequenceNumber")} tabIndex={props.tabStart + 12} class="lg:col-span-1" />
+            )}
           </Field>
 
           <Field name={`${props.namePrefix}notes`}>
-            {(field: any, fieldProps: any) => <IndexField {...fieldProps} value={field.value} label={t("person.notesIndiv")} tabIndex={props.tabStart + 13} class="md:col-span-2 lg:col-span-3" />}
+            {(field: any, fieldProps: any) => (
+              <IndexField
+                {...fieldProps}
+                value={field.value}
+                label={t("person.notesIndiv")}
+                tabIndex={props.tabStart + 13}
+                class="md:col-span-2 lg:col-span-3"
+              />
+            )}
           </Field>
         </div>
       </Show>

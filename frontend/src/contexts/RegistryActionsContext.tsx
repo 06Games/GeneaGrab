@@ -13,11 +13,7 @@ export interface RegistryActions {
 const RegistryActionsContext = createContext<RegistryActions>({});
 
 export function RegistryActionsProvider(props: RegistryActions & { children: JSX.Element }) {
-  return (
-    <RegistryActionsContext.Provider value={props}>
-      {props.children}
-    </RegistryActionsContext.Provider>
-  );
+  return <RegistryActionsContext.Provider value={props}>{props.children}</RegistryActionsContext.Provider>;
 }
 
 export function useRegistryActions() {

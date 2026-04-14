@@ -24,7 +24,9 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
   const thumbnailWidth = () => (props.height - THUMBNAIL_VERTICAL_PADDING) * THUMBNAIL_ASPECT_RATIO;
 
   const virtualizer = createVirtualizer({
-    get count() { return props.totalImages; },
+    get count() {
+      return props.totalImages;
+    },
     getScrollElement: () => containerRef,
     estimateSize: () => thumbnailWidth() + 4, // width + 4px implicit gap
     horizontal: true,
@@ -37,7 +39,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
   createEffect(() => {
     virtualizer.scrollToIndex(props.currentImage - 1, {
       align: "center",
-      behavior: "smooth"
+      behavior: "smooth",
     });
   });
 
@@ -48,18 +50,16 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
       aria-label={t("thumbnailBar.ariaLabel")}
       aria-orientation="horizontal"
       style={{ height: `${props.height}px` }}
-      class={[
-        "flex-shrink-0",
-        "bg-app border-t border-subtle overflow-x-auto",
-        "scrollbar-thin scrollbar-thumb-subtle-md scrollbar-track-transparent",
-      ].join(" ")}
+      class={["flex-shrink-0", "bg-app border-t border-subtle overflow-x-auto", "scrollbar-thin scrollbar-thumb-subtle-md scrollbar-track-transparent"].join(
+        " ",
+      )}
     >
       {/* Fakes the total scrollable width */}
       <div
         style={{
           width: `${virtualizer.getTotalSize()}px`,
-          height: '100%',
-          position: 'relative'
+          height: "100%",
+          position: "relative",
         }}
       >
         <For each={virtualizer.getVirtualItems()}>
@@ -83,23 +83,25 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                 ].join(" ")}
                 style={{
                   // Position each item absolutely based on the virtualizer's calculations
-                  position: 'absolute',
+                  position: "absolute",
                   top: 0,
                   left: 0,
-                  height: '100%',
+                  height: "100%",
                   width: `${thumbnailWidth()}px`,
                   transform: `translateX(${virtualItem.start}px)`,
                 }}
               >
-                <div class={[
-                  "w-full rounded border-2 overflow-hidden transition-all duration-150",
-                  "bg-panel flex items-center justify-center flex-1",
-                  isActive()
-                    ? "border-accent shadow-md shadow-accent/20"
-                    : "border-subtle opacity-60 group-hover:opacity-100 group-hover:border-subtle-md group-hover:shadow-sm",
-                ].join(" ")}>
-                  {src() && !hasError()
-                    ? <img
+                <div
+                  class={[
+                    "w-full rounded border-2 overflow-hidden transition-all duration-150",
+                    "bg-panel flex items-center justify-center flex-1",
+                    isActive()
+                      ? "border-accent shadow-md shadow-accent/20"
+                      : "border-subtle opacity-60 group-hover:opacity-100 group-hover:border-subtle-md group-hover:shadow-sm",
+                  ].join(" ")}
+                >
+                  {src() && !hasError() ? (
+                    <img
                       src={src()!}
                       alt=""
                       class="w-full h-full object-contain"
@@ -110,13 +112,16 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                         setFailedImages(next);
                       }}
                     />
-                    : <span class="text-[9px] text-dim font-mono leading-none">{image}</span>
-                  }
+                  ) : (
+                    <span class="text-[9px] text-dim font-mono leading-none">{image}</span>
+                  )}
                 </div>
-                <span class={[
-                  "text-[10px] tabular-nums transition-colors flex-shrink-0",
-                  isActive() ? "text-accent font-semibold" : "text-dim group-hover:text-muted",
-                ].join(" ")}>
+                <span
+                  class={[
+                    "text-[10px] tabular-nums transition-colors flex-shrink-0",
+                    isActive() ? "text-accent font-semibold" : "text-dim group-hover:text-muted",
+                  ].join(" ")}
+                >
                   {image}
                 </span>
               </button>

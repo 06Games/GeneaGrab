@@ -29,12 +29,13 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   const [registryExpanded, setRegistryExpanded] = createSignal(false);
   const [saveStatus, setSaveStatus] = createSignal<"saved" | "unsaved" | "saving" | "error">("saved");
 
-  const saveInfo = () => ({
-    saved: { dot: "bg-success", label: t("infoPanel.saved") },
-    unsaved: { dot: "bg-dim", label: t("infoPanel.unsaved") },
-    saving: { dot: "bg-accent animate-pulse", label: t("infoPanel.saving") },
-    error: { dot: "bg-danger", label: t("infoPanel.error") },
-  })[saveStatus() ?? "saved"];
+  const saveInfo = () =>
+    ({
+      saved: { dot: "bg-success", label: t("infoPanel.saved") },
+      unsaved: { dot: "bg-dim", label: t("infoPanel.unsaved") },
+      saving: { dot: "bg-accent animate-pulse", label: t("infoPanel.saving") },
+      error: { dot: "bg-danger", label: t("infoPanel.error") },
+    })[saveStatus() ?? "saved"];
 
   let saveTimer: ReturnType<typeof setTimeout>;
   let lastMeta: Partial<ImageMeta> = {};
@@ -45,17 +46,18 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
     lastMeta = { ...lastMeta, ...meta }; // Accumulate changes to avoid multiple rapid saves
     saveTimer = setTimeout(async () => {
       setSaveStatus("saving");
-      const success = await actions.onSaveImageMeta?.(lastMeta).catch(() => false).then(() => true) ?? false;
+      const success =
+        (await actions
+          .onSaveImageMeta?.(lastMeta)
+          .catch(() => false)
+          .then(() => true)) ?? false;
       setSaveStatus(success ? "saved" : "error");
     }, 800);
   };
   onCleanup(() => clearTimeout(saveTimer));
 
   return (
-    <aside
-      class="flex flex-col w-72 min-w-[220px] flex-shrink-0 bg-panel border-l border-subtle overflow-hidden"
-      aria-label={t("infoPanel.ariaLabel")}
-    >
+    <aside class="flex flex-col w-72 min-w-[220px] flex-shrink-0 bg-panel border-l border-subtle overflow-hidden" aria-label={t("infoPanel.ariaLabel")}>
       <div class="flex items-center justify-between px-4 py-3 border-b border-subtle flex-shrink-0">
         <span class="text-[13px] font-semibold text-main">{t("infoPanel.title")}</span>
         <IconButton title={t("infoPanel.editMeta")} onClick={props.onEditRegistry}>
@@ -66,17 +68,23 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       <div class="border-b border-subtle flex-shrink-0">
         <button
           type="button"
-          onClick={() => setRegistryExpanded(e => !e)}
+          onClick={() => setRegistryExpanded((e) => !e)}
           aria-expanded={registryExpanded()}
           class="w-full flex items-center justify-between px-4 py-3 hover:bg-tinted transition-colors duration-100 focus-visible:outline-none text-left"
         >
           <div class="overflow-hidden">
             <p class="text-[14px] font-medium text-main truncate">{props.registryMeta.archive_reference}</p>
             <p class="text-[12px] text-dim truncate mt-0.5">
-              {props.registryMeta.places?.[0]?.join(", ") || t("infoPanel.unknown")} · {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
+              {props.registryMeta.places?.[0]?.join(", ") || t("infoPanel.unknown")} ·{" "}
+              {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
             </p>
           </div>
-          <span class={["text-dim flex-shrink-0 ml-2 inline-flex items-center justify-center transition-transform duration-150 origin-center", registryExpanded() ? "rotate-180" : ""].join(" ")}>
+          <span
+            class={[
+              "text-dim flex-shrink-0 ml-2 inline-flex items-center justify-center transition-transform duration-150 origin-center",
+              registryExpanded() ? "rotate-180" : "",
+            ].join(" ")}
+          >
             <Icon icon="lucide:chevron-down" width="16" height="16" class="block" />
           </span>
         </button>
@@ -85,7 +93,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           <div class="px-4 pb-3 border-t border-hover">
             <div class="h-2" />
             {/*TODO: Rework this.*/}
-            <For each={Object.entries(props.registryMeta).filter(([_, v]) => typeof v === 'string' || typeof v === 'number') as [keyof RegistryMeta, string][]}>
+            <For each={Object.entries(props.registryMeta).filter(([_, v]) => typeof v === "string" || typeof v === "number") as [keyof RegistryMeta, string][]}>
               {([key, value]) => <MetaRow label={key} value={value} />}
             </For>
           </div>
@@ -97,11 +105,11 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           <>
             <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
               <div class="flex items-center justify-between mb-2">
-                <span class="text-[13px] font-semibold text-main">{
-                  imgMeta().name
+                <span class="text-[13px] font-semibold text-main">
+                  {imgMeta().name
                     ? t("infoPanel.image.customName", { n: props.image, name: imgMeta().name })
-                    : t("infoPanel.image.default", { n: props.image })
-                }</span>
+                    : t("infoPanel.image.default", { n: props.image })}
+                </span>
               </div>
 
               <MetaRow label={t("infoPanel.period")} value={imgMeta().date_range} />
@@ -110,10 +118,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
               <div class="mt-2 flex flex-wrap gap-1.5">
                 <For each={Array.from(imgMeta().act_types.entries())}>
                   {([type, count]) => (
-                    <span class={[
-                      "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border",
-                      ACT_TYPE_STYLES[type],
-                    ].join(" ")}>
+                    <span class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border", ACT_TYPE_STYLES[type]].join(" ")}>
                       {count}× {type}
                     </span>
                   )}

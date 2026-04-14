@@ -17,14 +17,13 @@ interface DetailZoneProps {
 
 type ActForm = EventDetail;
 
-
 export const DetailZone = (props: DetailZoneProps) => {
   const { t } = useI18n();
   const actions = useRegistryActions();
 
   // Initialize Modular Forms
   const [actForm, { Form, Field, FieldArray }] = createForm<ActForm>({
-    initialValues: props.event || {}
+    initialValues: props.event || {},
   });
 
   // Sync state when user selects a different record in the Grid
@@ -37,10 +36,10 @@ export const DetailZone = (props: DetailZoneProps) => {
   });
 
   // Determine what type of submission to make
-  let submitAction: 'save' | 'validate' = 'save';
+  let submitAction: "save" | "validate" = "save";
 
   const handleSubmit: SubmitHandler<ActForm> = (values) => {
-    if (submitAction === 'validate') {
+    if (submitAction === "validate") {
       actions.onValidateAndNext?.(values);
     } else {
       actions.onSaveAct?.(values);
@@ -56,7 +55,9 @@ export const DetailZone = (props: DetailZoneProps) => {
           </span>
           {/* Automatically shows a dirty state marker when modified! */}
           <Show when={actForm.dirty}>
-            <span class="text-accent text-[16px] font-bold leading-none select-none" title="Unsaved changes">*</span>
+            <span class="text-accent text-[16px] font-bold leading-none select-none" title="Unsaved changes">
+              *
+            </span>
           </Show>
           <Show when={props.event}>
             <span class="text-[12px] text-dim truncate">{props.event!.title || props.event!.date}</span>
@@ -71,8 +72,11 @@ export const DetailZone = (props: DetailZoneProps) => {
         <Show when={!props.event}>
           <div class="flex-1 flex items-center justify-center py-12">
             <p class="text-[14px] text-dim text-center">
-              {t("detail.emptyPrompt.text")}<br />
-              <span class="text-[12px]"><span>{t("detail.emptyPrompt.prefix")}</span> <Kbd>N</Kbd> <span>{t("detail.emptyPrompt.suffix")}</span></span>
+              {t("detail.emptyPrompt.text")}
+              <br />
+              <span class="text-[12px]">
+                <span>{t("detail.emptyPrompt.prefix")}</span> <Kbd>N</Kbd> <span>{t("detail.emptyPrompt.suffix")}</span>
+              </span>
             </p>
           </div>
         </Show>
@@ -82,19 +86,47 @@ export const DetailZone = (props: DetailZoneProps) => {
             <SectionLabel>{t("detail.sections.details")}</SectionLabel>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
               <Field name="event_type">
-                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.type")} value={field.value} tabIndex={1} options={ACT_TYPE_OPTIONS} />}
+                {(field, fieldProps) => (
+                  <IndexField {...fieldProps} label={t("detail.labels.type")} value={field.value} tabIndex={1} options={ACT_TYPE_OPTIONS} />
+                )}
               </Field>
               <Field name="title">
-                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.title")} value={field.value} tabIndex={2} placeholder={t("detail.placeholders.title")} />}
+                {(field, fieldProps) => (
+                  <IndexField {...fieldProps} label={t("detail.labels.title")} value={field.value} tabIndex={2} placeholder={t("detail.placeholders.title")} />
+                )}
               </Field>
               <Field name="act_number">
-                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.actNumber")} value={field.value} tabIndex={3} placeholder={t("detail.placeholders.actNumber")} />}
+                {(field, fieldProps) => (
+                  <IndexField
+                    {...fieldProps}
+                    label={t("detail.labels.actNumber")}
+                    value={field.value}
+                    tabIndex={3}
+                    placeholder={t("detail.placeholders.actNumber")}
+                  />
+                )}
               </Field>
               <Field name="date">
-                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.dateText")} value={field.value} tabIndex={4} placeholder={t("detail.placeholders.dateText")} />}
+                {(field, fieldProps) => (
+                  <IndexField
+                    {...fieldProps}
+                    label={t("detail.labels.dateText")}
+                    value={field.value}
+                    tabIndex={4}
+                    placeholder={t("detail.placeholders.dateText")}
+                  />
+                )}
               </Field>
               <Field name="date_normalized">
-                {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.dateNorm")} value={field.value} tabIndex={5} placeholder={t("detail.placeholders.dateNorm")} />}
+                {(field, fieldProps) => (
+                  <IndexField
+                    {...fieldProps}
+                    label={t("detail.labels.dateNorm")}
+                    value={field.value}
+                    tabIndex={5}
+                    placeholder={t("detail.placeholders.dateNorm")}
+                  />
+                )}
               </Field>
               <Field name="page">
                 {(field, fieldProps) => <IndexField {...fieldProps} label={t("detail.labels.pageFolio")} value={field.value} tabIndex={6} />}
@@ -127,7 +159,7 @@ export const DetailZone = (props: DetailZoneProps) => {
                         form={actForm}
                         Field={Field}
                         tabStart={20 + index() * 20}
-                        onRemove={() => remove(actForm, 'people', { at: index() })}
+                        onRemove={() => remove(actForm, "people", { at: index() })}
                       />
                     )}
                   </For>
@@ -137,12 +169,27 @@ export const DetailZone = (props: DetailZoneProps) => {
 
             <button
               type="button"
-              onClick={() => insert(actForm, 'people', {
-                value: {
-                  person_id: crypto.randomUUID(), role: "", first_name: "", last_name: "", sex: "", title: "", age: "",
-                  is_deceased: false, occupation: "", origin_place: "", residence_place: "", sequence_number: "", notes: "", relationship_type: "", relationship_to: ""
-                }
-              })}
+              onClick={() =>
+                insert(actForm, "people", {
+                  value: {
+                    person_id: crypto.randomUUID(),
+                    role: "",
+                    first_name: "",
+                    last_name: "",
+                    sex: "",
+                    title: "",
+                    age: "",
+                    is_deceased: false,
+                    occupation: "",
+                    origin_place: "",
+                    residence_place: "",
+                    sequence_number: "",
+                    notes: "",
+                    relationship_type: "",
+                    relationship_to: "",
+                  },
+                })
+              }
               class="mt-2 w-full py-2 rounded-xl border-2 border-dashed border-subtle text-[13px] text-dim flex items-center justify-center gap-1.5 hover:text-muted hover:border-subtle-md hover:bg-panel transition-colors duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <Icon icon="lucide:plus" width="16" height="16" class="block" /> {t("detail.addPerson")}
@@ -156,8 +203,11 @@ export const DetailZone = (props: DetailZoneProps) => {
                 {(field, fieldProps) => (
                   <textarea
                     {...fieldProps}
-                    rows={4} value={field.value ?? ""} placeholder={t("detail.placeholders.transcription")}
-                    spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
+                    rows={4}
+                    value={field.value ?? ""}
+                    placeholder={t("detail.placeholders.transcription")}
+                    spellcheck={false}
+                    class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
                   />
                 )}
               </Field>
@@ -168,8 +218,11 @@ export const DetailZone = (props: DetailZoneProps) => {
                 {(field, fieldProps) => (
                   <textarea
                     {...fieldProps}
-                    rows={4} value={field.value ?? ""} placeholder={t("detail.placeholders.notes")}
-                    spellcheck={false} class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
+                    rows={4}
+                    value={field.value ?? ""}
+                    placeholder={t("detail.placeholders.notes")}
+                    spellcheck={false}
+                    class="w-full resize-y rounded-lg border bg-panel px-3 py-2.5 text-[13px] text-main border-subtle focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none"
                   />
                 )}
               </Field>
@@ -179,12 +232,14 @@ export const DetailZone = (props: DetailZoneProps) => {
       </div>
 
       <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-t border-subtle bg-panel">
-        <Button variant="ghost" size="sm" onClick={() => reset(actForm)} disabled={!props.event}>{t("detail.reset")}</Button>
+        <Button variant="ghost" size="sm" onClick={() => reset(actForm)} disabled={!props.event}>
+          {t("detail.reset")}
+        </Button>
         <div class="flex gap-2">
-          <Button type="submit" variant="outline" size="sm" onClick={() => submitAction = 'save'} disabled={!props.event}>
+          <Button type="submit" variant="outline" size="sm" onClick={() => (submitAction = "save")} disabled={!props.event}>
             {t("detail.save")} <Kbd>Ctrl S</Kbd>
           </Button>
-          <Button type="submit" variant="primary" size="sm" onClick={() => submitAction = 'validate'} disabled={!props.event}>
+          <Button type="submit" variant="primary" size="sm" onClick={() => (submitAction = "validate")} disabled={!props.event}>
             {t("detail.validateAndNext")} <Kbd>↵</Kbd>
           </Button>
         </div>

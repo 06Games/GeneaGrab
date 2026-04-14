@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onMount, onCleanup, Show, Switch, Match, createMemo } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, Show, Switch, Match } from "solid-js";
 import OpenSeadragon from "openseadragon";
 import { IconButton, Divider } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
@@ -20,10 +20,7 @@ enum ImageStatus {
   Error,
   Loaded,
 }
-type ViewerState =
-  | { type: ImageStatus.Loading }
-  | { type: ImageStatus.Loaded }
-  | { type: ImageStatus.Error; message: string };
+type ViewerState = { type: ImageStatus.Loading } | { type: ImageStatus.Loaded } | { type: ImageStatus.Error; message: string };
 
 export const MainViewer = (props: MainViewerProps) => {
   const { t } = useI18n();
@@ -34,12 +31,14 @@ export const MainViewer = (props: MainViewerProps) => {
   const [zoomDisplay, setZoomDisplay] = createSignal(100);
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
   const [imageStatus, setImageStatus] = createSignal<ViewerState>({ type: ImageStatus.Loading });
-  const [downloadProgress, setDownloadProgress] = createSignal<{ current: number, total: number } | null>(null);
+  const [downloadProgress, setDownloadProgress] = createSignal<{ current: number; total: number } | null>(null);
 
   createEffect(() => {
     const isImageNumValid = props.currentImage >= 1 && props.currentImage <= props.totalImages;
     setImageInput(String(props.currentImage));
-    setImageStatus(isImageNumValid ? { type: ImageStatus.Loading } : { type: ImageStatus.Error, message: t("mainViewer.invalidImage", { n: props.currentImage }) });
+    setImageStatus(
+      isImageNumValid ? { type: ImageStatus.Loading } : { type: ImageStatus.Error, message: t("mainViewer.invalidImage", { n: props.currentImage }) },
+    );
   });
 
   const commitImageInput = () => {
@@ -84,11 +83,11 @@ export const MainViewer = (props: MainViewerProps) => {
         if (imageStatus().type == ImageStatus.Loading) setImageStatus({ type: ImageStatus.Loaded });
       };
 
-      if (item.getFullyLoaded())
-        wakeUpAndDraw();
-      else item.addHandler("fully-loaded-change", (e) => {
-        if (e.fullyLoaded) wakeUpAndDraw();
-      });
+      if (item.getFullyLoaded()) wakeUpAndDraw();
+      else
+        item.addHandler("fully-loaded-change", (e) => {
+          if (e.fullyLoaded) wakeUpAndDraw();
+        });
     });
     viewer.addHandler("tile-load-failed", (e) => {
       if (imageStatus().type == ImageStatus.Loading)
@@ -107,22 +106,20 @@ export const MainViewer = (props: MainViewerProps) => {
     });
 
     createEffect(() => {
-      if (props.currentImage < 1 || props.currentImage > props.totalImages)
-        return;
+      if (props.currentImage < 1 || props.currentImage > props.totalImages) return;
 
       const tileSize = props.imageMeta?.tile_size ?? 256;
       const zoomOffset = Math.log2(tileSize);
 
       viewer!.open({
-        type: 'custom',
+        type: "custom",
         width: props.imageMeta?.width,
         height: props.imageMeta?.height,
         tileSize: tileSize,
         minLevel: zoomOffset,
-        getTileUrl: (level: number, x: number, y: number) => api.getTileUrl(props.registryId, props.currentImage, level - zoomOffset, x, y)
+        getTileUrl: (level: number, x: number, y: number) => api.getTileUrl(props.registryId, props.currentImage, level - zoomOffset, x, y),
       } as any);
     });
-
 
     viewer.addHandler("canvas-key", (e) => {
       // Prevent default OpenSeadragon keyboard shortcuts
@@ -182,12 +179,12 @@ export const MainViewer = (props: MainViewerProps) => {
       if (unlisten) unlisten();
       setDownloadProgress(null);
     }
-  }
+  };
 
   const handleCopyUrl = () => {
     const url = props.imageMeta?.ark_url;
     if (url) navigator.clipboard.writeText(url);
-  }
+  };
 
   return (
     <div class="relative flex-1 flex flex-col overflow-hidden bg-viewer-bg min-h-0">
@@ -211,9 +208,7 @@ export const MainViewer = (props: MainViewerProps) => {
             ].join(" ")}
             aria-label={t("mainViewer.ariaImageNumber")}
           />
-          <span class="text-[13px] text-dim select-none">
-            / {props.totalImages}
-          </span>
+          <span class="text-[13px] text-dim select-none">/ {props.totalImages}</span>
         </div>
 
         <IconButton title={t("mainViewer.next", { key: "→" })} onClick={() => props.onImageChange(Math.min(props.totalImages, props.currentImage + 1))}>
@@ -225,9 +220,7 @@ export const MainViewer = (props: MainViewerProps) => {
         <IconButton title={t("mainViewer.zoomOut", { key: "-" })} onClick={handleZoomOut}>
           <Icon icon="lucide:zoom-out"></Icon>
         </IconButton>
-        <span class="text-[13px] text-muted tabular-nums w-10 text-center select-none">
-          {zoomDisplay()}%
-        </span>
+        <span class="text-[13px] text-muted tabular-nums w-10 text-center select-none">{zoomDisplay()}%</span>
         <IconButton title={t("mainViewer.zoomIn", { key: "+" })} onClick={handleZoomIn}>
           <Icon icon="lucide:zoom-in"></Icon>
         </IconButton>
@@ -240,11 +233,14 @@ export const MainViewer = (props: MainViewerProps) => {
 
         <Divider vertical class="mx-2 h-5" />
 
-        <Show when={downloadProgress()} fallback={
-          <IconButton title={t("mainViewer.download")} onClick={handleDownloadImage}>
-            <Icon icon="lucide:download"></Icon>
-          </IconButton>
-        }>
+        <Show
+          when={downloadProgress()}
+          fallback={
+            <IconButton title={t("mainViewer.download")} onClick={handleDownloadImage}>
+              <Icon icon="lucide:download"></Icon>
+            </IconButton>
+          }
+        >
           {(progress) => (
             <div class="relative inline-grid place-items-center w-8 h-8 rounded-md cursor-wait" title={`${progress().current} / ${progress().total}`}>
               <Icon icon="lucide:download" class="col-start-1 row-start-1 opacity-30"></Icon>

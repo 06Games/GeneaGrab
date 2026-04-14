@@ -7,8 +7,11 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
   const { t } = useI18n();
 
   const getDomain = (url: string) => {
-    try { return new URL(url).hostname; }
-    catch { return url; }
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return url;
+    }
   };
 
   return (
@@ -35,26 +38,24 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
 
       <div class="flex flex-col gap-1.5 mb-4">
         <Show when={props.registry.places?.length > 0}>
-          <div class="flex items-center gap-1.5 text-[12px] text-muted truncate" title={props.registry.places.map(p => p.join(", ")).join(" ; ")}>
+          <div class="flex items-center gap-1.5 text-[12px] text-muted truncate" title={props.registry.places.map((p) => p.join(", ")).join(" ; ")}>
             <Icon icon="lucide:map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-dim" />
-            <span class="truncate">{props.registry.places.map(p => p[p.length - 1]).join(", ")}</span>
+            <span class="truncate">{props.registry.places.map((p) => p[p.length - 1]).join(", ")}</span>
           </div>
         </Show>
 
         <Show when={props.registry.ark_url}>
           <div class="flex items-center gap-1.5 text-[12px] text-muted truncate">
             <Icon icon="lucide:globe" class="w-3.5 h-3.5 flex-shrink-0 text-dim" />
-            <span class="truncate">{getDomain(props.registry.ark_url || '')}</span>
+            <span class="truncate">{getDomain(props.registry.ark_url || "")}</span>
           </div>
         </Show>
       </div>
 
       <div class="mt-auto pt-3 border-t border-subtle flex items-center justify-between gap-2">
         <div class="flex flex-wrap gap-1 min-w-0">
-          {Array.from(props.registry.source_types).map(type => (
-            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded text-dim bg-tinted border border-subtle truncate max-w-[80px]">
-              {type as string}
-            </span>
+          {Array.from(props.registry.source_types).map((type) => (
+            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded text-dim bg-tinted border border-subtle truncate max-w-[80px]">{type as string}</span>
           ))}
         </div>
         <div class="flex items-center gap-2 text-[11px] text-dim flex-shrink-0 tabular-nums">
@@ -70,4 +71,4 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
       </div>
     </a>
   );
-}
+};

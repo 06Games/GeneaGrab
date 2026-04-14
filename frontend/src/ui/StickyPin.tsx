@@ -26,9 +26,7 @@ export const StickyPin = (props: StickyPinProps) => {
         "flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-md",
         "transition-colors duration-100",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
-        pinned()
-          ? "text-accent bg-accent-bg border border-accent-border"
-          : "text-subtle-md hover:text-dim hover:bg-hover border border-transparent",
+        pinned() ? "text-accent bg-accent-bg border border-accent-border" : "text-subtle-md hover:text-dim hover:bg-hover border border-transparent",
       ].join(" ")}
     >
       <Icon icon="lucide:pin" class="w-3.5 h-3.5" aria-hidden="true"></Icon>
