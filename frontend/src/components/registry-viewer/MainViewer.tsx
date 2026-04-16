@@ -171,7 +171,7 @@ export const MainViewer = (props: MainViewerProps) => {
       const blob = await image.blob();
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `image-${props.registryId}-${props.currentImage}.jpg`;
+      link.download = `image-${props.registryId}-${props.currentImage}.jpg`; // TODO: Better filename, auto focus the new file and avoid duplicated files
       link.click();
     } catch (e) {
       console.error("Could not download image", e);
@@ -254,6 +254,7 @@ export const MainViewer = (props: MainViewerProps) => {
           )}
         </Show>
 
+        {/* TODO: Disable btn while waiting then show a little checkmark */}
         <IconButton title={t("mainViewer.copyUrl")} onClick={handleCopyUrl} disabled={!props.imageMeta?.ark_url}>
           <Icon icon="lucide:link"></Icon>
         </IconButton>

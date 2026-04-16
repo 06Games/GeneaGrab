@@ -156,6 +156,7 @@ const HomePage = () => {
             </div>
           </Show>
 
+          {/* TODO: Card display isn't great to use and needs to be ordered */}
           <div style={{ height: `${virtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
             <For each={virtualizer.getVirtualItems()}>
               {(virtualRow) => (

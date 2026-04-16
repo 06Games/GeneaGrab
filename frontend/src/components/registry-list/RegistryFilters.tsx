@@ -30,6 +30,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
     <div class="flex flex-col gap-3 bg-panel border border-subtle rounded-xl p-4 shadow-sm">
       <div class="relative w-full">
         <Icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4" />
+        {/* TODO: Support URLs */}
         <input
           type="text"
           value={props.searchQuery}
