@@ -203,32 +203,17 @@ pub async fn fetch_image_tile(
     Ok(image_data)
 }
 
-pub async fn download_image<F>(
+pub async fn fetch_image<F>(
     db: &DbConn,
     plugin_manager: &PluginManager,
     registry: registry_entry::Model,
     image: image_entry::Model,
     mut progress_callback: F,
+    zoom_level: Option<u32>,
 ) -> Result<TileResponse, CoreError>
 where
     F: FnMut(u32, u32) + Send,
 {
-    log::info!("download_image called for image id={}", image.id);
-
-    let req = DownloadRequest {
-        image: image.clone().into(),
-    };
-
-    let image_data = plugin_manager
-        .execute(&registry.source_id, |plugin| plugin.download_image(req))
-        .await?;
-
-    if let Some(res) = image_data {
-        progress_callback(1, 1);
-        return Ok(res);
-    }
-
-    // Construct a full-res image using tiles
     let width = image
         .width
         .ok_or_else(|| CoreError::Other("Missing width".into()))?;
@@ -237,20 +222,10 @@ where
         .ok_or_else(|| CoreError::Other("Missing height".into()))?;
     let tile_size = image.tile_size.unwrap_or(256);
 
-    // Utilize our shared geometry logic
     let geometry = ImageGeometry::new(width, height, tile_size);
-    let max_level = geometry.max_level();
-    let base_layer = geometry.level(max_level);
+    let base_layer = geometry.level(zoom_level.unwrap_or_else(|| geometry.max_level()));
 
-    log::info!(
-        "Stitching image {} from tiles at level {} ({}x{} tiles, total {}x{})",
-        image.id,
-        max_level,
-        base_layer.tiles_x,
-        base_layer.tiles_y,
-        base_layer.width,
-        base_layer.height
-    );
+    log::info!("Stitching image {} from tiles at {}", image.id, base_layer);
 
     let mut canvas = RgbImage::new(base_layer.width, base_layer.height);
 
@@ -271,9 +246,16 @@ where
     let max_concurrent_requests = 5;
     let mut stream = futures::stream::iter(coords)
         .map(|(x, y)| async move {
-            let tile =
-                fetch_image_tile(db, plugin_manager, registry_ref, image_ref, max_level, x, y)
-                    .await?;
+            let tile = fetch_image_tile(
+                db,
+                plugin_manager,
+                registry_ref,
+                image_ref,
+                base_layer.level,
+                x,
+                y,
+            )
+            .await?;
             Ok::<((u32, u32), TileResponse), CoreError>(((x, y), tile))
         })
         .buffer_unordered(max_concurrent_requests);
@@ -307,4 +289,32 @@ where
         data: buffer.into_inner(),
         mime_type: "image/jpeg".to_string(),
     })
+}
+
+pub async fn download_image<F>(
+    db: &DbConn,
+    plugin_manager: &PluginManager,
+    registry: registry_entry::Model,
+    image: image_entry::Model,
+    mut progress_callback: F,
+) -> Result<TileResponse, CoreError>
+where
+    F: FnMut(u32, u32) + Send,
+{
+    log::info!("download_image called for image id={}", image.id);
+
+    let req = DownloadRequest {
+        image: image.clone().into(),
+    };
+
+    let image_data = plugin_manager
+        .execute(&registry.source_id, |plugin| plugin.download_image(req))
+        .await?;
+
+    if let Some(res) = image_data {
+        progress_callback(1, 1);
+        Ok(res)
+    } else {
+        fetch_image(db, plugin_manager, registry, image, progress_callback, None).await
+    }
 }

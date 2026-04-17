@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 /// Represents the base geometry of a tiled image pyramid.
 #[derive(Debug, Clone, Copy)]
 pub struct ImageGeometry {
@@ -9,12 +11,22 @@ pub struct ImageGeometry {
 /// Information about a specific zoom level's geometry.
 #[derive(Debug, Clone, Copy)]
 pub struct LevelGeometry {
-    pub index: u32,
+    pub level: u32,
     pub width: u32,
     pub height: u32,
     pub tiles_x: u32,
     pub tiles_y: u32,
     pub scale_factor: u32,
+}
+
+impl Display for LevelGeometry {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "level {} ({}x{} tiles, total {}x{})",
+            self.level, self.tiles_x, self.tiles_y, self.width, self.height
+        )
+    }
 }
 
 impl ImageGeometry {
@@ -41,17 +53,17 @@ impl ImageGeometry {
 
     /// Returns the geometry parameters for a specific level index.
     #[must_use]
-    pub fn level(&self, index: u32) -> LevelGeometry {
+    pub fn level(&self, level: u32) -> LevelGeometry {
         let max = self.max_level();
-        let index = index.min(max);
-        let scale_factor = 2u32.pow(max - index);
+        let level = level.min(max);
+        let scale_factor = 2u32.pow(max - level);
 
         // Dimensions at this specific zoom level
         let l_width = self.width / scale_factor;
         let l_height = self.height / scale_factor;
 
         LevelGeometry {
-            index,
+            level,
             width: l_width,
             height: l_height,
             tiles_x: l_width.div_ceil(self.tile_size),

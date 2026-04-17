@@ -1,10 +1,7 @@
 use serde::Deserialize;
 
 use crate::{
-    com_structs::PluginError,
-    data::Image,
-    protocols::fetchers::Fetcher,
-    utils::ImageGeometry,
+    com_structs::PluginError, data::Image, protocols::fetchers::Fetcher, utils::ImageGeometry,
 };
 
 #[derive(Debug, Deserialize)]
@@ -75,7 +72,7 @@ impl Zoomify {
             .ok_or_else(|| PluginError::MissingField("base_url".into()))?;
 
         let properties = self.geometry.level(level);
-        if level != properties.index {
+        if level != properties.level {
             return Err(PluginError::InvalidField("zoom".into()));
         }
         if x >= properties.tiles_x || y >= properties.tiles_y {

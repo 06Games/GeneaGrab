@@ -3,13 +3,16 @@
 use geneagrab_core::{plugins::PluginManager, services::plugin};
 use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
-use tauri::{AppHandle, Manager, State};
+use tauri::{Manager, State};
 
 pub mod commands;
+pub mod events;
+pub mod schemes;
 pub mod state;
-mod tiles;
 
 use state::AppState;
+
+use crate::schemes::{handler::scheme_handler, tiles};
 
 #[allow(clippy::missing_panics_doc)]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -88,17 +91,10 @@ pub fn run() {
 
             Ok(())
         })
-        .register_asynchronous_uri_scheme_protocol("tiles", |ctx, request, responder| {
-            let app_handle: AppHandle = ctx.app_handle().clone();
-            tauri::async_runtime::spawn(async move {
-                let state = app_handle.state::<AppState>();
-                responder.respond(
-                    tiles::handle_tile_request(request, state, app_handle.clone())
-                        .await
-                        .unwrap(),
-                );
-            });
-        })
+        .register_asynchronous_uri_scheme_protocol(
+            "tiles",
+            scheme_handler(tiles::handle_tile_request),
+        )
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![
             commands::registry::get_all_registries,
