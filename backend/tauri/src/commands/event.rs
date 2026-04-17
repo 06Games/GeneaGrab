@@ -1,6 +1,6 @@
-use tauri::State;
-use geneagrab_core::comm_models::{EventDetail, EventRow};
 use crate::state::{AppState, CommandError};
+use geneagrab_core::comm_models::{EventDetail, EventRow};
+use tauri::State;
 
 #[tauri::command]
 pub async fn get_event_rows(
@@ -21,10 +21,7 @@ pub async fn get_event_detail(
 }
 
 #[tauri::command]
-pub async fn save_act(
-    event: EventDetail,
-    state: State<'_, AppState>,
-) -> Result<(), CommandError> {
+pub async fn save_act(event: EventDetail, state: State<'_, AppState>) -> Result<(), CommandError> {
     geneagrab_core::services::event::save_act(&state.db, event).await?;
     Ok(())
 }

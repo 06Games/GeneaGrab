@@ -18,6 +18,7 @@ use crate::schemes::{handler::scheme_handler, tiles};
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             // Setup logging
             if cfg!(debug_assertions) {
@@ -103,6 +104,7 @@ pub fn run() {
             commands::registry::get_plugins_for_url,
             commands::image::get_image_meta,
             commands::image::save_image_meta,
+            commands::image::download_image,
             commands::event::get_event_rows,
             commands::event::get_event_detail,
             commands::event::save_act

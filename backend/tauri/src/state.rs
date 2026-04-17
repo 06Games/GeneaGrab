@@ -1,4 +1,4 @@
-use geneagrab_core::{errors::CoreError, plugins::PluginManager};
+use geneagrab_core::plugins::PluginManager;
 use sea_orm::DbConn;
 use serde::Serialize;
 
@@ -8,11 +8,12 @@ pub struct AppState {
 }
 
 #[derive(Serialize)]
-pub struct CommandError(String);
+pub struct CommandError(pub String);
 
-impl From<CoreError> for CommandError {
-    fn from(err: CoreError) -> Self {
+impl<T: ToString> From<T> for CommandError {
+    fn from(err: T) -> Self {
+        let err = err.to_string();
         log::error!("{err}");
-        CommandError(err.to_string())
+        CommandError(err)
     }
 }

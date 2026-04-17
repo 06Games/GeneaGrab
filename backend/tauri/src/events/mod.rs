@@ -3,7 +3,7 @@ mod download_progress;
 pub use download_progress::DownloadProgressPayload;
 
 use serde::Serialize;
-use tauri::{AppHandle, Emitter};
+use tauri::{Emitter, Runtime};
 
 pub trait TauriEvent: Serialize {
     const EVENT_NAME: &'static str;
@@ -13,7 +13,7 @@ pub trait TauriEvent: Serialize {
     /// # Errors
     ///
     /// Returns an error if the data cannot be serialized or the IPC call fails.
-    fn emit(&self, app_handle: &AppHandle) -> Result<(), tauri::Error> {
+    fn emit<R: Runtime>(&self, app_handle: &impl Emitter<R>) -> Result<(), tauri::Error> {
         app_handle.emit(Self::EVENT_NAME, self)
     }
 }

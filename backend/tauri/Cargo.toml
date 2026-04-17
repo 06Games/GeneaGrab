@@ -39,3 +39,4 @@ sea-orm = { version = "2.0.0-rc", features = [
 ] }
 tracing = { version = "0.1.44", features = ["log-always"] }
 anyhow = "1.0.102"
+tauri-plugin-opener = "2"

@@ -1,2 +1,2 @@
-pub mod tiles;
 pub mod handler;
+pub mod tiles;

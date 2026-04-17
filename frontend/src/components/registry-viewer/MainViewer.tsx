@@ -162,17 +162,7 @@ export const MainViewer = (props: MainViewerProps) => {
         setDownloadProgress({ current, total });
       });
 
-      const url = api.getImageUrl(props.registryId, props.currentImage);
-      if (!url) throw new Error("No image URL");
-
-      const image = await fetch(url);
-      if (!image.ok) throw new Error("Fetch failed");
-
-      const blob = await image.blob();
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `image-${props.registryId}-${props.currentImage}.jpg`; // TODO: Better filename, auto focus the new file and avoid duplicated files
-      link.click();
+      await api.downloadImage(props.registryId, props.currentImage);
     } catch (e) {
       console.error("Could not download image", e);
     } finally {

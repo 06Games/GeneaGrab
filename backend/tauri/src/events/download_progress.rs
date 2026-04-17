@@ -1,6 +1,6 @@
 use crate::events::TauriEvent;
 use serde::Serialize;
-use tauri::AppHandle;
+use tauri::{Emitter, Runtime};
 
 #[derive(Serialize, Clone)]
 pub struct DownloadProgressPayload {
@@ -15,8 +15,8 @@ impl TauriEvent for DownloadProgressPayload {
 }
 
 impl DownloadProgressPayload {
-    pub fn download_progress_callback(
-        app_handle: AppHandle,
+    pub fn download_progress_callback<R: Runtime>(
+        app_handle: impl Emitter<R>,
         registry_id: u32,
         image_id: u32,
     ) -> impl Fn(u32, u32) {
