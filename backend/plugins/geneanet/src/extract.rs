@@ -84,7 +84,7 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: &str) -> Result<(), Pl
             ))?;
     let popup_html = popup_element.inner_html();
 
-    let info_regex = Regex::new(r#"(?s)<p>(?:\[.*?\] - )?(?P<location>.*?) \((?P<locationDetails>.*?)\) - (?P<globalType>.*?)(?: \((?P<type>.*?)\))?(?: - .*)? *\| (?P<from>.*?) - (?P<to>.*?)</p>.*?<p>(?P<cote>.*?)</p>(?:.*?<p>(?P<notaire>.*?)</p>)?.*?<p class="no-margin-bottom">(?P<betterType>.*?)(?:\..*| -.*)?</p>.*?<p>(?P<note>.*?)</p>"#).unwrap();
+    let info_regex = Regex::new(r#"(?s)<p class="text-small">.*?<p>(?:\[.*?\] - )?(?P<location>.*?) \((?P<locationDetails>.*?)\) - (?P<globalType>.*?)(?: \((?P<type>.*?)\))?(?: - .*)? *\| (?P<from>.*?) - (?P<to>.*?)</p>.*?<p>(?P<cote>.*?)</p>(?:.*?<p>(?P<notaire>.*?)</p>)?.*?<p class="no-margin-bottom">(?P<betterType>.*?)(?:\..*| -.*)?</p>.*?<p>(?P<note>.*?)</p>"#).unwrap();
     let caps = info_regex
         .captures(&popup_html)
         .ok_or(PluginError::ParsingError(
