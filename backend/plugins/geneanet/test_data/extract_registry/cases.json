@@ -18,7 +18,10 @@
             "source_id": "geneanet",
             "registry_id": "17293",
             "registry_types": [
-                "Marriage"
+                {
+                    "category": "union",
+                    "label": "Marriage"
+                }
             ],
             "ark_url": "https://www.geneanet.org/registres/view/17293",
             "date_from": "1574",
@@ -51,7 +54,10 @@
             "source_id": "geneanet",
             "registry_id": "17149",
             "registry_types": [
-                "Burial"
+                {
+                    "category": "mortality",
+                    "label": "Burial"
+                }
             ],
             "ark_url": "https://www.geneanet.org/registres/view/17149",
             "date_from": "1588",

@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use geneagrab_plugin_core::data::RegistryType;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fmt::Display;
@@ -18,6 +19,7 @@ where
     }
 }
 
+#[allow(clippy::option_option)]
 fn empty_string_as_none_patch<'de, D, T>(deserializer: D) -> Result<Option<Option<T>>, D::Error>
 where
     D: Deserializer<'de>,
@@ -63,7 +65,7 @@ pub struct CursorResponse<T> {
 pub struct RegistryMeta {
     pub id: u32,
     pub archive_reference: Option<String>,
-    pub source_types: HashSet<String>,
+    pub source_types: HashSet<RegistryType>,
     pub places: HashSet<Vec<String>>,
     pub collection: Vec<String>,
     pub ark_url: Option<String>,

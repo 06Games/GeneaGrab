@@ -1,4 +1,4 @@
-use geneagrab_plugin_core::data::Registry;
+use geneagrab_plugin_core::data::{Registry, RegistryType};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -15,7 +15,7 @@ pub struct Model {
     pub registry_id: String,
     pub archive_reference: Option<String>,
 
-    pub registry_types: JsonField<HashSet<String>>,
+    pub registry_types: JsonField<HashSet<RegistryType>>,
     pub collection: JsonField<Vec<String>>,
 
     pub manifest_url: Option<String>,

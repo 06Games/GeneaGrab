@@ -4,6 +4,8 @@ use chrono::{DateTime, Utc};
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
+use crate::data::RegistryType;
+
 #[derive(Debug, Serialize, Deserialize, PartialEq, Builder, Clone)]
 pub struct Registry {
     pub source_id: String,
@@ -13,7 +15,7 @@ pub struct Registry {
 
     #[builder(default)]
     #[serde(default)]
-    pub registry_types: HashSet<String>,
+    pub registry_types: HashSet<RegistryType>,
     #[builder(default)]
     #[serde(default)]
     pub collection: Vec<String>,

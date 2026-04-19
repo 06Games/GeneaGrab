@@ -1,8 +1,8 @@
-use std::collections::HashSet;
+use std::{borrow::Cow, collections::HashSet};
 
 use geneagrab_plugin_core::{
     com_structs::{ExtractRequest, ExtractResponse, PluginError},
-    data::{Image, RegistryBuilder},
+    data::{Image, RegistryBuilder, RegistryType},
     protocols::{
         fetchers::{Fetcher, SimpleFetcher},
         utils::validate_regex_match,
@@ -12,59 +12,50 @@ use regex::Regex;
 use scraper::{Html, Selector};
 use url::Url;
 
-fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<String> {
+fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<RegistryType> {
     let mut types = HashSet::new();
-    let t = type_str.to_lowercase();
+    let t = deunicode::deunicode(type_str).to_lowercase();
 
     if t.contains("naissances") {
-        types.insert(
-            if is_civil_status {
-                "Birth"
-            } else {
-                "BirthTable"
-            }
-            .to_string(),
-        );
-    } else if t.contains("baptemes") || t.contains("baptêmes") {
-        types.insert("Baptism".to_string());
+        types.insert(RegistryType::Vital(Cow::Borrowed(if is_civil_status {
+            "Birth"
+        } else {
+            "BirthTable"
+        })));
+    } else if t.contains("baptemes") {
+        types.insert(RegistryType::Vital(Cow::Borrowed("Baptism")));
     } else if t.contains("communions") {
-        types.insert("Communion".to_string());
+        types.insert(RegistryType::Vital(Cow::Borrowed("Communion")));
     } else if t.contains("confirmations") {
-        types.insert("Confirmation".to_string());
+        types.insert(RegistryType::Vital(Cow::Borrowed("Confirmation")));
     } else if t.contains("promesses de mariage") {
-        types.insert("Banns".to_string());
+        types.insert(RegistryType::Union(Cow::Borrowed("Banns")));
     } else if t.contains("mariages") {
-        types.insert(
-            if is_civil_status {
-                "Marriage"
-            } else {
-                "MarriageTable"
-            }
-            .to_string(),
-        );
+        types.insert(RegistryType::Union(Cow::Borrowed(if is_civil_status {
+            "Marriage"
+        } else {
+            "MarriageTable"
+        })));
     } else if t.contains("décès") || t.contains("deces") {
-        types.insert(
-            if is_civil_status {
-                "Death"
-            } else {
-                "DeathTable"
-            }
-            .to_string(),
-        );
-    } else if t.contains("sépultures") || t.contains("sepultures") || t.contains("inhumation") {
-        types.insert("Burial".to_string());
+        types.insert(RegistryType::Mortality(Cow::Borrowed(if is_civil_status {
+            "Death"
+        } else {
+            "DeathTable"
+        })));
+    } else if t.contains("sepultures") || t.contains("inhumation") {
+        types.insert(RegistryType::Mortality(Cow::Borrowed("Burial")));
     } else if t.contains("recensements") {
-        types.insert("Census".to_string());
-    } else if t.contains("etat des âmes") || t.contains("etat des ames") {
-        types.insert("LiberStatutAnimarum".to_string());
+        types.insert(RegistryType::Census(Cow::Borrowed("Census")));
+    } else if t.contains("etat des ames") {
+        types.insert(RegistryType::Census(Cow::Borrowed("Liber Statut Animarum")));
     } else if t.contains("archives notariales") {
-        types.insert("Notarial".to_string());
+        types.insert(RegistryType::Legal(Cow::Borrowed("Notarial")));
     } else if t.contains("registres matricules") {
-        types.insert("Military".to_string());
-    } else if t.contains("autres") || t.contains("archives privées") {
-        types.insert("Other".to_string());
+        types.insert(RegistryType::Military(Cow::Borrowed("Military")));
+    } else if !t.is_empty() {
+        types.insert(RegistryType::Other(Cow::Owned(t)));
     } else {
-        types.insert("Unknown".to_string());
+        types.insert(RegistryType::Unknown);
     }
 
     types
