@@ -1,6 +1,8 @@
 PLUGIN_DIR ?= ~/.local/share/com.06games.geneagrab/plugins
 
-.PHONY: install web_dev web_build desktop_dev desktop_build plugins_dev plugins_install
+.PHONY: all install web_dev web_build desktop_dev desktop_build plugins_dev plugins_install
+
+all: plugins_install desktop_dev
 
 install:
 	cd frontend && bun install

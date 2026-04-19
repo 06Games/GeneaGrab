@@ -7,16 +7,19 @@ import { Button } from "../../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
 import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
-import { ActType } from "../../../types/registry";
+import { ActTypeCategory } from "../../../types/registry";
 
-const EVENT_CHIP: Record<ActType, string> = {
-  Birth: "text-event-birth bg-event-birth-bg",
-  Marriage: "text-event-marriage bg-event-marriage-bg",
-  Death: "text-event-death bg-event-death-bg",
-  Burial: "text-event-burial bg-event-burial-bg",
+const EVENT_CHIP: Record<ActTypeCategory, string> = {
+  Vital: "text-event-vital bg-event-vital-bg",
+  Union: "text-event-union bg-event-union-bg",
+  Mortality: "text-event-mortality bg-event-mortality-bg",
   Census: "text-event-census bg-event-census-bg",
-  Notarial: "text-event-notarial bg-event-notarial-bg",
+  Legal: "text-event-legal bg-event-legal-bg",
+  Land: "text-event-land bg-event-land-bg",
+  Media: "text-event-media bg-event-media-bg",
+  Military: "text-event-military bg-event-military-bg",
   Other: "text-event-other bg-event-other-bg",
+  Unknown: "text-event-other bg-event-other-bg",
 };
 
 interface GlobalGridProps {
@@ -141,10 +144,10 @@ export const GlobalGrid = (props: GlobalGridProps) => {
                   <span
                     class={[
                       "text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit leading-none self-center",
-                      EVENT_CHIP[event().event_type || "Other"] || EVENT_CHIP["Other"],
+                      EVENT_CHIP[event().event_type.category || "Other"] || EVENT_CHIP["Other"],
                     ].join(" ")}
                   >
-                    {(event().event_type || "Other").substring(0, 5)}...
+                    {(event().event_type.label || "Other").substring(0, 5)}...
                   </span>
                   <span class="text-[13px] text-main truncate font-medium">{event().title || "-"}</span>
                 </button>

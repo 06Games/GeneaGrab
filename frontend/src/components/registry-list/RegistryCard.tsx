@@ -1,7 +1,20 @@
-import { RegistryMeta } from "../../types/registry";
+import { ActTypeCategory, RegistryMeta } from "../../types/registry";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { Show } from "solid-js";
+
+const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
+  Vital: "text-event-vital bg-event-vital-bg border-event-vital-border",
+  Union: "text-event-union bg-event-union-bg border-event-union-border",
+  Mortality: "text-event-mortality bg-event-mortality-bg border-event-mortality-border",
+  Census: "text-event-census bg-event-census-bg border-event-census-border",
+  Legal: "text-event-legal bg-event-legal-bg border-event-legal-border",
+  Land: "text-event-land bg-event-land-bg border-event-land-border",
+  Media: "text-event-media bg-event-media-bg border-event-media-border",
+  Military: "text-event-military bg-event-military-bg border-event-military-border",
+  Other: "text-event-other bg-event-other-bg border-event-other-border",
+  Unknown: "text-event-other bg-event-other-bg border-event-other-border",
+};
 
 export const RegistryCard = (props: { registry: RegistryMeta }) => {
   const { t } = useI18n();
@@ -55,7 +68,9 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
       <div class="mt-auto pt-3 border-t border-subtle flex items-center justify-between gap-2">
         <div class="flex flex-wrap gap-1 min-w-0">
           {Array.from(props.registry.source_types).map((type) => (
-            <span class="text-[10px] font-medium px-1.5 py-0.5 rounded text-dim bg-tinted border border-subtle truncate max-w-[80px]">{type as string}</span>
+            <span class={["text-[10px] font-medium px-1.5 py-0.5 rounded border truncate max-w-[80px]", ACT_TYPE_STYLES[type.category]].join(" ")}>
+              {type.label as string}
+            </span>
           ))}
         </div>
         <div class="flex items-center gap-2 text-[11px] text-dim flex-shrink-0 tabular-nums">

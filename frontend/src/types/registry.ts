@@ -1,7 +1,10 @@
-export const ACT_TYPE_OPTIONS = [
-  "Birth", "Marriage", "Death", "Burial", "Census", "Notarial", "Other",
-] as const;
-export type ActType = typeof ACT_TYPE_OPTIONS[number];
+export const ACT_TYPE_OPTIONS = ["Vital", "Union", "Mortality", "Census", "Legal", "Land", "Media", "Military", "Other", "Unknown"] as const;
+export type ActTypeCategory = (typeof ACT_TYPE_OPTIONS)[number];
+
+export interface ActType {
+  category: ActTypeCategory;
+  label: string | null;
+}
 
 export interface RegistryFilters {
   search_term?: string | null;
@@ -15,7 +18,7 @@ export interface RegistryFilters {
 export interface RegistryMeta {
   id: number;
   archive_reference: string;
-  source_types: Set<ActType | string>;
+  source_types: Set<ActType>;
   places: string[][];
   collection: string[];
   ark_url?: string;

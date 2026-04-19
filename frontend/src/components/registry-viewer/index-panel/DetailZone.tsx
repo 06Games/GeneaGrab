@@ -15,6 +15,7 @@ interface DetailZoneProps {
   onFocusGrid?: () => void;
 }
 
+// FIXME: ActType can't match FieldValues
 type ActForm = EventDetail;
 
 export const DetailZone = (props: DetailZoneProps) => {

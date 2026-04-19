@@ -4,16 +4,19 @@ import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { useRegistryActions } from "../../contexts/RegistryActionsContext";
 import { ImageMeta } from "../../types/image";
-import { ActType, RegistryMeta } from "../../types/registry";
+import { ActTypeCategory, RegistryMeta } from "../../types/registry";
 
-const ACT_TYPE_STYLES: Record<ActType, string> = {
-  Birth: "text-event-birth bg-event-birth-bg border-event-birth-border",
-  Marriage: "text-event-marriage bg-event-marriage-bg border-event-marriage-border",
-  Death: "text-event-death bg-event-death-bg border-event-death-border",
-  Burial: "text-event-burial bg-event-burial-bg border-event-burial-border",
+const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
+  Vital: "text-event-vital bg-event-vital-bg border-event-vital-border",
+  Union: "text-event-union bg-event-union-bg border-event-union-border",
+  Mortality: "text-event-mortality bg-event-mortality-bg border-event-mortality-border",
   Census: "text-event-census bg-event-census-bg border-event-census-border",
-  Notarial: "text-event-notarial bg-event-notarial-bg border-event-notarial-border",
+  Legal: "text-event-legal bg-event-legal-bg border-event-legal-border",
+  Land: "text-event-land bg-event-land-bg border-event-land-border",
+  Media: "text-event-media bg-event-media-bg border-event-media-border",
+  Military: "text-event-military bg-event-military-bg border-event-military-border",
   Other: "text-event-other bg-event-other-bg border-event-other-border",
+  Unknown: "text-event-other bg-event-other-bg border-event-other-border",
 };
 
 interface InfoNotesPanelProps {
@@ -118,8 +121,10 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
               <div class="mt-2 flex flex-wrap gap-1.5">
                 <For each={Array.from(imgMeta().act_types.entries())}>
                   {([type, count]) => (
-                    <span class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border", ACT_TYPE_STYLES[type]].join(" ")}>
-                      {count}× {type}
+                    <span
+                      class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border", ACT_TYPE_STYLES[type.category]].join(" ")}
+                    >
+                      {count}× {type.label}
                     </span>
                   )}
                 </For>
