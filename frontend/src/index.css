@@ -11,24 +11,24 @@
   --color-tinted: var(--tinted);
   --color-hover: var(--hover);
   --color-active: var(--active);
-  
+
   --color-subtle: var(--subtle);
   --color-subtle-md: var(--subtle-md);
-  
+
   --color-main: var(--main);
   --color-muted: var(--muted);
   --color-dim: var(--dim);
-  
+
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-bg: var(--accent-bg);
   --color-accent-border: var(--accent-border);
   --color-accent-text: var(--accent-text);
-  
+
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
-  
+
   --color-viewer-bg: var(--viewer-bg);
   --color-viewer-dark: var(--viewer-dark);
 
@@ -36,35 +36,35 @@
   --color-event-vital: var(--evt-vital);
   --color-event-vital-bg: var(--evt-vital-bg);
   --color-event-vital-border: var(--evt-vital-border);
-  
+
   --color-event-union: var(--evt-union);
   --color-event-union-bg: var(--evt-union-bg);
   --color-event-union-border: var(--evt-union-border);
-  
+
   --color-event-mortality: var(--evt-mortality);
   --color-event-mortality-bg: var(--evt-mortality-bg);
   --color-event-mortality-border: var(--evt-mortality-border);
-  
+
   --color-event-census: var(--evt-census);
   --color-event-census-bg: var(--evt-census-bg);
   --color-event-census-border: var(--evt-census-border);
-  
+
   --color-event-legal: var(--evt-legal);
   --color-event-legal-bg: var(--evt-legal-bg);
   --color-event-legal-border: var(--evt-legal-border);
-  
+
   --color-event-land: var(--evt-land);
   --color-event-land-bg: var(--evt-land-bg);
   --color-event-land-border: var(--evt-land-border);
-  
+
   --color-event-media: var(--evt-media);
   --color-event-media-bg: var(--evt-media-bg);
   --color-event-media-border: var(--evt-media-border);
-  
+
   --color-event-military: var(--evt-military);
   --color-event-military-bg: var(--evt-military-bg);
   --color-event-military-border: var(--evt-military-border);
-  
+
   --color-event-other: var(--evt-other);
   --color-event-other-bg: var(--evt-other-bg);
   --color-event-other-border: var(--evt-other-border);
@@ -77,27 +77,27 @@
   --tinted: #faf7f3;
   --hover: #f2ece3;
   --active: #efe8dc;
-  
+
   /* Borders */
   --subtle: #e0d8cc;
   --subtle-md: #ccc4b8;
-  
+
   /* Typography */
   --main: #2c2820;
   --muted: #6b6358;
   --dim: #a89e93;
-  
+
   /* Accents & Status */
   --accent: #b8743a;
   --accent-hover: #a06530;
   --accent-bg: #fef3e7;
   --accent-border: #f0c990;
   --accent-text: #7a4a1e;
-  
+
   --success: #3a8c5c;
   --warning: #d97706;
   --danger: #c0392b;
-  
+
   /* Viewer specific */
   --viewer-bg: #eee8df;
   --viewer-dark: #1a1815;
@@ -106,22 +106,35 @@
   --evt-vital: #2d6a4f;
   --evt-vital-bg: #d8f3dc;
   --evt-vital-border: #b7e4c7;
+
   --evt-union: #1d4e89;
   --evt-union-bg: #dbeafe;
   --evt-union-border: #bfdbfe;
+
   --evt-mortality: #7f1d1d;
   --evt-mortality-bg: #fee2e2;
   --evt-mortality-border: #fecaca;
-  --evt-census: #403937;
-  --evt-census-bg: #f2e9e4;
-  --evt-census-border: #e0d8cc;
-  --evt-legal: #4b5563;
-  --evt-legal-bg: #f3f4f6;
-  --evt-legal-border: #e5e7eb;
-  /* TODO: Land and Media */
+
+  --evt-census: #0e7490;
+  --evt-census-bg: #ecfeff;
+  --evt-census-border: #cffafe;
+
+  --evt-legal: #334155;
+  --evt-legal-bg: #f1f5f9;
+  --evt-legal-border: #e2e8f0;
+
+  --evt-land: #78350f;
+  --evt-land-bg: #fffbeb;
+  --evt-land-border: #fef3c7;
+
+  --evt-media: #7e22ce;
+  --evt-media-bg: #faf5ff;
+  --evt-media-border: #f3e8ff;
+
   --evt-military: #713f12;
   --evt-military-bg: #ffedd5;
   --evt-military-border: #fed7aa;
+
   --evt-other: #6b6358;
   --evt-other-bg: #f2ece3;
   --evt-other-border: #e0d8cc;
@@ -135,27 +148,27 @@
     --tinted: #2a2a2e;
     --hover: #323236;
     --active: #3a3a3f;
-    
+
     /* Borders */
     --subtle: #3a3a3f;
     --subtle-md: #525259;
-    
+
     /* Typography */
     --main: #e4e4e7;
     --muted: #a1a1aa;
     --dim: #71717a;
-    
+
     /* Accents & Status */
     --accent: #d9853b;
     --accent-hover: #eda058;
     --accent-bg: #3b2615;
     --accent-border: #5c3b20;
     --accent-text: #f5c8a3;
-    
+
     --success: #4ade80;
     --warning: #d97706;
     --danger: #f87171;
-    
+
     /* Viewer specific */
     --viewer-bg: #141415;
     --viewer-dark: #09090b;
@@ -164,27 +177,35 @@
     --evt-vital: #86d4af;
     --evt-vital-bg: #193829;
     --evt-vital-border: #23533c;
-    
+
     --evt-union: #93bbf5;
     --evt-union-bg: #1a3052;
     --evt-union-border: #264778;
-    
+
     --evt-mortality: #f28f8f;
     --evt-mortality-bg: #4d1d1d;
     --evt-mortality-border: #732929;
-    
+
+    --evt-census: #67e8f9;
+    --evt-census-bg: #083344;
+    --evt-census-border: #155e75;
+
+    --evt-legal: #94a3b8;
+    --evt-legal-bg: #1e293b;
+    --evt-legal-border: #334155;
+
+    --evt-land: #fbbf24;
+    --evt-land-bg: #451a03;
+    --evt-land-border: #78350f;
+
+    --evt-media: #c084fc;
+    --evt-media-bg: #3b0764;
+    --evt-media-border: #581c87;
+
     --evt-military: #e0a67b;
     --evt-military-bg: #472b15;
     --evt-military-border: #6b401e;
-    
-    --evt-legal: #b3b3ba;
-    --evt-legal-bg: #323236;
-    --evt-legal-border: #4a4a50;
-    
-    --evt-census: #c0b3b9;
-    --evt-census-bg: #382d33;
-    --evt-census-border: #54434d;
-    
+
     --evt-other: #b3b3ba;
     --evt-other-bg: #323236;
     --evt-other-border: #4a4a50;
