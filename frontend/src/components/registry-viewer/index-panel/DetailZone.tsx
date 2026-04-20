@@ -15,7 +15,6 @@ interface DetailZoneProps {
   onFocusGrid?: () => void;
 }
 
-// FIXME: ActType can't match FieldValues
 type ActForm = EventDetail;
 
 export const DetailZone = (props: DetailZoneProps) => {
@@ -86,7 +85,7 @@ export const DetailZone = (props: DetailZoneProps) => {
           <section>
             <SectionLabel>{t("detail.sections.details")}</SectionLabel>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-2">
-              <Field name="event_type">
+              <Field name="event_type.category">
                 {(field, fieldProps) => (
                   <IndexField {...fieldProps} label={t("detail.labels.type")} value={field.value} tabIndex={1} options={ACT_TYPE_OPTIONS} />
                 )}

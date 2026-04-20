@@ -1,10 +1,10 @@
 export const ACT_TYPE_OPTIONS = ["vital", "union", "mortality", "census", "legal", "land", "media", "military", "other", "unknown"] as const;
 export type ActTypeCategory = (typeof ACT_TYPE_OPTIONS)[number];
 
-export interface ActType {
+export type ActType = {
   category: ActTypeCategory;
   label: string | null;
-}
+};
 
 export interface RegistryFilters {
   search_term?: string | null;
