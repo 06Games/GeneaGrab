@@ -1,4 +1,4 @@
-export const ACT_TYPE_OPTIONS = ["Vital", "Union", "Mortality", "Census", "Legal", "Land", "Media", "Military", "Other", "Unknown"] as const;
+export const ACT_TYPE_OPTIONS = ["vital", "union", "mortality", "census", "legal", "land", "media", "military", "other", "unknown"] as const;
 export type ActTypeCategory = (typeof ACT_TYPE_OPTIONS)[number];
 
 export interface ActType {

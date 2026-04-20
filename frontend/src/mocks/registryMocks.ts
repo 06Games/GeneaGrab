@@ -6,9 +6,9 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
   id: 123,
   archive_reference: "5 Mi 1/342",
   source_types: new Set([
-    { category: "Vital", label: "Birth" },
-    { category: "Union", label: "Marriage" },
-    { category: "Mortality", label: "Death" },
+    { category: "vital", label: "Birth" },
+    { category: "union", label: "Marriage" },
+    { category: "mortality", label: "Death" },
   ]),
   places: [["Brignoles"], ["Vins-sur-Caramy"]],
   collection: ["État civil"],
@@ -29,28 +29,28 @@ export const MOCK_IMAGE_META: ImageMeta = {
   notes: "Image in good condition, but handwriting is difficult to read in some areas.",
   ark_url: "",
   act_types: new Map<ActType, number>([
-    [{ category: "Vital", label: "Birth" }, 2],
-    [{ category: "Union", label: "Marriage" }, 1],
-    [{ category: "Mortality", label: "Death" }, 1],
+    [{ category: "vital", label: "Birth" }, 2],
+    [{ category: "union", label: "Marriage" }, 1],
+    [{ category: "mortality", label: "Death" }, 1],
   ]),
 };
 
 export const MOCK_EVENT_ROWS: EventRow[] = [
-  { event_id: 1, date: "03 Frim. II", event_type: { category: "Vital", label: "Birth" }, title: "MARTIN, Jean-Baptiste" },
-  { event_id: 2, date: "03 Frim. II", event_type: { category: "Vital", label: "Birth" }, title: "DUPONT, Marie" },
-  { event_id: 3, date: "05 Frim. II", event_type: { category: "Union", label: "Marriage" }, title: "ARNAUD, Pierre ∞ BLANC" },
-  { event_id: 4, date: "05 Frim. II", event_type: { category: "Mortality", label: "Death" }, title: "BOYER, Antoinette" },
-  { event_id: 5, date: "07 Frim. II", event_type: { category: "Vital", label: "Birth" }, title: "ISNARD, Louis" },
-  { event_id: 6, date: "12 Frim. II", event_type: { category: "Vital", label: "Birth" }, title: "FABRE, Thérèse" },
-  { event_id: 7, date: "14 Frim. II", event_type: { category: "Union", label: "Marriage" }, title: "ROUX, Antoine ∞ AUBERT" },
-  { event_id: 8, date: "16 Frim. II", event_type: { category: "Mortality", label: "Death" }, title: "PASCAL, Jean" },
+  { event_id: 1, date: "03 Frim. II", event_type: { category: "vital", label: "Birth" }, title: "MARTIN, Jean-Baptiste" },
+  { event_id: 2, date: "03 Frim. II", event_type: { category: "vital", label: "Birth" }, title: "DUPONT, Marie" },
+  { event_id: 3, date: "05 Frim. II", event_type: { category: "union", label: "Marriage" }, title: "ARNAUD, Pierre ∞ BLANC" },
+  { event_id: 4, date: "05 Frim. II", event_type: { category: "mortality", label: "Death" }, title: "BOYER, Antoinette" },
+  { event_id: 5, date: "07 Frim. II", event_type: { category: "vital", label: "Birth" }, title: "ISNARD, Louis" },
+  { event_id: 6, date: "12 Frim. II", event_type: { category: "vital", label: "Birth" }, title: "FABRE, Thérèse" },
+  { event_id: 7, date: "14 Frim. II", event_type: { category: "union", label: "Marriage" }, title: "ROUX, Antoine ∞ AUBERT" },
+  { event_id: 8, date: "16 Frim. II", event_type: { category: "mortality", label: "Death" }, title: "PASCAL, Jean" },
 ];
 
 export const MOCK_SELECTED_EVENT: EventDetail = {
   event_id: 3,
   date: "05 Frimaire An II",
   date_normalized: "1793-11-25",
-  event_type: { category: "Union", label: "Marriage" },
+  event_type: { category: "union", label: "Marriage" },
   title: "Marriage ARNAUD, Pierre ∞ BLANC",
   act_number: "47",
   page: "12r",

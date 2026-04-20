@@ -10,16 +10,16 @@ import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
 import { ActTypeCategory } from "../../../types/registry";
 
 const EVENT_CHIP: Record<ActTypeCategory, string> = {
-  Vital: "text-event-vital bg-event-vital-bg",
-  Union: "text-event-union bg-event-union-bg",
-  Mortality: "text-event-mortality bg-event-mortality-bg",
-  Census: "text-event-census bg-event-census-bg",
-  Legal: "text-event-legal bg-event-legal-bg",
-  Land: "text-event-land bg-event-land-bg",
-  Media: "text-event-media bg-event-media-bg",
-  Military: "text-event-military bg-event-military-bg",
-  Other: "text-event-other bg-event-other-bg",
-  Unknown: "text-event-other bg-event-other-bg",
+  vital: "text-event-vital bg-event-vital-bg",
+  union: "text-event-union bg-event-union-bg",
+  mortality: "text-event-mortality bg-event-mortality-bg",
+  census: "text-event-census bg-event-census-bg",
+  legal: "text-event-legal bg-event-legal-bg",
+  land: "text-event-land bg-event-land-bg",
+  media: "text-event-media bg-event-media-bg",
+  military: "text-event-military bg-event-military-bg",
+  other: "text-event-other bg-event-other-bg",
+  unknown: "text-event-other bg-event-other-bg",
 };
 
 interface GlobalGridProps {
@@ -144,7 +144,7 @@ export const GlobalGrid = (props: GlobalGridProps) => {
                   <span
                     class={[
                       "text-[10px] font-medium px-1.5 py-0.5 rounded-full w-fit leading-none self-center",
-                      EVENT_CHIP[event().event_type.category || "Other"] || EVENT_CHIP["Other"],
+                      EVENT_CHIP[event().event_type.category || "Other"] || EVENT_CHIP["other"],
                     ].join(" ")}
                   >
                     {(event().event_type.label || "Other").substring(0, 5)}...

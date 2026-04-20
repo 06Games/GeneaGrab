@@ -7,16 +7,16 @@ import { ImageMeta } from "../../types/image";
 import { ActTypeCategory, RegistryMeta } from "../../types/registry";
 
 const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
-  Vital: "text-event-vital bg-event-vital-bg border-event-vital-border",
-  Union: "text-event-union bg-event-union-bg border-event-union-border",
-  Mortality: "text-event-mortality bg-event-mortality-bg border-event-mortality-border",
-  Census: "text-event-census bg-event-census-bg border-event-census-border",
-  Legal: "text-event-legal bg-event-legal-bg border-event-legal-border",
-  Land: "text-event-land bg-event-land-bg border-event-land-border",
-  Media: "text-event-media bg-event-media-bg border-event-media-border",
-  Military: "text-event-military bg-event-military-bg border-event-military-border",
-  Other: "text-event-other bg-event-other-bg border-event-other-border",
-  Unknown: "text-event-other bg-event-other-bg border-event-other-border",
+  vital: "text-event-vital bg-event-vital-bg border-event-vital-border",
+  union: "text-event-union bg-event-union-bg border-event-union-border",
+  mortality: "text-event-mortality bg-event-mortality-bg border-event-mortality-border",
+  census: "text-event-census bg-event-census-bg border-event-census-border",
+  legal: "text-event-legal bg-event-legal-bg border-event-legal-border",
+  land: "text-event-land bg-event-land-bg border-event-land-border",
+  media: "text-event-media bg-event-media-bg border-event-media-border",
+  military: "text-event-military bg-event-military-bg border-event-military-border",
+  other: "text-event-other bg-event-other-bg border-event-other-border",
+  unknown: "text-event-other bg-event-other-bg border-event-other-border",
 };
 
 interface InfoNotesPanelProps {
@@ -79,7 +79,11 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
             <p class="text-[14px] font-medium text-main truncate">{props.registryMeta.archive_reference}</p>
             <p class="text-[12px] text-dim truncate mt-0.5">
               {props.registryMeta.places?.[0]?.join(", ") || t("infoPanel.unknown")} ·{" "}
-              {props.registryMeta.source_types?.size > 0 ? Array.from(props.registryMeta.source_types).join(", ") : t("infoPanel.unknown")}
+              {props.registryMeta.source_types?.size > 0
+                ? Array.from(props.registryMeta.source_types)
+                    .map((source_type) => source_type.label)
+                    .join(", ")
+                : t("infoPanel.unknown")}
             </p>
           </div>
           <span
