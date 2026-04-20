@@ -112,25 +112,26 @@ pub async fn get_all_registries(
         }
     }
 
-    let mut query = add_count_subqueries(query);
+    let query = add_count_subqueries(query);
 
-    if let Some(last_id) = payload.cursor {
-        query = query.filter(registry_entry::Column::Id.gt(last_id));
-    }
-
+    let offset = payload.cursor.unwrap_or(0);
     let limit = payload.limit;
 
     let mut data = query
+        .order_by_asc(registry_entry::Column::Places)
+        .order_by_asc(registry_entry::Column::RegistryTypes)
+        .order_by_asc(registry_entry::Column::DateFrom)
         .order_by_asc(registry_entry::Column::Id)
+        .offset(u64::from(offset))
         .limit(limit + 1) // Lookahead +1 to determine if there's a next page
         .into_model::<RegistryWithCounts>()
         .all(db)
         .await
         .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
 
-    let next_cursor = if data.len() > limit as usize {
+    let next_cursor = if data.len() > usize::try_from(limit).unwrap_or(usize::MAX) {
         data.pop();
-        data.last().map(|item| item.registry.id)
+        Some(offset.saturating_add(u32::try_from(limit).unwrap_or(0)))
     } else {
         None
     };
@@ -138,7 +139,11 @@ pub async fn get_all_registries(
     let metas = data
         .into_iter()
         .map(|row| {
-            RegistryMeta::from_entry(row.registry, row.image_count as u32, row.event_count as u32)
+            RegistryMeta::from_entry(
+                row.registry,
+                u32::try_from(row.image_count).unwrap_or(0),
+                u32::try_from(row.event_count).unwrap_or(0),
+            )
         })
         .collect();
 
@@ -168,8 +173,8 @@ pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, Cor
 
     Ok(RegistryMeta::from_entry(
         row.registry,
-        row.image_count as u32,
-        row.event_count as u32,
+        u32::try_from(row.image_count).unwrap_or(0),
+        u32::try_from(row.event_count).unwrap_or(0),
     ))
 }
 
