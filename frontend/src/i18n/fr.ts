@@ -4,7 +4,8 @@ export const fr: RawDictionaries = {
   home: {
     title: "Registres",
     addRegistry: "Ajouter un registre",
-    searchPlaceholder: "Rechercher une cote, un titre ou un auteur...",
+    searchPlaceholder: "Rechercher une cote, une URL, un titre ou un auteur...",
+    filters: "Filtres",
     filterType: "Tous les types",
     filterPlace: "Tous les lieux",
     filterCollection: "Toutes les collections",
@@ -14,6 +15,12 @@ export const fr: RawDictionaries = {
     noResults: "Aucun registre ne correspond à vos critères.",
     imagesCount: "Images totales",
     actsCount: "Actes indexés",
+    urlDetected: "URL de registre détectée",
+    urlAlreadyAdded: "Ce registre est déjà dans votre bibliothèque (voir ci-dessous).",
+    checkingUrl: "Vérification de la compatibilité...",
+    urlNoPlugin: "Aucun plugin compatible trouvé pour cette URL.",
+    urlReady: "Plugin compatible trouvé. Vous pouvez l'ajouter à la bibliothèque.",
+    addQuick: "Ajouter",
   },
   addModal: {
     title: "Ajouter un nouveau registre",
@@ -24,7 +31,7 @@ export const fr: RawDictionaries = {
     pluginLoading: "Chargement des plugins...",
     pluginNone: "Aucun plugin disponible pour cette URL",
     cancel: "Annuler",
-    submit: "Ajouter"
+    submit: "Ajouter",
   },
   mainViewer: {
     prev: "Image précédente ({{key}})",
@@ -37,11 +44,11 @@ export const fr: RawDictionaries = {
     copyUrl: "Copier l'URL de l'image",
     invalidImage: "Le numéro d'image est invalide ({{n}})",
     imageError: "Erreur lors du chargement de l'image {{n}} :\n{{e}}",
-    ariaImageNumber: "Numéro d'image"
+    ariaImageNumber: "Numéro d'image",
   },
   stickyPin: {
     locked: "Valeur verrouillée (cliquer pour déverrouiller)",
-    lockForNext: "Verrouiller pour l'acte suivant"
+    lockForNext: "Verrouiller pour l'acte suivant",
   },
   person: {
     noRole: "Sans rôle",
@@ -59,11 +66,11 @@ export const fr: RawDictionaries = {
     relationship: "Parenté",
     relationshipTo: "Envers (Qui)",
     sequenceNumber: "N° Ordre",
-    notesIndiv: "Notes (Indiv.)"
+    notesIndiv: "Notes (Indiv.)",
   },
   thumbnailBar: {
     ariaLabel: "Miniatures des prises de vue",
-    imageLabel: "Image {{n}}"
+    imageLabel: "Image {{n}}",
   },
   infoPanel: {
     ariaLabel: "Informations et notes",
@@ -72,7 +79,7 @@ export const fr: RawDictionaries = {
     unknown: "Inconnu",
     image: {
       default: "Image {{n}}",
-      customName: "Image {{n}} ({{name}})"
+      customName: "Image {{n}} ({{name}})",
     },
     indexedLabel: "Actes indexés",
     period: "Période",
@@ -83,17 +90,17 @@ export const fr: RawDictionaries = {
     saved: "Enregistré",
     saving: "Enregistrement…",
     error: "Erreur",
-    unsaved: "Modifications non enregistrées"
+    unsaved: "Modifications non enregistrées",
   },
   registryViewer: {
     loading: "Chargement des données du registre…",
     loadingError: "Erreur de chargement du registre",
     index: "Index",
-    viewsAndActs: "{{views}} vues · {{acts}} actes indexés"
+    viewsAndActs: "{{views}} vues · {{acts}} actes indexés",
   },
   indexPanel: {
     title: "Index",
-    badgeActs: "{{count}} actes indexés"
+    badgeActs: "{{count}} actes indexés",
   },
   grid: {
     number: "#",
@@ -101,7 +108,7 @@ export const fr: RawDictionaries = {
     type: "Type",
     title: "Titre",
     newAct: "Nouvel acte",
-    actsCount: "{{count}} actes indexés"
+    actsCount: "{{count}} actes indexés",
   },
   detail: {
     noSelection: "Aucun acte sélectionné",
@@ -110,7 +117,7 @@ export const fr: RawDictionaries = {
       details: "Détails de l'Acte",
       people: "Personnes & Participants",
       transcription: "Transcription",
-      notes: "Notes de l'Acte"
+      notes: "Notes de l'Acte",
     },
     addPerson: "Ajouter une personne",
     placeholders: {
@@ -119,20 +126,20 @@ export const fr: RawDictionaries = {
       dateText: "12 Floréal an III",
       dateNorm: "YYYY-MM-DD",
       transcription: "Texte intégral de l'acte...",
-      notes: "Remarques de l'indexeur..."
+      notes: "Remarques de l'indexeur...",
     },
     emptyPrompt: {
       text: "Sélectionnez un acte dans la liste",
       prefix: "ou appuyez sur",
-      suffix: "pour en créer un nouveau"
+      suffix: "pour en créer un nouveau",
     },
     actions: {
       list: "liste",
-      save: "sauvegarder"
+      save: "sauvegarder",
     },
     help: {
       detail: "détail",
-      list: "liste"
+      list: "liste",
     },
     labels: {
       type: "Type",
@@ -144,10 +151,10 @@ export const fr: RawDictionaries = {
       town: "Ville",
       parish: "Paroisse",
       hamlet: "Hameau",
-      imageNumber: "N° Image (Vue)"
+      imageNumber: "N° Image (Vue)",
     },
     reset: "Réinitialiser",
     save: "Sauvegarder",
-    validateAndNext: "Valider & Suivant"
-  }
+    validateAndNext: "Valider & Suivant",
+  },
 };

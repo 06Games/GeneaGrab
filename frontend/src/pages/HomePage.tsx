@@ -1,4 +1,4 @@
-import { createSignal, createMemo, createEffect, Show, For, onCleanup, onMount, untrack } from "solid-js";
+import { createSignal, createMemo, createEffect, Show, For, onCleanup, onMount, untrack, Switch, Match, createResource } from "solid-js";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import { useBackend } from "../contexts/BackendContext";
 import { useI18n } from "../ui/i18n";
@@ -31,6 +31,54 @@ const HomePage = () => {
   const [isFetching, setIsFetching] = createSignal(false);
 
   const [columns, setColumns] = createSignal(1);
+
+  const isUrl = createMemo(() => {
+    const q = searchQuery().trim();
+    try {
+      new URL(q);
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+  const [plugins] = createResource(
+    () => (isUrl() ? searchQuery().trim() : null),
+    (url) => api.getPluginsForUrl(url),
+  );
+
+  const [selectedQuickPlugin, setSelectedQuickPlugin] = createSignal("");
+  const [isAdding, setIsAdding] = createSignal(false);
+
+  createEffect(() => {
+    const list = plugins();
+    if (list && list.length > 0) {
+      setSelectedQuickPlugin(list[0].id);
+    } else {
+      setSelectedQuickPlugin("");
+    }
+  });
+
+  const isAlreadyAdded = createMemo(() => {
+    const q = searchQuery().trim();
+    if (!q) return false;
+    return items().some((r) => r.ark_url && (r.ark_url === q || q.startsWith(r.ark_url)));
+  });
+
+  const handleQuickAdd = async () => {
+    if (!searchQuery() || !selectedQuickPlugin() || isAdding()) return;
+    setIsAdding(true);
+    try {
+      await api.addRegistry(searchQuery().trim(), selectedQuickPlugin());
+      // Refresh list to instantly show the new registry
+      setItems([]);
+      fetchPage(null, true);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   onMount(() => {
     const observer = new ResizeObserver((entries) => {
@@ -145,9 +193,56 @@ const HomePage = () => {
           onDateToChange={setDateTo}
         />
 
+        <Show when={isUrl() && !isFetching()}>
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 -mb-2 bg-panel border border-accent rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
+            <div class="flex items-start gap-3">
+              <div class="mt-0.5 text-accent">
+                <Icon icon="lucide:link" width="20" height="20" />
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[14px] font-semibold text-main">{t("home.urlDetected")}</span>
+                <span class="text-[13px] text-dim">
+                  <Switch>
+                    <Match when={isAlreadyAdded()}>{t("home.urlAlreadyAdded")}</Match>
+                    <Match when={plugins.loading}>{t("home.checkingUrl")}</Match>
+                    <Match when={!plugins.loading && plugins()?.length === 0}>
+                      <span class="text-warning">{t("home.urlNoPlugin")}</span>
+                    </Match>
+                    <Match when={!plugins.loading && plugins() && plugins()!.length > 0}>{t("home.urlReady")}</Match>
+                  </Switch>
+                </span>
+              </div>
+            </div>
+
+            <Show when={!isAlreadyAdded() && !plugins.loading && plugins() && plugins()!.length > 0}>
+              <div class="flex items-center gap-2">
+                <select
+                  value={selectedQuickPlugin()}
+                  onChange={(e) => setSelectedQuickPlugin(e.currentTarget.value)}
+                  class="px-3 py-1.5 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent outline-none appearance-none cursor-pointer"
+                >
+                  <For each={plugins()}>{(p) => <option value={p.id}>{p.name}</option>}</For>
+                </select>
+                <Button variant="primary" onClick={handleQuickAdd} disabled={isAdding()}>
+                  <Show
+                    when={isAdding()}
+                    fallback={
+                      <>
+                        <Icon icon="lucide:plus" /> {t("home.addQuick")}
+                      </>
+                    }
+                  >
+                    <Icon icon="lucide:loader-2" class="animate-spin" />
+                  </Show>
+                </Button>
+              </div>
+            </Show>
+          </div>
+        </Show>
+
         <div
           ref={scrollRef}
-          class="flex-1 overflow-y-auto pr-2 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
+          class="flex-1 overflow-y-auto -mr-4 pr-4 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
         >
           <Show when={!isFetching() && items().length === 0}>
             <div class="py-16 flex flex-col items-center justify-center text-dim border-2 border-dashed border-subtle rounded-xl h-full">

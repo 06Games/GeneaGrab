@@ -2,7 +2,8 @@ export const en = {
   home: {
     title: "Registries",
     addRegistry: "Add Registry",
-    searchPlaceholder: "Search reference, title or author...",
+    searchPlaceholder: "Search reference, URL, title or author...",
+    filters: "Filters",
     filterType: "All types",
     filterPlace: "All places",
     filterCollection: "All collections",
@@ -12,6 +13,12 @@ export const en = {
     noResults: "No registries found matching your criteria.",
     imagesCount: "Total images",
     actsCount: "Indexed acts",
+    urlDetected: "Registry URL detected",
+    urlAlreadyAdded: "This registry is already in your library (see below).",
+    checkingUrl: "Checking compatibility...",
+    urlNoPlugin: "No compatible plugins found for this URL.",
+    urlReady: "Compatible plugin found. You can add this registry to your library.",
+    addQuick: "Add to library",
   },
   addModal: {
     title: "Add a new registry",
@@ -22,7 +29,7 @@ export const en = {
     pluginLoading: "Loading plugins...",
     pluginNone: "No plugins available for this URL",
     cancel: "Cancel",
-    submit: "Add Registry"
+    submit: "Add Registry",
   },
   mainViewer: {
     prev: "Previous image ({{key}})",
@@ -35,11 +42,11 @@ export const en = {
     copyUrl: "Copy image URL",
     invalidImage: "Invalid image number ({{n}})",
     imageError: "Couldn't load image {{n}}:\n{{e}}",
-    ariaImageNumber: "Image number"
+    ariaImageNumber: "Image number",
   },
   stickyPin: {
     locked: "Value locked (click to unlock)",
-    lockForNext: "Lock for next act"
+    lockForNext: "Lock for next act",
   },
   person: {
     noRole: "No role",
@@ -57,11 +64,11 @@ export const en = {
     relationship: "Relationship",
     relationshipTo: "Relationship to",
     sequenceNumber: "Seq. number",
-    notesIndiv: "Notes (Indiv.)"
+    notesIndiv: "Notes (Indiv.)",
   },
   thumbnailBar: {
     ariaLabel: "Thumbnails",
-    imageLabel: "Image {{n}}"
+    imageLabel: "Image {{n}}",
   },
   infoPanel: {
     ariaLabel: "Information and notes",
@@ -70,7 +77,7 @@ export const en = {
     unknown: "Unknown",
     image: {
       default: "Image {{n}}",
-      customName: "Image {{n}} ({{name}})"
+      customName: "Image {{n}} ({{name}})",
     },
     indexedLabel: "Indexed acts",
     period: "Period",
@@ -81,17 +88,17 @@ export const en = {
     saved: "Saved",
     saving: "Saving…",
     error: "Error",
-    unsaved: "Unsaved changes"
+    unsaved: "Unsaved changes",
   },
   registryViewer: {
     loading: "Loading registry data...",
     loadingError: "Failed to load registry",
     index: "Index",
-    viewsAndActs: "{{views}} views · {{acts}} indexed acts"
+    viewsAndActs: "{{views}} views · {{acts}} indexed acts",
   },
   indexPanel: {
     title: "Index",
-    badgeActs: "{{count}} indexed acts"
+    badgeActs: "{{count}} indexed acts",
   },
   grid: {
     number: "#",
@@ -99,7 +106,7 @@ export const en = {
     type: "Type",
     title: "Title",
     newAct: "New act",
-    actsCount: "{{count}} indexed acts"
+    actsCount: "{{count}} indexed acts",
   },
   detail: {
     noSelection: "No act selected",
@@ -108,7 +115,7 @@ export const en = {
       details: "Act details",
       people: "People & participants",
       transcription: "Transcription",
-      notes: "Act notes"
+      notes: "Act notes",
     },
     addPerson: "Add a person",
     placeholders: {
@@ -117,20 +124,20 @@ export const en = {
       dateText: "12 Floréal Year III",
       dateNorm: "YYYY-MM-DD",
       transcription: "Full act text...",
-      notes: "Indexer notes..."
+      notes: "Indexer notes...",
     },
     emptyPrompt: {
       text: "Select an act from the list",
       prefix: "or press",
-      suffix: "to create a new one"
+      suffix: "to create a new one",
     },
     actions: {
       list: "list",
-      save: "save"
+      save: "save",
     },
     help: {
       detail: "detail",
-      list: "list"
+      list: "list",
     },
     labels: {
       type: "Type",
@@ -142,10 +149,10 @@ export const en = {
       town: "Town",
       parish: "Parish",
       hamlet: "Hamlet",
-      imageNumber: "Image number"
+      imageNumber: "Image number",
     },
     reset: "Reset",
     save: "Save",
-    validateAndNext: "Validate & Next"
-  }
+    validateAndNext: "Validate & Next",
+  },
 };

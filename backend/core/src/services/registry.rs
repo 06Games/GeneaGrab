@@ -78,7 +78,9 @@ pub async fn get_all_registries(
                 sea_orm::Condition::any()
                     .add(registry_entry::Column::ArchiveReference.like(&term))
                     .add(registry_entry::Column::Title.like(&term))
-                    .add(registry_entry::Column::Author.like(&term)),
+                    .add(registry_entry::Column::Author.like(&term))
+                    .add(registry_entry::Column::ArkUrl.like(&term))
+                    .add(registry_entry::Column::ManifestUrl.like(&term)),
             );
         }
 
