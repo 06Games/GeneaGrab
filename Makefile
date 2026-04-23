@@ -42,4 +42,4 @@ plugins_install: plugins_dev
 	done
 
 ingest:
-	 code2prompt -O ingest.txt
+	code2prompt -O ingest.txt -e ingest.txt

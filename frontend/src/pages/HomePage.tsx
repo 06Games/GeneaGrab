@@ -9,11 +9,16 @@ import { TopBar } from "../ui/TopBar";
 import { Button } from "../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import type { RegistryMeta } from "../types/registry";
+import { useSearchParams } from "@solidjs/router";
+import { isTauri } from "@tauri-apps/api/core";
+import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 
 const HomePage = () => {
   const api = useBackend();
   const { t } = useI18n();
   let scrollRef!: HTMLDivElement;
+
+  const [searchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = createSignal("");
   const [selectedType, setSelectedType] = createSignal("");
@@ -80,7 +85,25 @@ const HomePage = () => {
     }
   };
 
-  onMount(() => {
+  onMount(async () => {
+    const initialUrl = searchParams.search_url;
+    if (initialUrl) {
+      setSearchQuery(decodeURIComponent(initialUrl instanceof Array ? initialUrl[0] : initialUrl));
+    }
+    if (isTauri()) {
+      (await getCurrent())?.forEach(handleCustomScheme);
+      await onOpenUrl((urls) => urls.forEach(handleCustomScheme));
+
+      function handleCustomScheme(url: string) {
+        console.log("Opened with custom scheme:", url);
+        const uri = new URL(url);
+        if (uri.pathname.startsWith("registry")) {
+          const search_url = uri.searchParams.get("url");
+          if (search_url) setSearchQuery(search_url);
+        }
+      }
+    }
+
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const containerWidth = entry.contentRect.width;
@@ -104,8 +127,11 @@ const HomePage = () => {
     return res;
   });
 
+  let lastFetchId = 0;
   const fetchPage = async (cursor: number | null, isInitial: boolean) => {
-    if (isFetching()) return;
+    if (isFetching() && !isInitial) return;
+
+    const currentFetchId = ++lastFetchId;
     setIsFetching(true);
 
     try {
@@ -124,15 +150,22 @@ const HomePage = () => {
 
       const res = await api.getAllRegistries(payload);
 
+      // If a newer fetch has started since this one, ignore these results
+      if (currentFetchId !== lastFetchId) return;
+
       if (isInitial) setItems(res.data);
       else setItems((prev) => [...prev, ...res.data]);
 
       setNextCursor(res.next_cursor);
       setHasNextPage(res.next_cursor !== null);
     } catch (err) {
-      console.error("Failed to fetch registries:", err);
+      if (currentFetchId === lastFetchId) {
+        console.error("Failed to fetch registries:", err);
+      }
     } finally {
-      setIsFetching(false);
+      if (currentFetchId === lastFetchId) {
+        setIsFetching(false);
+      }
     }
   };
 
@@ -140,7 +173,7 @@ const HomePage = () => {
     const currentDeps = [searchQuery(), selectedType(), selectedPlace(), selectedCollection(), dateFrom(), dateTo()].join("|");
     if (prevDeps !== currentDeps) {
       setItems([]);
-      fetchPage(null, true);
+      untrack(() => fetchPage(null, true));
     }
     return currentDeps;
   }, "");
