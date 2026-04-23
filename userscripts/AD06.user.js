@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         AD06
 // @description  Addon GeneaGrab pour le site des archives départementales des Alpes-Maritimes
-// @icon         https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png
+// @icon         https://github.com/06Games/GeneaGrab/raw/v4/backend/tauri/icons/icon.png
 // @version      2.1.3
 // @grant        none
 // @match        https://archives06.fr/**
-// @updateURL    https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD06.user.js
-// @downloadURL  https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD06.user.js
+// @updateURL    https://github.com/06Games/GeneaGrab/raw/v4/userscripts/AD06.user.js
+// @downloadURL  https://github.com/06Games/GeneaGrab/raw/v4/userscripts/AD06.user.js
 // ==/UserScript==
 
 window.addEventListener("load", function () {

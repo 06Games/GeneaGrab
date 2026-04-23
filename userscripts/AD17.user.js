@@ -1,12 +1,12 @@
 // ==UserScript==
 // @name         AD17
-// @icon         https://github.com/06Games/GeneaGrab/raw/v1/GeneaGrab/Assets/Logo/Icon.png
+// @icon         https://github.com/06Games/GeneaGrab/raw/v4/backend/tauri/icons/icon.png
 // @version      1.0.0
 // @grant        none
 // @include      http://www.archinoe.net/v2/ad17/visualiseur/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
-// @updateURL    https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD17.user.js
-// @downloadURL  https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/AD17.user.js
+// @updateURL    https://github.com/06Games/GeneaGrab/raw/v4/userscripts/AD17.user.js
+// @downloadURL  https://github.com/06Games/GeneaGrab/raw/v4/userscripts/AD17.user.js
 // ==/UserScript==
 
 

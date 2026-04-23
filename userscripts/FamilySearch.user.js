@@ -1,13 +1,13 @@
 ﻿// ==UserScript==
 // @name         FamilySearch
-// @icon         https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png
+// @icon         https://github.com/06Games/GeneaGrab/raw/v4/backend/tauri/icons/icon.png
 // @version      1.0.0
 // @grant        none
 // @match        https://www.familysearch.org/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js
 // @require      https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @updateURL    https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/FamilySearch.user.js
-// @downloadURL  https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab.WebScripts/FamilySearch.user.js
+// @updateURL    https://github.com/06Games/GeneaGrab/raw/v4/userscripts/FamilySearch.user.js
+// @downloadURL  https://github.com/06Games/GeneaGrab/raw/v4/userscripts/FamilySearch.user.js
 // ==/UserScript==
 /*global waitForKeyElements*/
 

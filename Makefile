@@ -1,6 +1,6 @@
 PLUGIN_DIR ?= ~/.local/share/com.06games.geneagrab/plugins
 
-.PHONY: all install web_dev web_build desktop_dev desktop_build plugins_dev plugins_install
+.PHONY: all install web_dev web_build desktop_dev desktop_build plugins_dev plugins_install ingest
 
 all: plugins_install desktop_dev
 
@@ -40,3 +40,6 @@ plugins_install: plugins_dev
 			cp "$$f" $(PLUGIN_DIR)/$$plugin_id.wasm; \
 		fi; \
 	done
+
+ingest:
+	 code2prompt -O ingest.txt
