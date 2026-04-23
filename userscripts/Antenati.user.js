@@ -29,7 +29,7 @@ function viewer() {
     const bookmarkBtn = document.getElementsByClassName("item-share")[0];
 
     const openInGeneagrab = document.createElement("div");
-    openInGeneagrab.innerHTML = '<img src="https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png" style="width: 1.33em; vertical-align: sub;"/>Open in GeneaGrab';
+    openInGeneagrab.innerHTML = '<img src="https://github.com/06Games/GeneaGrab/raw/v4/backend/tauri/icons/icon.png" style="width: 1.33em; vertical-align: sub;"/>Open in GeneaGrab';
     openInGeneagrab.addEventListener("click", function (e) {
         e.preventDefault();
         window.location = "geneagrab:registry?url=" + encodeURIComponent(window.location);

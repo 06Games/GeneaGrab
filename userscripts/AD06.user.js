@@ -22,7 +22,7 @@ function notice() {
 		let openInGeneagrabBtn = openInGeneagrab.appendChild(document.createElement("a"));
 		openInGeneagrabBtn.classList.add("btn");
 		openInGeneagrabBtn.setAttribute("title", "Ouvrir dans GeneaGrab");
-		openInGeneagrabBtn.innerHTML = '<span><span class="text">Ouvrir dans GeneaGrab</span><span class="icon"><img src="https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png" alt="Ouvrir dans GeneaGrab" style="width:28px"></span></span>';
+		openInGeneagrabBtn.innerHTML = '<span><span class="text">Ouvrir dans GeneaGrab</span><span class="icon"><img src="https://github.com/06Games/GeneaGrab/raw/v4/backend/tauri/icons/icon.png" alt="Ouvrir dans GeneaGrab" style="width:28px"></span></span>';
 		openInGeneagrabBtn.setAttribute("href", "geneagrab:registry?url=" + encodeURIComponent(getUrl(noticeAction.querySelector(".arc_arklink")?.getAttribute("href"))));
 	}
 }
@@ -34,7 +34,7 @@ function viewer() {
 
 	openInGeneagrab.id = "react-tabs-geneagrab";
 	openInGeneagrab.setAttribute("title", "Ouvrir dans GeneaGrab");
-	openInGeneagrab.innerHTML = '<img class="monocle-Icon" src="https://github.com/06Games/GeneaGrab/raw/v2/GeneaGrab/Assets/Logo/Icon.png" style="filter: brightness(10000%);">';
+	openInGeneagrab.innerHTML = '<img class="monocle-Icon" src="https://github.com/06Games/GeneaGrab/raw/v4/backend/tauri/icons/icon.png" style="filter: brightness(10000%);">';
 	openInGeneagrab.addEventListener("click", function (e) {
 		e.preventDefault();
 		let page = document.querySelector(".monocle-PageNav input.rea11y-NumberInput-value").value;
