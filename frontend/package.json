@@ -11,18 +11,15 @@
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.2.8",
     "@iconify-icon/solid": "^3.0.3",
-    "@kobalte/core": "^0.13.11",
     "@modular-forms/solid": "^0.25.1",
     "@solid-primitives/i18n": "^2.2.1",
-    "@solidjs/router": "^0.15.4",
     "@tanstack/solid-table": "^8.21.3",
     "@tanstack/solid-virtual": "^3.13.21",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-deep-link": "^2.4.8",
     "@tauri-apps/plugin-opener": "^2",
     "openseadragon": "^6.0.1",
-    "solid-js": "^1.9.3",
-    "tinykeys": "^3.0.0"
+    "solid-js": "^1.9.3"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",

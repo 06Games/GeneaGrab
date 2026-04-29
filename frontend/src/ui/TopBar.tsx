@@ -1,5 +1,6 @@
 import { JSX, For } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import { useTabs } from "../contexts/TabsContext";
 
 interface TopBarProps {
   breadcrumbs?: (string | JSX.Element)[];
@@ -7,12 +8,13 @@ interface TopBarProps {
 }
 
 export const TopBar = (props: TopBarProps) => {
+  const { openTab } = useTabs();
   return (
     <header data-tauri-drag-region class="flex-shrink-0 flex items-center justify-between px-4 h-11 bg-panel border-b border-subtle shadow-sm z-10 select-none">
       <div class="flex items-center gap-2 min-w-0 overflow-hidden">
-        <a href="/" class="text-[15px] font-bold text-accent flex-shrink-0 hover:text-accent-hover transition-colors">
+        <button onClick={() => openTab({ type: "home" })} class="text-[15px] font-bold text-accent flex-shrink-0 hover:text-accent-hover transition-colors">
           GeneaGrab
-        </a>
+        </button>
         <For each={props.breadcrumbs}>
           {(crumb) => (
             <>

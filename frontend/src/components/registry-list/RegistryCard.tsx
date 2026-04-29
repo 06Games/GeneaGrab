@@ -2,6 +2,7 @@ import { ActTypeCategory, RegistryMeta } from "../../types/registry";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { Show } from "solid-js";
+import { useTabs } from "../../contexts/TabsContext";
 
 const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
   vital: "text-event-vital bg-event-vital-bg border-event-vital-border",
@@ -18,6 +19,7 @@ const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
 
 export const RegistryCard = (props: { registry: RegistryMeta }) => {
   const { t } = useI18n();
+  const { openTab } = useTabs();
 
   const getDomain = (url: string) => {
     try {
@@ -28,9 +30,14 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
   };
 
   return (
-    <a
-      href={`/registry/${props.registry.id}`}
-      class="flex flex-col bg-panel border border-subtle rounded-xl p-4 transition-all duration-150 hover:border-accent hover:shadow-md hover:shadow-accent/5 focus:outline-none focus:ring-2 focus:ring-accent group"
+    <button
+      onClick={() =>
+        openTab({
+          type: "registry",
+          registryId: props.registry.id,
+        })
+      }
+      class="text-leftflex flex-col bg-panel border border-subtle rounded-xl p-4 transition-all duration-150 hover:border-accent hover:shadow-md hover:shadow-accent/5 focus:outline-none focus:ring-2 focus:ring-accent group"
     >
       <div class="flex items-start justify-between mb-2">
         <h3 class="text-[15px] font-bold text-main truncate group-hover:text-accent transition-colors" title={props.registry.archive_reference}>
@@ -84,6 +91,6 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
           </Show>
         </div>
       </div>
-    </a>
+    </button>
   );
 };

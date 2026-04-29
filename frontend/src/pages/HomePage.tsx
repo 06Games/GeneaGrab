@@ -9,7 +9,6 @@ import { TopBar } from "../ui/TopBar";
 import { Button } from "../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import type { RegistryMeta } from "../types/registry";
-import { useSearchParams } from "@solidjs/router";
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 
@@ -17,8 +16,6 @@ const HomePage = () => {
   const api = useBackend();
   const { t } = useI18n();
   let scrollRef!: HTMLDivElement;
-
-  const [searchParams] = useSearchParams();
 
   const [searchQuery, setSearchQuery] = createSignal("");
   const [selectedType, setSelectedType] = createSignal("");
@@ -86,7 +83,7 @@ const HomePage = () => {
   };
 
   onMount(async () => {
-    const initialUrl = searchParams.search_url;
+    const initialUrl: any = null; // FIXEME
     if (initialUrl) {
       setSearchQuery(decodeURIComponent(initialUrl instanceof Array ? initialUrl[0] : initialUrl));
     }

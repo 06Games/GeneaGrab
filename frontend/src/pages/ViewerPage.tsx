@@ -1,5 +1,4 @@
 import { createSignal, createEffect, onCleanup, onMount, createResource, Show } from "solid-js";
-import { useNavigate, useParams } from "@solidjs/router";
 import { Kbd } from "../ui/primitives";
 import { TopBar } from "../ui/TopBar";
 import { MainViewer } from "../components/registry-viewer/MainViewer";
@@ -14,6 +13,7 @@ import { useBackend } from "../contexts/BackendContext";
 import { EventDetail } from "../types";
 import { UserImageMeta } from "../types/image";
 import { RegistryMeta } from "../types/registry";
+import { useCurrentTab, useTabs } from "../contexts/TabsContext";
 
 type SyncMessage =
   | { type: "READY" }
@@ -30,18 +30,22 @@ const MIN_THUMB_HEIGHT = 60;
 const MAX_THUMB_HEIGHT = 200;
 const DEFAULT_THUMB_HEIGHT = 125;
 
-export const ViewerPage = () => {
-  const params = useParams();
+interface ViewerPageProps {
+  registryId: number;
+  initialImageId?: number;
+}
+export const ViewerPage = (props: ViewerPageProps) => {
   const { t } = useI18n();
+  const { openTab } = useTabs();
+  const { updateThisTab } = useCurrentTab();
   const api = useBackend();
-  const navigate = useNavigate();
 
-  const registryId = parseInt(params.id!, 10);
-
+  const registryId = props.registryId;
   const urlParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const isDetachedMode = urlParams.get("mode") === "index";
 
-  const [currentImage, setCurrentImage] = createSignal(params.imageId ? parseInt(params.imageId, 10) : 1);
+  const [tabTile, setTableTitle] = createSignal("");
+  const [currentImage, setCurrentImage] = createSignal(props.initialImageId || 1);
   const [indexVisible, setIndexVisible] = createSignal(false);
   const [indexHeight, setIndexHeight] = createSignal(DEFAULT_INDEX_HEIGHT);
   const [thumbnailHeight, setThumbnailHeight] = createSignal(DEFAULT_THUMB_HEIGHT);
@@ -56,8 +60,23 @@ export const ViewerPage = () => {
 
   // Sync URL with current image
   createEffect(() => {
+    const regMeta = registryMeta();
+    if (!regMeta) return;
+    setTableTitle(
+      `${regMeta.places?.map((place) => place[place.length - 1]).join(", ") || t("infoPanel.unknown")} · ${
+        regMeta.source_types?.size > 0
+          ? Array.from(regMeta.source_types)
+              .map((source_type) => source_type.label)
+              .join(", ")
+          : t("infoPanel.unknown")
+      } (${regMeta.date_from ?? "?"}-${regMeta.date_to ?? "?"})`,
+    );
+
     if (!isDetachedMode) {
-      navigate(`/registry/${registryId}/${currentImage()}`, { replace: true });
+      updateThisTab({
+        title: tabTile(),
+        imageId: currentImage(),
+      });
     }
   });
 
@@ -240,16 +259,7 @@ export const ViewerPage = () => {
                 style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
               >
                 <TopBar
-                  breadcrumbs={[
-                    <a href="/">{t("home.title")}</a>,
-                    `${regMeta().archive_reference} · ${regMeta().places?.[0]?.join(", ") || t("infoPanel.unknown")} · ${
-                      regMeta().source_types?.size > 0
-                        ? Array.from(regMeta().source_types)
-                            .map((source_type) => source_type.label)
-                            .join(", ")
-                        : t("infoPanel.unknown")
-                    }`,
-                  ]}
+                  breadcrumbs={[<button onClick={() => openTab({ type: "home" })}>{t("home.title")}</button>, tabTile()]}
                   right={
                     <button
                       type="button"
