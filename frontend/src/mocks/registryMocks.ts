@@ -17,6 +17,7 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
   date_from: "1793",
   date_to: "1794",
   total_images: 348,
+  images: undefined,
   acts_count: 42,
 };
 

@@ -77,7 +77,8 @@ pub struct RegistryMeta {
     pub date_to: Option<String>,
     pub notes: Option<String>,
 
-    pub total_images: u32,
+    pub total_images: usize,
+    pub images: Option<Vec<UserImageMeta>>,
     pub acts_count: u32,
 }
 

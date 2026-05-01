@@ -2,6 +2,7 @@ import { For, createEffect, createSignal } from "solid-js";
 import { useI18n } from "../../ui/i18n";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import { getBackendService } from "../../services/apiFactory";
+import { UserImageMeta } from "../../types/image";
 
 const THUMBNAIL_ASPECT_RATIO = 1.3;
 const THUMBNAIL_VERTICAL_PADDING = 16; // Combined height for the image number label and gap below the thumbnail
@@ -9,6 +10,7 @@ const THUMBNAIL_VERTICAL_PADDING = 16; // Combined height for the image number l
 interface ThumbnailBarProps {
   totalImages: number;
   currentImage: number;
+  images: UserImageMeta[];
   registryId: number;
   height: number;
   onImageChange: (image: number) => void;
@@ -64,19 +66,21 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
       >
         <For each={virtualizer.getVirtualItems()}>
           {(virtualItem) => {
-            const image = virtualItem.index + 1;
-            const isActive = () => props.currentImage === image;
-            const src = () => api.getTileUrl(props.registryId, image, 0, 0, 0);
-            const hasError = () => failedImages().has(image);
+            const image_number = virtualItem.index + 1;
+            const image: UserImageMeta | undefined = props.images[virtualItem.index];
+            const isActive = () => props.currentImage === image_number;
+            const src = () => api.getTileUrl(props.registryId, image_number, 0, 0, 0);
+            const hasError = () => failedImages().has(image_number);
 
+            // TODO: Display some image metadata (like time period)
             return (
               <button
                 type="button"
                 role="option"
                 aria-selected={isActive()}
-                aria-label={t("thumbnailBar.imageLabel", { n: image })}
-                data-image={image}
-                onClick={() => props.onImageChange(image)}
+                aria-label={t("thumbnailBar.imageLabel", { n: image_number })}
+                data-image={image_number}
+                onClick={() => props.onImageChange(image_number)}
                 class={[
                   "h-full flex flex-col items-center justify-center gap-1 rounded-md group",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
@@ -108,12 +112,12 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                       loading="lazy"
                       onError={() => {
                         const next = new Set(failedImages());
-                        next.add(image);
+                        next.add(image_number);
                         setFailedImages(next);
                       }}
                     />
                   ) : (
-                    <span class="text-[9px] text-dim font-mono leading-none">{image}</span>
+                    <span class="text-[9px] text-dim font-mono leading-none">{image_number}</span>
                   )}
                 </div>
                 <span
@@ -122,7 +126,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                     isActive() ? "text-accent font-semibold" : "text-dim group-hover:text-muted",
                   ].join(" ")}
                 >
-                  {image}
+                  {image?.name ? `${image.name} (${image_number})` : image_number}
                 </span>
               </button>
             );

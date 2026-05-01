@@ -1,3 +1,5 @@
+import { UserImageMeta } from "./image";
+
 export const ACT_TYPE_OPTIONS = ["vital", "union", "mortality", "census", "legal", "land", "media", "military", "other", "unknown"] as const;
 export type ActTypeCategory = (typeof ACT_TYPE_OPTIONS)[number];
 
@@ -31,6 +33,7 @@ export interface RegistryMeta {
   notes?: string;
 
   total_images: number;
+  images: UserImageMeta[] | undefined;
   acts_count: number;
 }
 

@@ -298,6 +298,7 @@ export const ViewerPage = (props: ViewerPageProps) => {
                     <ThumbnailBar
                       height={thumbnailHeight()}
                       totalImages={regMeta().total_images}
+                      images={regMeta().images ?? []}
                       currentImage={currentImage()}
                       onImageChange={setCurrentImage}
                       registryId={registryId}

@@ -1,7 +1,7 @@
 use std::cmp::Reverse;
 
 use crate::{
-    comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta},
+    comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta, UserImageMeta},
     db_entries::{
         image_entry,
         registry_entry::{self},
@@ -19,7 +19,12 @@ use sea_orm::{
 
 impl RegistryMeta {
     #[must_use]
-    pub fn from_entry(registry: registry_entry::Model, total_images: u32, acts_count: u32) -> Self {
+    pub fn from_entry(
+        registry: registry_entry::Model,
+        image_count: usize,
+        images: Option<Vec<UserImageMeta>>,
+        acts_count: u32,
+    ) -> Self {
         Self {
             id: registry.id,
             archive_reference: registry.archive_reference,
@@ -35,14 +40,32 @@ impl RegistryMeta {
             date_to: registry.date_to,
             notes: registry.notes,
 
-            total_images,
+            total_images: image_count,
+            images,
             acts_count,
         }
     }
 }
 
+impl From<PartialImageMeta> for UserImageMeta {
+    fn from(value: PartialImageMeta) -> Self {
+        Self {
+            name: Some(value.name),
+            date_range: Some(value.date_range),
+            notes: Some(value.notes),
+        }
+    }
+}
+
 #[derive(FromQueryResult)]
-struct RegistryWithCounts {
+pub struct PartialImageMeta {
+    pub name: Option<String>,
+    pub date_range: Option<String>,
+    pub notes: Option<String>,
+}
+
+#[derive(FromQueryResult)]
+struct RegistryWithJoins {
     #[sea_orm(nested)]
     pub registry: registry_entry::Model,
     pub image_count: i64,
@@ -56,12 +79,10 @@ fn add_count_subqueries(
         .column_as(
             sea_orm::sea_query::Expr::cust("(SELECT COUNT(*) FROM image_entry WHERE image_entry.registry_entry_id = registry_entry.id)"),
             "image_count"
-        )
-        /* */.column_as(
-            //sea_orm::sea_query::Expr::cust("(SELECT COUNT(*) FROM event WHERE event.registry_id = registry_entry.id)"),
-            sea_orm::sea_query::Expr::cust("(SELECT 0)"), // TODO: Placeholder until events are implemented
-            "event_count"
-        )
+        ).column_as(
+        //sea_orm::sea_query::Expr::cust("(SELECT COUNT(*) FROM event WHERE event.registry_id = registry_entry.id)"),
+        sea_orm::sea_query::Expr::cust("(SELECT 0)"), // TODO: Placeholder until events are implemented
+        "event_count")
 }
 
 pub async fn get_all_registries(
@@ -124,7 +145,7 @@ pub async fn get_all_registries(
         .order_by_asc(registry_entry::Column::Id)
         .offset(u64::from(offset))
         .limit(limit + 1) // Lookahead +1 to determine if there's a next page
-        .into_model::<RegistryWithCounts>()
+        .into_model::<RegistryWithJoins>()
         .all(db)
         .await
         .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
@@ -141,7 +162,8 @@ pub async fn get_all_registries(
         .map(|row| {
             RegistryMeta::from_entry(
                 row.registry,
-                u32::try_from(row.image_count).unwrap_or(0),
+                usize::try_from(row.image_count).unwrap_or(0),
+                None,
                 u32::try_from(row.event_count).unwrap_or(0),
             )
         })
@@ -165,15 +187,26 @@ pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, Cor
     log::info!("fetch_registry_meta called with id: {id}");
 
     let row = add_count_subqueries(registry_entry::Entity::find_by_id(id))
-        .into_model::<RegistryWithCounts>()
+        .into_model::<RegistryWithJoins>()
         .one(db)
         .await
         .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?
         .ok_or_else(|| CoreError::NotFound(format!("Registry {id} not found")))?;
 
+    let images = image_entry::Entity::find()
+        .filter(image_entry::Column::RegistryEntryId.eq(id))
+        .select_only()
+        .column(image_entry::Column::Name)
+        .column(image_entry::Column::ImageNumber)
+        .into_model::<PartialImageMeta>()
+        .all(db)
+        .await
+        .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?;
+
     Ok(RegistryMeta::from_entry(
         row.registry,
-        u32::try_from(row.image_count).unwrap_or(0),
+        usize::try_from(row.image_count).unwrap_or(0),
+        Some(images.into_iter().map(std::convert::Into::into).collect()),
         u32::try_from(row.event_count).unwrap_or(0),
     ))
 }
@@ -206,8 +239,7 @@ pub async fn add_registry(
         .await
         .map_err(|e| CoreError::DbError(format!("DB error inserting registry: {e}")))?;
 
-    let num_images = u32::try_from(res.images.len())
-        .map_err(|e| CoreError::InvalidInput(format!("Invalid number of images: {e}")))?;
+    let num_images = res.images.len();
     if !res.images.is_empty() {
         let image_active_models: Vec<image_entry::ActiveModel> = res
             .images
@@ -230,7 +262,7 @@ pub async fn add_registry(
         .await
         .map_err(|e| CoreError::DbError(format!("Failed to commit transaction: {e}")))?;
 
-    let meta = RegistryMeta::from_entry(new_registry, num_images, 0);
+    let meta = RegistryMeta::from_entry(new_registry, num_images, None, 0);
 
     Ok(meta)
 }
