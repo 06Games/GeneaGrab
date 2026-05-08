@@ -2642,6 +2642,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "geneagrab-plugin-ad06"
+version = "4.0.0"
+dependencies = [
+ "assert-json-diff",
+ "deunicode",
+ "extism-pdk",
+ "geneagrab-plugin-core",
+ "regex",
+ "scraper",
+ "serde",
+ "serde_json",
+ "url",
+]
+
+[[package]]
 name = "geneagrab-plugin-core"
 version = "4.0.0"
 dependencies = [

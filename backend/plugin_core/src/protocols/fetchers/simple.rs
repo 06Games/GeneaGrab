@@ -5,6 +5,7 @@ use crate::{com_structs::PluginError, data::http::Request, protocols::fetchers::
 /**
 A simple fetcher that uses the built-in HTTP client.
 */
+#[derive(Default)]
 pub struct SimpleFetcher;
 
 impl Fetcher for SimpleFetcher {
