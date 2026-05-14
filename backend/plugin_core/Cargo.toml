@@ -26,3 +26,5 @@ strum = { version = "0.28.0", features = ["derive"] }
 host = ["dep:extism"]
 guest = ["dep:extism-pdk", "dep:regex", "dep:url"]
 protocols-zoomify = ["dep:quick-xml"]
+protocols-iiif = []
+protocols-ligeo = []

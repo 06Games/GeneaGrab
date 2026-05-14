@@ -7,9 +7,15 @@ use geneagrab_plugin_core::{
 };
 
 pub(crate) fn is_image_missing_data(
-    _req: ExtractImageRequest,
-) -> Result<Option<String>, PluginError> {
-    todo!();
+    req: &ExtractImageRequest,
+) -> std::option::Option<std::string::String> {
+    if req.image.manifest_url.is_none() {
+        Some("manifest_url".to_string())
+    } else if req.image.width.is_none() || req.image.height.is_none() {
+        Some("dimensions".to_string())
+    } else {
+        None
+    }
 }
 
 fn extract_image_internal(
@@ -18,6 +24,7 @@ fn extract_image_internal(
 ) -> Result<ExtractImageResponse, PluginError> {
     todo!();
 }
+
 pub(crate) fn extract_image(
     req: &ExtractImageRequest,
 ) -> Result<ExtractImageResponse, PluginError> {
@@ -35,7 +42,22 @@ pub(crate) fn fetch_tile(req: &TileRequest) -> Result<TileResponse, PluginError>
     fetch_tile_internal(req, &SimpleFetcher)
 }
 
-#[allow(clippy::unnecessary_wraps, reason = "WIP")]
-pub(crate) fn download_image(_req: DownloadRequest) -> Result<Option<TileResponse>, PluginError> {
-    Ok(None) // Sometimes, the images are freely downloadable. We might want to check for that in the future.
+pub(crate) fn download_image(req: DownloadRequest) -> Result<Option<TileResponse>, PluginError> {
+    let manifest_url = req
+        .image
+        .manifest_url
+        .ok_or(PluginError::MissingField("manifest_url".into()))?;
+
+    let iiif_request = format!(
+        "{}/full/max/0/default.jpg",
+        manifest_url.trim_end_matches('/')
+    );
+
+    let fetcher = SimpleFetcher {};
+    let data = fetcher.fetch_raw(iiif_request.into())?;
+
+    Ok(Some(TileResponse {
+        data,
+        mime_type: "image/jpeg".to_string(),
+    }))
 }
