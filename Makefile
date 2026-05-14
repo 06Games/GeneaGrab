@@ -1,4 +1,4 @@
-PLUGIN_DIR ?= ~/.local/share/com.06games.geneagrab/plugins
+PLUGIN_DIR ?= ~/.local/share/com.evan-g.geneagrab/plugins
 
 .PHONY: all install web_dev web_build desktop_dev desktop_build plugins_dev plugins_install ingest
 
