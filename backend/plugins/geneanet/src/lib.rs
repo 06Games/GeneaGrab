@@ -63,6 +63,7 @@ impl PluginBase for PluginImpl {
         Ok(IdentifyResponse {
             registry_id: col_value.into(),
             image_number: Some(image_number),
+            ark_url: None,
         })
     }
 

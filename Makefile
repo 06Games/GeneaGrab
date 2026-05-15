@@ -36,7 +36,7 @@ plugins_install: plugins_dev
 	@for f in backend/target/wasm32-unknown-unknown/debug/*.wasm; do \
 		if [ -f "$$f" ]; then \
 			plugin_id=$$(basename "$$f" .wasm | sed 's/^geneagrab_plugin_//'); \
-			echo "Installing plugin $$plugin_id..."; \
+			echo "Installing plugin $$plugin_id... in $(PLUGIN_DIR)/$$plugin_id.wasm"; \
 			cp "$$f" $(PLUGIN_DIR)/$$plugin_id.wasm; \
 		fi; \
 	done

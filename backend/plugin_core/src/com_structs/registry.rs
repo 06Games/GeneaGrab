@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExtractRequest {
     pub url: String,
-    pub identified: IdentifyResponse
+    pub identified: IdentifyResponse,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,4 +22,5 @@ pub struct IdentifyRequest {
 pub struct IdentifyResponse {
     pub registry_id: String,
     pub image_number: Option<u32>,
+    pub ark_url: Option<String>,
 }

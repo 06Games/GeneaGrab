@@ -299,6 +299,7 @@ mod tests {
                 identified: IdentifyResponse {
                     registry_id: case.registry_id.clone(),
                     image_number: case.image_number,
+                    ark_url: None,
                 },
                 url: case.request_url.clone(),
             };

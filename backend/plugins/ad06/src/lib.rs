@@ -22,7 +22,7 @@ const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
         "A plugin for extracting data from Alpes-Maritimes (France) Departmental Archives.",
     )),
     author: Some(Cow::Borrowed("Evan Galli")),
-    version: Some(Cow::Borrowed("2.0.0")),
+    version: Some(Cow::Borrowed("1.0.0")),
     source_url: Some(Cow::Borrowed(
         "https://github.com/06Games/GeneaGrab/tree/v4/backend/plugins/ad06",
     )),
@@ -30,7 +30,7 @@ const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
 };
 
 static ARK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"/ark:/(?P<something>[\w\.]+)(?:/(?P<id>[\w\.]+))?(?:/(?P<tag>[\w\.]+))?(?:/(?P<seq>\d+))?(?:/(?P<page>\d+))?")
+    Regex::new(r"/ark:/(?P<naan>[\w\.]+)(?:/(?P<document_id>[\w\.]+))?(?:/(?P<view_type>[\w\.]+))?(?:/(?P<sequence>\d+))?(?:/(?P<image_number>\d+))?")
         .expect("Invalid regex pattern")
 });
 
@@ -45,22 +45,32 @@ impl PluginBase for PluginImpl {
         let url =
             url::Url::parse(&req.url).map_err(|e| PluginError::InvalidField(e.to_string()))?;
 
-        if url.host_str() != Some("archives06.fr") || !url.path().starts_with("/ark:/") {
+        let host = url.host_str();
+        if host != Some("archives06.fr") || !url.path().starts_with("/ark:/") {
             return Err(PluginError::InvalidField("Not an AD06 URL".into()));
         }
+        let host = host.unwrap();
 
         let captures = ARK_REGEX
             .captures(url.path())
             .ok_or(PluginError::InvalidField("Invalid ARK URL".into()))?;
-        let registry_id = captures.name("id").map_or("", |m| m.as_str()).to_string();
+        let name_assigning_authority_number =
+            captures.name("naan").map_or("", |m| m.as_str()).to_string();
+        let document_id = captures
+            .name("document_id")
+            .map_or("", |m| m.as_str())
+            .to_string();
         let image_number = captures
-            .name("page")
+            .name("image_number")
             .and_then(|m| m.as_str().parse::<u32>().ok())
             .unwrap_or(1);
 
+        let ark_url =
+            format!("https://{host}/ark:/{name_assigning_authority_number}/{document_id}");
         Ok(IdentifyResponse {
-            registry_id,
+            registry_id: document_id,
             image_number: Some(image_number),
+            ark_url: Some(ark_url),
         })
     }
 
