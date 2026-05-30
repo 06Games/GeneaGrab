@@ -4,7 +4,7 @@ use geneagrab_plugin_core::{
     com_structs::{ExtractRequest, ExtractResponse, PluginError},
     data::{Image, RegistryBuilder, RegistryType},
     protocols::{
-        fetchers::{Fetcher, SimpleFetcher},
+        fetchers::{Fetcher, FlareSolverrFetcher},
         utils::validate_regex_match,
     },
 };
@@ -209,7 +209,7 @@ fn extract_registry_internal(
 }
 
 pub(crate) fn extract_registry(req: &ExtractRequest) -> Result<ExtractResponse, PluginError> {
-    extract_registry_internal(req, &SimpleFetcher {})
+    extract_registry_internal(req, &FlareSolverrFetcher::from_config()?)
 }
 
 #[cfg(test)]

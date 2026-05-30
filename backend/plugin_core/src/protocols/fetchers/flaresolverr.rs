@@ -2,6 +2,7 @@
 use std::{fmt::Display, string::ToString};
 
 use extism_pdk::{config, var, Json};
+use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -167,7 +168,10 @@ impl FlareSolverrFetcher {
 
     /// Returns the response body given by Flaresolverr with some cleaning to try to recover the original response.
     fn clean_response(solution: FlareSolverrSolution) -> std::vec::Vec<u8> {
-        remove_xml_viewer(solution.response).into_bytes()
+        let response = remove_xml_viewer(&solution.response)
+            .or_else(|| remove_json_viewer(&solution.response))
+            .unwrap_or(solution.response);
+        response.into_bytes()
     }
 
     /// Performs the original request with the obtained cookies and user agent from FlareSolverr.
@@ -239,15 +243,20 @@ fn build_cookie_header_string(cookies: &[FlareSolverrCookie]) -> String {
 }
 
 /// FlareSolverr wraps XML responses in viewer, this function removes that wrapper if it exists.
-fn remove_xml_viewer(response: String) -> String {
+fn remove_xml_viewer(response: &str) -> Option<String> {
     let viewer_tag = "<div id=\"webkit-xml-viewer-source-xml\">";
-    if let Some(start_idx) = response.find(viewer_tag) {
-        let content_start = start_idx + viewer_tag.len();
-        let after_start = &response[content_start..];
+    let start_idx = response.find(viewer_tag)?;
+    let content_start = start_idx + viewer_tag.len();
+    let after_start = &response[content_start..];
+    let end_idx = after_start.find("</div>")?;
+    Some(after_start[..end_idx].to_string())
+}
 
-        if let Some(end_idx) = after_start.find("</div>") {
-            return after_start[..end_idx].to_string();
-        }
-    }
-    response
+// FlareSolverr wraps JSON responses in viewer, this function removes that wrapper if it exists.
+fn remove_json_viewer(response: &str) -> Option<String> {
+    let document = Html::parse_document(response);
+    let selector = Selector::parse("pre").ok()?;
+    let pre_element = document.select(&selector).next()?;
+    let json_text = pre_element.text().collect::<String>();
+    Some(json_text)
 }
