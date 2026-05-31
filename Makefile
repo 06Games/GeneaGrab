@@ -31,7 +31,15 @@ plugins_dev:
 		fi; \
 	done
 
-plugins_install: plugins_dev
+plugins_release:
+	@for d in backend/plugins/*; do \
+		if [ -d "$$d" ]; then \
+			echo "Building plugin in $$d..."; \
+			(cd "$$d" && cargo build --release --target wasm32-unknown-unknown); \
+		fi; \
+	done
+
+plugins_install: plugins_release
 	@mkdir -p $(PLUGIN_DIR)
 	@for f in backend/target/wasm32-unknown-unknown/debug/*.wasm; do \
 		if [ -f "$$f" ]; then \

@@ -8,6 +8,10 @@
             {
                 "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/manifest",
                 "response_file": "ece981d3d12d06e97f5012a67ab768508e_manifest.json"
+            },
+            {
+                "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/canvas/0/1",
+                "response_file": "ece981d3d12d06e97f5012a67ab768508e_canvas.html"
             }
         ],
         "expected_image_count": 5,
@@ -25,8 +29,6 @@
             "date_to": "1784",
             "places": [
                 [
-                    "France",
-                    "Alpes-Maritimes",
                     "Lantosque"
                 ]
             ]
