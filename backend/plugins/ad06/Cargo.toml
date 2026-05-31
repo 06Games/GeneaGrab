@@ -21,4 +21,4 @@ scraper = "0.26.0"
 deunicode = "1.6.2"
 
 [dev-dependencies]
-assert-json-diff = "2.0.2"
+geneagrab-plugin-core = { path = "../../plugin_core", features = ["test"] }

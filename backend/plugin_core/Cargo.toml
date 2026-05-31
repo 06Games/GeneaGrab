@@ -21,6 +21,7 @@ quick-xml = { version = "0.39.2", features = ["serialize"], optional = true }
 url = { version = "2.5.8", optional = true }
 strum = { version = "0.28.0", features = ["derive"] }
 scraper = { version = "0.27.0", optional = true }
+assert-json-diff = { version = "2.0.2", optional = true }
 
 
 [features]
@@ -29,3 +30,4 @@ guest = ["dep:extism-pdk", "dep:regex", "dep:url", "dep:scraper"]
 protocols-zoomify = ["dep:quick-xml"]
 protocols-iiif = []
 protocols-ligeo = []
+test = ["dep:assert-json-diff"]

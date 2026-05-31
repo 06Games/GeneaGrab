@@ -9,3 +9,6 @@ pub mod iiif;
 
 #[cfg(all(feature = "protocols-iiif", feature = "protocols-ligeo"))]
 pub mod ligeo;
+
+#[cfg(feature = "test")]
+pub mod test_utils;

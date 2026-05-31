@@ -2668,7 +2668,6 @@ dependencies = [
 name = "geneagrab-plugin-ad06"
 version = "4.0.0"
 dependencies = [
- "assert-json-diff",
  "deunicode",
  "extism-pdk",
  "geneagrab-plugin-core",
@@ -2683,6 +2682,7 @@ dependencies = [
 name = "geneagrab-plugin-core"
 version = "4.0.0"
 dependencies = [
+ "assert-json-diff",
  "chrono",
  "derive_builder",
  "extism",
@@ -2701,7 +2701,6 @@ dependencies = [
 name = "geneagrab-plugin-geneanet"
 version = "4.0.0"
 dependencies = [
- "assert-json-diff",
  "deunicode",
  "extism-pdk",
  "geneagrab-plugin-core",
