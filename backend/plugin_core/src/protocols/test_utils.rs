@@ -2,8 +2,10 @@ use crate::com_structs::{ExtractRequest, ExtractResponse, IdentifyResponse, Plug
 use crate::data::http::Request;
 use crate::protocols::fetchers::Fetcher;
 use assert_json_diff::assert_json_include;
+use jsonc_parser::ParseOptions;
 use serde::Deserialize;
 use std::fs;
+use std::panic;
 use std::path::PathBuf;
 
 pub struct TestCases<T> {
@@ -33,7 +35,8 @@ where
     let cases_json = fs::read_to_string(test_data_dir.join("cases.json"))
         .expect("Failed to read cases.json manifest");
 
-    let cases: Vec<T> = serde_json::from_str(&cases_json).expect("Failed to parse cases.json");
+    let cases: Vec<T> = jsonc_parser::parse_to_serde_value(&cases_json, &ParseOptions::default())
+        .expect("Failed to parse cases.json");
 
     TestCases {
         dir: test_data_dir,
@@ -86,46 +89,59 @@ pub fn registry_extraction_integration_test(
     test_cases: TestCases<ExtractTestCase>,
     extract_fn: impl Fn(&ExtractRequest, &MockFetcher) -> Result<ExtractResponse, PluginError>,
 ) {
+    let mut failures = Vec::new();
+
     for case in test_cases.cases {
         let description = format!(
             "Registry ID: {}, Image Number: {:?}",
             case.registry_id, case.image_number
         );
 
-        let req = ExtractRequest {
-            identified: IdentifyResponse {
-                registry_id: case.registry_id.clone(),
-                image_number: case.image_number,
-                ark_url: case.ark_url,
-            },
-            url: case.request_url.clone(),
-        };
+        let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
+            let req = ExtractRequest {
+                identified: IdentifyResponse {
+                    registry_id: case.registry_id.clone(),
+                    image_number: case.image_number,
+                    ark_url: case.ark_url.clone(),
+                },
+                url: case.request_url.clone(),
+            };
 
-        let result = extract_fn(
-            &req,
-            &MockFetcher {
-                mocks: case.mocks,
-                base_dir: test_cases.dir.clone(),
-            },
-        );
+            let response = extract_fn(
+                &req,
+                &MockFetcher {
+                    mocks: case.mocks,
+                    base_dir: test_cases.dir.clone(),
+                },
+            )
+            .expect("extract_registry_internal failed");
+            assert_json_include!(
+                actual: serde_json::to_value(&response.registry).unwrap(),
+                expected: serde_json::to_value(&case.expected_registry).unwrap()
+            );
+            assert_eq!(
+                response.images.len(),
+                case.expected_image_count,
+                "parsed image count mismatch"
+            );
+        }));
 
-        assert!(
-            result.is_ok(),
-            "[{}] extract_registry_internal failed: {:?}",
-            description,
-            result.err()
-        );
-
-        let response = result.unwrap();
-
-        assert_json_include!(
-            actual: serde_json::to_value(&response.registry).unwrap(),
-            expected: serde_json::to_value(&case.expected_registry).unwrap()
-        );
-        assert_eq!(
-            response.images.len(),
-            case.expected_image_count,
-            "[{description}] parsed image count mismatch"
-        );
+        if let Err(err) = result {
+            let msg = if let Some(s) = err.downcast_ref::<&str>() {
+                s.to_string()
+            } else if let Some(s) = err.downcast_ref::<String>() {
+                s.clone()
+            } else {
+                "Unknown panic".to_string()
+            };
+            failures.push(format!("[{description}] {msg}"));
+        }
     }
+
+    assert!(
+        failures.is_empty(),
+        "{} test cases failed:\n\n{}",
+        failures.len(),
+        failures.join("\n\n")
+    );
 }

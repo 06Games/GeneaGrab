@@ -1,37 +1,1256 @@
 [
-    {
-        "request_url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/daogrp/0/3",
-        "registry_id": "ece981d3d12d06e97f5012a67ab768508e",
-        "image_number": 3,
-        "ark_url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e",
-        "mocks": [
-            {
-                "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/manifest",
-                "response_file": "ece981d3d12d06e97f5012a67ab768508e_manifest.json"
-            },
-            {
-                "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/canvas/0/1",
-                "response_file": "ece981d3d12d06e97f5012a67ab768508e_canvas.html"
-            }
-        ],
-        "expected_image_count": 5,
-        "expected_registry": {
-            "source_id": "ad06",
-            "registry_id": "ece981d3d12d06e97f5012a67ab768508e",
-            "archive_reference": "5 Mi 75/1",
-            "registry_types": [
-                {
-                    "category": "mortality",
-                    "label": "Burial"
-                }
-            ],
-            "date_from": "1781",
-            "date_to": "1784",
-            "places": [
-                [
-                    "Lantosque"
-                ]
-            ]
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/daogrp/0/3",
+    "registry_id": "ece981d3d12d06e97f5012a67ab768508e",
+    "image_number": 3,
+    "ark_url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/manifest",
+        "response_file": "ece981d3d12d06e97f5012a67ab768508e_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/canvas/0/1",
+        "response_file": "ece981d3d12d06e97f5012a67ab768508e_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ece981d3d12d06e97f5012a67ab768508e",
+      "archive_reference": "5 Mi 75/1",
+      "registry_types": [
+        {
+          "category": "mortality",
+          "label": "Burial"
         }
+      ],
+      "date_from": "1781",
+      "date_to": "1784",
+      "places": [["Lantosque"]],
+      "collection": ["Etat civil (parcours de recherche)", "LANTOSQUE"]
     }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/daogrp/0/35",
+    "registry_id": "ecbbce420b017f540479f25c97ff2c266a",
+    "image_number": 35,
+    "ark_url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/manifest",
+        "response_file": "ecbbce420b017f540479f25c97ff2c266a_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/canvas/0/1",
+        "response_file": "ecbbce420b017f540479f25c97ff2c266a_canvas.html"
+      }
+    ],
+    "expected_image_count": 71,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ecbbce420b017f540479f25c97ff2c266a",
+      "archive_reference": "5 Mi 89/26",
+      "registry_types": [
+        {
+          "category": "mortality",
+          "label": "Burial"
+        }
+      ],
+      "date_from": "1840",
+      "date_to": "1870",
+      "places": [["Nice", "Sainte-Hélène"]],
+      "collection": ["Etat civil (parcours de recherche)", "NICE"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/daogrp/0/layout:table/idsearch:RECH_2616c589cede9aef5f50348ea29ef354",
+    "registry_id": "ecebe99656ed10bbc4f90577557b5db67c",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/manifest",
+        "response_file": "ecebe99656ed10bbc4f90577557b5db67c_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/canvas/0/1",
+        "response_file": "ecebe99656ed10bbc4f90577557b5db67c_canvas.html"
+      }
+    ],
+    "expected_image_count": 12,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ecebe99656ed10bbc4f90577557b5db67c",
+      "archive_reference": "5 Mi 89/80",
+      "registry_types": [
+        {
+          "category": "vital",
+          "label": "Baptism"
+        },
+        {
+          "category": "vital",
+          "label": "BaptismTable"
+        }
+      ],
+      "date_from": "1823",
+      "date_to": "1824",
+      "places": [["Nice", "Notre-Dame Du Port"]],
+      "collection": ["Etat civil (parcours de recherche)", "NICE"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/daogrp/0/layout:table/idsearch:RECH_b8eed04fe2a98dd5bf1fe2452dbc1b8e",
+    "registry_id": "eca80928a80f578297aa1382ce096dd10e",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/manifest",
+        "response_file": "eca80928a80f578297aa1382ce096dd10e_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/canvas/0/1",
+        "response_file": "eca80928a80f578297aa1382ce096dd10e_canvas.html"
+      }
+    ],
+    "expected_image_count": 135,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "eca80928a80f578297aa1382ce096dd10e",
+      "archive_reference": "5 Mi 17/1",
+      "registry_types": [
+        {
+          "category": "vital",
+          "label": "Birth"
+        },
+        {
+          "category": "union",
+          "label": "Marriage"
+        },
+        {
+          "category": "union",
+          "label": "Banns"
+        },
+        {
+          "category": "mortality",
+          "label": "Death"
+        }
+      ],
+      "date_from": "1728",
+      "date_to": "1768",
+      "places": [["Bezaudun-Les-Alpes"]],
+      "collection": ["Etat civil (parcours de recherche)", "BEZAUDUN-LES-ALPES"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/daogrp/0/layout:table/idsearch:RECH_c99248cfe88969cc390bdb768dc1de70",
+    "registry_id": "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/manifest",
+        "response_file": "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/canvas/0/1",
+        "response_file": "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d_canvas.html"
+      }
+    ],
+    "expected_image_count": 6,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
+      "archive_reference": "1 E 3",
+      "registry_types": [
+        {
+          "category": "union",
+          "label": "Divorce"
+        }
+      ],
+      "date_from": "1803",
+      "date_to": "1803",
+      "places": [["Cannes"]],
+      "collection": ["Etat civil (parcours de recherche)", "CANNES"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ec6f5e3a7e2cbde236ef1c70629240c15d",
+    "registry_id": "ec6f5e3a7e2cbde236ef1c70629240c15d",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/ec6f5e3a7e2cbde236ef1c70629240c15d",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ec6f5e3a7e2cbde236ef1c70629240c15d/manifest",
+        "response_file": "ec6f5e3a7e2cbde236ef1c70629240c15d_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ec6f5e3a7e2cbde236ef1c70629240c15d/canvas/0/1",
+        "response_file": "ec6f5e3a7e2cbde236ef1c70629240c15d_canvas.html"
+      }
+    ],
+    "expected_image_count": 53,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ec6f5e3a7e2cbde236ef1c70629240c15d",
+      "archive_reference": "5 Mi 27/1",
+      "registry_types": [
+        {
+          "category": "vital",
+          "label": "Catalogue"
+        }
+      ],
+      "date_from": "1750",
+      "date_to": "1795",
+      "places": [["Cabris"]],
+      "collection": ["Etat civil (parcours de recherche)", "CABRIS"]
+    }
+  }
+  /*{
+    "request_url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1",
+    "registry_id": "eca462a76104f3e90edbdcaac70e14fec1",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1/manifest",
+        "response_file": "eca462a76104f3e90edbdcaac70e14fec1_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1/canvas/0/1",
+        "response_file": "eca462a76104f3e90edbdcaac70e14fec1_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "eca462a76104f3e90edbdcaac70e14fec1",
+      "archive_reference": "5 Mi 84/2",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Other"
+        }
+      ],
+      "date_from": "1750",
+      "date_to": "1800",
+      "places": [["Menton"]],
+      "collection": ["Etat civil (parcours de recherche)", "MENTON"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc",
+    "registry_id": "ec1eb5b16de1632496bf6d65113d1d73fc",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc/manifest",
+        "response_file": "ec1eb5b16de1632496bf6d65113d1d73fc_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc/canvas/0/1",
+        "response_file": "ec1eb5b16de1632496bf6d65113d1d73fc_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ec1eb5b16de1632496bf6d65113d1d73fc",
+      "archive_reference": "5 Mi 84/3",
+      "registry_types": [
+        {
+          "category": "vital",
+          "label": "Birth"
+        },
+        {
+          "category": "vital",
+          "label": "Baptism"
+        },
+        {
+          "category": "other",
+          "label": "Confirmation"
+        }
+      ],
+      "date_from": "1577",
+      "date_to": "1607",
+      "places": [["Menton"]],
+      "collection": ["Etat civil (parcours de recherche)", "MENTON"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e",
+    "registry_id": "ec0269f0e601136679d5332be8edc7262e",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e/manifest",
+        "response_file": "ec0269f0e601136679d5332be8edc7262e_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e/canvas/0/1",
+        "response_file": "ec0269f0e601136679d5332be8edc7262e_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ec0269f0e601136679d5332be8edc7262e",
+      "archive_reference": "5 Mi 74/1",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Communion"
+        }
+      ],
+      "date_from": "1880",
+      "date_to": "1929",
+      "places": [["Isola"]],
+      "collection": ["Etat civil (parcours de recherche)", "ISOLA"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055",
+    "registry_id": "ecc93946f2a961d4131c537524ca92d055",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055/manifest",
+        "response_file": "ecc93946f2a961d4131c537524ca92d055_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055/canvas/0/1",
+        "response_file": "ecc93946f2a961d4131c537524ca92d055_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "ecc93946f2a961d4131c537524ca92d055",
+      "archive_reference": "2 E 985",
+      "registry_types": [
+        {
+          "category": "vital",
+          "label": "unionTable"
+        }
+      ],
+      "date_from": "1934",
+      "date_to": "1934",
+      "places": [["Antibes"]],
+      "collection": ["Etat civil (parcours de recherche)", "ANTIBES"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/dao/0/layout:table/idsearch:RECH_8bd2b6be1f4d9dee88dd728c3f7365e6",
+    "registry_id": "e5f3d1e196cf2c2c3fbcb9770bb85548",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/manifest",
+        "response_file": "e5f3d1e196cf2c2c3fbcb9770bb85548_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/canvas/0/1",
+        "response_file": "e5f3d1e196cf2c2c3fbcb9770bb85548_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "e5f3d1e196cf2c2c3fbcb9770bb85548",
+      "archive_reference": "25 Fi 15/1/A0",
+      "title": "Tableau d'assemblage des sections A à D.",
+      "subtitle": "TA",
+      "registry_types": [
+        {
+          "category": "cadastre",
+          "label": "CadastralMap"
+        }
+      ],
+      "date_from": "1866",
+      "date_to": "1866",
+      "places": [["Berre-Les-Alpes", "Tableau D'Assemblage."]],
+      "collection": ["Cadastre. - Plans cadastraux", "BERRE-LES-ALPES", "TABLEAU D'ASSEMBLAGE."]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/dao/0",
+    "registry_id": "c2ca249edd8bc5100f8a389e12389285",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/manifest",
+        "response_file": "c2ca249edd8bc5100f8a389e12389285_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/canvas/0/1",
+        "response_file": "c2ca249edd8bc5100f8a389e12389285_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "c2ca249edd8bc5100f8a389e12389285",
+      "archive_reference": "25 Fi 15/1/D1/COM",
+      "title": "Plan parcellaire : section D dite de Sena, 1ère feuille.",
+      "subtitle": "Plan de section, D1",
+      "registry_types": [
+        {
+          "category": "cadastre",
+          "label": "CadastralMap"
+        }
+      ],
+      "date_from": "1866",
+      "date_to": "1866",
+      "places": [["Berre-Les-Alpes", "Sena."]],
+      "collection": ["Cadastre. - Plans cadastraux", "BERRE-LES-ALPES", "SENA."]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/daogrp/0/30/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+    "registry_id": "efe090d2498239ccfd227216e5211a09",
+    "image_number": 30,
+    "ark_url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/manifest",
+        "response_file": "efe090d2498239ccfd227216e5211a09_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/canvas/0/1",
+        "response_file": "efe090d2498239ccfd227216e5211a09_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "efe090d2498239ccfd227216e5211a09",
+      "archive_reference": "3 P 1503",
+      "title": "Etat des sections A à M",
+      "registry_types": [
+        {
+          "category": "cadastre",
+          "label": "CadastralSectionStates"
+        }
+      ],
+      "date_from": "1875",
+      "date_to": "1875",
+      "places": [["Utelle"]],
+      "collection": ["Cadastre. - Etats de section", "UTELLE"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/daogrp/0/158/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+    "registry_id": "c9b59a423e101f278296bb4526a2e15c",
+    "image_number": 158,
+    "ark_url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/manifest",
+        "response_file": "c9b59a423e101f278296bb4526a2e15c_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/canvas/0/1",
+        "response_file": "c9b59a423e101f278296bb4526a2e15c_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "c9b59a423e101f278296bb4526a2e15c",
+      "archive_reference": "3 P 1511",
+      "title": "Matrice cadastrale des propriétés non bâties",
+      "subtitle": "folios 1489 à 1988",
+      "registry_types": [
+        {
+          "category": "cadastre",
+          "label": "CadastralMatrix"
+        }
+      ],
+      "date_from": "1913",
+      "date_to": "1969",
+      "places": [["Utelle"]],
+      "collection": ["Cadastre. - Matrices", "UTELLE"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/daogrp/0",
+    "registry_id": "2fece3eabbcab939c1f84def0316487c",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/manifest",
+        "response_file": "2fece3eabbcab939c1f84def0316487c_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/canvas/0/1",
+        "response_file": "2fece3eabbcab939c1f84def0316487c_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "2fece3eabbcab939c1f84def0316487c",
+      "archive_reference": "3 P 828",
+      "title": "Matrice cadastrale des propriétés foncières (bâties et non bâties), sections A à E",
+      "subtitle": "folios 1 à 680",
+      "registry_types": [
+        {
+          "category": "cadastre",
+          "label": "CadastralMatrix"
+        }
+      ],
+      "date_from": "1872",
+      "date_to": "1913",
+      "places": [["Nice", "Nice-Est (Quartier Saint-Roch)"]],
+      "collection": ["Cadastre. - Matrices", "NICE", "NICE-EST (QUARTIER SAINT-ROCH)"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/daogrp/0/7/layout:table/idsearch:RECH_2486f937f76e40e6df864a4708967f91",
+    "registry_id": "9b56a6d2e75f3d28e97044e9f373f5bb",
+    "image_number": 7,
+    "ark_url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/manifest",
+        "response_file": "9b56a6d2e75f3d28e97044e9f373f5bb_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/canvas/0/1",
+        "response_file": "9b56a6d2e75f3d28e97044e9f373f5bb_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "9b56a6d2e75f3d28e97044e9f373f5bb",
+      "archive_reference": "6 M 112",
+      "registry_types": [
+        {
+          "category": "census",
+          "label": "Census"
+        }
+      ],
+      "date_from": "1891",
+      "date_to": "1891",
+      "places": [["Lantosque"]],
+      "collection": ["Recensement de la population", "LANTOSQUE"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/daogrp/0/62/",
+    "registry_id": "cb9d2442564ee9b717d681ea3af12a03",
+    "image_number": 62,
+    "ark_url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/manifest",
+        "response_file": "cb9d2442564ee9b717d681ea3af12a03_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/canvas/0/1",
+        "response_file": "cb9d2442564ee9b717d681ea3af12a03_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "cb9d2442564ee9b717d681ea3af12a03",
+      "archive_reference": "6 M 149",
+      "registry_types": [
+        {
+          "category": "census",
+          "label": "Census"
+        }
+      ],
+      "date_from": "1911",
+      "date_to": "1911",
+      "places": [["Nice", "Canton Ouest (Début)"]],
+      "collection": ["Recensement de la population", "NICE", "CANTON OUEST (DÉBUT)"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/674341.2453955/dao/0/50",
+    "registry_id": "674341.2453955",
+    "image_number": 50,
+    "ark_url": "https://archives06.fr/ark:/79346/674341.2453955",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/674341.2453955/manifest",
+        "response_file": "674341.2453955_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/674341.2453955/canvas/0/1",
+        "response_file": "674341.2453955_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "674341.2453955",
+      "archive_reference": "3 E 19 83",
+      "title": "Protocoles du notaire Joseph Buffonio, à Lantosque",
+      "registry_types": [
+        {
+          "category": "notarial",
+          "label": "Notarial"
+        }
+      ],
+      "date_from": "1744-11-15",
+      "date_to": "1760-03-14",
+      "places": [["Lantosque"]],
+      "collection": [
+        "Instrument de recherche des versements d'archives notariales (3 E)",
+        "Versement de l'étude Graillet, à Roquebillière",
+        "Protocoles du notaire Joseph Buffonio, à Lantosque",
+        "LANTOSQUE"
+      ]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/674248.2453940/dao/0",
+    "registry_id": "674248.2453940",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/674248.2453940",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/674248.2453940/manifest",
+        "response_file": "674248.2453940_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/674248.2453940/canvas/0/1",
+        "response_file": "674248.2453940_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "674248.2453940",
+      "archive_reference": "3 E 19 70",
+      "title": "Protocole du notaire Pierre Malaussena, à Lantosque",
+      "author": "MALAUSSENA, Pierre",
+      "registry_types": [
+        {
+          "category": "notarial",
+          "label": "Notarial"
+        }
+      ],
+      "date_from": "1673-11-01",
+      "date_to": "1703-06-30",
+      "places": [["Lantosque"]],
+      "collection": ["Instrument de recherche des versements d'archives notariales (3 E)", "Versement de l'étude Graillet, à Roquebillière", "LANTOSQUE"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/765909.2436493",
+    "registry_id": "765909.2436493",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/765909.2436493",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/765909.2436493/manifest",
+        "response_file": "765909.2436493_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/765909.2436493/canvas/0/1",
+        "response_file": "765909.2436493_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "765909.2436493",
+      "archive_reference": "3 E 113 2",
+      "title": "Protocole avec répertoire du notaire Jean Auda, à Lantosque",
+      "registry_types": [
+        {
+          "category": "notarial",
+          "label": "Notarial"
+        }
+      ],
+      "date_from": "1610-09-01",
+      "date_to": "1621-12-20",
+      "places": [["Lantosque"]],
+      "collection": [
+        "Instrument de recherche des versements d'archives notariales (3 E)",
+        "Répertoire du versement d'archives notariales concernant les territoires d'Aiglun, Ascros, Aspremont, Gilette, Lantosque, Malaussène, Rosquestéron, Sigale et Toudon, de 1580 à 1822",
+        "Protocole avec répertoire du notaire Jean Auda, à Lantosque",
+        "LANTOSQUE"
+      ]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/952271.2415676",
+    "registry_id": "952271.2415676",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/952271.2415676",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/952271.2415676/manifest",
+        "response_file": "952271.2415676_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/952271.2415676/canvas/0/1",
+        "response_file": "952271.2415676_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "952271.2415676",
+      "archive_reference": "C 1125",
+      "title": "1641",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Other"
+        }
+      ],
+      "date_from": "1641",
+      "date_to": "1641",
+      "places": [],
+      "collection": [
+        "Instrument de recherche des archives anciennes, série C",
+        "Fonds de l'administration de l'insinuation du comté de Nice",
+        "Bureau de Nice",
+        "Sospel"
+      ]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/951070.2415509/dao/0/5",
+    "registry_id": "951070.2415509",
+    "image_number": 5,
+    "ark_url": "https://archives06.fr/ark:/79346/951070.2415509",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/951070.2415509/manifest",
+        "response_file": "951070.2415509_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/951070.2415509/canvas/0/1",
+        "response_file": "951070.2415509_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "951070.2415509",
+      "archive_reference": "C 965",
+      "title": "1742-1753",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Other"
+        }
+      ],
+      "date_from": "1742",
+      "date_to": "1753",
+      "places": [],
+      "collection": [
+        "Instrument de recherche des archives anciennes, série C",
+        "Fonds de l'administration de l'insinuation du comté de Nice",
+        "Bureau de Nice",
+        "Moulinet"
+      ]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/944655.2414623",
+    "registry_id": "944655.2414623",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/944655.2414623",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/944655.2414623/manifest",
+        "response_file": "944655.2414623_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/944655.2414623/canvas/0/1",
+        "response_file": "944655.2414623_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "944655.2414623",
+      "archive_reference": "C 104",
+      "title": "Lettres A-B",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Other"
+        }
+      ],
+      "date_from": "1610",
+      "date_to": "1721",
+      "places": [],
+      "collection": [
+        "Instrument de recherche des archives anciennes, série C",
+        "Fonds de l'administration de l'insinuation du comté de Nice",
+        "Bureau de Nice",
+        "Tables",
+        "1610 à 1721"
+      ]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/3236728/dao/0/1",
+    "registry_id": "3236728",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/3236728",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/3236728/manifest",
+        "response_file": "3236728_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/3236728/canvas/0/1",
+        "response_file": "3236728_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "3236728",
+      "archive_reference": "1262 W 2",
+      "title": "Table des noms",
+      "subtitle": "Bon à Dumistrescu",
+      "author": "2e bureau de Nice 1914-1955 (autres communes)",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Catalogue"
+        }
+      ],
+      "places": [],
+      "collection": ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des noms"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/3236746/dao/0/200",
+    "registry_id": "3236746",
+    "image_number": 200,
+    "ark_url": "https://archives06.fr/ark:/79346/3236746",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/3236746/manifest",
+        "response_file": "3236746_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/3236746/canvas/0/1",
+        "response_file": "3236746_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "3236746",
+      "archive_reference": "1262 W 21",
+      "title": "Table des prénoms",
+      "subtitle": "Volume 016",
+      "author": "2e bureau de Nice 1914-1955 (autres communes)",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Catalogue"
+        }
+      ],
+      "places": [],
+      "collection": ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des prénoms"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/3236640/dao/0/120",
+    "registry_id": "3236640",
+    "image_number": 120,
+    "ark_url": "https://archives06.fr/ark:/79346/3236640",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/3236640/manifest",
+        "response_file": "3236640_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/3236640/canvas/0/1",
+        "response_file": "3236640_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "3236640",
+      "archive_reference": "1262 W 156",
+      "title": "Répertoire des formalités",
+      "subtitle": "Volume 066",
+      "author": "2e bureau de Nice 1914-1955 (autres communes)",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Catalogue"
+        }
+      ],
+      "places": [],
+      "collection": ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Répertoire des formalités"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/2978304/dao/0/5",
+    "registry_id": "2978304",
+    "image_number": 5,
+    "ark_url": "https://archives06.fr/ark:/79346/2978304",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/2978304/manifest",
+        "response_file": "2978304_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/2978304/canvas/0/1",
+        "response_file": "2978304_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "2978304",
+      "archive_reference": "402 Q 6/400",
+      "title": "Actes translatifs de propriétés d'immeubles, volume 298, 24 mai-13 juin 1932",
+      "subtitle": "Volume 298 (24 mai-13 juin 1932)",
+      "author": "2e bureau de Nice 1914-1955 (autres communes)",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Engrossments"
+        }
+      ],
+      "date_from": "1932-05-24",
+      "date_to": "1932-06-13",
+      "places": [],
+      "collection": ["Hypothèques. - Actes translatifs", "2e bureau de Nice 1914-1955 (autres communes)"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/dao/0/layout:table/idsearch:RECH_c8a1303621a60e2782b150cef417305b",
+    "registry_id": "b0f71497f90be8cb192bb0c77acac139",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/manifest",
+        "response_file": "b0f71497f90be8cb192bb0c77acac139_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/canvas/0/1",
+        "response_file": "b0f71497f90be8cb192bb0c77acac139_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "b0f71497f90be8cb192bb0c77acac139",
+      "archive_reference": "1 J 57",
+      "title": "Investiture du fief et juridiction de Puget (Puget-Théniers) en faveur du comte Nicolas Grimaldi de Busca (Nicolo Grimaldi di Busca).",
+      "author": "Chambre des comptes de Turin pour Victor Amédée II, duc de Savoie",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Other"
+        }
+      ],
+      "date_from": "1704-01-01",
+      "date_to": "1704-01-01",
+      "places": [["Turin (Italie"]],
+      "collection": ["Armoiries dans les Alpes-Maritimes", "TURIN (ITALIE"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/1213862.2781873/dao/1/12",
+    "registry_id": "1213862.2781873",
+    "image_number": 12,
+    "ark_url": "https://archives06.fr/ark:/79346/1213862.2781873",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/1213862.2781873/manifest",
+        "response_file": "1213862.2781873_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/1213862.2781873/canvas/0/1",
+        "response_file": "1213862.2781873_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "1213862.2781873",
+      "archive_reference": "1 Num 48",
+      "title": "Album du Carnaval 1937. Album illustré des Chars, Cavalcades, Groupes, Isolés de S. M. Carnaval de Nice 1937",
+      "registry_types": [
+        {
+          "category": "book",
+          "label": "Book"
+        }
+      ],
+      "date_from": "1937",
+      "date_to": "1937",
+      "places": [],
+      "collection": ["Ouvrages", "Sous-série 1 Num. - Reproductions de complément"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/649576.2781893/dao/1",
+    "registry_id": "649576.2781893",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/649576.2781893",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/649576.2781893/manifest",
+        "response_file": "649576.2781893_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/649576.2781893/canvas/0/1",
+        "response_file": "649576.2781893_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "649576.2781893",
+      "archive_reference": "4 Mi 18/1",
+      "title": "THEATRUM STATUUM REGIAE CELSITUDINIS SABAUDIAE DUCIS, PEDEMONTII PRINCIPIS CYPRI REGIS. PARS PRIMA EXHIBENS PEDEMONTIUM, E IN EO AUGUSTAM TAURINORUM E LOCA VICINIORA. TOME 1 ET 2",
+      "registry_types": [
+        {
+          "category": "book",
+          "label": "Book"
+        }
+      ],
+      "date_from": "1682",
+      "date_to": "1682",
+      "places": [],
+      "collection": ["Ouvrages", "Sous série 4 Mi. - Microformes de documentation"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/daogrp/0/279",
+    "registry_id": "2231f2886f84620708c0eceab9d6b9b7",
+    "image_number": 279,
+    "ark_url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/manifest",
+        "response_file": "2231f2886f84620708c0eceab9d6b9b7_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/canvas/0/1",
+        "response_file": "2231f2886f84620708c0eceab9d6b9b7_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "2231f2886f84620708c0eceab9d6b9b7",
+      "title": "Calendario generale pe' regii stati de 1830.",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Other"
+        }
+      ],
+      "date_from": "1830",
+      "date_to": "1830",
+      "places": [],
+      "collection": ["Annuaires", "Calendario generale pe' regii stati"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/daogrp/0/425",
+    "registry_id": "3eaf8e3ad6a4d0fa88add0385faf26ce",
+    "image_number": 425,
+    "ark_url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/manifest",
+        "response_file": "3eaf8e3ad6a4d0fa88add0385faf26ce_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/canvas/0/1",
+        "response_file": "3eaf8e3ad6a4d0fa88add0385faf26ce_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "3eaf8e3ad6a4d0fa88add0385faf26ce",
+      "title": "Annuaire des Alpes-Maritimes de 1873.",
+      "registry_types": [
+        {
+          "category": "other",
+          "label": "Other"
+        }
+      ],
+      "date_from": "1873",
+      "date_to": "1873",
+      "places": [],
+      "collection": ["Annuaires", "Annuaire des Alpes-Maritimes"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/dao/0",
+    "registry_id": "1a061a78007faccd7f9125c2869ca143",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/manifest",
+        "response_file": "1a061a78007faccd7f9125c2869ca143_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/canvas/0/1",
+        "response_file": "1a061a78007faccd7f9125c2869ca143_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "1a061a78007faccd7f9125c2869ca143",
+      "title": "Cannes (The) Advertiser",
+      "registry_types": [
+        {
+          "category": "newspaper",
+          "label": "Newspaper"
+        }
+      ],
+      "date_from": "1891-11-06",
+      "date_to": "1891-11-06",
+      "places": [],
+      "collection": ["Presse ancienne numérisée", "Cannes (The) Advertiser (1891-1891)", "Année 1891"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/dao/0/5?id=https%3A%2F%2Farchives06.fr%2Fark%3A%2F79346%2Fa3fbfbacbda3ab24338625a01b000e5c%2Fcanvas%2F0%2F5",
+    "registry_id": "a3fbfbacbda3ab24338625a01b000e5c",
+    "image_number": 5,
+    "ark_url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/manifest",
+        "response_file": "a3fbfbacbda3ab24338625a01b000e5c_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/canvas/0/1",
+        "response_file": "a3fbfbacbda3ab24338625a01b000e5c_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "a3fbfbacbda3ab24338625a01b000e5c",
+      "title": "Eclaireur (L')",
+      "registry_types": [
+        {
+          "category": "newspaper",
+          "label": "Newspaper"
+        }
+      ],
+      "date_from": "1937-12-30",
+      "date_to": "1937-12-30",
+      "places": [],
+      "collection": ["Presse ancienne numérisée", "Eclaireur (L') (1883-1945)", "Année 1937"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/dao/0/2",
+    "registry_id": "35d236db0bd7183dbf75ab2486e6d240",
+    "image_number": 2,
+    "ark_url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/manifest",
+        "response_file": "35d236db0bd7183dbf75ab2486e6d240_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/canvas/0/1",
+        "response_file": "35d236db0bd7183dbf75ab2486e6d240_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "35d236db0bd7183dbf75ab2486e6d240",
+      "title": "Lou Ficanas",
+      "registry_types": [
+        {
+          "category": "newspaper",
+          "label": "Newspaper"
+        }
+      ],
+      "date_from": "1891-08-16",
+      "date_to": "1891-08-16",
+      "places": [],
+      "collection": ["Presse ancienne numérisée", "Lou Ficanas (1891-1891)", "Année 1891"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/daogrp/0/layout:table/idsearch:RECH_61e8e38e23201aa701187c8e647f7c96",
+    "registry_id": "6c992c340bba967a24a29e352ac60851",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/manifest",
+        "response_file": "6c992c340bba967a24a29e352ac60851_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/canvas/0/1",
+        "response_file": "6c992c340bba967a24a29e352ac60851_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "6c992c340bba967a24a29e352ac60851",
+      "archive_reference": "1 N 3",
+      "title": "Délibérations du conseil général (1863)",
+      "registry_types": [
+        {
+          "category": "book",
+          "label": "Book"
+        }
+      ],
+      "date_from": "1863",
+      "date_to": "1863",
+      "places": [],
+      "collection": ["Délibérations du conseil général"]
+    }
+  },
+  {
+    "request_url": "https://archives06.fr/ark:/79346/703610.2544066/dao/0",
+    "registry_id": "703610.2544066",
+    "image_number": 1,
+    "ark_url": "https://archives06.fr/ark:/79346/703610.2544066",
+    "mocks": [
+      {
+        "url": "https://archives06.fr/ark:/79346/703610.2544066/manifest",
+        "response_file": "703610.2544066_manifest.json"
+      },
+      {
+        "url": "https://archives06.fr/ark:/79346/703610.2544066/canvas/0/1",
+        "response_file": "703610.2544066_canvas.html"
+      }
+    ],
+    "expected_image_count": 5,
+    "expected_registry": {
+      "source_id": "ad06",
+      "registry_id": "703610.2544066",
+      "author": "Non déterminé",
+      "registry_types": [],
+      "places": [],
+      "collection": []
+    }
+  }*/
 ]
