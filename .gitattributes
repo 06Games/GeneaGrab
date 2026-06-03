@@ -1,0 +1,2 @@
+backend/plugins/**/test_data/**/* linguist-vendored
+backend/plugins/**/test_data/**/cases.json -linguist-vendored
