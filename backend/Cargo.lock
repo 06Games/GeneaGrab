@@ -376,16 +376,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "assert-json-diff"
-version = "2.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47e4f2b81832e72834d7518d8487a0396a28cc408186a2e8854c0f98011faf12"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "async-broadcast"
 version = "0.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2311,6 +2301,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "float-cmp"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b09cf3155332e944990140d967ff5eceb70df778b34f77d8075db46e4704e6d8"
+dependencies = [
+ "num-traits",
+]
+
+[[package]]
 name = "flume"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2682,7 +2681,6 @@ dependencies = [
 name = "geneagrab-plugin-core"
 version = "4.0.0"
 dependencies = [
- "assert-json-diff",
  "chrono",
  "derive_builder",
  "extism",
@@ -2692,6 +2690,7 @@ dependencies = [
  "regex",
  "scraper 0.27.0",
  "serde",
+ "serde-json-assert",
  "serde_json",
  "strum 0.28.0",
  "thiserror 2.0.18",
@@ -6189,6 +6188,17 @@ checksum = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e"
 dependencies = [
  "serde_core",
  "serde_derive",
+]
+
+[[package]]
+name = "serde-json-assert"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1868f55385c1cbda8c62aec205ab5874536f3492e11456e04265509848fe982"
+dependencies = [
+ "float-cmp",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

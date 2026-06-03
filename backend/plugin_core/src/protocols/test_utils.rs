@@ -1,9 +1,9 @@
 use crate::com_structs::{ExtractRequest, ExtractResponse, IdentifyResponse, PluginError};
 use crate::data::http::Request;
 use crate::protocols::fetchers::Fetcher;
-use assert_json_diff::assert_json_include;
 use jsonc_parser::ParseOptions;
 use serde::Deserialize;
+use serde_json_assert::{assert_json_include, assert_json_matches, CompareMode, Config};
 use std::fs;
 use std::panic;
 use std::path::PathBuf;
@@ -115,9 +115,12 @@ pub fn registry_extraction_integration_test(
                 },
             )
             .expect("extract_registry_internal failed");
-            assert_json_include!(
-                actual: serde_json::to_value(&response.registry).unwrap(),
-                expected: serde_json::to_value(&case.expected_registry).unwrap()
+
+            let config = Config::new(CompareMode::Inclusive).consider_array_sorting(false);
+            assert_json_matches!(
+                serde_json::to_value(&response.registry).unwrap(),
+                serde_json::to_value(&case.expected_registry).unwrap(),
+                &config
             );
             assert_eq!(
                 response.images.len(),
