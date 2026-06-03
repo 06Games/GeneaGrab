@@ -33,22 +33,22 @@ fn to_title_case(s: &str) -> String {
 
 fn parse_types(type_str: &str) -> HashSet<RegistryType> {
     let mut types = HashSet::new();
-    let parts: Vec<&str> = type_str.split(',').collect();
+    let extract_regex = Regex::new(r"\p{Lu}[^\p{Lu}]*").unwrap();
 
-    for p in parts {
-        let t = p.trim().to_lowercase();
+    for mat in extract_regex.find_iter(type_str) {
+        let t = mat.as_str().trim().to_lowercase();
         match t.as_str() {
             "naissances" => {
                 types.insert(RegistryType::Vital(Cow::Borrowed("Birth")));
             }
             "tables décennales des naissances" | "tables alphabétiques des naissances" => {
-                types.insert(RegistryType::Vital(Cow::Borrowed("BirthTable")));
+                types.insert(RegistryType::Vital(Cow::Borrowed("Birth table")));
             }
             "baptêmes" => {
                 types.insert(RegistryType::Vital(Cow::Borrowed("Baptism")));
             }
             "tables des baptêmes" => {
-                types.insert(RegistryType::Vital(Cow::Borrowed("BaptismTable")));
+                types.insert(RegistryType::Vital(Cow::Borrowed("Baptism table")));
             }
             "confirmations" => {
                 types.insert(RegistryType::Vital(Cow::Borrowed("Confirmation")));
@@ -65,7 +65,7 @@ fn parse_types(type_str: &str) -> HashSet<RegistryType> {
             "tables des mariages"
             | "tables décennales des mariages"
             | "tables alphabétiques des mariages" => {
-                types.insert(RegistryType::Union(Cow::Borrowed("MarriageTable")));
+                types.insert(RegistryType::Union(Cow::Borrowed("Marriage table")));
             }
             "divorces" => {
                 types.insert(RegistryType::Union(Cow::Borrowed("Divorce")));
@@ -74,13 +74,13 @@ fn parse_types(type_str: &str) -> HashSet<RegistryType> {
                 types.insert(RegistryType::Mortality(Cow::Borrowed("Death")));
             }
             "tables décennales des décès" | "tables alphabétiques des décès" => {
-                types.insert(RegistryType::Mortality(Cow::Borrowed("DeathTable")));
+                types.insert(RegistryType::Mortality(Cow::Borrowed("Death table")));
             }
             "sépultures" | "sépultures des enfants décédés sans baptêmes" => {
                 types.insert(RegistryType::Mortality(Cow::Borrowed("Burial")));
             }
             "tables des sépultures" => {
-                types.insert(RegistryType::Mortality(Cow::Borrowed("BurialTable")));
+                types.insert(RegistryType::Mortality(Cow::Borrowed("Burial table")));
             }
             "répertoire" => {
                 types.insert(RegistryType::Legal(Cow::Borrowed("Catalogue")));
@@ -89,10 +89,10 @@ fn parse_types(type_str: &str) -> HashSet<RegistryType> {
                 types.insert(RegistryType::Other(Cow::Borrowed("Inventory")));
             }
             "matrice cadastrale" => {
-                types.insert(RegistryType::Land(Cow::Borrowed("CadastralMatrix")));
+                types.insert(RegistryType::Land(Cow::Borrowed("Cadastral roll")));
             }
             "état de section" => {
-                types.insert(RegistryType::Land(Cow::Borrowed("CadastralSectionStates")));
+                types.insert(RegistryType::Land(Cow::Borrowed("Parcel registry")));
             }
             _ => {
                 types.insert(RegistryType::Unknown);
@@ -117,8 +117,10 @@ struct ParsedMetadata {
 
 fn parse_manifest_metadata(metadata: &[Metadata]) -> ParsedMetadata {
     let mut parsed = ParsedMetadata::default();
+    let html_regex = Regex::new(r"<[^>]*>").unwrap();
     for meta in metadata {
-        let value = deunicode::deunicode(&meta.to_string()).replace("<[^>]*>", "");
+        let value = html_regex.replace_all(&meta.to_string(), "").to_string();
+        let deunicoded_value = deunicode::deunicode(&value);
         match meta.label.as_str() {
             "Commune" | "Commune d’exercice du notaire" | "Lieu" | "Lieu d'édition" => {
                 parsed.location_primary = Some(to_title_case(&value.to_lowercase()));
@@ -158,18 +160,18 @@ fn get_ead_pattern_and_types(eadid: &str) -> (Option<&'static str>, Vec<Registry
         ),
         "FRAD006_CADASTRE_PLAN" => (
             Some(r"(?P<callnum>.+) +- +(?P<district>.*?) +- +(?P<subtitle>.*?) +- +(?P<from>.+?)"),
-            vec![RegistryType::Land(Cow::Borrowed("CadastralMap"))],
+            vec![RegistryType::Land(Cow::Borrowed("Cadastral map"))],
         ),
         "FRAD006_CADASTRE_MATRICE" => (
             Some(r"(?P<callnum>.+?) +- +(?P<title>.*?) *?-"),
-            vec![RegistryType::Land(Cow::Borrowed("CadastralMatrix"))],
+            vec![RegistryType::Land(Cow::Borrowed("Cadastral roll"))],
         ),
         "FRAD006_CADASTRE_ETAT_SECTION" => (
             Some(r"(?P<callnum>.+) +- +(?P<title>.*?) *?-"),
-            vec![RegistryType::Land(Cow::Borrowed("CadastralSectionStates"))],
+            vec![RegistryType::Land(Cow::Borrowed("Parcel registry"))],
         ),
         "FRAD006_RECENSEMENT_POPULATION" => (
-            Some(r"(?P<city>.+) +- +(?P<from>.+)(, (?<district>.*))"),
+            Some(r"(?P<city>.+) +- +(?P<from>.+)(, (?P<district>.*))"),
             vec![RegistryType::Census(Cow::Borrowed("Census"))],
         ),
         "FRAD006_HYPOTHEQUES" => (
@@ -180,7 +182,7 @@ fn get_ead_pattern_and_types(eadid: &str) -> (Option<&'static str>, Vec<Registry
             Some(
                 r"(?P<callnum>.+?) ?- +(?P<author>.+?) ?\.?- +(?P<title>.+?) ?- +(?P<from>.+?)(-(?P<to>.+))?$",
             ),
-            vec![RegistryType::Legal(Cow::Borrowed("Engrossments"))],
+            vec![RegistryType::Legal(Cow::Borrowed("Enrolled deeds"))],
         ),
         "FRAD006_REPERTOIRE_NOTAIRES" => (
             Some(r"(?P<callnum>.+) +- +(?P<title>.+)"),
@@ -196,11 +198,11 @@ fn get_ead_pattern_and_types(eadid: &str) -> (Option<&'static str>, Vec<Registry
             Some(
                 r"(?P<callnum>C [\d ]+?) *- *(?P<title>.*)\. *- *(?P<from>.*?) *- *(?P<to>.*?) *$",
             ),
-            vec![RegistryType::Other(Cow::Borrowed("OldArchives"))],
+            vec![RegistryType::Legal(Cow::Borrowed("Enrolled deeds"))],
         ),
         "FRAD006_NI" => (
             Some(r"(?P<callnum>NI .+?) *- *(?P<title>.*)\. *- *(?P<from>.*?) *- *(?P<to>.*?) *$"),
-            vec![RegistryType::Other(Cow::Borrowed("OldArchives"))],
+            vec![RegistryType::Other(Cow::Borrowed("State archives"))],
         ),
         "FRAD006_ARMOIRIES" => (
             Some(r"(?P<callnum>.+) +- +(?P<title>.+)"),
@@ -208,27 +210,27 @@ fn get_ead_pattern_and_types(eadid: &str) -> (Option<&'static str>, Vec<Registry
         ),
         "FRAD006_OUVRAGES" => (
             Some(r"(?P<callnum>.+) +- +(?P<title>.+)"),
-            vec![RegistryType::Other(Cow::Borrowed("Book"))],
+            vec![RegistryType::Media(Cow::Borrowed("Book"))],
         ),
         "FRAD006_ANNUAIRES" => (
             Some(r"(?P<title>.+)"),
-            vec![RegistryType::Other(Cow::Borrowed("Directory"))],
+            vec![RegistryType::Media(Cow::Borrowed("Directory"))],
         ),
         "FRAD006_PRESSE" => (
             Some(r"(?P<title>.+) \(\d*-\d*\), .*? +- +(?P<from>(\d|\/)+)(-(?P<to>(\d|\/)+))?"),
-            vec![RegistryType::Other(Cow::Borrowed("Newspaper"))],
+            vec![RegistryType::Media(Cow::Borrowed("Newspaper"))],
         ),
         "FRAD006_DELIBERATIONS_CONSEIL_GENERAL" => (
             Some(r"(?P<callnum>.+) +- +(?P<title>.+) +- +(?P<from>.+?)(-(?P<to>.+))?$"),
-            vec![RegistryType::Other(Cow::Borrowed("Book"))],
+            vec![RegistryType::Media(Cow::Borrowed("Book"))],
         ),
         "FRAD006_11AV" => (
             Some(r"(?P<callnum>.+) +- +(?P<title>.+) +- +(?P<from>.+?)(-(?P<to>.+))?$"),
-            vec![RegistryType::Other(Cow::Borrowed("Audiovisual"))],
+            vec![RegistryType::Media(Cow::Borrowed("Audiovisual"))],
         ),
         "FRAD006_10FI" => (
             Some(r"(?P<callnum>.+) +- +(?P<title>.+) +- +\((?P<from>.+?)-(?P<to>.+)\)"),
-            vec![RegistryType::Other(Cow::Borrowed("Iconography"))],
+            vec![RegistryType::Media(Cow::Borrowed("Iconography"))],
         ),
         _ => (None, vec![]),
     }
