@@ -12,6 +12,7 @@ geneagrab-plugin-core = { path = "../../plugin_core", features = [
     "protocols-ligeo",
     "protocols-iiif",
 ] }
+dates = { path = "../../plugin_common/dates" }
 extism-pdk = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

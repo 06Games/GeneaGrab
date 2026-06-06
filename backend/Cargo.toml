@@ -1,3 +1,11 @@
 [workspace]
 resolver = "2"
-members = ["core", "migration", "plugin_core", "plugins/ad06", "plugins/geneanet", "tauri"]
+members = [
+    "core",
+    "migration",
+    "plugin_core",
+    "plugins/ad06",
+    "plugin_common/dates",
+    "plugins/geneanet",
+    "tauri",
+]
