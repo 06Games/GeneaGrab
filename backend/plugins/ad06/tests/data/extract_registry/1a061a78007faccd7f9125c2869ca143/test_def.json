@@ -13,14 +13,14 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 8,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "1a061a78007faccd7f9125c2869ca143",
     "title": "Cannes (The) Advertiser",
     "registry_types": [
       {
-        "category": "newspaper",
+        "category": "media",
         "label": "Newspaper"
       }
     ],

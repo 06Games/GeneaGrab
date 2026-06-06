@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 221,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "3236746",
@@ -23,11 +23,11 @@
     "author": "2e bureau de Nice 1914-1955 (autres communes)",
     "registry_types": [
       {
-        "category": "other",
+        "category": "legal",
         "label": "Catalogue"
       }
     ],
     "places": [],
-    "collection": ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des prénoms"]
+    "collection": ["Hypothèques - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des prénoms"]
   }
 }

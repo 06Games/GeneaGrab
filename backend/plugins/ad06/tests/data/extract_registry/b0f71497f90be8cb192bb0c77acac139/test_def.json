@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 1,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "b0f71497f90be8cb192bb0c77acac139",
@@ -23,12 +23,12 @@
     "registry_types": [
       {
         "category": "other",
-        "label": "Other"
+        "label": "Armorial"
       }
     ],
     "date_from": "1704-01-01",
     "date_to": "1704-01-01",
-    "places": [["Turin (Italie"]],
-    "collection": ["Armoiries dans les Alpes-Maritimes", "TURIN (ITALIE"]
+    "places": [["Turin (Italie)"]],
+    "collection": ["Armoiries dans les Alpes-Maritimes"]
   }
 }

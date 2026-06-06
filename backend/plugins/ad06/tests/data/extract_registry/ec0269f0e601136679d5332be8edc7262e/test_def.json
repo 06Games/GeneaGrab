@@ -13,14 +13,14 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 31,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "ec0269f0e601136679d5332be8edc7262e",
     "archive_reference": "5 Mi 74/1",
     "registry_types": [
       {
-        "category": "other",
+        "category": "vital",
         "label": "Communion"
       }
     ],

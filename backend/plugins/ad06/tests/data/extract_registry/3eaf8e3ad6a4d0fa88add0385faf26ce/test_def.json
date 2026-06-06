@@ -13,15 +13,15 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 80,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "3eaf8e3ad6a4d0fa88add0385faf26ce",
     "title": "Annuaire des Alpes-Maritimes de 1873.",
     "registry_types": [
       {
-        "category": "other",
-        "label": "Other"
+        "category": "media",
+        "label": "Directory"
       }
     ],
     "date_from": "1873",

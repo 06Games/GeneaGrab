@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 1,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "c2ca249edd8bc5100f8a389e12389285",
@@ -22,13 +22,16 @@
     "subtitle": "Plan de section, D1",
     "registry_types": [
       {
-        "category": "cadastre",
-        "label": "CadastralMap"
+        "category": "land",
+        "label": "Cadastral map"
       }
     ],
     "date_from": "1866",
     "date_to": "1866",
     "places": [["Berre-Les-Alpes", "Sena."]],
-    "collection": ["Cadastre. - Plans cadastraux", "BERRE-LES-ALPES", "SENA."]
+    "collection":         [
+          "Cadastre - Plans cadastraux",
+          "BERRE-LES-ALPES"
+        ]
   }
 }

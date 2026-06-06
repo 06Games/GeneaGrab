@@ -13,15 +13,15 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 352,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "2231f2886f84620708c0eceab9d6b9b7",
     "title": "Calendario generale pe' regii stati de 1830.",
     "registry_types": [
       {
-        "category": "other",
-        "label": "Other"
+        "category": "media",
+        "label": "Directory"
       }
     ],
     "date_from": "1830",

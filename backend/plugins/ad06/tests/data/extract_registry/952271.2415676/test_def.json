@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 259,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "952271.2415676",
@@ -21,8 +21,8 @@
     "title": "1641",
     "registry_types": [
       {
-        "category": "other",
-        "label": "Other"
+        "category": "legal",
+        "label": "Enrolled deeds"
       }
     ],
     "date_from": "1641",

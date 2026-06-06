@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 246,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "efe090d2498239ccfd227216e5211a09",
@@ -21,13 +21,13 @@
     "title": "Etat des sections A à M",
     "registry_types": [
       {
-        "category": "cadastre",
-        "label": "CadastralSectionStates"
+        "category": "land",
+        "label": "Parcel registry"
       }
     ],
     "date_from": "1875",
     "date_to": "1875",
     "places": [["Utelle"]],
-    "collection": ["Cadastre. - Etats de section", "UTELLE"]
+    "collection": ["Cadastre - Etats de section", "UTELLE"]
   }
 }

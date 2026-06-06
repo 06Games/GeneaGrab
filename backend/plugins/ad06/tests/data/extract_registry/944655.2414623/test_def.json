@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 360,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "944655.2414623",
@@ -21,8 +21,8 @@
     "title": "Lettres A-B",
     "registry_types": [
       {
-        "category": "other",
-        "label": "Other"
+        "category": "legal",
+        "label": "Enrolled deeds"
       }
     ],
     "date_from": "1610",

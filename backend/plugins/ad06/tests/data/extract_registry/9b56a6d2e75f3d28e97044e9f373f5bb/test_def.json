@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 37,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "9b56a6d2e75f3d28e97044e9f373f5bb",
@@ -27,6 +27,6 @@
     "date_from": "1891",
     "date_to": "1891",
     "places": [["Lantosque"]],
-    "collection": ["Recensement de la population", "LANTOSQUE"]
+    "collection": ["Recensement de la population", "Lantosque"]
   }
 }

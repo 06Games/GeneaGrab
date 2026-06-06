@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 139,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "cb9d2442564ee9b717d681ea3af12a03",
@@ -26,7 +26,7 @@
     ],
     "date_from": "1911",
     "date_to": "1911",
-    "places": [["Nice", "Canton Ouest (Début)"]],
-    "collection": ["Recensement de la population", "NICE", "CANTON OUEST (DÉBUT)"]
+    "places": [["Nice", "Canton Ouest (début)"]],
+    "collection": ["Recensement de la population", "Nice"]
   }
 }

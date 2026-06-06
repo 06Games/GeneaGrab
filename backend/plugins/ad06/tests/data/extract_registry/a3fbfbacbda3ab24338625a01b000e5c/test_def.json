@@ -13,14 +13,14 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 10,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "a3fbfbacbda3ab24338625a01b000e5c",
     "title": "Eclaireur (L')",
     "registry_types": [
       {
-        "category": "newspaper",
+        "category": "media",
         "label": "Newspaper"
       }
     ],

@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 86,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "eca462a76104f3e90edbdcaac70e14fec1",
@@ -21,7 +21,7 @@
     "registry_types": [
       {
         "category": "other",
-        "label": "Other"
+        "label": "Inventory"
       }
     ],
     "date_from": "1750",

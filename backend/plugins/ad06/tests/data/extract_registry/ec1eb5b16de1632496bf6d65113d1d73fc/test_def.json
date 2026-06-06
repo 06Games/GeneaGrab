@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 64,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "ec1eb5b16de1632496bf6d65113d1d73fc",
@@ -28,7 +28,7 @@
         "label": "Baptism"
       },
       {
-        "category": "other",
+        "category": "vital",
         "label": "Confirmation"
       }
     ],

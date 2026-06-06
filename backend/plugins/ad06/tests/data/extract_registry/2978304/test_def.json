@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 233,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "2978304",
@@ -23,13 +23,13 @@
     "author": "2e bureau de Nice 1914-1955 (autres communes)",
     "registry_types": [
       {
-        "category": "other",
-        "label": "Engrossments"
+        "category": "legal",
+        "label": "Enrolled deeds"
       }
     ],
     "date_from": "1932-05-24",
     "date_to": "1932-06-13",
     "places": [],
-    "collection": ["Hypothèques. - Actes translatifs", "2e bureau de Nice 1914-1955 (autres communes)"]
+    "collection": ["Hypothèques - Actes translatifs", "2e bureau de Nice 1914-1955 (autres communes)"]
   }
 }

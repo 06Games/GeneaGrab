@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 341,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "2fece3eabbcab939c1f84def0316487c",
@@ -22,13 +22,13 @@
     "subtitle": "folios 1 à 680",
     "registry_types": [
       {
-        "category": "cadastre",
-        "label": "CadastralMatrix"
+        "category": "land",
+        "label": "Cadastral roll"
       }
     ],
     "date_from": "1872",
     "date_to": "1913",
-    "places": [["Nice", "Nice-Est (Quartier Saint-Roch)"]],
-    "collection": ["Cadastre. - Matrices", "NICE", "NICE-EST (QUARTIER SAINT-ROCH)"]
+    "places": [["Nice", "Nice-Est (quartier Saint-Roch)"]],
+    "collection": ["Cadastre - Matrices", "NICE"]
   }
 }

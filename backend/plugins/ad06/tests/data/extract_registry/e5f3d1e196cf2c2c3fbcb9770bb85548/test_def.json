@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 1,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "e5f3d1e196cf2c2c3fbcb9770bb85548",
@@ -22,13 +22,13 @@
     "subtitle": "TA",
     "registry_types": [
       {
-        "category": "cadastre",
-        "label": "CadastralMap"
+        "category": "land",
+        "label": "Cadastral map"
       }
     ],
     "date_from": "1866",
     "date_to": "1866",
     "places": [["Berre-Les-Alpes", "Tableau D'Assemblage."]],
-    "collection": ["Cadastre. - Plans cadastraux", "BERRE-LES-ALPES", "TABLEAU D'ASSEMBLAGE."]
+    "collection": ["Cadastre - Plans cadastraux", "BERRE-LES-ALPES"]
   }
 }

@@ -166,15 +166,16 @@ pub fn registry_extraction_integration_test(
     )
     .expect("extract_registry_internal failed");
 
+    assert_eq!(
+        response.images.len(),
+        case.expected_image_count,
+        "parsed image count mismatch"
+    );
+
     let config = Config::new(CompareMode::Inclusive).consider_array_sorting(false);
     assert_json_matches!(
         serde_json::to_value(&response.registry).unwrap(),
         serde_json::to_value(&case.expected_registry).unwrap(),
         &config
-    );
-    assert_eq!(
-        response.images.len(),
-        case.expected_image_count,
-        "parsed image count mismatch"
     );
 }

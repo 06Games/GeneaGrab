@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 486,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "765909.2436493",
@@ -21,7 +21,7 @@
     "title": "Protocole avec répertoire du notaire Jean Auda, à Lantosque",
     "registry_types": [
       {
-        "category": "notarial",
+        "category": "legal",
         "label": "Notarial"
       }
     ],

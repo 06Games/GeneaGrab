@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 139,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "674248.2453940",
@@ -22,13 +22,13 @@
     "author": "MALAUSSENA, Pierre",
     "registry_types": [
       {
-        "category": "notarial",
+        "category": "legal",
         "label": "Notarial"
       }
     ],
     "date_from": "1673-11-01",
     "date_to": "1703-06-30",
     "places": [["Lantosque"]],
-    "collection": ["Instrument de recherche des versements d'archives notariales (3 E)", "Versement de l'étude Graillet, à Roquebillière", "LANTOSQUE"]
+    "collection": ["Instrument de recherche des versements d'archives notariales (3 E)", "Versement de l'étude Graillet, à Roquebillière"]
   }
 }

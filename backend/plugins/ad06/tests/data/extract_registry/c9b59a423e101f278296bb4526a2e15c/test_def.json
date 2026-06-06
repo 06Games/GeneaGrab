@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 253,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "c9b59a423e101f278296bb4526a2e15c",
@@ -22,13 +22,13 @@
     "subtitle": "folios 1489 à 1988",
     "registry_types": [
       {
-        "category": "cadastre",
-        "label": "CadastralMatrix"
+        "category": "land",
+        "label": "Cadastral roll"
       }
     ],
     "date_from": "1913",
     "date_to": "1969",
     "places": [["Utelle"]],
-    "collection": ["Cadastre. - Matrices", "UTELLE"]
+    "collection": ["Cadastre - Matrices", "UTELLE"]
   }
 }
