@@ -18,7 +18,7 @@ fn to_title_case(s: &str) -> String {
     let mut capitalize_next = true;
 
     for c in s.chars() {
-        if c.is_whitespace() || c == '-' || c == '\'' {
+        if c.is_whitespace() || c == '-' || c == '\'' || c == '(' {
             result.push(c);
             capitalize_next = true;
         } else if capitalize_next {
