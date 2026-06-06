@@ -5,7 +5,7 @@ use geneagrab_plugin_core::{
         fetchers::{Fetcher, HostFetcher},
         iiif::{Canvas, Manifest, Metadata},
         ligeo::LigeoClasseur,
-        utils::validate_regex_match,
+        utils::{to_title_case, validate_regex_match},
     },
 };
 use regex::Regex;
@@ -13,23 +13,6 @@ use scraper::{Html, Selector};
 use std::fmt::Write;
 use std::{borrow::Cow, collections::HashSet};
 
-fn to_title_case(s: &str) -> String {
-    let mut result = String::with_capacity(s.len());
-    let mut capitalize_next = true;
-
-    for c in s.chars() {
-        if c.is_whitespace() || c == '-' || c == '\'' || c == '(' {
-            result.push(c);
-            capitalize_next = true;
-        } else if capitalize_next {
-            result.extend(c.to_uppercase());
-            capitalize_next = false;
-        } else {
-            result.extend(c.to_lowercase());
-        }
-    }
-    result
-}
 
 fn parse_types(type_str: &str) -> HashSet<RegistryType> {
     let mut types = HashSet::new();
