@@ -1,6 +1,6 @@
 use crate::com_structs::{ExtractRequest, ExtractResponse, IdentifyResponse, PluginError};
 use crate::data::http::{FetchMethod, Request};
-use crate::protocols::fetchers::{Fetcher, FlareSolverrFetcher, HostFetcher};
+use crate::protocols::fetchers::{Fetcher, FlareSolverrFetcher};
 use jsonc_parser::ParseOptions;
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderName, HeaderValue};

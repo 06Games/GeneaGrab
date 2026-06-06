@@ -104,8 +104,8 @@ fn parse_types(type_str: &str) -> HashSet<RegistryType> {
 
 #[derive(Default)]
 struct ParsedMetadata {
-    location_primary: Option<String>,
-    location_secondary: Option<String>,
+    location_primary: Option<Vec<String>>,
+    location_secondary: Option<Vec<String>>,
     title: Option<String>,
     subtitle: Option<String>,
     author: Option<String>,
@@ -122,10 +122,20 @@ fn parse_manifest_metadata(metadata: &[Metadata]) -> ParsedMetadata {
         let value = html_regex.replace_all(&meta.to_string(), "").to_string();
         match meta.label.as_str() {
             "Commune" | "Commune d’exercice du notaire" | "Lieu" | "Lieu d'édition" => {
-                parsed.location_primary = Some(to_title_case(&value.to_lowercase()));
+                parsed.location_primary = Some(
+                    value
+                        .split(", ")
+                        .map(|s| to_title_case(&s.to_lowercase()))
+                        .collect(),
+                );
             }
             "Paroisse" | "Complément de lieu" => {
-                parsed.location_secondary = Some(to_title_case(&value.to_lowercase()));
+                parsed.location_secondary = Some(
+                    value
+                        .split(", ")
+                        .map(|s| to_title_case(&s.to_lowercase()))
+                        .collect(),
+                );
             }
             "Date" | "Date de l'acte" | "Année (s)" => {
                 let parts: Vec<&str> = value.split('-').collect();
@@ -258,10 +268,12 @@ fn enrich_from_classeur_and_html(
             if let Ok(re) = Regex::new(pat) {
                 if let Some(caps) = re.captures(label) {
                     parsed.location_primary = parsed.location_primary.take().or_else(|| {
-                        validate_regex_match(caps.name("city")).map(|s| to_title_case(&s))
+                        validate_regex_match(caps.name("city"))
+                            .map(|s| s.split(", ").map(to_title_case).collect())
                     });
                     parsed.location_secondary = parsed.location_secondary.take().or_else(|| {
-                        validate_regex_match(caps.name("district")).map(|s| to_title_case(&s))
+                        validate_regex_match(caps.name("district"))
+                            .map(|s| s.split(", ").map(to_title_case).collect())
                     });
 
                     if let Some(t) = caps.name("type") {
@@ -313,7 +325,7 @@ fn enrich_from_classeur_and_html(
             }
 
             if eadid == "FRAD006_ETAT_CIVIL" && !collection.is_empty() {
-                parsed.location_primary = collection.last().map(|s| to_title_case(s));
+                parsed.location_primary = collection.last().map(|s| vec![to_title_case(s)]);
             } else if eadid == "FRAD006_3E" {
                 // Title override for Notarial matching from-to
                 if let (Some(t), Some(f), Some(to_d)) =
@@ -406,16 +418,31 @@ pub fn extract_registry_internal(
         builder.notes(Some(parsed.notes_str));
     }
 
-    // Build places purely for geographical location sets
-    let mut place = Vec::new();
-    if let Some(loc) = parsed.location_primary {
-        place.push(loc);
-    }
-    if let Some(dist) = parsed.location_secondary {
-        place.push(dist);
-    }
-    if !place.is_empty() {
-        builder.places(HashSet::from([place]));
+    let places_opt: Option<HashSet<Vec<String>>> =
+        match (parsed.location_primary, parsed.location_secondary) {
+            (Some(primary), Some(secondary)) => {
+                // If there's secondary places, consider the primary as one single place (shouldn't happen anyway)
+                let city = primary.join(", ");
+                Some(
+                    secondary
+                        .into_iter()
+                        .map(|s| vec![city.clone(), s])
+                        .collect(),
+                )
+            }
+            (None, Some(secondary)) => {
+                // Else, just use secondary as primary
+                Some(secondary.into_iter().map(|s| vec![s]).collect())
+            }
+            (Some(primary), None) => {
+                // If there's only primary places, push them without geo context
+                Some(primary.into_iter().map(|s| vec![s]).collect())
+            }
+            (None, None) => None,
+        };
+
+    if let Some(places) = places_opt.filter(|p| !p.is_empty()) {
+        builder.places(places);
     }
 
     let registry = builder
