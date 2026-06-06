@@ -4,7 +4,7 @@ use geneagrab_plugin_core::{
         TileResponse,
     },
     protocols::{
-        fetchers::{Fetcher, FlareSolverrFetcher},
+        fetchers::{CachedFlareSolverrFetcher, Fetcher},
         zoomify::Zoomify,
     },
 };
@@ -42,7 +42,7 @@ pub(crate) fn extract_image(
     req: &ExtractImageRequest,
 ) -> Result<ExtractImageResponse, PluginError> {
     // Image API is now under Cloudflare protection
-    extract_image_internal(req, &FlareSolverrFetcher::from_config()?)
+    extract_image_internal(req, &CachedFlareSolverrFetcher::default())
 }
 
 fn fetch_tile_internal(
@@ -61,7 +61,7 @@ fn fetch_tile_internal(
 
 pub(crate) fn fetch_tile(req: &TileRequest) -> Result<TileResponse, PluginError> {
     // Tile API is now under Cloudflare protection
-    fetch_tile_internal(req, &FlareSolverrFetcher::from_config()?)
+    fetch_tile_internal(req, &CachedFlareSolverrFetcher::default())
 }
 
 #[allow(clippy::unnecessary_wraps, reason = "WIP")]

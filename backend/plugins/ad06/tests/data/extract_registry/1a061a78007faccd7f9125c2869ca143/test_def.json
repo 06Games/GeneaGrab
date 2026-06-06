@@ -6,11 +6,11 @@
   "mocks": [
     {
       "url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/manifest",
-      "response_file": "1a061a78007faccd7f9125c2869ca143_manifest.json"
+      "response_file": "manifest.json"
     },
     {
       "url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/canvas/0/1",
-      "response_file": "1a061a78007faccd7f9125c2869ca143_canvas.html"
+      "response_file": "canvas.html"
     }
   ],
   "expected_image_count": 5,
@@ -27,10 +27,6 @@
     "date_from": "1891-11-06",
     "date_to": "1891-11-06",
     "places": [],
-    "collection": [
-      "Presse ancienne numérisée",
-      "Cannes (The) Advertiser (1891-1891)",
-      "Année 1891"
-    ]
+    "collection": ["Presse ancienne numérisée", "Cannes (The) Advertiser (1891-1891)", "Année 1891"]
   }
 }
