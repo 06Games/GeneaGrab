@@ -13,8 +13,8 @@ use geneagrab_plugin_core::{
 };
 use regex::Regex;
 
-mod extract;
-mod image;
+pub mod extract;
+pub mod image;
 
 const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
     id: Cow::Borrowed("geneanet"),

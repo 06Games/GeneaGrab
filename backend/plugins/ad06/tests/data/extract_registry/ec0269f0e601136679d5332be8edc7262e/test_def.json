@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e",
+  "registry_id": "ec0269f0e601136679d5332be8edc7262e",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/ec0269f0e601136679d5332be8edc7262e/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "ec0269f0e601136679d5332be8edc7262e",
+    "archive_reference": "5 Mi 74/1",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Communion"
+      }
+    ],
+    "date_from": "1880",
+    "date_to": "1929",
+    "places": [["Isola"]],
+    "collection": ["Etat civil (parcours de recherche)", "ISOLA"]
+  }
+}

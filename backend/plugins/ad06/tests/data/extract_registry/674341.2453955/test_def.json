@@ -1,0 +1,38 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/674341.2453955/dao/0/50",
+  "registry_id": "674341.2453955",
+  "image_number": 50,
+  "ark_url": "https://archives06.fr/ark:/79346/674341.2453955",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/674341.2453955/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/674341.2453955/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "674341.2453955",
+    "archive_reference": "3 E 19 83",
+    "title": "Protocoles du notaire Joseph Buffonio, à Lantosque",
+    "registry_types": [
+      {
+        "category": "notarial",
+        "label": "Notarial"
+      }
+    ],
+    "date_from": "1744-11-15",
+    "date_to": "1760-03-14",
+    "places": [["Lantosque"]],
+    "collection": [
+      "Instrument de recherche des versements d'archives notariales (3 E)",
+      "Versement de l'étude Graillet, à Roquebillière",
+      "Protocoles du notaire Joseph Buffonio, à Lantosque",
+      "LANTOSQUE"
+    ]
+  }
+}

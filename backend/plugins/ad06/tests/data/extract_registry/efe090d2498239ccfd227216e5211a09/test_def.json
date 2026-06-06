@@ -1,0 +1,33 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/daogrp/0/30/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+  "registry_id": "efe090d2498239ccfd227216e5211a09",
+  "image_number": 30,
+  "ark_url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/efe090d2498239ccfd227216e5211a09/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "efe090d2498239ccfd227216e5211a09",
+    "archive_reference": "3 P 1503",
+    "title": "Etat des sections A à M",
+    "registry_types": [
+      {
+        "category": "cadastre",
+        "label": "CadastralSectionStates"
+      }
+    ],
+    "date_from": "1875",
+    "date_to": "1875",
+    "places": [["Utelle"]],
+    "collection": ["Cadastre. - Etats de section", "UTELLE"]
+  }
+}

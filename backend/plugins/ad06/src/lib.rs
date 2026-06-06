@@ -12,8 +12,8 @@ use geneagrab_plugin_core::{
 use regex::Regex;
 use std::{borrow::Cow, sync::LazyLock};
 
-mod extract;
-mod image;
+pub mod extract;
+pub mod image;
 
 const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
     id: Cow::Borrowed("ad06"),

@@ -1,0 +1,36 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/dao/0",
+  "registry_id": "1a061a78007faccd7f9125c2869ca143",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/manifest",
+      "response_file": "1a061a78007faccd7f9125c2869ca143_manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/1a061a78007faccd7f9125c2869ca143/canvas/0/1",
+      "response_file": "1a061a78007faccd7f9125c2869ca143_canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "1a061a78007faccd7f9125c2869ca143",
+    "title": "Cannes (The) Advertiser",
+    "registry_types": [
+      {
+        "category": "newspaper",
+        "label": "Newspaper"
+      }
+    ],
+    "date_from": "1891-11-06",
+    "date_to": "1891-11-06",
+    "places": [],
+    "collection": [
+      "Presse ancienne numérisée",
+      "Cannes (The) Advertiser (1891-1891)",
+      "Année 1891"
+    ]
+  }
+}

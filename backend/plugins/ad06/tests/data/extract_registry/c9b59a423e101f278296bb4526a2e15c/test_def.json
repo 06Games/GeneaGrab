@@ -1,0 +1,34 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/daogrp/0/158/layout:table/idsearch:RECH_f20a5b0b42b3539b111df4c0dc20a868",
+  "registry_id": "c9b59a423e101f278296bb4526a2e15c",
+  "image_number": 158,
+  "ark_url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/c9b59a423e101f278296bb4526a2e15c/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "c9b59a423e101f278296bb4526a2e15c",
+    "archive_reference": "3 P 1511",
+    "title": "Matrice cadastrale des propriétés non bâties",
+    "subtitle": "folios 1489 à 1988",
+    "registry_types": [
+      {
+        "category": "cadastre",
+        "label": "CadastralMatrix"
+      }
+    ],
+    "date_from": "1913",
+    "date_to": "1969",
+    "places": [["Utelle"]],
+    "collection": ["Cadastre. - Matrices", "UTELLE"]
+  }
+}

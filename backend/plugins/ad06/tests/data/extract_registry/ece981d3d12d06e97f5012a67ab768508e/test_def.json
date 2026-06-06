@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/daogrp/0/3",
+  "registry_id": "ece981d3d12d06e97f5012a67ab768508e",
+  "image_number": 3,
+  "ark_url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/ece981d3d12d06e97f5012a67ab768508e/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "ece981d3d12d06e97f5012a67ab768508e",
+    "archive_reference": "5 Mi 75/1",
+    "registry_types": [
+      {
+        "category": "mortality",
+        "label": "Burial"
+      }
+    ],
+    "date_from": "1781",
+    "date_to": "1784",
+    "places": [["Lantosque"]],
+    "collection": ["Etat civil (parcours de recherche)", "LANTOSQUE"]
+  }
+}

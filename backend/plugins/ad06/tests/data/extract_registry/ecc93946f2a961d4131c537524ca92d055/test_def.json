@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055",
+  "registry_id": "ecc93946f2a961d4131c537524ca92d055",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/ecc93946f2a961d4131c537524ca92d055/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "ecc93946f2a961d4131c537524ca92d055",
+    "archive_reference": "2 E 985",
+    "registry_types": [
+      {
+        "category": "vital",
+        "label": "unionTable"
+      }
+    ],
+    "date_from": "1934",
+    "date_to": "1934",
+    "places": [["Antibes"]],
+    "collection": ["Etat civil (parcours de recherche)", "ANTIBES"]
+  }
+}

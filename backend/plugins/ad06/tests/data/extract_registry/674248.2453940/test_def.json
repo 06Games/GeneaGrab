@@ -1,0 +1,34 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/674248.2453940/dao/0",
+  "registry_id": "674248.2453940",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/674248.2453940",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/674248.2453940/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/674248.2453940/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "674248.2453940",
+    "archive_reference": "3 E 19 70",
+    "title": "Protocole du notaire Pierre Malaussena, à Lantosque",
+    "author": "MALAUSSENA, Pierre",
+    "registry_types": [
+      {
+        "category": "notarial",
+        "label": "Notarial"
+      }
+    ],
+    "date_from": "1673-11-01",
+    "date_to": "1703-06-30",
+    "places": [["Lantosque"]],
+    "collection": ["Instrument de recherche des versements d'archives notariales (3 E)", "Versement de l'étude Graillet, à Roquebillière", "LANTOSQUE"]
+  }
+}

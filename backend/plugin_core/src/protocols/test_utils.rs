@@ -3,7 +3,7 @@ use crate::data::http::Request;
 use crate::protocols::fetchers::Fetcher;
 use jsonc_parser::ParseOptions;
 use serde::Deserialize;
-use serde_json_assert::{assert_json_include, assert_json_matches, CompareMode, Config};
+use serde_json_assert::{assert_json_matches, CompareMode, Config};
 use std::fs;
 use std::panic;
 use std::path::PathBuf;
@@ -54,19 +54,19 @@ impl Fetcher for MockFetcher {
     /// # Panics
     /// If the wanted url haven't been mocked
     fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, PluginError> {
-        let matching_mock = self.mocks.iter().find(|mock| mock.url == req.url);
+        let mock = self
+            .mocks
+            .iter()
+            .find(|mock| mock.url == req.url)
+            .unwrap_or_else(|| panic!("No mock response found for URL: {}", req.url));
 
-        if let Some(mock) = matching_mock {
-            let file_path = self.base_dir.join(&mock.response_file);
-            fs::read(&file_path).map_err(|e| {
-                panic!(
-                    "Mock failed to read file '{}' for URL {}: {}",
-                    mock.response_file, req.url, e
-                )
-            })
-        } else {
-            panic!("No mock response found for URL: {}", req.url);
-        }
+        let file_path = self.base_dir.join(&mock.response_file);
+        fs::read(&file_path).map_err(|e| {
+            panic!(
+                "Mock failed to read file '{}' for URL {}: {}",
+                mock.response_file, req.url, e
+            )
+        })
     }
 }
 
@@ -81,70 +81,42 @@ pub struct ExtractTestCase {
     expected_registry: serde_json::Value,
 }
 
-/// Run integration tests for the registry extraction
+/// Run a test case for the registry extraction
 ///
 /// # Panics
 /// If the result isn't what was expected
 pub fn registry_extraction_integration_test(
-    test_cases: TestCases<ExtractTestCase>,
-    extract_fn: impl Fn(&ExtractRequest, &MockFetcher) -> Result<ExtractResponse, PluginError>,
+    case: ExtractTestCase,
+    base_dir: PathBuf,
+    extract_fn: &impl Fn(&ExtractRequest, &MockFetcher) -> Result<ExtractResponse, PluginError>,
 ) {
-    let mut failures = Vec::new();
+    let req = ExtractRequest {
+        identified: IdentifyResponse {
+            registry_id: case.registry_id.clone(),
+            image_number: case.image_number,
+            ark_url: case.ark_url.clone(),
+        },
+        url: case.request_url.clone(),
+    };
 
-    for case in test_cases.cases {
-        let description = format!(
-            "Registry ID: {}, Image Number: {:?}",
-            case.registry_id, case.image_number
-        );
+    let response = extract_fn(
+        &req,
+        &MockFetcher {
+            mocks: case.mocks,
+            base_dir,
+        },
+    )
+    .expect("extract_registry_internal failed");
 
-        let result = panic::catch_unwind(panic::AssertUnwindSafe(|| {
-            let req = ExtractRequest {
-                identified: IdentifyResponse {
-                    registry_id: case.registry_id.clone(),
-                    image_number: case.image_number,
-                    ark_url: case.ark_url.clone(),
-                },
-                url: case.request_url.clone(),
-            };
-
-            let response = extract_fn(
-                &req,
-                &MockFetcher {
-                    mocks: case.mocks,
-                    base_dir: test_cases.dir.clone(),
-                },
-            )
-            .expect("extract_registry_internal failed");
-
-            let config = Config::new(CompareMode::Inclusive).consider_array_sorting(false);
-            assert_json_matches!(
-                serde_json::to_value(&response.registry).unwrap(),
-                serde_json::to_value(&case.expected_registry).unwrap(),
-                &config
-            );
-            assert_eq!(
-                response.images.len(),
-                case.expected_image_count,
-                "parsed image count mismatch"
-            );
-        }));
-
-        if let Err(err) = result {
-            let msg = if let Some(s) = err.downcast_ref::<&str>() {
-                s.to_string()
-            } else if let Some(s) = err.downcast_ref::<String>() {
-                s.clone()
-            } else {
-                "Unknown panic".to_string()
-            };
-            failures.push(format!("[{description}] {msg}"));
-        }
-    }
-
-    assert!(
-        failures.is_empty(),
-        "{} test cases failed:\n\n{}",
-        failures.len(),
-        failures.join("\n\n")
+    let config = Config::new(CompareMode::Inclusive).consider_array_sorting(false);
+    assert_json_matches!(
+        serde_json::to_value(&response.registry).unwrap(),
+        serde_json::to_value(&case.expected_registry).unwrap(),
+        &config
+    );
+    assert_eq!(
+        response.images.len(),
+        case.expected_image_count,
+        "parsed image count mismatch"
     );
 }

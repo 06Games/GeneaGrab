@@ -1,0 +1,33 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/3236746/dao/0/200",
+  "registry_id": "3236746",
+  "image_number": 200,
+  "ark_url": "https://archives06.fr/ark:/79346/3236746",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/3236746/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/3236746/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "3236746",
+    "archive_reference": "1262 W 21",
+    "title": "Table des prénoms",
+    "subtitle": "Volume 016",
+    "author": "2e bureau de Nice 1914-1955 (autres communes)",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Catalogue"
+      }
+    ],
+    "places": [],
+    "collection": ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des prénoms"]
+  }
+}

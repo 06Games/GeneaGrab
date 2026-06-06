@@ -1,0 +1,36 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/daogrp/0/layout:table/idsearch:RECH_2616c589cede9aef5f50348ea29ef354",
+  "registry_id": "ecebe99656ed10bbc4f90577557b5db67c",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/ecebe99656ed10bbc4f90577557b5db67c/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 12,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "ecebe99656ed10bbc4f90577557b5db67c",
+    "archive_reference": "5 Mi 89/80",
+    "registry_types": [
+      {
+        "category": "vital",
+        "label": "Baptism"
+      },
+      {
+        "category": "vital",
+        "label": "Baptism table"
+      }
+    ],
+    "date_from": "1823",
+    "date_to": "1824",
+    "places": [["Nice", "Notre-Dame Du Port"]],
+    "collection": ["Etat civil (parcours de recherche)", "NICE"]
+  }
+}

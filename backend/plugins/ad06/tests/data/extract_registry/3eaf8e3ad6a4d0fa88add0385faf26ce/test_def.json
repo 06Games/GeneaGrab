@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/daogrp/0/425",
+  "registry_id": "3eaf8e3ad6a4d0fa88add0385faf26ce",
+  "image_number": 425,
+  "ark_url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/3eaf8e3ad6a4d0fa88add0385faf26ce/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "3eaf8e3ad6a4d0fa88add0385faf26ce",
+    "title": "Annuaire des Alpes-Maritimes de 1873.",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Other"
+      }
+    ],
+    "date_from": "1873",
+    "date_to": "1873",
+    "places": [],
+    "collection": ["Annuaires", "Annuaire des Alpes-Maritimes"]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/dao/0",
+  "registry_id": "c2ca249edd8bc5100f8a389e12389285",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/c2ca249edd8bc5100f8a389e12389285/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "c2ca249edd8bc5100f8a389e12389285",
+    "archive_reference": "25 Fi 15/1/D1/COM",
+    "title": "Plan parcellaire : section D dite de Sena, 1ère feuille.",
+    "subtitle": "Plan de section, D1",
+    "registry_types": [
+      {
+        "category": "cadastre",
+        "label": "CadastralMap"
+      }
+    ],
+    "date_from": "1866",
+    "date_to": "1866",
+    "places": [["Berre-Les-Alpes", "Sena."]],
+    "collection": ["Cadastre. - Plans cadastraux", "BERRE-LES-ALPES", "SENA."]
+  }
+}

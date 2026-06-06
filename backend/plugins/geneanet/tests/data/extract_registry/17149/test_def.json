@@ -1,0 +1,30 @@
+{
+  "request_url": "https://www.geneanet.org/registres/view/17149/3",
+  "registry_id": "17149",
+  "image_number": 3,
+  "mocks": [
+    {
+      "url": "https://www.geneanet.org/registres/view/17149",
+      "response_file": "page.html"
+    },
+    {
+      "url": "https://www.geneanet.org/registres/api/images/17149?min_page=1&max_page=999999",
+      "response_file": "images.json"
+    }
+  ],
+  "expected_image_count": 19,
+  "expected_registry": {
+    "source_id": "geneanet",
+    "registry_id": "17149",
+    "registry_types": [
+      {
+        "category": "mortality",
+        "label": "Burial"
+      }
+    ],
+    "ark_url": "https://www.geneanet.org/registres/view/17149",
+    "date_from": "1588",
+    "date_to": "1603",
+    "places": [["France", "Alpes-Maritimes", "Utelle"]]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/dao/0/5?id=https%3A%2F%2Farchives06.fr%2Fark%3A%2F79346%2Fa3fbfbacbda3ab24338625a01b000e5c%2Fcanvas%2F0%2F5",
+  "registry_id": "a3fbfbacbda3ab24338625a01b000e5c",
+  "image_number": 5,
+  "ark_url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/a3fbfbacbda3ab24338625a01b000e5c/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "a3fbfbacbda3ab24338625a01b000e5c",
+    "title": "Eclaireur (L')",
+    "registry_types": [
+      {
+        "category": "newspaper",
+        "label": "Newspaper"
+      }
+    ],
+    "date_from": "1937-12-30",
+    "date_to": "1937-12-30",
+    "places": [],
+    "collection": ["Presse ancienne numérisée", "Eclaireur (L') (1883-1945)", "Année 1937"]
+  }
+}

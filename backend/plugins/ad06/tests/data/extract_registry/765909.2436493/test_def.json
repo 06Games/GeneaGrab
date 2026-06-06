@@ -1,0 +1,38 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/765909.2436493",
+  "registry_id": "765909.2436493",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/765909.2436493",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/765909.2436493/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/765909.2436493/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "765909.2436493",
+    "archive_reference": "3 E 113 2",
+    "title": "Protocole avec répertoire du notaire Jean Auda, à Lantosque",
+    "registry_types": [
+      {
+        "category": "notarial",
+        "label": "Notarial"
+      }
+    ],
+    "date_from": "1610-09-01",
+    "date_to": "1621-12-20",
+    "places": [["Lantosque"]],
+    "collection": [
+      "Instrument de recherche des versements d'archives notariales (3 E)",
+      "Répertoire du versement d'archives notariales concernant les territoires d'Aiglun, Ascros, Aspremont, Gilette, Lantosque, Malaussène, Rosquestéron, Sigale et Toudon, de 1580 à 1822",
+      "Protocole avec répertoire du notaire Jean Auda, à Lantosque",
+      "LANTOSQUE"
+    ]
+  }
+}

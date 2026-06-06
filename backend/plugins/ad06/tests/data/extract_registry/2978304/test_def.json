@@ -1,0 +1,35 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/2978304/dao/0/5",
+  "registry_id": "2978304",
+  "image_number": 5,
+  "ark_url": "https://archives06.fr/ark:/79346/2978304",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/2978304/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/2978304/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "2978304",
+    "archive_reference": "402 Q 6/400",
+    "title": "Actes translatifs de propriétés d'immeubles, volume 298, 24 mai-13 juin 1932",
+    "subtitle": "Volume 298 (24 mai-13 juin 1932)",
+    "author": "2e bureau de Nice 1914-1955 (autres communes)",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Engrossments"
+      }
+    ],
+    "date_from": "1932-05-24",
+    "date_to": "1932-06-13",
+    "places": [],
+    "collection": ["Hypothèques. - Actes translatifs", "2e bureau de Nice 1914-1955 (autres communes)"]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/649576.2781893/dao/1",
+  "registry_id": "649576.2781893",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/649576.2781893",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/649576.2781893/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/649576.2781893/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "649576.2781893",
+    "archive_reference": "4 Mi 18/1",
+    "title": "THEATRUM STATUUM REGIAE CELSITUDINIS SABAUDIAE DUCIS, PEDEMONTII PRINCIPIS CYPRI REGIS. PARS PRIMA EXHIBENS PEDEMONTIUM, E IN EO AUGUSTAM TAURINORUM E LOCA VICINIORA. TOME 1 ET 2",
+    "registry_types": [
+      {
+        "category": "book",
+        "label": "Book"
+      }
+    ],
+    "date_from": "1682",
+    "date_to": "1682",
+    "places": [],
+    "collection": ["Ouvrages", "Sous série 4 Mi. - Microformes de documentation"]
+  }
+}

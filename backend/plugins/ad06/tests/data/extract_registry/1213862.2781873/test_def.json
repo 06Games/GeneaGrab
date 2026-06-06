@@ -1,0 +1,33 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/1213862.2781873/dao/1/12",
+  "registry_id": "1213862.2781873",
+  "image_number": 12,
+  "ark_url": "https://archives06.fr/ark:/79346/1213862.2781873",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/1213862.2781873/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/1213862.2781873/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "1213862.2781873",
+    "archive_reference": "1 Num 48",
+    "title": "Album du Carnaval 1937. Album illustré des Chars, Cavalcades, Groupes, Isolés de S. M. Carnaval de Nice 1937",
+    "registry_types": [
+      {
+        "category": "book",
+        "label": "Book"
+      }
+    ],
+    "date_from": "1937",
+    "date_to": "1937",
+    "places": [],
+    "collection": ["Ouvrages", "Sous-série 1 Num. - Reproductions de complément"]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/daogrp/0/35",
+  "registry_id": "ecbbce420b017f540479f25c97ff2c266a",
+  "image_number": 35,
+  "ark_url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/ecbbce420b017f540479f25c97ff2c266a/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 71,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "ecbbce420b017f540479f25c97ff2c266a",
+    "archive_reference": "5 Mi 89/26",
+    "registry_types": [
+      {
+        "category": "mortality",
+        "label": "Burial"
+      }
+    ],
+    "date_from": "1840",
+    "date_to": "1870",
+    "places": [["Nice", "Sainte-Hélène"]],
+    "collection": ["Etat civil (parcours de recherche)", "NICE"]
+  }
+}

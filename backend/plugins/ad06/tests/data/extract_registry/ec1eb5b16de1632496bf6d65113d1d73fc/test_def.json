@@ -1,0 +1,40 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc",
+  "registry_id": "ec1eb5b16de1632496bf6d65113d1d73fc",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/ec1eb5b16de1632496bf6d65113d1d73fc/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "ec1eb5b16de1632496bf6d65113d1d73fc",
+    "archive_reference": "5 Mi 84/3",
+    "registry_types": [
+      {
+        "category": "vital",
+        "label": "Birth"
+      },
+      {
+        "category": "vital",
+        "label": "Baptism"
+      },
+      {
+        "category": "other",
+        "label": "Confirmation"
+      }
+    ],
+    "date_from": "1577",
+    "date_to": "1607",
+    "places": [["Menton"]],
+    "collection": ["Etat civil (parcours de recherche)", "MENTON"]
+  }
+}

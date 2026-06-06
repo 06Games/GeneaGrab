@@ -120,7 +120,6 @@ fn parse_manifest_metadata(metadata: &[Metadata]) -> ParsedMetadata {
     let html_regex = Regex::new(r"<[^>]*>").unwrap();
     for meta in metadata {
         let value = html_regex.replace_all(&meta.to_string(), "").to_string();
-        let deunicoded_value = deunicode::deunicode(&value);
         match meta.label.as_str() {
             "Commune" | "Commune d’exercice du notaire" | "Lieu" | "Lieu d'édition" => {
                 parsed.location_primary = Some(to_title_case(&value.to_lowercase()));
@@ -354,7 +353,7 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
         .collect()
 }
 
-fn extract_registry_internal(
+pub fn extract_registry_internal(
     req: &ExtractRequest,
     fetcher: &impl Fetcher,
 ) -> Result<ExtractResponse, PluginError> {
@@ -428,20 +427,4 @@ fn extract_registry_internal(
 
 pub(crate) fn extract_registry(req: &ExtractRequest) -> Result<ExtractResponse, PluginError> {
     extract_registry_internal(req, &HostFetcher {})
-}
-
-#[cfg(test)]
-mod tests {
-    use geneagrab_plugin_core::protocols::test_utils::{
-        load_test_cases, registry_extraction_integration_test, ExtractTestCase, TestCases,
-    };
-
-    use super::*;
-
-    #[test]
-    fn test_extract_registry_integration() {
-        let test_cases: TestCases<ExtractTestCase> =
-            load_test_cases(env!("CARGO_MANIFEST_DIR"), "extract_registry");
-        registry_extraction_integration_test(test_cases, extract_registry_internal);
-    }
 }

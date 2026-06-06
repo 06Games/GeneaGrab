@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/daogrp/0/layout:table/idsearch:RECH_c99248cfe88969cc390bdb768dc1de70",
+  "registry_id": "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/ecb5e6f03f874d7e8122ebe9ee9b0a9d1d/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 6,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "ecb5e6f03f874d7e8122ebe9ee9b0a9d1d",
+    "archive_reference": "1 E 3",
+    "registry_types": [
+      {
+        "category": "union",
+        "label": "Divorce"
+      }
+    ],
+    "date_from": "1803",
+    "date_to": "1803",
+    "places": [["Cannes"]],
+    "collection": ["Etat civil (parcours de recherche)", "CANNES"]
+  }
+}

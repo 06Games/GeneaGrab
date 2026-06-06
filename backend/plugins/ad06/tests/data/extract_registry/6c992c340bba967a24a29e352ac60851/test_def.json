@@ -1,0 +1,33 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/daogrp/0/layout:table/idsearch:RECH_61e8e38e23201aa701187c8e647f7c96",
+  "registry_id": "6c992c340bba967a24a29e352ac60851",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/6c992c340bba967a24a29e352ac60851/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "6c992c340bba967a24a29e352ac60851",
+    "archive_reference": "1 N 3",
+    "title": "Délibérations du conseil général (1863)",
+    "registry_types": [
+      {
+        "category": "book",
+        "label": "Book"
+      }
+    ],
+    "date_from": "1863",
+    "date_to": "1863",
+    "places": [],
+    "collection": ["Délibérations du conseil général"]
+  }
+}

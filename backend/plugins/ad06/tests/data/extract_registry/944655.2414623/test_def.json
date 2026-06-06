@@ -1,0 +1,39 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/944655.2414623",
+  "registry_id": "944655.2414623",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/944655.2414623",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/944655.2414623/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/944655.2414623/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "944655.2414623",
+    "archive_reference": "C 104",
+    "title": "Lettres A-B",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Other"
+      }
+    ],
+    "date_from": "1610",
+    "date_to": "1721",
+    "places": [],
+    "collection": [
+      "Instrument de recherche des archives anciennes, série C",
+      "Fonds de l'administration de l'insinuation du comté de Nice",
+      "Bureau de Nice",
+      "Tables",
+      "1610 à 1721"
+    ]
+  }
+}

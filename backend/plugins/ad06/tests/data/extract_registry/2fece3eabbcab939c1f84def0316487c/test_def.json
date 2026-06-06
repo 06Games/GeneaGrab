@@ -1,0 +1,34 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/daogrp/0",
+  "registry_id": "2fece3eabbcab939c1f84def0316487c",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/2fece3eabbcab939c1f84def0316487c/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "2fece3eabbcab939c1f84def0316487c",
+    "archive_reference": "3 P 828",
+    "title": "Matrice cadastrale des propriétés foncières (bâties et non bâties), sections A à E",
+    "subtitle": "folios 1 à 680",
+    "registry_types": [
+      {
+        "category": "cadastre",
+        "label": "CadastralMatrix"
+      }
+    ],
+    "date_from": "1872",
+    "date_to": "1913",
+    "places": [["Nice", "Nice-Est (Quartier Saint-Roch)"]],
+    "collection": ["Cadastre. - Matrices", "NICE", "NICE-EST (QUARTIER SAINT-ROCH)"]
+  }
+}

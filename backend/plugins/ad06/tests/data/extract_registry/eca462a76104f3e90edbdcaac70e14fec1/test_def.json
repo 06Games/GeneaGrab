@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1",
+  "registry_id": "eca462a76104f3e90edbdcaac70e14fec1",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/eca462a76104f3e90edbdcaac70e14fec1/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "eca462a76104f3e90edbdcaac70e14fec1",
+    "archive_reference": "5 Mi 84/2",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Other"
+      }
+    ],
+    "date_from": "1750",
+    "date_to": "1800",
+    "places": [["Menton"]],
+    "collection": ["Etat civil (parcours de recherche)", "MENTON"]
+  }
+}

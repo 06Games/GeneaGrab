@@ -1,0 +1,33 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/3236728/dao/0/1",
+  "registry_id": "3236728",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/3236728",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/3236728/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/3236728/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "3236728",
+    "archive_reference": "1262 W 2",
+    "title": "Table des noms",
+    "subtitle": "Bon à Dumistrescu",
+    "author": "2e bureau de Nice 1914-1955 (autres communes)",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Catalogue"
+      }
+    ],
+    "places": [],
+    "collection": ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Table des noms"]
+  }
+}

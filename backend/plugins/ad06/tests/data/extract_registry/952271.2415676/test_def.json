@@ -1,0 +1,38 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/952271.2415676",
+  "registry_id": "952271.2415676",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/952271.2415676",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/952271.2415676/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/952271.2415676/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "952271.2415676",
+    "archive_reference": "C 1125",
+    "title": "1641",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Other"
+      }
+    ],
+    "date_from": "1641",
+    "date_to": "1641",
+    "places": [],
+    "collection": [
+      "Instrument de recherche des archives anciennes, série C",
+      "Fonds de l'administration de l'insinuation du comté de Nice",
+      "Bureau de Nice",
+      "Sospel"
+    ]
+  }
+}

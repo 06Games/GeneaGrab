@@ -1,0 +1,34 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/dao/0/layout:table/idsearch:RECH_8bd2b6be1f4d9dee88dd728c3f7365e6",
+  "registry_id": "e5f3d1e196cf2c2c3fbcb9770bb85548",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/e5f3d1e196cf2c2c3fbcb9770bb85548/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "e5f3d1e196cf2c2c3fbcb9770bb85548",
+    "archive_reference": "25 Fi 15/1/A0",
+    "title": "Tableau d'assemblage des sections A à D.",
+    "subtitle": "TA",
+    "registry_types": [
+      {
+        "category": "cadastre",
+        "label": "CadastralMap"
+      }
+    ],
+    "date_from": "1866",
+    "date_to": "1866",
+    "places": [["Berre-Les-Alpes", "Tableau D'Assemblage."]],
+    "collection": ["Cadastre. - Plans cadastraux", "BERRE-LES-ALPES", "TABLEAU D'ASSEMBLAGE."]
+  }
+}

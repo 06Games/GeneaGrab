@@ -1,0 +1,34 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/dao/0/layout:table/idsearch:RECH_c8a1303621a60e2782b150cef417305b",
+  "registry_id": "b0f71497f90be8cb192bb0c77acac139",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/b0f71497f90be8cb192bb0c77acac139/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "b0f71497f90be8cb192bb0c77acac139",
+    "archive_reference": "1 J 57",
+    "title": "Investiture du fief et juridiction de Puget (Puget-Théniers) en faveur du comte Nicolas Grimaldi de Busca (Nicolo Grimaldi di Busca).",
+    "author": "Chambre des comptes de Turin pour Victor Amédée II, duc de Savoie",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Other"
+      }
+    ],
+    "date_from": "1704-01-01",
+    "date_to": "1704-01-01",
+    "places": [["Turin (Italie"]],
+    "collection": ["Armoiries dans les Alpes-Maritimes", "TURIN (ITALIE"]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/daogrp/0/7/layout:table/idsearch:RECH_2486f937f76e40e6df864a4708967f91",
+  "registry_id": "9b56a6d2e75f3d28e97044e9f373f5bb",
+  "image_number": 7,
+  "ark_url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/9b56a6d2e75f3d28e97044e9f373f5bb/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "9b56a6d2e75f3d28e97044e9f373f5bb",
+    "archive_reference": "6 M 112",
+    "registry_types": [
+      {
+        "category": "census",
+        "label": "Census"
+      }
+    ],
+    "date_from": "1891",
+    "date_to": "1891",
+    "places": [["Lantosque"]],
+    "collection": ["Recensement de la population", "LANTOSQUE"]
+  }
+}

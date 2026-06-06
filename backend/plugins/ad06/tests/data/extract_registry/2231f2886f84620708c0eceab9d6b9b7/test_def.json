@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/daogrp/0/279",
+  "registry_id": "2231f2886f84620708c0eceab9d6b9b7",
+  "image_number": 279,
+  "ark_url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/2231f2886f84620708c0eceab9d6b9b7/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "2231f2886f84620708c0eceab9d6b9b7",
+    "title": "Calendario generale pe' regii stati de 1830.",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Other"
+      }
+    ],
+    "date_from": "1830",
+    "date_to": "1830",
+    "places": [],
+    "collection": ["Annuaires", "Calendario generale pe' regii stati"]
+  }
+}

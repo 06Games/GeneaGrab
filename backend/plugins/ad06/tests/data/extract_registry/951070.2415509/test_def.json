@@ -1,0 +1,38 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/951070.2415509/dao/0/5",
+  "registry_id": "951070.2415509",
+  "image_number": 5,
+  "ark_url": "https://archives06.fr/ark:/79346/951070.2415509",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/951070.2415509/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/951070.2415509/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "951070.2415509",
+    "archive_reference": "C 965",
+    "title": "1742-1753",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Other"
+      }
+    ],
+    "date_from": "1742",
+    "date_to": "1753",
+    "places": [],
+    "collection": [
+      "Instrument de recherche des archives anciennes, série C",
+      "Fonds de l'administration de l'insinuation du comté de Nice",
+      "Bureau de Nice",
+      "Moulinet"
+    ]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/daogrp/0/62/",
+  "registry_id": "cb9d2442564ee9b717d681ea3af12a03",
+  "image_number": 62,
+  "ark_url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/cb9d2442564ee9b717d681ea3af12a03/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "cb9d2442564ee9b717d681ea3af12a03",
+    "archive_reference": "6 M 149",
+    "registry_types": [
+      {
+        "category": "census",
+        "label": "Census"
+      }
+    ],
+    "date_from": "1911",
+    "date_to": "1911",
+    "places": [["Nice", "Canton Ouest (Début)"]],
+    "collection": ["Recensement de la population", "NICE", "CANTON OUEST (DÉBUT)"]
+  }
+}

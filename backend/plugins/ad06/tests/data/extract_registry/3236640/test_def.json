@@ -1,0 +1,33 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/3236640/dao/0/120",
+  "registry_id": "3236640",
+  "image_number": 120,
+  "ark_url": "https://archives06.fr/ark:/79346/3236640",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/3236640/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/3236640/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "3236640",
+    "archive_reference": "1262 W 156",
+    "title": "Répertoire des formalités",
+    "subtitle": "Volume 066",
+    "author": "2e bureau de Nice 1914-1955 (autres communes)",
+    "registry_types": [
+      {
+        "category": "other",
+        "label": "Catalogue"
+      }
+    ],
+    "places": [],
+    "collection": ["Hypothèques. - Tables et répertoires des formalités", "2e bureau de Nice 1914-1955 (autres communes)", "Répertoire des formalités"]
+  }
+}

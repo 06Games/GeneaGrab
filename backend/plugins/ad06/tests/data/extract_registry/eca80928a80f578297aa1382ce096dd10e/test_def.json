@@ -1,0 +1,44 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/daogrp/0/layout:table/idsearch:RECH_b8eed04fe2a98dd5bf1fe2452dbc1b8e",
+  "registry_id": "eca80928a80f578297aa1382ce096dd10e",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/eca80928a80f578297aa1382ce096dd10e/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 135,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "eca80928a80f578297aa1382ce096dd10e",
+    "archive_reference": "5 Mi 17/1",
+    "registry_types": [
+      {
+        "category": "vital",
+        "label": "Birth"
+      },
+      {
+        "category": "union",
+        "label": "Marriage"
+      },
+      {
+        "category": "union",
+        "label": "Banns"
+      },
+      {
+        "category": "mortality",
+        "label": "Death"
+      }
+    ],
+    "date_from": "1728",
+    "date_to": "1768",
+    "places": [["Bezaudun-Les-Alpes"]],
+    "collection": ["Etat civil (parcours de recherche)", "BEZAUDUN-LES-ALPES"]
+  }
+}

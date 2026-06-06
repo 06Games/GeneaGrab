@@ -1,0 +1,32 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/dao/0/2",
+  "registry_id": "35d236db0bd7183dbf75ab2486e6d240",
+  "image_number": 2,
+  "ark_url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/35d236db0bd7183dbf75ab2486e6d240/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 5,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "35d236db0bd7183dbf75ab2486e6d240",
+    "title": "Lou Ficanas",
+    "registry_types": [
+      {
+        "category": "newspaper",
+        "label": "Newspaper"
+      }
+    ],
+    "date_from": "1891-08-16",
+    "date_to": "1891-08-16",
+    "places": [],
+    "collection": ["Presse ancienne numérisée", "Lou Ficanas (1891-1891)", "Année 1891"]
+  }
+}
