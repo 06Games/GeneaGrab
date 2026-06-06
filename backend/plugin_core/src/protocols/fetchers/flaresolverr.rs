@@ -1,7 +1,7 @@
 #![allow(clippy::doc_markdown)]
 use std::{fmt::Display, string::ToString};
 
-use extism_pdk::{config, var, Json};
+use extism_pdk::config;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -9,22 +9,26 @@ use url::Url;
 use crate::{
     com_structs::PluginError,
     data::http::{FetchMethod, Request},
-    protocols::fetchers::{Fetcher, HostFetcher, SimpleFetcher},
+    protocols::fetchers::{Fetcher, SimpleFetcher},
 };
 
 /// Proxies requests through FlareSolverr to bypass Cloudflare protections.
-pub struct FlareSolverrFetcher {
+pub struct FlareSolverrFetcher<F: Fetcher> {
     flaresolverr_url: String,
+    fetcher: F,
 }
 
-impl FlareSolverrFetcher {
+impl<F: Fetcher> FlareSolverrFetcher<F> {
     #[must_use]
-    pub fn new(flaresolverr_url: &str) -> Self {
+    pub fn new(flaresolverr_url: &str, fetcher: F) -> Self {
         Self {
             flaresolverr_url: flaresolverr_url.trim_end_matches('/').to_string(),
+            fetcher,
         }
     }
+}
 
+impl FlareSolverrFetcher<SimpleFetcher> {
     /// # Errors
     ///
     /// If the config value couldn't be retrieved
@@ -32,7 +36,7 @@ impl FlareSolverrFetcher {
         let flaresolverr_url = config::get("flaresolverr_url")
             .map_err(|e| PluginError::LibraryError(format!("Failed to get config: {e}")))?
             .unwrap_or_else(|| "http://localhost:8191".to_string());
-        Ok(Self::new(&flaresolverr_url))
+        Ok(Self::new(&flaresolverr_url, SimpleFetcher {}))
     }
 }
 
@@ -56,7 +60,7 @@ struct FlareSolverrResponse {
 
 #[derive(Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-struct FlareSolverrSolution {
+pub(crate) struct FlareSolverrSolution {
     url: String,
     response: String,
     user_agent: String,
@@ -77,7 +81,7 @@ impl Display for FlareSolverrCookie {
 }
 
 #[derive(Serialize, Deserialize)]
-struct Clearance {
+pub(crate) struct Clearance {
     user_agent: String,
     cookies: Vec<FlareSolverrCookie>,
     referer: String,
@@ -112,9 +116,9 @@ impl IntoIterator for Clearance {
     }
 }
 
-impl FlareSolverrFetcher {
+impl<F: Fetcher> FlareSolverrFetcher<F> {
     /// Performs a fetch through FlareSolverr.
-    fn internal_fetch(&self, req: Request) -> Result<FlareSolverrSolution, PluginError> {
+    pub(crate) fn internal_fetch(&self, req: Request) -> Result<FlareSolverrSolution, PluginError> {
         let url = Url::parse(&req.url)
             .map_err(|e| PluginError::InvalidField(format!("Invalid URL: {e}")))?;
         let domain = url
@@ -146,7 +150,7 @@ impl FlareSolverrFetcher {
             body: Some(body),
         };
 
-        let res = SimpleFetcher {}.fetch(req)?;
+        let res = self.fetcher.fetch(req)?;
 
         let parsed_res: FlareSolverrResponse = serde_json::from_str(&res).map_err(|e| {
             PluginError::ParsingError(format!("Failed to parse FlareSolverr response: {e}"))
@@ -176,42 +180,38 @@ impl FlareSolverrFetcher {
 
     /// Performs the original request with the obtained cookies and user agent from FlareSolverr.
     /// Safer than `dirty_fetch` when the response isn't HTML, but uses two requests.
-    fn safe_fetch(clearance: Clearance, req: Request) -> Result<Vec<u8>, PluginError> {
+    pub(crate) fn safe_fetch(
+        &self,
+        clearance: Clearance,
+        req: Request,
+    ) -> Result<Vec<u8>, PluginError> {
         let mut req = req;
         req.headers.extend(clearance);
-        HostFetcher {}.fetch_raw(req)
+        self.fetcher.fetch_raw(req)
+    }
+
+    pub(crate) fn use_solution(
+        &self,
+        req: Request,
+        solution: FlareSolverrSolution,
+    ) -> Result<Vec<u8>, PluginError> {
+        if needs_safe_request(&req.url) {
+            self.safe_fetch(solution.try_into()?, req)
+        } else {
+            Ok(FlareSolverrFetcher::<F>::clean_response(solution))
+        }
     }
 }
 
-impl Fetcher for FlareSolverrFetcher {
+impl<F: Fetcher> Fetcher for FlareSolverrFetcher<F> {
     fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, PluginError> {
-        let host = build_referer(&req.url)?;
-        let cache_key = format!("flaresolverr_{host}");
-
-        if needs_safe_request(&req.url) {
-            if let Ok(Some(cached_solution)) = var::get::<Json<Clearance>>(&cache_key) {
-                // Try to fetch using the cached session
-                if let Ok(data) = FlareSolverrFetcher::safe_fetch(cached_solution.0, req.clone()) {
-                    return Ok(data);
-                }
-            }
-        }
-
         let solution = self.internal_fetch(req.clone())?;
-        var::set(&cache_key, Json::<Clearance>(solution.clone().try_into()?))
-            .map_err(|e| PluginError::LibraryError(format!("Couldn't store cache: {e}")))?;
-
-        // Could be improved... but it's good enough for now
-        if needs_safe_request(&req.url) {
-            FlareSolverrFetcher::safe_fetch(solution.try_into()?, req)
-        } else {
-            Ok(FlareSolverrFetcher::clean_response(solution))
-        }
+        self.use_solution(req, solution)
     }
 }
 
 /// Determine if a request needs a second pass without FlareSolverr (because of the browser modifying the response)
-fn needs_safe_request(url: &str) -> bool {
+pub(crate) fn needs_safe_request(url: &str) -> bool {
     std::path::Path::new(url).extension().is_some_and(|ext| {
         ext.eq_ignore_ascii_case("jpg")
             || ext.eq_ignore_ascii_case("png")
@@ -220,7 +220,7 @@ fn needs_safe_request(url: &str) -> bool {
 }
 
 /// Build the Referer header for a request
-fn build_referer(url: &str) -> Result<String, PluginError> {
+pub(crate) fn build_referer(url: &str) -> Result<String, PluginError> {
     let url =
         Url::parse(url).map_err(|e| PluginError::ParsingError(format!("Invalid url: {e}")))?;
     Ok(format!(

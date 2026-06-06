@@ -1,12 +1,17 @@
 use crate::com_structs::{ExtractRequest, ExtractResponse, IdentifyResponse, PluginError};
-use crate::data::http::Request;
-use crate::protocols::fetchers::Fetcher;
+use crate::data::http::{FetchMethod, Request};
+use crate::protocols::fetchers::{Fetcher, FlareSolverrFetcher, HostFetcher};
 use jsonc_parser::ParseOptions;
+use reqwest::blocking::Client;
+use reqwest::header::{HeaderName, HeaderValue};
+use reqwest::Method;
 use serde::Deserialize;
 use serde_json_assert::{assert_json_matches, CompareMode, Config};
 use std::fs;
 use std::panic;
 use std::path::PathBuf;
+use std::str::FromStr;
+use std::sync::Mutex;
 
 pub struct TestCases<T> {
     pub dir: PathBuf,
@@ -44,6 +49,46 @@ where
     }
 }
 
+static MUTEX: Mutex<()> = Mutex::new(());
+
+#[allow(clippy::unnecessary_wraps, clippy::needless_pass_by_value)]
+fn http_req(req: Request) -> Result<Vec<u8>, PluginError> {
+    let lock = MUTEX.lock().unwrap();
+    let client = Client::new();
+
+    let req_method = match req.method {
+        FetchMethod::GET => Method::GET,
+        FetchMethod::POST => Method::POST,
+        FetchMethod::PUT => Method::PUT,
+        FetchMethod::DELETE => Method::DELETE,
+        FetchMethod::PATCH => Method::PATCH,
+        FetchMethod::OPTIONS => Method::OPTIONS,
+        FetchMethod::HEAD => Method::HEAD,
+    };
+
+    let mut builder = client.request(req_method, &req.url);
+
+    for (key, value) in &req.headers {
+        match (HeaderName::from_str(key), HeaderValue::from_str(value)) {
+            (Ok(name), Ok(val)) => {
+                builder = builder.header(name, val);
+            }
+            _ => {
+                eprintln!("Warning: Invalid header key/value pair ({key}, {value})");
+            }
+        }
+    }
+    if let Some(body_content) = &req.body {
+        builder = builder.body(body_content.clone());
+    }
+    let response = builder.send().unwrap();
+    let text = response.error_for_status().unwrap().bytes().unwrap();
+
+    drop(lock);
+
+    Ok(text.into())
+}
+
 /// Implementation of the Fetcher trait that reads the response from a file
 pub struct MockFetcher {
     mocks: Vec<MockRequest>,
@@ -61,6 +106,19 @@ impl Fetcher for MockFetcher {
             .unwrap_or_else(|| panic!("No mock response found for URL: {}", req.url));
 
         let file_path = self.base_dir.join(&mock.response_file);
+        if !file_path.exists() {
+            eprintln!("Mock file doesn't exist '{}'", mock.response_file);
+            let res =
+                FlareSolverrFetcher::new("http://localhost:8191", http_req).fetch(req.clone())?;
+            if let Err(e) = fs::write(&file_path, &res) {
+                eprintln!(
+                    "Couldn't save response from '{}' to '{}': {}",
+                    req.url, mock.response_file, e
+                );
+            }
+            return Ok(res.into_bytes());
+        }
+
         fs::read(&file_path).map_err(|e| {
             panic!(
                 "Mock failed to read file '{}' for URL {}: {}",
