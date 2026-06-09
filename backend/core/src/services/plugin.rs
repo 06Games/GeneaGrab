@@ -60,7 +60,7 @@ pub async fn register_plugin(
     let plugin_config = get_plugin_config(db, &plugin_id).await?;
 
     tokio::task::spawn_blocking(move || {
-        plugin_manager.register_plugin(&plugin_id, plugin_config, wasm_bytes)
+        plugin_manager.register_plugin(&plugin_id, &plugin_config, wasm_bytes)
     })
     .await
     .map_err(|e| {

@@ -75,10 +75,15 @@ host_fn!(http_request (user_data: Client;req: Json<Request>) -> Vec<u8> {
 });
 
 impl PluginManager {
+    /// Registers a new plugin with the manager
+    /// # Errors
+    /// If the http client couldn't be constructed
+    /// If the plugin couldn't be compiled
+    /// If the lock is poisoned
     pub fn register_plugin(
         &self,
         id: &str,
-        plugin_config: HashMap<String, String>,
+        plugin_config: &HashMap<String, String>,
         wasm_bytes: Vec<u8>,
     ) -> Result<(), CoreError> {
         let manifest = Manifest::new([Wasm::data(wasm_bytes)])
@@ -125,6 +130,9 @@ impl PluginManager {
         Ok(())
     }
 
+    /// List all plugins in the registry.
+    /// # Errors
+    /// If the registry lock is poisoned
     pub fn list_plugins(&self) -> Result<Vec<PluginMetadata>, CoreError> {
         let map = self
             .registry
@@ -133,10 +141,17 @@ impl PluginManager {
         Ok(map.values().map(|data| data.metadata.clone()).collect())
     }
 
+    /// Execute a function on the specified plugin.
+    /// # Errors
+    /// If `plugin_id` can't be found in the registered plugin list
+    /// If the execution fails
+    /// If the lock is poisoned
+    #[allow(clippy::unused_async, reason = "planned feature")]
     pub async fn execute<F, R>(&self, plugin_id: &str, action: F) -> Result<R, CoreError>
     where
         F: FnOnce(&mut extism::Plugin) -> Result<R, extism::Error>,
     {
+        // TODO: Wait for the plugin to be built if register_plugin has been called but the plugin isn't ready.
         let map = self
             .registry
             .read()

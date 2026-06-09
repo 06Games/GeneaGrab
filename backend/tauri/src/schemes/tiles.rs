@@ -9,6 +9,10 @@ use tauri::{
     AppHandle, Manager,
 };
 
+/// Handles the tile request by preparing and returning an image
+/// # Errors
+/// If the preparation of the image failed
+/// If the response couldn't be constructed
 pub async fn handle_tile_request(
     request: Request<Vec<u8>>,
     app_handle: AppHandle,

@@ -171,6 +171,9 @@ fn parse_image_api(base_url: &Url, api_json: &str) -> Result<Vec<Image>, PluginE
     Ok(images)
 }
 
+/// Internal impl of `extract_registry`. A custom fetcher can be provided.
+/// # Errors
+/// If a request or the extraction fails
 pub fn extract_registry_internal(
     req: &ExtractRequest,
     fetcher: &impl Fetcher,

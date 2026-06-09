@@ -13,7 +13,6 @@ use scraper::{Html, Selector};
 use std::fmt::Write;
 use std::{borrow::Cow, collections::HashSet};
 
-
 fn parse_types(type_str: &str) -> HashSet<RegistryType> {
     let mut types = HashSet::new();
     let extract_regex = Regex::new(r"\p{Lu}[^\p{Lu}]*").unwrap();
@@ -338,7 +337,7 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
                     tile_size: None,
                     manifest_url: res.service.as_ref().map(|s| s.id.clone()),
                     ark_url: Some(canvas.id.clone()),
-                    image_number: (i + 1) as u32,
+                    image_number: u32::try_from(i + 1).expect("Image count shouldn't be that high"),
                     name: canvas.label.clone(),
                     date_range: None,
                     notes: None,
@@ -348,6 +347,9 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
         .collect()
 }
 
+/// Internal impl of `extract_registry`. A custom fetcher can be provided.
+/// # Errors
+/// If a request or the extraction fails
 pub fn extract_registry_internal(
     req: &ExtractRequest,
     fetcher: &impl Fetcher,
