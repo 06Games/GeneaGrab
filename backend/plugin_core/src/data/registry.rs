@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use chrono::{DateTime, Utc};
+use dates::HistoricalDate;
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
@@ -32,13 +32,13 @@ pub struct Registry {
     #[builder(default)]
     pub author: Option<String>,
     #[builder(default)]
-    pub date_from: Option<String>,
+    pub date_from: Option<HistoricalDate>,
     #[builder(default)]
-    pub date_from_normalized: Option<DateTime<Utc>>,
+    pub date_from_normalized: Option<i32>,
     #[builder(default)]
-    pub date_to: Option<String>,
+    pub date_to: Option<HistoricalDate>,
     #[builder(default)]
-    pub date_to_normalized: Option<DateTime<Utc>>,
+    pub date_to_normalized: Option<i32>,
 
     #[builder(default)]
     #[serde(default)]

@@ -74,7 +74,9 @@ pub struct RegistryMeta {
     pub subtitle: Option<String>,
     pub author: Option<String>,
     pub date_from: Option<String>,
+    pub date_from_gregorian: Option<String>,
     pub date_to: Option<String>,
+    pub date_to_gregorian: Option<String>,
     pub notes: Option<String>,
 
     pub total_images: usize,

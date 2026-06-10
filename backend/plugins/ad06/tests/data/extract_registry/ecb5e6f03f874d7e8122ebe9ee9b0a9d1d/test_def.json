@@ -24,8 +24,8 @@
         "label": "Divorce"
       }
     ],
-    "date_from": "1803",
-    "date_to": "1803",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1803, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1803, "month": 1, "day": 1 },
     "places": [["Cannes"]],
     "collection": ["Etat civil (parcours de recherche)", "CANNES"]
   }

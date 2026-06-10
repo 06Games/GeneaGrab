@@ -23,8 +23,8 @@
       }
     ],
     "ark_url": "https://www.geneanet.org/registres/view/17149",
-    "date_from": "1588",
-    "date_to": "1603",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1588, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1603, "month": 1, "day": 1 },
     "places": [["France", "Alpes-Maritimes", "Utelle"]]
   }
 }

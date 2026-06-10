@@ -24,8 +24,8 @@
         "label": "Census"
       }
     ],
-    "date_from": "1911",
-    "date_to": "1911",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1911, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1911, "month": 1, "day": 1 },
     "places": [["Nice", "Canton Ouest (Début)"]],
     "collection": ["Recensement de la population", "Nice"]
   }

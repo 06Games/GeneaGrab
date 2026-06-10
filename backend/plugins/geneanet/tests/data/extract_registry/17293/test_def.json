@@ -23,8 +23,8 @@
       }
     ],
     "ark_url": "https://www.geneanet.org/registres/view/17293",
-    "date_from": "1574",
-    "date_to": "1582",
+    "date_from": { "calendar": "Julian", "precision": "Year", "year": 1574, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Julian", "precision": "Year", "year": 1582, "month": 1, "day": 1 },
     "places": [["France", "Alpes-Maritimes", "Roquebillière"]]
   }
 }

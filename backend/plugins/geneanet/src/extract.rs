@@ -103,8 +103,8 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: &str) -> Result<(), Pl
     }
     builder.places(HashSet::from([place]));
 
-    builder.date_from(validate_regex_match(caps.name("from")));
-    builder.date_to(validate_regex_match(caps.name("to")));
+    builder.date_from(validate_regex_match(caps.name("from")).and_then(|d| d.parse().ok()));
+    builder.date_to(validate_regex_match(caps.name("to")).and_then(|d| d.parse().ok()));
     builder.archive_reference(validate_regex_match(caps.name("cote")));
     builder.notes(validate_regex_match(caps.name("note")));
 

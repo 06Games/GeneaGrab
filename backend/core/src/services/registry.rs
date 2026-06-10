@@ -9,6 +9,7 @@ use crate::{
     errors::CoreError,
     plugins::PluginManager,
 };
+use dates::HistoricalDate;
 use geneagrab_plugin_core::com_structs::{HostPluginBase, IdentifyRequest, IdentifyResponse};
 use geneagrab_plugin_core::{com_structs::ExtractRequest, data::PluginMetadata};
 use sea_orm::QueryOrder;
@@ -36,8 +37,22 @@ impl RegistryMeta {
             title: registry.title,
             subtitle: registry.subtitle,
             author: registry.author,
-            date_from: registry.date_from,
-            date_to: registry.date_to,
+            date_from: registry.date_from.as_deref().map(ToString::to_string),
+            date_from_gregorian: registry
+                .date_from
+                .as_deref()
+                .filter(|d| !matches!(d, HistoricalDate::Gregorian { .. }))
+                .and_then(dates::HistoricalDate::to_modern_date)
+                .as_ref()
+                .map(ToString::to_string),
+            date_to: registry.date_to.as_deref().map(ToString::to_string),
+            date_to_gregorian: registry
+                .date_to
+                .as_deref()
+                .filter(|d| !matches!(d, HistoricalDate::Gregorian { .. }))
+                .and_then(dates::HistoricalDate::to_modern_date)
+                .as_ref()
+                .map(ToString::to_string),
             notes: registry.notes,
 
             total_images: image_count,

@@ -28,8 +28,8 @@
         "label": "Baptism table"
       }
     ],
-    "date_from": "1823",
-    "date_to": "1824",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1823, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1824, "month": 1, "day": 1 },
     "places": [["Nice", "Notre-Dame Du Port"]],
     "collection": ["Etat civil (parcours de recherche)", "NICE"]
   }

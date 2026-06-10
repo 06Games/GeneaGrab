@@ -24,8 +24,8 @@
         "label": "Burial"
       }
     ],
-    "date_from": "1781",
-    "date_to": "1784",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1781, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1784, "month": 1, "day": 1 },
     "places": [["Lantosque"]],
     "collection": ["Etat civil (parcours de recherche)", "LANTOSQUE"]
   }

@@ -394,8 +394,8 @@ pub fn extract_registry_internal(
         .title(parsed.title)
         .subtitle(parsed.subtitle)
         .author(parsed.author)
-        .date_from(parsed.date_from)
-        .date_to(parsed.date_to)
+        .date_from(parsed.date_from.and_then(|d| d.parse().ok()))
+        .date_to(parsed.date_to.and_then(|d| d.parse().ok()))
         .collection(collection)
         .registry_types(parsed.registry_types);
 

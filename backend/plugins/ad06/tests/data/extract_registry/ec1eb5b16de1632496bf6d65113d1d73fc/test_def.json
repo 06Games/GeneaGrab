@@ -32,8 +32,8 @@
         "label": "Confirmation"
       }
     ],
-    "date_from": "1577",
-    "date_to": "1607",
+    "date_from": { "calendar": "Julian", "precision": "Year", "year": 1577, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1607, "month": 1, "day": 1 },
     "places": [["Menton"]],
     "collection": ["Etat civil (parcours de recherche)", "MENTON"]
   }

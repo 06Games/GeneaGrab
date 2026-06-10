@@ -24,8 +24,8 @@
         "label": "Directory"
       }
     ],
-    "date_from": "1873",
-    "date_to": "1873",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1873, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1873, "month": 1, "day": 1 },
     "places": [],
     "collection": ["Annuaires", "Annuaire des Alpes-Maritimes"]
   }

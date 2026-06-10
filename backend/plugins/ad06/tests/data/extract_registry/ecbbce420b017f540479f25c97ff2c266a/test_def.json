@@ -24,8 +24,8 @@
         "label": "Burial"
       }
     ],
-    "date_from": "1840",
-    "date_to": "1870",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1840, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1870, "month": 1, "day": 1 },
     "places": [["Nice", "Sainte-Hélène"]],
     "collection": ["Etat civil (parcours de recherche)", "NICE"]
   }

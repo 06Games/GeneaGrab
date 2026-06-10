@@ -36,8 +36,8 @@
         "label": "Death"
       }
     ],
-    "date_from": "1728",
-    "date_to": "1768",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1728, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1768, "month": 1, "day": 1 },
     "places": [["Bezaudun-Les-Alpes"]],
     "collection": ["Etat civil (parcours de recherche)", "BEZAUDUN-LES-ALPES"]
   }

@@ -1,3 +1,4 @@
+use dates::HistoricalDate;
 use geneagrab_plugin_core::data::{Registry, RegistryType};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -24,10 +25,10 @@ pub struct Model {
     pub title: Option<String>,
     pub subtitle: Option<String>,
     pub author: Option<String>,
-    pub date_from: Option<String>,
-    pub date_from_normalized: Option<DateTimeUtc>,
-    pub date_to: Option<String>,
-    pub date_to_normalized: Option<DateTimeUtc>,
+    pub date_from: Option<JsonField<HistoricalDate>>,
+    pub date_from_normalized: Option<i32>,
+    pub date_to: Option<JsonField<HistoricalDate>>,
+    pub date_to_normalized: Option<i32>,
 
     pub places: JsonField<HashSet<Vec<String>>>,
     pub notes: Option<String>,
@@ -62,9 +63,9 @@ impl From<Model> for Registry {
             title: model.title,
             subtitle: model.subtitle,
             author: model.author,
-            date_from: model.date_from,
+            date_from: model.date_from.map(JsonField::into_inner),
             date_from_normalized: model.date_from_normalized,
-            date_to: model.date_to,
+            date_to: model.date_to.map(JsonField::into_inner),
             date_to_normalized: model.date_to_normalized,
             places: model.places.0,
             notes: model.notes,
@@ -74,7 +75,7 @@ impl From<Model> for Registry {
 }
 
 impl Model {
-    #[must_use] 
+    #[must_use]
     pub fn from_registry(registry: Registry, id: u32) -> Self {
         Self {
             id,
@@ -88,9 +89,9 @@ impl Model {
             title: registry.title,
             subtitle: registry.subtitle,
             author: registry.author,
-            date_from: registry.date_from,
+            date_from: registry.date_from.map(JsonField),
             date_from_normalized: registry.date_from_normalized,
-            date_to: registry.date_to,
+            date_to: registry.date_to.map(JsonField),
             date_to_normalized: registry.date_to_normalized,
             places: JsonField(registry.places),
             notes: registry.notes,

@@ -26,8 +26,8 @@
         "label": "Armorial"
       }
     ],
-    "date_from": "1704-01-01",
-    "date_to": "1704-01-01",
+    "date_from": { "calendar": "Gregorian", "precision": "Day", "year": 1704, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Day", "year": 1704, "month": 1, "day": 1 },
     "places": [["Turin (Italie)"]],
     "collection": ["Armoiries dans les Alpes-Maritimes"]
   }

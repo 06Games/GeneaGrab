@@ -25,8 +25,8 @@
         "label": "Book"
       }
     ],
-    "date_from": "1863",
-    "date_to": "1863",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1863, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1863, "month": 1, "day": 1 },
     "places": [],
     "collection": ["Délibérations du conseil général"]
   }

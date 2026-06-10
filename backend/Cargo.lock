@@ -2770,6 +2770,7 @@ name = "geneagrab-core"
 version = "4.0.0"
 dependencies = [
  "chrono",
+ "dates",
  "extism",
  "futures",
  "geneagrab-plugin-core",
@@ -2805,6 +2806,7 @@ name = "geneagrab-plugin-core"
 version = "4.0.0"
 dependencies = [
  "chrono",
+ "dates",
  "derive_builder",
  "extism",
  "extism-pdk",

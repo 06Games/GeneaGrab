@@ -13,7 +13,7 @@ pub enum Precision {
     Day,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "calendar")]
 pub enum HistoricalDate {
     Gregorian {

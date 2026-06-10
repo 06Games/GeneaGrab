@@ -1,5 +1,6 @@
 pub mod calendars;
-pub mod date;
+mod date;
+pub use date::*;
 
 #[cfg(test)]
 mod date_tests {

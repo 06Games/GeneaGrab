@@ -25,8 +25,8 @@
         "label": "Notarial"
       }
     ],
-    "date_from": "1610-09-01",
-    "date_to": "1621-12-20",
+    "date_from": { "calendar": "Gregorian", "precision": "Day", "year": 1610, "month": 9, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Day", "year": 1621, "month": 12, "day": 20 },
     "places": [["Lantosque"]],
     "collection": [
       "Instrument de recherche des versements d'archives notariales (3 E)",

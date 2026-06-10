@@ -24,8 +24,8 @@
         "label": "Communion"
       }
     ],
-    "date_from": "1880",
-    "date_to": "1929",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1880, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1929, "month": 1, "day": 1 },
     "places": [["Isola"]],
     "collection": ["Etat civil (parcours de recherche)", "ISOLA"]
   }

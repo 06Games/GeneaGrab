@@ -25,8 +25,8 @@
         "label": "Enrolled deeds"
       }
     ],
-    "date_from": "1610",
-    "date_to": "1721",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1610, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1721, "month": 1, "day": 1 },
     "places": [],
     "collection": [
       "Instrument de recherche des archives anciennes, série C",

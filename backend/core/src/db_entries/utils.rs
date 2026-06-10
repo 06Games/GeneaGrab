@@ -1,4 +1,9 @@
-use sea_orm::{sea_query::ValueType, sea_query::ValueTypeErr, TryGetableFromJson};
+use std::ops::{Deref, DerefMut};
+
+use sea_orm::{
+    sea_query::{Nullable, ValueType, ValueTypeErr},
+    TryGetableFromJson,
+};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -39,5 +44,31 @@ where
 
     fn column_type() -> sea_orm::ColumnType {
         sea_orm::ColumnType::Json
+    }
+}
+
+impl<T> Nullable for JsonField<T> {
+    fn null() -> sea_orm::prelude::Value {
+        <&str as sea_orm::sea_query::Nullable>::null()
+    }
+}
+
+impl<T> Deref for JsonField<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl<T> DerefMut for JsonField<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
+impl<T> JsonField<T> {
+    pub fn into_inner(self) -> T {
+        self.0
     }
 }

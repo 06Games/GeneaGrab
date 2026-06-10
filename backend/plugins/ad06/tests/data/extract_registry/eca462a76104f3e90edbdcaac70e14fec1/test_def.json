@@ -24,8 +24,8 @@
         "label": "Inventory"
       }
     ],
-    "date_from": "1750",
-    "date_to": "1800",
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1750, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1800, "month": 1, "day": 1 },
     "places": [["Menton"]],
     "collection": ["Etat civil (parcours de recherche)", "MENTON"]
   }

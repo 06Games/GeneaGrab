@@ -25,8 +25,8 @@
         "label": "Notarial"
       }
     ],
-    "date_from": "1744-11-15",
-    "date_to": "1760-03-14",
+    "date_from": { "calendar": "Gregorian", "precision": "Day", "year": 1744, "month": 11, "day": 15 },
+    "date_to": { "calendar": "Gregorian", "precision": "Day", "year": 1760, "month": 3, "day": 14 },
     "places": [["Lantosque"]],
     "collection": [
       "Instrument de recherche des versements d'archives notariales (3 E)",

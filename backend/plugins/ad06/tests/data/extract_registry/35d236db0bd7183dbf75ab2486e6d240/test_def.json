@@ -24,8 +24,8 @@
         "label": "Newspaper"
       }
     ],
-    "date_from": "1891-08-16",
-    "date_to": "1891-08-16",
+    "date_from": { "calendar": "Gregorian", "precision": "Day", "year": 1891, "month": 8, "day": 16 },
+    "date_to": { "calendar": "Gregorian", "precision": "Day", "year": 1891, "month": 8, "day": 16 },
     "places": [],
     "collection": ["Presse ancienne numérisée", "Lou Ficanas (1891-1891)", "Année 1891"]
   }
