@@ -41,7 +41,7 @@ plugins_release:
 
 plugins_install: plugins_release
 	@mkdir -p $(PLUGIN_DIR)
-	@for f in backend/target/wasm32-unknown-unknown/debug/*.wasm; do \
+	@for f in backend/target/wasm32-unknown-unknown/release/*.wasm; do \
 		if [ -f "$$f" ]; then \
 			plugin_id=$$(basename "$$f" .wasm | sed 's/^geneagrab_plugin_//'); \
 			echo "Installing plugin $$plugin_id... in $(PLUGIN_DIR)/$$plugin_id.wasm"; \

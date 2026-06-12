@@ -970,15 +970,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "calendrier"
-version = "1.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "284d507dbb324a81bc3283c9f4793c948b33d8b3e3a7a7b8b754dd37724fa49c"
-dependencies = [
- "chrono",
-]
-
-[[package]]
 name = "camino"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1777,9 +1768,7 @@ dependencies = [
 name = "dates"
 version = "0.1.0"
 dependencies = [
- "calendrier",
  "chrono",
- "julian",
  "regex",
  "serde",
  "serde_json",
@@ -3867,15 +3856,6 @@ checksum = "5dea2b27dd239b2556ed7a25ba842fe47fd602e7fc7433c2a8d6106d4d9edd70"
 dependencies = [
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "julian"
-version = "0.7.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0f6a512aa084efd924c90124c684e806617166753ba4619dc76aa077a84bde4e"
-dependencies = [
- "thiserror 2.0.18",
 ]
 
 [[package]]
