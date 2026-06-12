@@ -91,7 +91,7 @@ impl PluginBase for PluginImpl {
     }
 
     fn download_image(req: DownloadRequest) -> Result<Option<TileResponse>, PluginError> {
-        crate::image::download_image(req)
+        crate::image::download_image(&req)
     }
 }
 

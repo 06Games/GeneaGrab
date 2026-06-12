@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
+pub mod image_api;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Manifest {
