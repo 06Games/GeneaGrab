@@ -174,6 +174,7 @@ impl<F: Fetcher> FlareSolverrFetcher<F> {
     fn clean_response(solution: FlareSolverrSolution) -> std::vec::Vec<u8> {
         let response = remove_xml_viewer(&solution.response)
             .or_else(|| remove_json_viewer(&solution.response))
+            .or_else(|| fake_html(&solution.response))
             .unwrap_or(solution.response);
         response.into_bytes()
     }
@@ -259,4 +260,22 @@ fn remove_json_viewer(response: &str) -> Option<String> {
     let pre_element = document.select(&selector).next()?;
     let json_text = pre_element.text().collect::<String>();
     Some(json_text)
+}
+
+/// FlareSolverr wraps responses in HTML tags if the server wrongly declared the content type as text/html.
+/// This function retrieves the actual response from the HTML body.
+fn fake_html(response: &str) -> Option<String> {
+    let trimmed = response.trim();
+    let prefix = "<html><head></head><body>";
+    let suffix = "</body></html>";
+
+    if trimmed.starts_with(prefix) && trimmed.ends_with(suffix) {
+        let start = prefix.len();
+        let end = trimmed.len() - suffix.len();
+
+        // This slice grabs the JSON, completely ignoring the \n inside it
+        Some(trimmed[start..end].to_string())
+    } else {
+        None
+    }
 }
