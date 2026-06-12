@@ -4,6 +4,7 @@ mod m20220101_000001_create_table;
 mod m20260329_000001_create_plugin_setting;
 mod m20260419_000001_update_registry_type;
 mod m20260610_000001_dates;
+mod m20260613_000001_image_api_url;
 
 pub struct Migrator;
 
@@ -15,6 +16,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20260329_000001_create_plugin_setting::Migration),
             Box::new(m20260419_000001_update_registry_type::Migration),
             Box::new(m20260610_000001_dates::Migration),
+            Box::new(m20260613_000001_image_api_url::Migration),
         ]
     }
 }

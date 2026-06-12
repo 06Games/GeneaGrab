@@ -13,6 +13,7 @@ use regex::Regex;
 use std::{borrow::Cow, sync::LazyLock};
 
 pub mod extract;
+mod fetcher;
 pub mod image;
 
 const PLUGIN_METADATA: PluginMetadata = PluginMetadata {

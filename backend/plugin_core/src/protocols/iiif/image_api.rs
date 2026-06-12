@@ -7,11 +7,14 @@ use crate::{
     utils::ImageGeometry,
 };
 
+#[must_use]
 pub fn is_image_missing_data(req: &ExtractImageRequest) -> Option<String> {
     if req.image.manifest_url.is_none() {
         Some("manifest_url".to_string())
     } else if req.image.width.is_none() || req.image.height.is_none() {
         Some("dimensions".to_string())
+    } else if req.image.api_url.is_none() {
+        Some("api_url".to_string())
     } else {
         None
     }
@@ -23,48 +26,39 @@ pub fn extract_image(
 ) -> Result<ExtractImageResponse, PluginError> {
     let mut image = req.image.clone();
 
-    if is_image_missing_data(req).is_some() {
-        let manifest_url = image
-            .manifest_url
-            .as_ref()
-            .ok_or_else(|| PluginError::MissingField("manifest_url".into()))?;
+    let manifest_url = image
+        .manifest_url
+        .as_ref()
+        .ok_or_else(|| PluginError::MissingField("manifest_url".into()))?;
 
-        // Standard IIIF Image API discovery
-        let info_url = format!("{}/info.json", manifest_url.trim_end_matches('/'));
-        let info_json = fetcher.fetch(info_url.into())?;
+    // Standard IIIF Image API discovery
+    let info_url = format!("{}/info.json", manifest_url.trim_end_matches('/'));
+    let info_json = fetcher.fetch(info_url.into())?;
 
-        let info: serde_json::Value = serde_json::from_str(&info_json)
-            .map_err(|e| PluginError::ParsingError(format!("Failed to parse info.json: {e}")))?;
+    let info: serde_json::Value = serde_json::from_str(&info_json)
+        .map_err(|e| PluginError::ParsingError(format!("Failed to parse info.json: {e}")))?;
 
-        if image.width.is_none() {
-            image.width = info
-                .get("width")
-                .and_then(serde_json::Value::as_u64)
-                .and_then(|v| u32::try_from(v).ok());
-        }
+    image.api_url = info
+        .get("@id")
+        .and_then(serde_json::Value::as_str)
+        .map(String::from);
 
-        if image.height.is_none() {
-            image.height = info
-                .get("height")
-                .and_then(serde_json::Value::as_u64)
-                .and_then(|v| u32::try_from(v).ok());
-        }
+    image.width = info
+        .get("width")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|v| u32::try_from(v).ok());
+    image.height = info
+        .get("height")
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|v| u32::try_from(v).ok());
 
-        if image.tile_size.is_none() {
-            if let Some(tiles) = info.get("tiles").and_then(|t| t.as_array()) {
-                if let Some(first_tile) = tiles.first() {
-                    image.tile_size = first_tile
-                        .get("width")
-                        .and_then(serde_json::Value::as_u64)
-                        .and_then(|v| u32::try_from(v).ok());
-                }
-            }
-
-            if image.tile_size.is_none() {
-                image.tile_size = Some(512); // Safe fallback
-            }
-        }
-    }
+    image.tile_size = info
+        .get("tiles")
+        .and_then(serde_json::Value::as_array)
+        .and_then(|t| t.first())
+        .and_then(|t| t.get("width"))
+        .and_then(serde_json::Value::as_u64)
+        .and_then(|v| u32::try_from(v).ok());
 
     Ok(ExtractImageResponse { image })
 }

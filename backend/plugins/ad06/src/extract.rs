@@ -2,7 +2,7 @@ use geneagrab_plugin_core::{
     com_structs::{ExtractRequest, ExtractResponse, PluginError},
     data::{Image, RegistryBuilder, RegistryType},
     protocols::{
-        fetchers::{Fetcher, HostFetcher},
+        fetchers::Fetcher,
         iiif::{Canvas, Manifest, Metadata},
         ligeo::LigeoClasseur,
         utils::{to_title_case, validate_regex_match},
@@ -12,6 +12,8 @@ use regex::Regex;
 use scraper::{Html, Selector};
 use std::fmt::Write;
 use std::{borrow::Cow, collections::HashSet};
+
+use crate::fetcher::AdamFetcher;
 
 fn parse_types(type_str: &str) -> HashSet<RegistryType> {
     let mut types = HashSet::new();
@@ -336,6 +338,8 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
                     height: res.height,
                     tile_size: None,
                     manifest_url: res.service.as_ref().map(|s| s.id.clone()),
+                    api_url: None,
+                    download_url: None,
                     ark_url: Some(canvas.id.clone()),
                     image_number: u32::try_from(i + 1).expect("Image count shouldn't be that high"),
                     name: canvas.label.clone(),
@@ -438,5 +442,5 @@ pub fn extract_registry_internal(
 }
 
 pub(crate) fn extract_registry(req: &ExtractRequest) -> Result<ExtractResponse, PluginError> {
-    extract_registry_internal(req, &HostFetcher {})
+    extract_registry_internal(req, &AdamFetcher::default())
 }

@@ -3,8 +3,10 @@ use geneagrab_plugin_core::{
         DownloadRequest, ExtractImageRequest, ExtractImageResponse, PluginError, TileRequest,
         TileResponse,
     },
-    protocols::{fetchers::HostFetcher, iiif::image_api},
+    protocols::iiif::image_api,
 };
+
+use crate::fetcher::AdamFetcher;
 
 pub(crate) fn is_image_missing_data(req: &ExtractImageRequest) -> Option<String> {
     image_api::is_image_missing_data(req)
@@ -13,7 +15,7 @@ pub(crate) fn is_image_missing_data(req: &ExtractImageRequest) -> Option<String>
 pub(crate) fn extract_image(
     req: &ExtractImageRequest,
 ) -> Result<ExtractImageResponse, PluginError> {
-    image_api::extract_image(req, &HostFetcher{})
+    image_api::extract_image(req, &AdamFetcher::default())
 }
 
 pub(crate) fn fetch_tile(req: &TileRequest) -> Result<TileResponse, PluginError> {
@@ -21,11 +23,11 @@ pub(crate) fn fetch_tile(req: &TileRequest) -> Result<TileResponse, PluginError>
     // We pass a custom formatter that strictly limits the parameter to "{width},".
     image_api::fetch_tile(
         req,
-        &HostFetcher{},
+        &AdamFetcher::default(),
         Some(|requested_width, _scale| format!("{requested_width},")),
     )
 }
 
 pub(crate) fn download_image(req: &DownloadRequest) -> Result<Option<TileResponse>, PluginError> {
-    image_api::download_image(req, &HostFetcher{})
+    image_api::download_image(req, &AdamFetcher::default())
 }

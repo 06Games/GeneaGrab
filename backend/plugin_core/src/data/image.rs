@@ -6,6 +6,8 @@ pub struct Image {
     pub height: Option<u32>,
     pub tile_size: Option<u32>,
     pub manifest_url: Option<String>,
+    pub api_url: Option<String>,
+    pub download_url: Option<String>,
     pub ark_url: Option<String>,
 
     pub image_number: u32,

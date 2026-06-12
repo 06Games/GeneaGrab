@@ -159,6 +159,8 @@ fn parse_image_api(base_url: &Url, api_json: &str) -> Result<Vec<Image>, PluginE
                 height: None,
                 tile_size: None,
                 manifest_url,
+                api_url: None,
+                download_url: None,
                 ark_url,
                 image_number: page_num,
                 name: None,       // Irrelevant

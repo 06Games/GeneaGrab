@@ -14,6 +14,8 @@ pub struct Model {
     pub height: Option<u32>,
     pub tile_size: Option<u32>,
     pub manifest_url: Option<String>,
+    pub api_url: Option<String>,
+    pub download_url: Option<String>,
     pub ark_url: Option<String>,
 
     pub image_number: u32,
@@ -49,6 +51,8 @@ impl From<Model> for Image {
             height: model.height,
             tile_size: model.tile_size,
             manifest_url: model.manifest_url,
+            api_url: model.api_url,
+            download_url: model.download_url,
             ark_url: model.ark_url,
 
             image_number: model.image_number,
@@ -60,16 +64,20 @@ impl From<Model> for Image {
 }
 
 impl Model {
-    #[must_use] 
+    #[must_use]
     pub fn from_image(image: Image, id: u32, registry_entry_id: u32) -> Self {
         Self {
             id,
             registry_entry_id,
+
             width: image.width,
             height: image.height,
             tile_size: image.tile_size,
             manifest_url: image.manifest_url,
+            api_url: image.api_url,
+            download_url: image.download_url,
             ark_url: image.ark_url,
+
             image_number: image.image_number,
             name: image.name,
             date_range: image.date_range,
