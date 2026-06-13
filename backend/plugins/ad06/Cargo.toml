@@ -20,6 +20,7 @@ regex = "1.12.3"
 url = "2.5.8"
 scraper = "0.26.0"
 deunicode = "1.6.2"
+base64 = "0.22.1"
 
 [dev-dependencies]
 geneagrab-plugin-core = { path = "../../plugin_core", features = ["test"] }
