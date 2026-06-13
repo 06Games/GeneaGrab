@@ -9,9 +9,7 @@ use crate::{
 
 #[must_use]
 pub fn is_image_missing_data(req: &ExtractImageRequest) -> Option<String> {
-    if req.image.manifest_url.is_none() {
-        Some("manifest_url".to_string())
-    } else if req.image.width.is_none() || req.image.height.is_none() {
+    if req.image.width.is_none() || req.image.height.is_none() {
         Some("dimensions".to_string())
     } else if req.image.api_url.is_none() {
         Some("api_url".to_string())
@@ -31,10 +29,8 @@ pub fn extract_image(
         .as_ref()
         .ok_or_else(|| PluginError::MissingField("manifest_url".into()))?;
 
-    // Standard IIIF Image API discovery
     let info_url = format!("{}/info.json", manifest_url.trim_end_matches('/'));
     let info_json = fetcher.fetch(info_url.into())?;
-
     let info: serde_json::Value = serde_json::from_str(&info_json)
         .map_err(|e| PluginError::ParsingError(format!("Failed to parse info.json: {e}")))?;
 
@@ -70,11 +66,11 @@ pub fn fetch_tile(
     fetcher: &impl Fetcher,
     size_formatter: Option<fn(u32, u32) -> String>,
 ) -> Result<TileResponse, PluginError> {
-    let manifest_url = req
+    let api_url = req
         .image
-        .manifest_url
+        .api_url
         .as_ref()
-        .ok_or_else(|| PluginError::MissingField("manifest_url".into()))?;
+        .ok_or_else(|| PluginError::MissingField("api_url".into()))?;
 
     let width = req
         .image
@@ -115,7 +111,7 @@ pub fn fetch_tile(
 
     let url = format!(
         "{}/{}/{}/0/default.jpg",
-        manifest_url.trim_end_matches('/'),
+        api_url.trim_end_matches('/'),
         region,
         size
     );
@@ -132,16 +128,13 @@ pub fn download_image(
     req: &DownloadRequest,
     fetcher: &impl Fetcher,
 ) -> Result<Option<TileResponse>, PluginError> {
-    let manifest_url = req
+    let api_url = req
         .image
-        .manifest_url
+        .api_url
         .as_ref()
-        .ok_or(PluginError::MissingField("manifest_url".into()))?;
+        .ok_or(PluginError::MissingField("api_url".into()))?;
 
-    let iiif_request = format!(
-        "{}/full/max/0/default.jpg",
-        manifest_url.trim_end_matches('/')
-    );
+    let iiif_request = format!("{}/full/max/0/default.jpg", api_url.trim_end_matches('/'));
 
     let data = fetcher.fetch_raw(iiif_request.into())?;
 

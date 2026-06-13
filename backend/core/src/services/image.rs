@@ -160,6 +160,11 @@ pub async fn prepare_image(
         has_updates |= patch_field(&mut image_model.height, res.image.height.map(Some));
         has_updates |= patch_field(&mut image_model.tile_size, res.image.tile_size.map(Some));
         has_updates |= patch_field(&mut image_model.ark_url, res.image.ark_url.map(Some));
+        has_updates |= patch_field(&mut image_model.api_url, res.image.api_url.map(Some));
+        has_updates |= patch_field(
+            &mut image_model.download_url,
+            res.image.download_url.map(Some),
+        );
 
         if has_updates {
             set_image(db, registry_id, image_id, image_model).await?;
