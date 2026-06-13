@@ -5,7 +5,7 @@ use crate::{
     data::http::Request,
     protocols::fetchers::{
         flaresolverr::{build_referer, needs_safe_request, Clearance},
-        Fetcher, FlareSolverrFetcher, SimpleFetcher,
+        Fetcher, FlareSolverrFetcher, HostFetcher,
     },
 };
 
@@ -13,7 +13,7 @@ pub struct CachedFlareSolverrFetcher<F: Fetcher> {
     flaresolverr_fetcher: FlareSolverrFetcher<F>,
 }
 
-impl Default for CachedFlareSolverrFetcher<SimpleFetcher> {
+impl Default for CachedFlareSolverrFetcher<HostFetcher> {
     fn default() -> Self {
         Self {
             flaresolverr_fetcher: FlareSolverrFetcher::from_config()

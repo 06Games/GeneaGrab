@@ -9,7 +9,7 @@ use url::Url;
 use crate::{
     com_structs::PluginError,
     data::http::{FetchMethod, Request},
-    protocols::fetchers::{Fetcher, SimpleFetcher},
+    protocols::fetchers::{Fetcher, HostFetcher},
 };
 
 /// Proxies requests through FlareSolverr to bypass Cloudflare protections.
@@ -28,7 +28,7 @@ impl<F: Fetcher> FlareSolverrFetcher<F> {
     }
 }
 
-impl FlareSolverrFetcher<SimpleFetcher> {
+impl FlareSolverrFetcher<HostFetcher> {
     /// # Errors
     ///
     /// If the config value couldn't be retrieved
@@ -36,7 +36,7 @@ impl FlareSolverrFetcher<SimpleFetcher> {
         let flaresolverr_url = config::get("flaresolverr_url")
             .map_err(|e| PluginError::LibraryError(format!("Failed to get config: {e}")))?
             .unwrap_or_else(|| "http://localhost:8191".to_string());
-        Ok(Self::new(&flaresolverr_url, SimpleFetcher {}))
+        Ok(Self::new(&flaresolverr_url, HostFetcher {}))
     }
 }
 

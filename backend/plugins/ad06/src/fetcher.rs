@@ -1,12 +1,12 @@
 use geneagrab_plugin_core::{
     com_structs::PluginError,
     data::http::Request,
-    protocols::fetchers::{CachedFlareSolverrFetcher, Fetcher, SimpleFetcher},
+    protocols::fetchers::{CachedFlareSolverrFetcher, Fetcher, HostFetcher},
 };
 
 #[derive(Default)]
 pub struct AdamFetcher {
-    fetcher: CachedFlareSolverrFetcher<SimpleFetcher>,
+    fetcher: CachedFlareSolverrFetcher<HostFetcher>,
 }
 
 impl Fetcher for AdamFetcher {
