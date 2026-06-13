@@ -199,7 +199,7 @@ pub(crate) async fn get_registry(db: &DbConn, id: u32) -> Result<registry_entry:
 }
 
 pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, CoreError> {
-    log::info!("fetch_registry_meta called with id: {id}");
+    tracing::info!("fetch_registry_meta called with id: {id}");
 
     let row = add_count_subqueries(registry_entry::Entity::find_by_id(id))
         .into_model::<RegistryWithJoins>()
@@ -232,7 +232,7 @@ pub async fn add_registry(
     url: String,
     plugin_id: String,
 ) -> Result<RegistryMeta, CoreError> {
-    log::info!("add_registry called with url: {url}, plugin_id: {plugin_id}");
+    tracing::info!("add_registry called with url: {url}, plugin_id: {plugin_id}");
 
     let res = plugin_manager
         .execute(&plugin_id, |plugin| {

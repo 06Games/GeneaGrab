@@ -79,7 +79,7 @@ pub async fn fetch_image_meta(
     registry_id: u32,
     image_id: u32,
 ) -> Result<ImageMeta, CoreError> {
-    log::info!("fetch_image_meta called for registry {registry_id} image {image_id}");
+    tracing::info!("fetch_image_meta called for registry {registry_id} image {image_id}");
 
     let image = get_image(db, registry_id, image_id).await?;
 
@@ -105,7 +105,7 @@ pub async fn save_image_meta(
     image_id: u32,
     meta: UserImageMeta,
 ) -> Result<(), CoreError> {
-    log::info!("save_image_meta called for registry {registry_id} image {image_id}");
+    tracing::info!("save_image_meta called for registry {registry_id} image {image_id}");
 
     let mut update_model = image_entry::ActiveModel {
         ..Default::default()
@@ -130,7 +130,7 @@ pub async fn prepare_image(
     registry_id: u32,
     image_id: u32,
 ) -> Result<(registry_entry::Model, image_entry::Model), CoreError> {
-    log::info!("fetch_image called for image {image_id}");
+    tracing::info!("fetch_image called for image {image_id}");
 
     let registry = registry::get_registry(db, registry_id).await?;
     let mut image = get_image(db, registry_id, image_id).await?;
@@ -145,7 +145,7 @@ pub async fn prepare_image(
         })
         .await?
     {
-        log::info!("Image {image_id} is missing data ({field}), extracting...");
+        tracing::info!("Image {image_id} is missing data ({field}), extracting...");
         let res = plugin_manager
             .execute(&registry.source_id, |plugin| {
                 plugin.extract_image(extract_req)
@@ -164,7 +164,7 @@ pub async fn prepare_image(
         if has_updates {
             set_image(db, registry_id, image_id, image_model).await?;
         } else {
-            log::warn!("Didn't find new data for image {image_id}, but image is said to be missing data. Trying to proceed anyway.");
+            tracing::warn!("Didn't find new data for image {image_id}, but image is said to be missing data. Trying to proceed anyway.");
         }
         image = get_image(db, registry_id, image_id).await?; // Refetch the image with updated data
     }
@@ -181,7 +181,7 @@ pub async fn fetch_image_tile(
     x: u32,
     y: u32,
 ) -> Result<TileResponse, CoreError> {
-    log::info!(
+    tracing::info!(
         "fetch_image_tile called for image id={}, level={}, x={}, y={}",
         image.id,
         level,
@@ -225,7 +225,7 @@ where
     let geometry = ImageGeometry::new(width, height, tile_size);
     let base_layer = geometry.level(zoom_level.unwrap_or_else(|| geometry.max_level()));
 
-    log::info!("Stitching image {} from tiles at {}", image.id, base_layer);
+    tracing::info!("Stitching image {} from tiles at {}", image.id, base_layer);
 
     let mut canvas = RgbImage::new(base_layer.width, base_layer.height);
 
@@ -301,7 +301,7 @@ pub async fn download_image<F>(
 where
     F: FnMut(u32, u32) + Send,
 {
-    log::info!("download_image called for image id={}", image.id);
+    tracing::info!("download_image called for image id={}", image.id);
 
     let req = DownloadRequest {
         image: image.clone().into(),

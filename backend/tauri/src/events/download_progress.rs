@@ -28,7 +28,7 @@ impl DownloadProgressPayload {
                 total,
             }
             .emit(&app_handle)
-            .unwrap_or_else(|e| log::error!("Failed to emit progress: {e}"));
+            .unwrap_or_else(|e| tracing::error!("Failed to emit progress: {e}"));
         }
     }
 }

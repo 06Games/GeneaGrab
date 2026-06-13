@@ -11,6 +11,7 @@ pub mod schemes;
 pub mod state;
 
 use state::AppState;
+use tauri_plugin_tracing::LevelFilter;
 
 use crate::schemes::{handler::scheme_handler, tiles};
 
@@ -36,12 +37,9 @@ pub fn run() {
             // Setup logging
             if cfg!(debug_assertions) {
                 app.handle().plugin(
-                    tauri_plugin_log::Builder::default()
-                        .targets([
-                            tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
-                            tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Webview),
-                        ])
-                        .level(log::LevelFilter::Info)
+                    tauri_plugin_tracing::Builder::new()
+                        .with_max_level(LevelFilter::INFO)
+                        .with_default_subscriber()
                         .build(),
                 )?;
             }
@@ -61,7 +59,7 @@ pub fn run() {
 
             // Construct DB URL
             let db_path = app_data_dir.join("geneagrab.db");
-            log::info!("Using database at: {}", db_path.to_string_lossy());
+            tracing::info!("Using database at: {}", db_path.to_string_lossy());
             let db_url = format!("sqlite://{}?mode=rwc", db_path.to_string_lossy());
 
             // Connect to the DB and run migrations
@@ -99,9 +97,12 @@ pub fn run() {
                     .await
                     {
                         Ok(()) => {
-                            log::info!("Successfully registered plugin: {}", plugin_path.display());
+                            tracing::info!(
+                                "Successfully registered plugin: {}",
+                                plugin_path.display()
+                            );
                         }
-                        Err(e) => log::error!(
+                        Err(e) => tracing::error!(
                             "Failed to register plugin {}: {}",
                             plugin_path.display(),
                             e

@@ -13,7 +13,7 @@ pub struct CommandError(pub String);
 impl<T: ToString> From<T> for CommandError {
     fn from(err: T) -> Self {
         let err = err.to_string();
-        log::error!("{err}");
+        tracing::error!("{err}");
         CommandError(err)
     }
 }

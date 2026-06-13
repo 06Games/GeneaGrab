@@ -21,7 +21,7 @@ pub async fn handle_tile_request(
     let path = request.uri().path();
     let parts: Vec<&str> = path.trim_start_matches('/').split('/').collect();
 
-    log::info!("Received tile request: {path}");
+    tracing::info!("Received tile request: {path}");
 
     if parts.len() >= 2 {
         let registry_id = parts[0].parse::<u32>().unwrap_or(0);
@@ -65,7 +65,7 @@ pub async fn handle_tile_request(
         match endpoint {
             Some(Ok(image_data)) => build_tile_response(image_data),
             Some(Err(e)) => {
-                log::error!("Failed to handle image request: {e}");
+                tracing::error!("Failed to handle image request: {e}");
                 Ok(Response::builder()
                     .status(tauri::http::StatusCode::INTERNAL_SERVER_ERROR)
                     .body(vec![])?)
