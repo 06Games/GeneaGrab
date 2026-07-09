@@ -1,170 +1,97 @@
-use extism::convert::Json;
-use extism::{host_fn, Manifest, Plugin, PluginBuilder, UserData, Wasm, PTR};
-use geneagrab_plugin_core::com_structs::HostPluginBase;
-use geneagrab_plugin_core::data::http::Request;
-use geneagrab_plugin_core::data::PluginMetadata;
-use serde::ser::StdError;
-use std::collections::HashMap;
-use std::str::FromStr;
-use std::sync::{Arc, Mutex, RwLock};
-use tokio::runtime::Handle;
-use tracing::{info, trace};
-use wreq::header::{HeaderName, HeaderValue};
-use wreq::{Client, Method};
+use std::sync::Arc;
+use sea_orm::DbConn;
+use wreq::Client;
 use wreq_util::Emulation;
-
+use geneagrab_providers::traits::{ArchiveProvider, Fetcher};
+use geneagrab_plugin_ad06::Ad06Provider;
+use geneagrab_plugin_geneanet::GeneanetProvider;
+use geneagrab_providers::data::PluginMetadata;
 use crate::errors::CoreError;
+use crate::services::plugin::get_plugin_config;
 
-struct PluginData {
-    plugin: Mutex<Plugin>,
-    metadata: PluginMetadata,
+pub struct CoreFetcher {
+    pub client: Client,
 }
 
-#[derive(Clone)]
-pub struct PluginManager {
-    registry: Arc<RwLock<HashMap<String, PluginData>>>,
-}
-
-impl Default for PluginManager {
-    fn default() -> Self {
-        Self {
-            registry: Arc::new(RwLock::new(HashMap::new())),
+#[async_trait::async_trait]
+impl Fetcher for CoreFetcher {
+    async fn fetch_raw(&self, req: geneagrab_providers::data::Request) -> Result<Vec<u8>, geneagrab_providers::errors::ProviderError> {
+        use std::str::FromStr;
+        use wreq::header::{HeaderName, HeaderValue};
+        let headers = req
+            .headers
+            .iter()
+            .map(|(k, v)| {
+                (
+                    HeaderName::from_str(k.as_str()).unwrap(),
+                    HeaderValue::from_str(v.as_str()).unwrap(),
+                )
+            })
+            .collect();
+        let mut req_builder = self.client
+            .request(wreq::Method::from_str(&req.method.to_string()).unwrap(), &req.url)
+            .headers(headers);
+        if let Some(body) = req.body {
+            req_builder = req_builder.body(body);
         }
+        let resp = req_builder.send().await.map_err(|e| geneagrab_providers::errors::ProviderError::NetworkError(e.to_string()))?;
+
+        tracing::info!("Sent request to {}, got status {}", req.url, resp.status());
+        let body = resp.bytes().await.map_err(|e| geneagrab_providers::errors::ProviderError::NetworkError(e.to_string()))?;
+        Ok(body.to_vec())
     }
 }
 
-async fn http_request_impl(req: Request, client: Client) -> Result<Vec<u8>, Box<dyn StdError>> {
-    let headers = req
-        .headers
-        .iter()
-        .map(|(k, v)| {
-            (
-                HeaderName::from_str(k.as_str()).unwrap(),
-                HeaderValue::from_str(v.as_str()).unwrap(),
-            )
-        })
-        .collect();
-    let mut req_builder = client
-        .request(Method::from_str(&req.method.to_string())?, &req.url)
-        .headers(headers);
-    if let Some(body) = req.body {
-        req_builder = req_builder.body(body);
-    }
-    let resp = req_builder.send().await?;
-
-    info!("Sent request to {}, got status {}", req.url, resp.status());
-    let body = resp.bytes().await?;
-    trace!("Response body: {body:?}");
-
-    Ok(body.to_vec())
-}
-
-host_fn!(http_request (user_data: Client;req: Json<Request>) -> Vec<u8> {
-    let request_data = req.0;
-    let client = {
-        let lock = user_data.get()?;
-        let guard = lock.lock().unwrap();
-        guard.clone()
-    };
-    tokio::task::block_in_place(|| {
-        Handle::current().block_on(async {
-            http_request_impl(request_data, client).await
-        })
-    })
-    .map_err(|e| extism::Error::msg(e.to_string()))
-});
+#[derive(Clone, Default)]
+pub struct PluginManager;
 
 impl PluginManager {
-    /// Registers a new plugin with the manager
-    /// # Errors
-    /// If the http client couldn't be constructed
-    /// If the plugin couldn't be compiled
-    /// If the lock is poisoned
-    pub fn register_plugin(
+    pub fn list_plugins(&self) -> Result<Vec<PluginMetadata>, CoreError> {
+        Ok(vec![
+            Ad06Provider::new("").metadata(),
+            GeneanetProvider::new("").metadata(),
+        ])
+    }
+
+    pub fn get_provider_without_config(&self, plugin_id: &str) -> Result<Arc<dyn ArchiveProvider>, CoreError> {
+        match plugin_id {
+            "ad06" => Ok(Arc::new(Ad06Provider::new(""))),
+            "geneanet" => Ok(Arc::new(GeneanetProvider::new(""))),
+            _ => Err(CoreError::NotFound(format!("Plugin {plugin_id} not found"))),
+        }
+    }
+
+    pub async fn execute<F, Fut, R>(
         &self,
-        id: &str,
-        plugin_config: &HashMap<String, String>,
-        wasm_bytes: Vec<u8>,
-    ) -> Result<(), CoreError> {
-        let manifest = Manifest::new([Wasm::data(wasm_bytes)])
-            .with_allowed_host("*")
-            .with_config(plugin_config.iter());
+        db: &DbConn,
+        plugin_id: &str,
+        action: F,
+    ) -> Result<R, CoreError>
+    where
+        F: FnOnce(Arc<dyn ArchiveProvider>, Arc<dyn Fetcher>) -> Fut,
+        Fut: std::future::Future<Output = Result<R, geneagrab_providers::errors::ProviderError>>,
+    {
+        let config = get_plugin_config(db, plugin_id).await?;
+        let flaresolverr_url = config
+            .get("flaresolverr_url")
+            .cloned()
+            .unwrap_or_else(|| "http://localhost:8191".to_string());
+
+        let provider: Arc<dyn ArchiveProvider> = match plugin_id {
+            "ad06" => Arc::new(Ad06Provider::new(&flaresolverr_url)),
+            "geneanet" => Arc::new(GeneanetProvider::new(&flaresolverr_url)),
+            _ => return Err(CoreError::NotFound(format!("Plugin {plugin_id} not found"))),
+        };
+
         let http_client = Client::builder()
             .emulation(Emulation::Firefox135)
             .build()
             .map_err(|e| CoreError::Other(format!("Failed to create HTTP client: {e}")))?;
 
-        let mut plugin = PluginBuilder::new(&manifest)
-            .with_http_response_headers(true)
-            .with_wasi(true)
-            .with_function(
-                "http_request",
-                [PTR],
-                [PTR],
-                UserData::new(http_client),
-                http_request,
-            )
-            .build()
-            .map_err(|e| CoreError::Other(format!("Failed to initialize plugin: {e}")))?;
+        let fetcher = Arc::new(CoreFetcher { client: http_client });
 
-        if !HostPluginBase::is_supported(&plugin) {
-            return Err(CoreError::Other(format!(
-                "Plugin '{id}' is missing required Base functions!"
-            )));
-        }
-
-        let meta = plugin.metadata(()).map_err(|e| {
-            CoreError::Other(format!("Failed to get plugin metadata for '{id}': {e}"))
-        })?;
-
-        let mut map = self.registry.write().map_err(|e| {
-            CoreError::LockError(format!("Failed to write to plugin registry: {e}"))
-        })?;
-        map.insert(
-            id.to_string(),
-            PluginData {
-                plugin: Mutex::new(plugin),
-                metadata: meta.clone(),
-            },
-        );
-        Ok(())
-    }
-
-    /// List all plugins in the registry.
-    /// # Errors
-    /// If the registry lock is poisoned
-    pub fn list_plugins(&self) -> Result<Vec<PluginMetadata>, CoreError> {
-        let map = self
-            .registry
-            .read()
-            .map_err(|e| CoreError::LockError(format!("Failed to read plugin registry: {e}")))?;
-        Ok(map.values().map(|data| data.metadata.clone()).collect())
-    }
-
-    /// Execute a function on the specified plugin.
-    /// # Errors
-    /// If `plugin_id` can't be found in the registered plugin list
-    /// If the execution fails
-    /// If the lock is poisoned
-    #[allow(clippy::unused_async, reason = "planned feature")]
-    pub async fn execute<F, R>(&self, plugin_id: &str, action: F) -> Result<R, CoreError>
-    where
-        F: FnOnce(&mut extism::Plugin) -> Result<R, extism::Error>,
-    {
-        // TODO: Wait for the plugin to be built if register_plugin has been called but the plugin isn't ready.
-        let map = self
-            .registry
-            .read()
-            .map_err(|e| CoreError::LockError(format!("Failed to read plugin registry: {e}")))?;
-        let plugin_mutex = &map
-            .get(plugin_id)
-            .ok_or_else(|| CoreError::NotFound(format!("Plugin {plugin_id} not found")))?
-            .plugin;
-
-        let mut plugin = plugin_mutex
-            .lock()
-            .map_err(|e| CoreError::LockError(format!("Failed to lock plugin: {e}")))?;
-
-        action(&mut plugin).map_err(|e| CoreError::PluginError(e.to_string()))
+        action(provider, fetcher)
+            .await
+            .map_err(|e| CoreError::PluginError(e.to_string()))
     }
 }

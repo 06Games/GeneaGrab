@@ -1,5 +1,5 @@
 use dates::HistoricalDate;
-use geneagrab_plugin_core::data::{Registry, RegistryType};
+use geneagrab_providers::data::{Registry, RegistryType};
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};

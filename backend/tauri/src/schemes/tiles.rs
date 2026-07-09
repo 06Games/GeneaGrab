@@ -3,7 +3,7 @@ use std::vec;
 use crate::{events::DownloadProgressPayload, state::AppState};
 use anyhow::Error;
 use geneagrab_core::services::image;
-use geneagrab_plugin_core::com_structs::TileResponse;
+use geneagrab_providers::com_structs::TileResponse;
 use tauri::{
     http::{Request, Response, StatusCode},
     AppHandle, Manager,

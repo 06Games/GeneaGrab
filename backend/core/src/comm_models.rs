@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use geneagrab_plugin_core::data::RegistryType;
+use geneagrab_providers::data::RegistryType;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::fmt::Display;

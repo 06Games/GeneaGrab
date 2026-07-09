@@ -26,3 +26,9 @@ pub enum CoreError {
     #[error("{0}")]
     Other(String),
 }
+
+impl From<geneagrab_providers::errors::ProviderError> for CoreError {
+    fn from(err: geneagrab_providers::errors::ProviderError) -> Self {
+        CoreError::PluginError(err.to_string())
+    }
+}

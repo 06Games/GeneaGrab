@@ -1,9 +1,9 @@
 #![warn(clippy::pedantic)]
 
-use geneagrab_core::{plugins::PluginManager, services::plugin};
+use geneagrab_core::plugins::PluginManager;
 use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
-use tauri::{Manager, State};
+use tauri::Manager;
 
 pub mod commands;
 pub mod events;
@@ -79,36 +79,6 @@ pub fn run() {
             app.manage(AppState {
                 db,
                 plugin_manager: PluginManager::default(),
-            });
-
-            let app_handle = app.handle().clone();
-            let plugins_dir = app_data_dir.join("plugins").clone();
-            tauri::async_runtime::spawn(async move {
-                let state: State<'_, AppState> = app_handle.state();
-                let plugins = plugin::scan_plugins_dir(&plugins_dir)
-                    .await
-                    .expect("Failed to scan plugins directory");
-                for plugin_path in plugins {
-                    match plugin::register_plugin(
-                        &state.db,
-                        state.plugin_manager.clone(),
-                        plugin_path.clone(),
-                    )
-                    .await
-                    {
-                        Ok(()) => {
-                            tracing::info!(
-                                "Successfully registered plugin: {}",
-                                plugin_path.display()
-                            );
-                        }
-                        Err(e) => tracing::error!(
-                            "Failed to register plugin {}: {}",
-                            plugin_path.display(),
-                            e
-                        ),
-                    }
-                }
             });
 
             Ok(())

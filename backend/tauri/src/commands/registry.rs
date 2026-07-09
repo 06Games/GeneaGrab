@@ -1,6 +1,6 @@
 use crate::state::{AppState, CommandError};
 use geneagrab_core::comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta};
-use geneagrab_plugin_core::data::PluginMetadata;
+use geneagrab_providers::data::PluginMetadata;
 use tauri::State;
 
 #[tauri::command]

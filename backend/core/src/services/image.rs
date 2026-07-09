@@ -6,9 +6,9 @@ use crate::{
     services::registry,
 };
 use futures::StreamExt;
-use geneagrab_plugin_core::{
+use geneagrab_providers::{
     com_structs::{
-        DownloadRequest, ExtractImageRequest, HostPluginBase, TileRequest, TileResponse,
+        DownloadRequest, ExtractImageRequest, TileRequest, TileResponse,
     },
     utils::ImageGeometry,
 };
@@ -139,16 +139,18 @@ pub async fn prepare_image(
         image: image.clone().into(),
     };
 
-    if let Some(field) = plugin_manager
-        .execute(&registry.source_id, |plugin| {
-            plugin.is_image_missing_data(extract_req.clone())
+    let req_clone = extract_req.clone();
+    let missing_data = plugin_manager
+        .execute(db, &registry.source_id, |plugin, _| async move {
+            plugin.is_image_missing_data(&req_clone)
         })
-        .await?
-    {
+        .await?;
+
+    if let Some(field) = missing_data {
         tracing::info!("Image {image_id} is missing data ({field}), extracting...");
         let res = plugin_manager
-            .execute(&registry.source_id, |plugin| {
-                plugin.extract_image(extract_req)
+            .execute(db, &registry.source_id, |plugin, fetcher| async move {
+                plugin.extract_image(&*fetcher, extract_req).await
             })
             .await?;
 
@@ -178,7 +180,7 @@ pub async fn prepare_image(
 }
 
 pub async fn fetch_image_tile(
-    _db: &DbConn,
+    db: &DbConn,
     plugin_manager: &PluginManager,
     registry: &registry_entry::Model,
     image: &image_entry::Model,
@@ -202,7 +204,9 @@ pub async fn fetch_image_tile(
     };
 
     let image_data = plugin_manager
-        .execute(&registry.source_id, |plugin| plugin.fetch_tile(req))
+        .execute(db, &registry.source_id, |plugin, fetcher| async move {
+            plugin.fetch_tile(&*fetcher, req).await
+        })
         .await?;
 
     Ok(image_data)
@@ -313,7 +317,9 @@ where
     };
 
     let image_data = plugin_manager
-        .execute(&registry.source_id, |plugin| plugin.download_image(req))
+        .execute(db, &registry.source_id, |plugin, fetcher| async move {
+            plugin.download_image(&*fetcher, req).await
+        })
         .await?;
 
     if let Some(res) = image_data {

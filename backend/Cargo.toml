@@ -3,9 +3,9 @@ resolver = "2"
 members = [
     "core",
     "migration",
-    "plugin_core",
-    "plugins/ad06",
-    "plugin_common/dates",
-    "plugins/geneanet",
+    "providers/common",
+    "providers/ad06",
+    "providers/geneanet",
+    "dates",
     "tauri",
 ]

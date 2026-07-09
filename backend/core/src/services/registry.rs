@@ -10,8 +10,8 @@ use crate::{
     plugins::PluginManager,
 };
 use dates::HistoricalDate;
-use geneagrab_plugin_core::com_structs::{HostPluginBase, IdentifyRequest, IdentifyResponse};
-use geneagrab_plugin_core::{com_structs::ExtractRequest, data::PluginMetadata};
+use geneagrab_providers::com_structs::{IdentifyRequest, IdentifyResponse, ExtractRequest};
+use geneagrab_providers::data::PluginMetadata;
 use sea_orm::QueryOrder;
 use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, FromQueryResult,
@@ -235,9 +235,9 @@ pub async fn add_registry(
     tracing::info!("add_registry called with url: {url}, plugin_id: {plugin_id}");
 
     let res = plugin_manager
-        .execute(&plugin_id, |plugin| {
+        .execute(db, &plugin_id, |plugin, fetcher| async move {
             let identified = plugin.identify(IdentifyRequest { url: url.clone() })?; // TODO: Avoid re-extracting data from the URL
-            plugin.extract_registry(ExtractRequest { url, identified })
+            plugin.extract_registry(&*fetcher, ExtractRequest { url, identified }).await
         })
         .await?;
 
@@ -290,15 +290,12 @@ pub async fn get_plugins_for_url(
     let mut compatible_plugins = Vec::new();
 
     for meta in plugins {
-        if let Ok(identified) = plugin_manager
-            .execute(&meta.id, |plugin| {
-                plugin.identify(IdentifyRequest {
-                    url: url.to_string(),
-                })
-            })
-            .await
-        {
-            compatible_plugins.push((meta, identified));
+        if let Ok(provider) = plugin_manager.get_provider_without_config(&meta.id) {
+            if let Ok(identified) = provider.identify(IdentifyRequest {
+                url: url.to_string(),
+            }) {
+                compatible_plugins.push((meta, identified));
+            }
         }
     }
 
