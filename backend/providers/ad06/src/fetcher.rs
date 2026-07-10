@@ -53,7 +53,18 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
 #[async_trait::async_trait]
 impl<'a, F: Fetcher + ?Sized> Fetcher for AdamFetcher<'a, F> {
     async fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, ProviderError> {
-        let res = self.fetcher.fetch_raw(req).await?;
+        let res = match self.fetcher.fetch_raw(req).await {
+            Ok(data) => data,
+            Err(ProviderError::NetworkError(msg))
+                if msg.contains("ERR_CONNECTION_RESET")
+                    || msg.to_ascii_lowercase().contains("connection reset") =>
+            {
+                return Err(ProviderError::NetworkError(String::from(
+                    "Resource is behind a captcha",
+                )));
+            }
+            Err(e) => return Err(e),
+        };
         match Self::has_captcha(&res) {
             Ok(None) => Ok(res),
             Ok(Some(_captcha)) => {
