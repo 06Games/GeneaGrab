@@ -1,7 +1,7 @@
 #![warn(clippy::pedantic)]
 
 use migration::{Migrator, MigratorTrait};
-use sea_orm::Database;
+use sea_orm::{ConnectOptions, Database};
 use tauri::Manager;
 
 pub mod commands;
@@ -63,7 +63,9 @@ pub fn run() {
 
             // Connect to the DB and run migrations
             let db = tauri::async_runtime::block_on(async {
-                let conn = Database::connect(&db_url)
+                let mut opt = ConnectOptions::new(db_url);
+                opt.sqlx_logging(false);
+                let conn = Database::connect(opt)
                     .await
                     .expect("Failed to connect to database");
 
@@ -75,9 +77,7 @@ pub fn run() {
                 conn
             });
 
-            app.manage(AppState {
-                db,
-            });
+            app.manage(AppState { db });
 
             Ok(())
         })
