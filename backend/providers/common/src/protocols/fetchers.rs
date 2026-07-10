@@ -18,6 +18,16 @@ static FLARESOLVERR_CACHE: LazyLock<RwLock<HashMap<String, Clearance>>> =
 static FLARESOLVERR_LAST_ERROR: LazyLock<RwLock<HashMap<String, (ProviderError, std::time::Instant)>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
 
+async fn check_cooldown(cache_key: &str) -> Result<(), ProviderError> {
+    let error_guard = FLARESOLVERR_LAST_ERROR.read().await;
+    if let Some((err, instant)) = error_guard.get(cache_key) {
+        if instant.elapsed() < std::time::Duration::from_secs(5) {
+            return Err(err.clone());
+        }
+    }
+    Ok(())
+}
+
 /// Proxies requests through FlareSolverr to bypass Cloudflare protections.
 pub struct FlareSolverrFetcher<'a, F: Fetcher + ?Sized> {
     flaresolverr_url: String,
@@ -135,23 +145,52 @@ impl<'a, F: Fetcher + ?Sized> CachedFlareSolverrFetcher<'a, F> {
         }
     }
 
-    async fn fetch_raw_uncached(&self, req: Request, cache_key: &str) -> Result<Vec<u8>, ProviderError> {
-        if needs_safe_request(&req.url) {
-            let read_guard = FLARESOLVERR_CACHE.read().await;
-            if let Some(cached_solution) = read_guard.get(cache_key) {
-                match self
-                    .flaresolverr_fetcher
-                    .safe_fetch(cached_solution.clone(), req.clone())
-                    .await
-                {
-                    Ok(data) => return Ok(data),
-                    Err(_) => {
-                        drop(read_guard);
-                        let mut write_guard = FLARESOLVERR_CACHE.write().await;
-                        write_guard.remove(cache_key);
-                    }
+    async fn try_fetch_cached(
+        &self,
+        req: &Request,
+        cache_key: &str,
+    ) -> Option<Result<Vec<u8>, ProviderError>> {
+        if !needs_safe_request(&req.url) {
+            return None;
+        }
+        let read_guard = FLARESOLVERR_CACHE.read().await;
+        if let Some(cached_solution) = read_guard.get(cache_key) {
+            let solution_clone = cached_solution.clone();
+            drop(read_guard);
+            match self
+                .flaresolverr_fetcher
+                .safe_fetch(solution_clone, req.clone())
+                .await
+            {
+                Ok(data) => Some(Ok(data)),
+                Err(_) => {
+                    let mut write_guard = FLARESOLVERR_CACHE.write().await;
+                    write_guard.remove(cache_key);
+                    None
                 }
             }
+        } else {
+            None
+        }
+    }
+
+    async fn resolve_fresh_solution(
+        &self,
+        req: &Request,
+        cache_key: &str,
+    ) -> Result<FlareSolverrSolution, ProviderError> {
+        let solution = self.flaresolverr_fetcher.internal_fetch(req.clone()).await?;
+        let clearance = Clearance::try_from(solution.clone())?;
+        {
+            let mut write_guard = FLARESOLVERR_CACHE.write().await;
+            write_guard.insert(cache_key.to_string(), clearance);
+        }
+        Ok(solution)
+    }
+
+    async fn fetch_raw_uncached(&self, req: Request, cache_key: &str) -> Result<Vec<u8>, ProviderError> {
+        if let Some(res) = self.try_fetch_cached(&req, cache_key).await {
+            return res;
         }
 
         // Cache miss or expired cookies: serialize FlareSolverr calls
@@ -159,62 +198,31 @@ impl<'a, F: Fetcher + ?Sized> CachedFlareSolverrFetcher<'a, F> {
         let _guard = RESOLVE_LOCK.lock().await;
 
         // Double check cooldown under lock
-        {
-            let error_guard = FLARESOLVERR_LAST_ERROR.read().await;
-            if let Some((err, instant)) = error_guard.get(cache_key) {
-                if instant.elapsed() < std::time::Duration::from_secs(5) {
-                    return Err(err.clone());
-                }
-            }
-        }
+        check_cooldown(cache_key).await?;
 
         // Double check cache under lock (another thread might have resolved it in the meantime)
         if needs_safe_request(&req.url) {
-            let read_guard = FLARESOLVERR_CACHE.read().await;
-            if let Some(cached_solution) = read_guard.get(cache_key) {
-                let solution_clone = cached_solution.clone();
-                drop(read_guard);
+            let has_cached = {
+                let read_guard = FLARESOLVERR_CACHE.read().await;
+                read_guard.contains_key(cache_key)
+            };
+            if has_cached {
                 drop(_guard); // drop lock before making network request
-                if let Ok(data) = self
-                    .flaresolverr_fetcher
-                    .safe_fetch(solution_clone, req.clone())
-                    .await
-                {
-                    return Ok(data);
+                if let Some(res) = self.try_fetch_cached(&req, cache_key).await {
+                    return res;
                 }
+
                 // If it fails again, re-acquire the lock to perform a fresh fetch
                 let _re_guard = RESOLVE_LOCK.lock().await;
-
-                // Double check cooldown under inner lock
-                {
-                    let error_guard = FLARESOLVERR_LAST_ERROR.read().await;
-                    if let Some((err, instant)) = error_guard.get(cache_key) {
-                        if instant.elapsed() < std::time::Duration::from_secs(5) {
-                            return Err(err.clone());
-                        }
-                    }
-                }
-
-                let solution = self.flaresolverr_fetcher.internal_fetch(req.clone()).await?;
-                let clearance = Clearance::try_from(solution.clone())?;
-                {
-                    let mut write_guard = FLARESOLVERR_CACHE.write().await;
-                    write_guard.insert(cache_key.to_string(), clearance);
-                }
+                check_cooldown(cache_key).await?;
+                let solution = self.resolve_fresh_solution(&req, cache_key).await?;
+                drop(_re_guard);
                 return self.flaresolverr_fetcher.use_solution(req, solution).await;
             }
         }
 
-        let solution = self.flaresolverr_fetcher.internal_fetch(req.clone()).await?;
-        let clearance = Clearance::try_from(solution.clone())?;
-
-        {
-            let mut write_guard = FLARESOLVERR_CACHE.write().await;
-            write_guard.insert(cache_key.to_string(), clearance);
-        }
-
+        let solution = self.resolve_fresh_solution(&req, cache_key).await?;
         drop(_guard);
-
         self.flaresolverr_fetcher.use_solution(req, solution).await
     }
 }
@@ -226,14 +234,7 @@ impl<'a, F: Fetcher + ?Sized> Fetcher for CachedFlareSolverrFetcher<'a, F> {
         let cache_key = format!("flaresolverr_{host}");
 
         // Check if we are in cooldown for this host
-        {
-            let error_guard = FLARESOLVERR_LAST_ERROR.read().await;
-            if let Some((err, instant)) = error_guard.get(&cache_key) {
-                if instant.elapsed() < std::time::Duration::from_secs(5) {
-                    return Err(err.clone());
-                }
-            }
-        }
+        check_cooldown(&cache_key).await?;
 
         match self.fetch_raw_uncached(req, &cache_key).await {
             Ok(data) => Ok(data),
