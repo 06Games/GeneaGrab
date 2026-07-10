@@ -29,7 +29,6 @@ pub async fn add_registry(
 ) -> Result<RegistryMeta, CommandError> {
     let res = geneagrab_core::services::registry::add_registry(
         &state.db,
-        &state.plugin_manager,
         url,
         plugin_id,
     )
@@ -40,9 +39,8 @@ pub async fn add_registry(
 #[tauri::command]
 pub async fn get_plugins_for_url(
     url: String,
-    state: State<'_, AppState>,
 ) -> Result<Vec<PluginMetadata>, CommandError> {
-    let res = geneagrab_core::services::registry::get_plugins_for_url(&state.plugin_manager, &url)
+    let res = geneagrab_core::services::registry::get_plugins_for_url(&url)
         .await?;
 
     Ok(res.into_iter().map(|(meta, _)| meta).collect()) // TODO: Keep the extracted info

@@ -1,6 +1,5 @@
 #![warn(clippy::pedantic)]
 
-use geneagrab_core::plugins::PluginManager;
 use migration::{Migrator, MigratorTrait};
 use sea_orm::Database;
 use tauri::Manager;
@@ -78,7 +77,6 @@ pub fn run() {
 
             app.manage(AppState {
                 db,
-                plugin_manager: PluginManager::default(),
             });
 
             Ok(())

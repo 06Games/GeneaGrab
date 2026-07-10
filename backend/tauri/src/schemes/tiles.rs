@@ -27,7 +27,7 @@ pub async fn handle_tile_request(
         let registry_id = parts[0].parse::<u32>().unwrap_or(0);
         let image_id = parts[1].parse::<u32>().unwrap_or(0);
         let (registry, image) =
-            image::prepare_image(&state.db, &state.plugin_manager, registry_id, image_id).await?;
+            image::prepare_image(&state.db, registry_id, image_id).await?;
 
         let endpoint = match parts.len() {
             2 => {
@@ -37,7 +37,7 @@ pub async fn handle_tile_request(
                     image_id,
                 );
                 Some(
-                    image::download_image(&state.db, &state.plugin_manager, registry, image, cb)
+                    image::download_image(&state.db, registry, image, cb)
                         .await,
                 )
             }
@@ -49,7 +49,6 @@ pub async fn handle_tile_request(
                 Some(
                     image::fetch_image_tile(
                         &state.db,
-                        &state.plugin_manager,
                         &registry,
                         &image,
                         level,

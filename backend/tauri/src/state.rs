@@ -1,10 +1,8 @@
-use geneagrab_core::plugins::PluginManager;
 use sea_orm::DbConn;
 use serde::Serialize;
 
 pub struct AppState {
     pub db: DbConn,
-    pub plugin_manager: PluginManager,
 }
 
 #[derive(Serialize)]

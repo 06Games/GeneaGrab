@@ -1,3 +1,3 @@
-mod plugin_manager;
+mod providers;
 
-pub use plugin_manager::*;
+pub use providers::*;

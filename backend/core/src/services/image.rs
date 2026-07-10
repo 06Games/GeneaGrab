@@ -2,7 +2,6 @@ use crate::{
     comm_models::{ImageMeta, UserImageMeta},
     db_entries::{image_entry, registry_entry},
     errors::CoreError,
-    plugins::PluginManager,
     services::registry,
 };
 use futures::StreamExt;
@@ -126,7 +125,6 @@ pub async fn save_image_meta(
 
 pub async fn prepare_image(
     db: &DbConn,
-    plugin_manager: &PluginManager,
     registry_id: u32,
     image_id: u32,
 ) -> Result<(registry_entry::Model, image_entry::Model), CoreError> {
@@ -139,20 +137,17 @@ pub async fn prepare_image(
         image: image.clone().into(),
     };
 
-    let req_clone = extract_req.clone();
-    let missing_data = plugin_manager
-        .execute(db, &registry.source_id, |plugin, _| async move {
-            plugin.is_image_missing_data(&req_clone)
-        })
-        .await?;
+    let provider = crate::plugins::get_provider(db, &registry.source_id).await?;
+    let missing_data = provider
+        .is_image_missing_data(&extract_req)
+        .map_err(|e| CoreError::PluginError(e.to_string()))?;
 
     if let Some(field) = missing_data {
         tracing::info!("Image {image_id} is missing data ({field}), extracting...");
-        let res = plugin_manager
-            .execute(db, &registry.source_id, |plugin, fetcher| async move {
-                plugin.extract_image(&*fetcher, extract_req).await
-            })
-            .await?;
+        let res = provider
+            .extract_image(extract_req)
+            .await
+            .map_err(|e| CoreError::PluginError(e.to_string()))?;
 
         let mut image_model: image_entry::ActiveModel = image.into();
         let mut has_updates = false;
@@ -181,7 +176,6 @@ pub async fn prepare_image(
 
 pub async fn fetch_image_tile(
     db: &DbConn,
-    plugin_manager: &PluginManager,
     registry: &registry_entry::Model,
     image: &image_entry::Model,
     level: u32,
@@ -203,18 +197,17 @@ pub async fn fetch_image_tile(
         y,
     };
 
-    let image_data = plugin_manager
-        .execute(db, &registry.source_id, |plugin, fetcher| async move {
-            plugin.fetch_tile(&*fetcher, req).await
-        })
-        .await?;
+    let provider = crate::plugins::get_provider(db, &registry.source_id).await?;
+    let image_data = provider
+        .fetch_tile(req)
+        .await
+        .map_err(|e| CoreError::PluginError(e.to_string()))?;
 
     Ok(image_data)
 }
 
 pub async fn fetch_image<F>(
     db: &DbConn,
-    plugin_manager: &PluginManager,
     registry: registry_entry::Model,
     image: image_entry::Model,
     mut progress_callback: F,
@@ -257,7 +250,6 @@ where
         .map(|(x, y)| async move {
             let tile = fetch_image_tile(
                 db,
-                plugin_manager,
                 registry_ref,
                 image_ref,
                 base_layer.level,
@@ -302,7 +294,6 @@ where
 
 pub async fn download_image<F>(
     db: &DbConn,
-    plugin_manager: &PluginManager,
     registry: registry_entry::Model,
     image: image_entry::Model,
     mut progress_callback: F,
@@ -316,16 +307,16 @@ where
         image: image.clone().into(),
     };
 
-    let image_data = plugin_manager
-        .execute(db, &registry.source_id, |plugin, fetcher| async move {
-            plugin.download_image(&*fetcher, req).await
-        })
-        .await?;
+    let provider = crate::plugins::get_provider(db, &registry.source_id).await?;
+    let image_data = provider
+        .download_image(req)
+        .await
+        .map_err(|e| CoreError::PluginError(e.to_string()))?;
 
     if let Some(res) = image_data {
         progress_callback(1, 1);
         Ok(res)
     } else {
-        fetch_image(db, plugin_manager, registry, image, progress_callback, None).await
+        fetch_image(db, registry, image, progress_callback, None).await
     }
 }

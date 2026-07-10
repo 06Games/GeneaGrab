@@ -35,13 +35,15 @@ static ARK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 
 pub struct Ad06Provider {
     pub flaresolverr_url: String,
+    pub fetcher: std::sync::Arc<dyn Fetcher>,
 }
 
 impl Ad06Provider {
     #[must_use]
-    pub fn new(flaresolverr_url: &str) -> Self {
+    pub fn new(flaresolverr_url: &str, fetcher: std::sync::Arc<dyn Fetcher>) -> Self {
         Self {
             flaresolverr_url: flaresolverr_url.to_string(),
+            fetcher,
         }
     }
 }
@@ -87,11 +89,9 @@ impl ArchiveProvider for Ad06Provider {
 
     async fn extract_registry(
         &self,
-        fetcher: &dyn Fetcher,
         req: ExtractRequest,
     ) -> Result<ExtractResponse, ProviderError> {
-        let adam_fetcher = fetcher::AdamFetcher::new(&self.flaresolverr_url, fetcher);
-        extract::extract_registry_internal(&req, &adam_fetcher).await
+        extract::extract_registry(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
     fn is_image_missing_data(&self, req: &ExtractImageRequest) -> Result<Option<String>, ProviderError> {
@@ -100,28 +100,22 @@ impl ArchiveProvider for Ad06Provider {
 
     async fn extract_image(
         &self,
-        fetcher: &dyn Fetcher,
         req: ExtractImageRequest,
     ) -> Result<ExtractImageResponse, ProviderError> {
-        let adam_fetcher = fetcher::AdamFetcher::new(&self.flaresolverr_url, fetcher);
-        image::extract_image(&req, &adam_fetcher).await
+        image::extract_image(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
     async fn fetch_tile(
         &self,
-        fetcher: &dyn Fetcher,
         req: TileRequest,
     ) -> Result<TileResponse, ProviderError> {
-        let adam_fetcher = fetcher::AdamFetcher::new(&self.flaresolverr_url, fetcher);
-        image::fetch_tile(&req, &adam_fetcher).await
+        image::fetch_tile(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
     async fn download_image(
         &self,
-        fetcher: &dyn Fetcher,
         req: DownloadRequest,
     ) -> Result<Option<TileResponse>, ProviderError> {
-        let adam_fetcher = fetcher::AdamFetcher::new(&self.flaresolverr_url, fetcher);
-        image::download_image(&req, &adam_fetcher).await
+        image::download_image(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 }

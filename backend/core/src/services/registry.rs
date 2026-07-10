@@ -7,7 +7,6 @@ use crate::{
         registry_entry::{self},
     },
     errors::CoreError,
-    plugins::PluginManager,
 };
 use dates::HistoricalDate;
 use geneagrab_providers::com_structs::{IdentifyRequest, IdentifyResponse, ExtractRequest};
@@ -228,18 +227,17 @@ pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, Cor
 
 pub async fn add_registry(
     db: &DbConn,
-    plugin_manager: &PluginManager,
     url: String,
     plugin_id: String,
 ) -> Result<RegistryMeta, CoreError> {
     tracing::info!("add_registry called with url: {url}, plugin_id: {plugin_id}");
 
-    let res = plugin_manager
-        .execute(db, &plugin_id, |plugin, fetcher| async move {
-            let identified = plugin.identify(IdentifyRequest { url: url.clone() })?; // TODO: Avoid re-extracting data from the URL
-            plugin.extract_registry(&*fetcher, ExtractRequest { url, identified }).await
-        })
-        .await?;
+    let provider = crate::plugins::get_provider(db, &plugin_id).await?;
+    let identified = provider.identify(IdentifyRequest { url: url.clone() }).map_err(|e| CoreError::PluginError(e.to_string()))?;
+    let res = provider
+        .extract_registry(ExtractRequest { url, identified })
+        .await
+        .map_err(|e| CoreError::PluginError(e.to_string()))?;
 
     let txn = db
         .begin()
@@ -283,19 +281,18 @@ pub async fn add_registry(
 }
 
 pub async fn get_plugins_for_url(
-    plugin_manager: &PluginManager,
     url: &str,
 ) -> Result<Vec<(PluginMetadata, IdentifyResponse)>, CoreError> {
-    let plugins = plugin_manager.list_plugins()?;
+    let fetcher = crate::plugins::get_fetcher()?;
+    let providers = crate::plugins::get_providers("", fetcher);
     let mut compatible_plugins = Vec::new();
 
-    for meta in plugins {
-        if let Ok(provider) = plugin_manager.get_provider_without_config(&meta.id) {
-            if let Ok(identified) = provider.identify(IdentifyRequest {
-                url: url.to_string(),
-            }) {
-                compatible_plugins.push((meta, identified));
-            }
+    for provider in providers {
+        let meta = provider.metadata();
+        if let Ok(identified) = provider.identify(IdentifyRequest {
+            url: url.to_string(),
+        }) {
+            compatible_plugins.push((meta, identified));
         }
     }
 

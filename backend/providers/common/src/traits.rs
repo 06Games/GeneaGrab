@@ -23,7 +23,6 @@ pub trait ArchiveProvider: Send + Sync {
     
     async fn extract_registry(
         &self,
-        fetcher: &dyn Fetcher,
         req: ExtractRequest,
     ) -> Result<ExtractResponse, ProviderError>;
     
@@ -31,19 +30,16 @@ pub trait ArchiveProvider: Send + Sync {
     
     async fn extract_image(
         &self,
-        fetcher: &dyn Fetcher,
         req: ExtractImageRequest,
     ) -> Result<ExtractImageResponse, ProviderError>;
     
     async fn fetch_tile(
         &self,
-        fetcher: &dyn Fetcher,
         req: TileRequest,
     ) -> Result<TileResponse, ProviderError>;
     
     async fn download_image(
         &self,
-        fetcher: &dyn Fetcher,
         req: DownloadRequest,
     ) -> Result<Option<TileResponse>, ProviderError>;
 }

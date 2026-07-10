@@ -47,7 +47,7 @@ pub async fn download_image(
         image_id,
     );
     let (registry, image) =
-        image::prepare_image(&state.db, &state.plugin_manager, registry_id, image_id).await?;
+        image::prepare_image(&state.db, registry_id, image_id).await?;
     let filename = format!(
         "geneagrab--{}--{}.jpg",
         registry
@@ -57,7 +57,7 @@ pub async fn download_image(
         image_id
     );
     let image =
-        image::download_image(&state.db, &state.plugin_manager, registry, image, cb).await?;
+        image::download_image(&state.db, registry, image, cb).await?;
 
     let file_path = app_handle.path().download_dir()?.join(filename);
     fs::write(&file_path, image.data)?;

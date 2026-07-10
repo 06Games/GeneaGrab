@@ -437,3 +437,12 @@ pub async fn extract_registry_internal(
 
     Ok(ExtractResponse { registry, images })
 }
+
+pub(crate) async fn extract_registry(
+    req: &ExtractRequest,
+    flaresolverr_url: &str,
+    base_fetcher: &dyn Fetcher,
+) -> Result<ExtractResponse, ProviderError> {
+    let adam_fetcher = crate::fetcher::AdamFetcher::new(flaresolverr_url, base_fetcher);
+    extract_registry_internal(req, &adam_fetcher).await
+}

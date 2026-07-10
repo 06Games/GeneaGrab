@@ -9,7 +9,6 @@ use geneagrab_providers::com_structs::{
     ExtractImageRequest, ExtractImageResponse, TileRequest, TileResponse, DownloadRequest
 };
 use geneagrab_providers::errors::ProviderError;
-use geneagrab_providers::protocols::fetchers::CachedFlareSolverrFetcher;
 
 pub mod extract;
 pub mod image;
@@ -35,13 +34,15 @@ static URL_REGEX: LazyLock<Regex> = LazyLock::new(|| {
 
 pub struct GeneanetProvider {
     pub flaresolverr_url: String,
+    pub fetcher: std::sync::Arc<dyn Fetcher>,
 }
 
 impl GeneanetProvider {
     #[must_use]
-    pub fn new(flaresolverr_url: &str) -> Self {
+    pub fn new(flaresolverr_url: &str, fetcher: std::sync::Arc<dyn Fetcher>) -> Self {
         Self {
             flaresolverr_url: flaresolverr_url.to_string(),
+            fetcher,
         }
     }
 }
@@ -79,11 +80,9 @@ impl ArchiveProvider for GeneanetProvider {
 
     async fn extract_registry(
         &self,
-        fetcher: &dyn Fetcher,
         req: ExtractRequest,
     ) -> Result<ExtractResponse, ProviderError> {
-        let fs_fetcher = CachedFlareSolverrFetcher::new(&self.flaresolverr_url, fetcher);
-        extract::extract_registry_internal(&req, &fs_fetcher).await
+        extract::extract_registry(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
     fn is_image_missing_data(&self, req: &ExtractImageRequest) -> Result<Option<String>, ProviderError> {
@@ -92,25 +91,20 @@ impl ArchiveProvider for GeneanetProvider {
 
     async fn extract_image(
         &self,
-        fetcher: &dyn Fetcher,
         req: ExtractImageRequest,
     ) -> Result<ExtractImageResponse, ProviderError> {
-        let fs_fetcher = CachedFlareSolverrFetcher::new(&self.flaresolverr_url, fetcher);
-        image::extract_image(&req, &fs_fetcher).await
+        image::extract_image(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
     async fn fetch_tile(
         &self,
-        fetcher: &dyn Fetcher,
         req: TileRequest,
     ) -> Result<TileResponse, ProviderError> {
-        let fs_fetcher = CachedFlareSolverrFetcher::new(&self.flaresolverr_url, fetcher);
-        image::fetch_tile(&req, &fs_fetcher).await
+        image::fetch_tile(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
     async fn download_image(
         &self,
-        _fetcher: &dyn Fetcher,
         _req: DownloadRequest,
     ) -> Result<Option<TileResponse>, ProviderError> {
         image::download_image()

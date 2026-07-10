@@ -8,7 +8,7 @@ use geneagrab_providers::{
     traits::Fetcher,
 };
 
-pub fn is_image_missing_data(
+pub(crate) fn is_image_missing_data(
     req: &ExtractImageRequest,
 ) -> Result<Option<String>, ProviderError> {
     match Zoomify::try_from(req.image.clone()) {
@@ -38,11 +38,16 @@ async fn extract_image_internal(
     Ok(ExtractImageResponse { image })
 }
 
-pub async fn extract_image(
+pub(crate) async fn extract_image(
     req: &ExtractImageRequest,
-    fetcher: &dyn Fetcher,
+    flaresolverr_url: &str,
+    base_fetcher: &dyn Fetcher,
 ) -> Result<ExtractImageResponse, ProviderError> {
-    extract_image_internal(req, fetcher).await
+    let fs_fetcher = geneagrab_providers::protocols::fetchers::CachedFlareSolverrFetcher::new(
+        flaresolverr_url,
+        base_fetcher,
+    );
+    extract_image_internal(req, &fs_fetcher).await
 }
 
 async fn fetch_tile_internal(
@@ -59,11 +64,19 @@ async fn fetch_tile_internal(
     })
 }
 
-pub async fn fetch_tile(req: &TileRequest, fetcher: &dyn Fetcher) -> Result<TileResponse, ProviderError> {
-    fetch_tile_internal(req, fetcher).await
+pub(crate) async fn fetch_tile(
+    req: &TileRequest,
+    flaresolverr_url: &str,
+    base_fetcher: &dyn Fetcher,
+) -> Result<TileResponse, ProviderError> {
+    let fs_fetcher = geneagrab_providers::protocols::fetchers::CachedFlareSolverrFetcher::new(
+        flaresolverr_url,
+        base_fetcher,
+    );
+    fetch_tile_internal(req, &fs_fetcher).await
 }
 
 #[allow(clippy::unnecessary_wraps, reason = "WIP")]
-pub fn download_image() -> Result<Option<TileResponse>, ProviderError> {
+pub(crate) fn download_image() -> Result<Option<TileResponse>, ProviderError> {
     Ok(None)
 }
