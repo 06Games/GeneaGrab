@@ -2,7 +2,6 @@
 name = "geneagrab-tauri"
 version = "4.0.0"
 description = "A tool to download images of digitised registers"
-authors = ["EvanG"]
 license = "GPL"
 repository = ""
 edition = "2021"

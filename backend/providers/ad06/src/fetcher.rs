@@ -3,21 +3,21 @@ use scraper::{Html, Selector};
 use url::form_urlencoded;
 
 use geneagrab_providers::{
+    data::{FetchMethod, Request},
     errors::ProviderError,
-    data::{Request, FetchMethod},
-    traits::Fetcher,
     protocols::fetchers::CachedFlareSolverrFetcher,
+    traits::Fetcher,
 };
 
-static OCR_ENGINE: tokio::sync::Mutex<Option<ddddocr::DdddOcr>> = tokio::sync::Mutex::const_new(None);
+static OCR_ENGINE: tokio::sync::Mutex<Option<ddddocr::DdddOcr>> =
+    tokio::sync::Mutex::const_new(None);
 
 struct CaptchaState {
     last_request: Option<std::time::Instant>,
 }
 
-static CAPTCHA_STATE: tokio::sync::Mutex<CaptchaState> = tokio::sync::Mutex::const_new(CaptchaState {
-    last_request: None,
-});
+static CAPTCHA_STATE: tokio::sync::Mutex<CaptchaState> =
+    tokio::sync::Mutex::const_new(CaptchaState { last_request: None });
 
 pub struct AdamFetcher<'a, F: Fetcher + ?Sized> {
     fetcher: CachedFlareSolverrFetcher<'a, F>,
@@ -47,7 +47,9 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
                     general_purpose::STANDARD
                         .decode(base64_payload)
                         .map_err(|e| {
-                            ProviderError::ParsingError(format!("Error decoding captcha image: {e}"))
+                            ProviderError::ParsingError(format!(
+                                "Error decoding captcha image: {e}"
+                            ))
                         })?;
                 Ok(Some(image_bytes))
             } else {
@@ -75,10 +77,13 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
     }
 
     fn get_onnx_path() -> Result<std::path::PathBuf, ProviderError> {
+        const MODEL_BYTES: &[u8] = include_bytes!("../ddddocr_common.onnx");
         let temp_path = std::env::temp_dir().join("ddddocr_common.onnx");
         if !temp_path.exists() {
-            tracing::info!("Writing embedded OCR model to temporary file: {:?}", temp_path);
-            const MODEL_BYTES: &[u8] = include_bytes!("../ddddocr_common.onnx");
+            tracing::info!(
+                "Writing embedded OCR model to temporary file: {:?}",
+                temp_path
+            );
             std::fs::write(&temp_path, MODEL_BYTES).map_err(|e| {
                 ProviderError::LibraryError(format!("Failed to write embedded OCR model: {e}"))
             })?;
@@ -89,16 +94,16 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
     fn truncate_to_3rd_path_level(url_str: &str) -> Result<String, ProviderError> {
         let mut url = url::Url::parse(url_str)
             .map_err(|e| ProviderError::ParsingError(format!("Invalid URL: {e}")))?;
-        
+
         if let Some(segments) = url.path_segments() {
             let truncated: Vec<&str> = segments.take(3).collect();
             let new_path = truncated.join("/");
             url.set_path(&new_path);
         }
-        
+
         url.set_query(None);
         url.set_fragment(None);
-        
+
         Ok(url.to_string())
     }
 
@@ -109,19 +114,19 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
     ) -> Result<Option<Request>, ProviderError> {
         let html = String::from_utf8_lossy(html_bytes);
         let document = Html::parse_document(&html);
-        
+
         let form_selector = Selector::parse("form").unwrap();
         let input_selector = Selector::parse("input").unwrap();
-        
+
         for form in document.select(&form_selector) {
             let mut has_captcha_input = false;
             let mut form_fields = Vec::new();
-            
+
             for input in form.select(&input_selector) {
                 let name = input.value().attr("name").unwrap_or("");
                 let value = input.value().attr("value").unwrap_or("");
                 let input_type = input.value().attr("type").unwrap_or("");
-                
+
                 if name == "captcha_code" {
                     has_captcha_input = true;
                     form_fields.push((name.to_string(), code.to_string()));
@@ -129,7 +134,7 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
                     form_fields.push((name.to_string(), value.to_string()));
                 }
             }
-            
+
             if has_captcha_input {
                 let action = form.value().attr("action").unwrap_or("");
                 let submit_url = if action.is_empty() {
@@ -141,26 +146,29 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
                         .map_err(|e| ProviderError::InvalidField(e.to_string()))?
                         .to_string()
                 };
-                
+
                 let body = form_urlencoded::Serializer::new(String::new())
                     .extend_pairs(form_fields)
                     .finish();
-                
+
                 return Ok(Some(Request {
                     url: submit_url,
                     method: FetchMethod::POST,
-                    headers: vec![("Content-Type".to_string(), "application/x-www-form-urlencoded".to_string())],
+                    headers: vec![(
+                        "Content-Type".to_string(),
+                        "application/x-www-form-urlencoded".to_string(),
+                    )],
                     body: Some(body),
                 }));
             }
         }
-        
+
         Ok(None)
     }
 }
 
 #[async_trait::async_trait]
-impl<'a, F: Fetcher + ?Sized> Fetcher for AdamFetcher<'a, F> {
+impl<F: Fetcher + ?Sized> Fetcher for AdamFetcher<'_, F> {
     async fn fetch_raw(&self, req: Request) -> Result<Vec<u8>, ProviderError> {
         let first_attempt = self.fetcher.fetch_raw(req.clone()).await;
 
@@ -169,7 +177,7 @@ impl<'a, F: Fetcher + ?Sized> Fetcher for AdamFetcher<'a, F> {
             let mut state = CAPTCHA_STATE.lock().await;
 
             let need_request = match state.last_request {
-                Some(instant) => instant.elapsed() > std::time::Duration::from_secs(60),
+                Some(instant) => instant.elapsed() > std::time::Duration::from_mins(1),
                 None => true,
             };
 
@@ -183,31 +191,48 @@ impl<'a, F: Fetcher + ?Sized> Fetcher for AdamFetcher<'a, F> {
                     body: None,
                 };
 
-                let root_res = self.fetcher.fetch_raw(root_req).await;
-                
-                if let Ok(root_res_data) = root_res {
+                let root_response = self.fetcher.fetch_raw(root_req).await;
+
+                if let Ok(root_res_data) = root_response {
                     if let Ok(Some(captcha_bytes)) = Self::extract_captcha_image(&root_res_data) {
-                        tracing::warn!("Captcha challenge image successfully extracted from root response");
-                        
+                        tracing::warn!(
+                            "Captcha challenge image successfully extracted from root response"
+                        );
+
                         let mut ocr_guard = OCR_ENGINE.lock().await;
                         if ocr_guard.is_none() {
                             let path = Self::get_onnx_path()?;
                             tracing::info!("Loading OCR model from {:?}", path);
-                            *ocr_guard = Some(ddddocr::DdddOcr::new(path.to_str().unwrap()).map_err(|e| {
-                                ProviderError::LibraryError(format!("Failed to load ddddocr model: {e:?}"))
-                            })?);
+                            *ocr_guard = Some(
+                                ddddocr::DdddOcr::new(path.to_str().unwrap()).map_err(|e| {
+                                    ProviderError::LibraryError(format!(
+                                        "Failed to load ddddocr model: {e:?}"
+                                    ))
+                                })?,
+                            );
                         }
-                        
+
                         if let Some(ocr) = ocr_guard.as_mut() {
                             match ocr.classification(&captcha_bytes).await {
                                 Ok(code) => {
                                     let trimmed_code = code.trim();
                                     tracing::warn!("Solved captcha: '{}'", trimmed_code);
-                                    if let Some(submit_req) = Self::prepare_captcha_submit(&root_res_data, &req.url, trimmed_code)? {
-                                        tracing::info!("Submitting solved captcha to {}...", submit_req.url);
+                                    if let Some(submit_req) = Self::prepare_captcha_submit(
+                                        &root_res_data,
+                                        &req.url,
+                                        trimmed_code,
+                                    )? {
+                                        tracing::info!(
+                                            "Submitting solved captcha to {}...",
+                                            submit_req.url
+                                        );
                                         match self.fetcher.fetch_raw(submit_req).await {
-                                            Ok(_) => tracing::info!("Captcha submitted successfully"),
-                                            Err(e) => tracing::error!("Failed to submit captcha: {:?}", e),
+                                            Ok(_) => {
+                                                tracing::info!("Captcha submitted successfully");
+                                            }
+                                            Err(e) => {
+                                                tracing::error!("Failed to submit captcha: {e:?}");
+                                            }
                                         }
                                     }
                                 }
@@ -218,7 +243,7 @@ impl<'a, F: Fetcher + ?Sized> Fetcher for AdamFetcher<'a, F> {
                         }
                     }
                 }
-                
+
                 state.last_request = Some(std::time::Instant::now());
             }
 
@@ -230,8 +255,13 @@ impl<'a, F: Fetcher + ?Sized> Fetcher for AdamFetcher<'a, F> {
             // We sleep for the remaining duration of the 5 seconds since the failure before retrying.
             let elapsed = failure_time.elapsed();
             if elapsed < std::time::Duration::from_secs(5) {
-                let sleep_duration = std::time::Duration::from_secs(5) - elapsed;
-                tracing::info!("Sleeping for {:?} to bypass FlareSolverr cooldown cache...", sleep_duration);
+                let sleep_duration = std::time::Duration::from_secs(5)
+                    .checked_sub(elapsed)
+                    .unwrap_or_default();
+                tracing::info!(
+                    "Sleeping for {:?} to bypass FlareSolverr cooldown cache...",
+                    sleep_duration
+                );
                 tokio::time::sleep(sleep_duration).await;
             }
 
