@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::borrow::Cow;
 use std::sync::LazyLock;
 use regex::Regex;
