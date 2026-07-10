@@ -56,7 +56,7 @@ jobs:
           curl -LO https://github.com/microsoft/onnxruntime/releases/download/v1.19.2/onnxruntime-osx-x86_64-1.19.2.tgz
           tar -xzf onnxruntime-osx-x86_64-1.19.2.tgz
           echo "ORT_STRATEGY=system" >> $GITHUB_ENV
-          echo "ORT_LIB_LOCATION=$PWD/onnxruntime-osx-x86_64-1.19.2" >> $GITHUB_ENV
+          echo "ORT_LIB_LOCATION=$PWD/onnxruntime-osx-x86_64-1.19.2/lib" >> $GITHUB_ENV
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
