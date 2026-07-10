@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use std::borrow::Cow;
+use std::collections::HashSet;
 
 use geneagrab_providers::{
     com_structs::{ExtractRequest, ExtractResponse},
@@ -66,21 +66,15 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: &str) -> Result<(), Pr
 
     let popup_selector = Selector::parse("#popup-informations")
         .map_err(|e| ProviderError::ParsingError(format!("Failed to parse popup selector: {e}")))?;
-    let popup_element =
-        document
-            .select(&popup_selector)
-            .next()
-            .ok_or_else(|| ProviderError::ParsingError(
-                "Popup information section not found in HTML".into(),
-            ))?;
+    let popup_element = document.select(&popup_selector).next().ok_or_else(|| {
+        ProviderError::ParsingError("Popup information section not found in HTML".into())
+    })?;
     let popup_html = popup_element.inner_html();
 
     let info_regex = Regex::new(r#"(?s)<p class="text-small">.*?<p>(?:\[.*?\] - )?(?P<location>.*?) \((?P<locationDetails>.*?)\) - (?P<globalType>.*?)(?: \((?P<type>.*?)\))?(?: - .*)? *\| (?P<from>.*?) - (?P<to>.*?)</p>.*?<p>(?P<cote>.*?)</p>(?:.*?<p>(?P<notaire>.*?)</p>)?.*?<p class="no-margin-bottom">(?P<betterType>.*?)(?:\..*| -.*)?</p>.*?<p>(?P<note>.*?)</p>"#).unwrap();
     let caps = info_regex
         .captures(&popup_html)
-        .ok_or_else(|| ProviderError::ParsingError(
-            "Failed to match registry info regex".into(),
-        ))?;
+        .ok_or_else(|| ProviderError::ParsingError("Failed to match registry info regex".into()))?;
 
     let mut place = Vec::new();
     if let Some(loc_details) = caps.name("locationDetails") {
@@ -174,6 +168,7 @@ fn parse_image_api(base_url: &Url, api_json: &str) -> Result<Vec<Image>, Provide
 }
 
 /// Internal impl of `extract_registry`. A custom fetcher can be provided.
+#[allow(clippy::missing_errors_doc)]
 pub async fn extract_registry_internal(
     req: &ExtractRequest,
     fetcher: &dyn Fetcher,

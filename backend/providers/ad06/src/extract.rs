@@ -1,7 +1,7 @@
 use geneagrab_providers::{
     com_structs::{ExtractRequest, ExtractResponse},
-    errors::ProviderError,
     data::{Image, RegistryBuilder, RegistryType},
+    errors::ProviderError,
     protocols::{
         iiif::{Canvas, Manifest, Metadata},
         ligeo::LigeoClasseur,
@@ -351,6 +351,7 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
 }
 
 /// Internal impl of `extract_registry`. A custom fetcher can be provided.
+#[allow(clippy::missing_errors_doc)]
 pub async fn extract_registry_internal(
     req: &ExtractRequest,
     fetcher: &dyn Fetcher,

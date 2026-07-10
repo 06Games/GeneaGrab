@@ -3,7 +3,6 @@ use geneagrab_providers::data::{FetchMethod, Request};
 use geneagrab_providers::errors::ProviderError;
 use geneagrab_providers::traits::Fetcher;
 use geneagrab_providers::protocols::fetchers::FlareSolverrFetcher;
-use jsonc_parser::ParseOptions;
 use reqwest::blocking::Client;
 use reqwest::header::{HeaderName, HeaderValue};
 use reqwest::Method;
@@ -15,40 +14,10 @@ use std::str::FromStr;
 use std::sync::Mutex;
 use async_trait::async_trait;
 
-pub struct TestCases<T> {
-    pub dir: PathBuf,
-    pub cases: Vec<T>,
-}
-
 #[derive(Deserialize)]
 pub struct MockRequest {
     url: String,
     response_file: String,
-}
-
-/// Loads the test cases
-///
-/// # Panics
-/// When the test data directory or the cases file cannot be found
-/// When the cases file couldn't be parsed
-#[must_use]
-pub fn load_test_cases<T>(manifest_dir: &'static str, test_name: &str) -> TestCases<T>
-where
-    T: for<'de> Deserialize<'de>,
-{
-    let manifest_dir = PathBuf::from(manifest_dir);
-    let test_data_dir = manifest_dir.join("tests").join("data").join(test_name);
-
-    let cases_json = fs::read_to_string(test_data_dir.join("cases.json"))
-        .expect("Failed to read cases.json manifest");
-
-    let cases: Vec<T> = jsonc_parser::parse_to_serde_value(&cases_json, &ParseOptions::default())
-        .expect("Failed to parse cases.json");
-
-    TestCases {
-        dir: test_data_dir,
-        cases,
-    }
 }
 
 static MUTEX: Mutex<()> = Mutex::new(());
