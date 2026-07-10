@@ -9,39 +9,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-plugins:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "backend -> target"
-
-      - name: Build Plugins (WASM)
-        run: |
-          mkdir -p dist-plugins
-          for d in backend/plugins/*; do
-            if [ -d "$d" ]; then
-              (cd "$d" && cargo build --release --target wasm32-unknown-unknown)
-            fi
-          done
-          find backend/target/wasm32-unknown-unknown/release -maxdepth 1 -name "*.wasm" -exec cp {} dist-plugins/ \;
-
-      - name: Upload Plugins Artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: geneagrab-plugins
-          path: dist-plugins/*.wasm
-          if-no-files-found: error
-
   build-tauri:
     strategy:
       fail-fast: false
@@ -101,37 +68,22 @@ jobs:
         working-directory: ./backend/tauri
         run: bunx tauri build ${{ matrix.args }}
 
-      - name: Upload App Artifacts
-        uses: actions/upload-artifact@v7
+      - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
         with:
-          name: geneagrab-app-${{ matrix.id }}
-          path: |
-            backend/target/**/release/bundle/**/*.dmg
-            backend/target/**/release/bundle/**/*.AppImage
-            backend/target/**/release/bundle/**/*.rpm
-            backend/target/**/release/bundle/**/*.deb
-            backend/target/**/release/bundle/**/*.msi
-            backend/target/**/release/bundle/**/*.exe
-          if-no-files-found: error
-
-  upload-release-assets:
-    needs:
-      - build-plugins
-      - build-tauri
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Download All Artifacts
-        uses: actions/download-artifact@v8
-        with:
-          path: artifacts
-
-      - name: Create Release and Upload Assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create ${{ github.ref_name }} --title "GeneaGrab ${{ github.ref_name }}" --notes "See the assets to download this version and install." --draft || true
-          find artifacts -type f -exec gh release upload ${{ github.ref_name }} {} --clobber --repo ${{ github.repository }} \;
+          draft: true
+          fail_on_unmatched_files: false
+          files: |
+            backend/target/release/bundle/**/*.dmg
+            backend/target/release/bundle/**/*.AppImage
+            backend/target/release/bundle/**/*.rpm
+            backend/target/release/bundle/**/*.deb
+            backend/target/release/bundle/**/*.msi
+            backend/target/release/bundle/**/*.exe
+            backend/target/*/release/bundle/**/*.dmg
+            backend/target/*/release/bundle/**/*.AppImage
+            backend/target/*/release/bundle/**/*.rpm
+            backend/target/*/release/bundle/**/*.deb
+            backend/target/*/release/bundle/**/*.msi
+            backend/target/*/release/bundle/**/*.exe
