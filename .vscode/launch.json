@@ -8,12 +8,14 @@
             "sourceLanguages": [
                 "rust"
             ],
-            "program": "${workspaceFolder}/backend/target/debug/geneagrab-tauri",
+            "program": "${workspaceFolder}/backend/target/debug/geneagrab",
             "args": [],
             "cwd": "${workspaceFolder}/backend/tauri",
             "preLaunchTask": "build-backend-only",
             "env": {
-                "TAURI_ENV": "dev"
+                "TAURI_ENV": "dev",
+                "GDK_BACKEND": "x11",
+                "WEBKIT_DISABLE_DMABUF_RENDERER": "1"
             }
         }
     ]
