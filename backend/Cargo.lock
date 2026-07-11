@@ -1495,17 +1495,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ddddocr"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e681c569d4770169703ea3ae740a984317514f1e2433467d6aca8a126ffb7a06"
-dependencies = [
- "image",
- "ort",
- "thiserror 2.0.18",
-]
-
-[[package]]
 name = "der"
 version = "0.7.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2385,9 +2374,10 @@ dependencies = [
  "async-trait",
  "base64 0.22.1",
  "datatest-stable",
- "ddddocr",
  "geneagrab-providers",
+ "image",
  "jsonc-parser",
+ "ort",
  "regex",
  "reqwest",
  "scraper 0.22.0",
