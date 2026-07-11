@@ -1,2 +1,2 @@
-backend/plugins/**/tests/data/**/* linguist-vendored
-backend/plugins/**/tests/data/**/test_def.json -linguist-vendored
+backend/**/tests/data/**/* linguist-vendored
+backend/**/tests/data/**/test_def.json -linguist-vendored
