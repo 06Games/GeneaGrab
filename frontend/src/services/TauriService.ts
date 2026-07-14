@@ -7,6 +7,12 @@ import { PluginOption, RegistryFilters, RegistryMeta } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
+  constructor() {
+    invoke("register_user_agent", { ua: navigator.userAgent }).catch((err) => {
+      console.error("Failed to register User-Agent:", err);
+    });
+  }
+
   async getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> {
     const res = await invoke<any>("get_all_registries", { payload });
     return {

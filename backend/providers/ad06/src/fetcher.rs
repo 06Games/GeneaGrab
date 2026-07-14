@@ -273,11 +273,37 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
         drop(state);
 
         // Retry the original request
-        let second_attempt = self.fetcher.fetch_raw(req).await;
+        let mut second_attempt = self.fetcher.fetch_raw(req.clone()).await;
         if Self::is_blocked_by_captcha(&second_attempt) {
             if let Ok(data) = &second_attempt {
-                Self::extract_captcha_image(data)?;
+                if let Ok(Some(captcha_bytes)) = Self::extract_captcha_image(data) {
+                    if let Some(prompter) = geneagrab_providers::protocols::fetchers::CAPTCHA_PROMPTER.get() {
+                        tracing::warn!("OCR failed to solve the captcha. Prompting user for manual verification...");
+                        match (prompter)(captcha_bytes).await {
+                            Ok(manual_code) => {
+                                tracing::info!("User provided manual captcha code: '{}'", manual_code);
+                                if let Some(submit_req) = Self::prepare_captcha_submit(data, &req.url, &manual_code)? {
+                                    match self.fetcher.fetch_raw(submit_req).await {
+                                        Ok(_) => {
+                                            tracing::info!("Manual captcha submitted successfully");
+                                            second_attempt = self.fetcher.fetch_raw(req).await;
+                                        }
+                                        Err(e) => {
+                                            tracing::error!("Failed to submit manual captcha: {e:?}");
+                                        }
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                tracing::error!("Failed to prompt user for captcha: {:?}", e);
+                            }
+                        }
+                    }
+                }
             }
+        }
+
+        if Self::is_blocked_by_captcha(&second_attempt) {
             return Err(ProviderError::NetworkError(String::from(
                 "Resource is behind a captcha",
             )));

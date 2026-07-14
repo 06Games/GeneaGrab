@@ -2439,6 +2439,7 @@ name = "geneagrab-tauri"
 version = "4.0.0"
 dependencies = [
  "anyhow",
+ "base64 0.22.1",
  "geneagrab-core",
  "geneagrab-providers",
  "migration",
@@ -2453,6 +2454,7 @@ dependencies = [
  "tauri-plugin-tracing",
  "tokio",
  "tracing",
+ "url",
 ]
 
 [[package]]

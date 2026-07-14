@@ -5,12 +5,23 @@ use tokio::sync::RwLock;
 use url::Url;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
+use std::future::Future;
+use std::pin::Pin;
+use std::sync::OnceLock;
 
 use crate::{
     errors::ProviderError,
     data::{FetchMethod, Request},
     traits::Fetcher,
 };
+
+pub type ChallengeSolverFn = fn(String) -> Pin<Box<dyn Future<Output = Result<Clearance, ProviderError>> + Send + 'static>>;
+
+pub static CHALLENGE_SOLVER: OnceLock<ChallengeSolverFn> = OnceLock::new();
+
+pub type CaptchaPrompterFn = fn(Vec<u8>) -> Pin<Box<dyn Future<Output = Result<String, ProviderError>> + Send + 'static>>;
+
+pub static CAPTCHA_PROMPTER: OnceLock<CaptchaPrompterFn> = OnceLock::new();
 
 static FLARESOLVERR_CACHE: LazyLock<RwLock<HashMap<String, Clearance>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
@@ -150,7 +161,8 @@ impl<'a, F: Fetcher + ?Sized> CachedFlareSolverrFetcher<'a, F> {
         req: &Request,
         cache_key: &str,
     ) -> Option<Result<Vec<u8>, ProviderError>> {
-        if !needs_safe_request(&req.url) {
+        let has_solver = CHALLENGE_SOLVER.get().is_some();
+        if !has_solver && !needs_safe_request(&req.url) {
             return None;
         }
         let read_guard = FLARESOLVERR_CACHE.read().await;
@@ -188,20 +200,39 @@ impl<'a, F: Fetcher + ?Sized> CachedFlareSolverrFetcher<'a, F> {
         Ok(solution)
     }
 
+    async fn resolve_clearance_webview(
+        &self,
+        req: &Request,
+        cache_key: &str,
+    ) -> Result<Clearance, ProviderError> {
+        if let Some(solver) = CHALLENGE_SOLVER.get() {
+            let clearance = (solver)(req.url.clone()).await?;
+            {
+                let mut write_guard = FLARESOLVERR_CACHE.write().await;
+                write_guard.insert(cache_key.to_string(), clearance.clone());
+            }
+            Ok(clearance)
+        } else {
+            Err(ProviderError::NetworkError("No challenge solver registered".to_string()))
+        }
+    }
+
     async fn fetch_raw_uncached(&self, req: Request, cache_key: &str) -> Result<Vec<u8>, ProviderError> {
         if let Some(res) = self.try_fetch_cached(&req, cache_key).await {
             return res;
         }
 
-        // Cache miss or expired cookies: serialize FlareSolverr calls
+        // Cache miss or expired cookies: serialize solver calls
         static RESOLVE_LOCK: tokio::sync::Mutex<()> = tokio::sync::Mutex::const_new(());
         let _guard = RESOLVE_LOCK.lock().await;
 
         // Double check cooldown under lock
         check_cooldown(cache_key).await?;
 
+        let has_solver = CHALLENGE_SOLVER.get().is_some();
+
         // Double check cache under lock (another thread might have resolved it in the meantime)
-        if needs_safe_request(&req.url) {
+        if has_solver || needs_safe_request(&req.url) {
             let has_cached = {
                 let read_guard = FLARESOLVERR_CACHE.read().await;
                 read_guard.contains_key(cache_key)
@@ -215,15 +246,27 @@ impl<'a, F: Fetcher + ?Sized> CachedFlareSolverrFetcher<'a, F> {
                 // If it fails again, re-acquire the lock to perform a fresh fetch
                 let _re_guard = RESOLVE_LOCK.lock().await;
                 check_cooldown(cache_key).await?;
-                let solution = self.resolve_fresh_solution(&req, cache_key).await?;
+                let clearance = if has_solver {
+                    self.resolve_clearance_webview(&req, cache_key).await?
+                } else {
+                    let solution = self.resolve_fresh_solution(&req, cache_key).await?;
+                    drop(_re_guard);
+                    return self.flaresolverr_fetcher.use_solution(req, solution).await;
+                };
                 drop(_re_guard);
-                return self.flaresolverr_fetcher.use_solution(req, solution).await;
+                return self.flaresolverr_fetcher.safe_fetch(clearance, req).await;
             }
         }
 
-        let solution = self.resolve_fresh_solution(&req, cache_key).await?;
-        drop(_guard);
-        self.flaresolverr_fetcher.use_solution(req, solution).await
+        if has_solver {
+            let clearance = self.resolve_clearance_webview(&req, cache_key).await?;
+            drop(_guard);
+            self.flaresolverr_fetcher.safe_fetch(clearance, req).await
+        } else {
+            let solution = self.resolve_fresh_solution(&req, cache_key).await?;
+            drop(_guard);
+            self.flaresolverr_fetcher.use_solution(req, solution).await
+        }
     }
 }
 
@@ -289,9 +332,9 @@ impl Display for FlareSolverrCookie {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct Clearance {
-    user_agent: String,
-    cookies: Vec<FlareSolverrCookie>,
-    referer: String,
+    pub user_agent: String,
+    pub cookies: Vec<FlareSolverrCookie>,
+    pub referer: String,
 }
 
 impl TryFrom<FlareSolverrSolution> for Clearance {

@@ -8,6 +8,7 @@ pub mod commands;
 pub mod events;
 pub mod schemes;
 pub mod state;
+pub mod challenges;
 
 use state::AppState;
 use tauri_plugin_tracing::LevelFilter;
@@ -79,6 +80,11 @@ pub fn run() {
 
             app.manage(AppState { db });
 
+            // Initialize the Cloudflare challenge solver callback using Tauri Webviews
+            challenges::set_app_handle(app.handle().clone());
+            let _ = geneagrab_providers::protocols::fetchers::CHALLENGE_SOLVER.set(challenges::solve_challenge_callback);
+            let _ = geneagrab_providers::protocols::fetchers::CAPTCHA_PROMPTER.set(challenges::solve_captcha_callback);
+
             Ok(())
         })
         .register_asynchronous_uri_scheme_protocol(
@@ -96,7 +102,9 @@ pub fn run() {
             commands::image::download_image,
             commands::event::get_event_rows,
             commands::event::get_event_detail,
-            commands::event::save_act
+            commands::event::save_act,
+            challenges::register_user_agent,
+            challenges::submit_captcha_code
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
