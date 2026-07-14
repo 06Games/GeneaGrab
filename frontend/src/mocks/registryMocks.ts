@@ -17,7 +17,15 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
   date_from: "1793",
   date_to: "1794",
   total_images: 348,
-  images: undefined,
+  images: Array.from({ length: 348 }, (_, i) =>
+    i === 11
+      ? {
+          name: "Births 1793",
+          date_range: "1793-11-01 to 1793-11-30",
+          notes: "Image in good condition, but handwriting is difficult to read in some areas."
+        }
+      : {}
+  ),
   acts_count: 42,
 };
 

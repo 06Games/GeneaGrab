@@ -51,7 +51,7 @@ export const ViewerPage = (props: ViewerPageProps) => {
   const [thumbnailHeight, setThumbnailHeight] = createSignal(DEFAULT_THUMB_HEIGHT);
   const [selectedEventId, setSelectedEventId] = createSignal<number | null>(null);
 
-  const [registryMeta] = createResource(() => registryId, api.getRegistryMeta);
+  const [registryMeta, { mutate: mutateRegistryMeta }] = createResource(() => registryId, api.getRegistryMeta);
   const [eventRows] = createResource(() => registryId, api.getEventRows);
   const [imageMeta, { mutate: mutateImageMeta }] = createResource(
     () => (isDetachedMode ? false : { regId: registryId, imgId: currentImage() }),
@@ -190,6 +190,14 @@ export const ViewerPage = (props: ViewerPageProps) => {
     onSaveImageMeta: async (meta: Partial<UserImageMeta>) => {
       await api.saveImageMeta(registryId, currentImage(), meta);
       mutateImageMeta((prev) => (prev ? { ...prev, ...meta } : prev));
+      mutateRegistryMeta((prev) => {
+        if (!prev) return prev;
+        const images = prev.images || [];
+        const nextImages = [...images];
+        const idx = currentImage() - 1;
+        nextImages[idx] = { ...nextImages[idx], ...meta };
+        return { ...prev, images: nextImages };
+      });
     },
     onSaveAct: async (event: EventDetail) => {
       await api.saveAct(event);
@@ -241,19 +249,9 @@ export const ViewerPage = (props: ViewerPageProps) => {
             </div>
           }
         >
-          {(regMeta) => {
-            if (isDetachedMode) {
-              return (
-                <div
-                  class="w-screen h-screen overflow-hidden flex flex-col bg-panel text-main antialiased"
-                  style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
-                >
-                  {renderIndex(regMeta(), true)}
-                </div>
-              );
-            }
-
-            return (
+          <Show
+            when={isDetachedMode}
+            fallback={
               <div
                 class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased"
                 style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
@@ -279,7 +277,7 @@ export const ViewerPage = (props: ViewerPageProps) => {
                     <MainViewer
                       currentImage={currentImage()}
                       imageMeta={imageMeta()}
-                      totalImages={regMeta().total_images}
+                      totalImages={registryMeta()!.total_images}
                       onImageChange={setCurrentImage}
                       registryId={registryId}
                     />
@@ -297,15 +295,15 @@ export const ViewerPage = (props: ViewerPageProps) => {
                     </div>
                     <ThumbnailBar
                       height={thumbnailHeight()}
-                      totalImages={regMeta().total_images}
-                      images={regMeta().images ?? []}
+                      totalImages={registryMeta()!.total_images}
+                      images={registryMeta()!.images ?? []}
                       currentImage={currentImage()}
                       onImageChange={setCurrentImage}
                       registryId={registryId}
                     />
                   </main>
 
-                  <InfoNotesPanel registryMeta={regMeta()} imageMeta={imageMeta()} image={currentImage().toString()} />
+                  <InfoNotesPanel registryMeta={registryMeta()!} imageMeta={imageMeta()} image={currentImage().toString()} />
                 </div>
 
                 {indexVisible() && !isDetached() && (
@@ -323,15 +321,15 @@ export const ViewerPage = (props: ViewerPageProps) => {
                   </div>
                 )}
 
-                {indexVisible() && !isDetached() && renderIndex(regMeta(), false)}
+                {indexVisible() && !isDetached() && renderIndex(registryMeta()!, false)}
 
                 <footer class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle" role="status">
                   <div class="flex items-center gap-4">
                     <span class="text-[11px] text-dim">
-                      {currentImage()} / {regMeta().total_images}
+                      {currentImage()} / {registryMeta()!.total_images}
                     </span>
                     <span class="text-[11px] text-dim">
-                      {t("registryViewer.viewsAndActs", { views: regMeta().total_images, acts: eventRows()?.length || 0 })}
+                      {t("registryViewer.viewsAndActs", { views: registryMeta()!.total_images, acts: eventRows()?.length || 0 })}
                     </span>
                   </div>
                   <div class="flex items-center gap-3">
@@ -339,8 +337,15 @@ export const ViewerPage = (props: ViewerPageProps) => {
                   </div>
                 </footer>
               </div>
-            );
-          }}
+            }
+          >
+            <div
+              class="w-screen h-screen overflow-hidden flex flex-col bg-panel text-main antialiased"
+              style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
+            >
+              {renderIndex(registryMeta()!, true)}
+            </div>
+          </Show>
         </Show>
       </Show>
     </RegistryActionsProvider>

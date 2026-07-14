@@ -1,11 +1,11 @@
-import { For, createEffect, createSignal } from "solid-js";
+import { For, createEffect, createSignal, Show } from "solid-js";
 import { useI18n } from "../../ui/i18n";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import { getBackendService } from "../../services/apiFactory";
 import { UserImageMeta } from "../../types/image";
 
 const THUMBNAIL_ASPECT_RATIO = 1.3;
-const THUMBNAIL_VERTICAL_PADDING = 16; // Combined height for the image number label and gap below the thumbnail
+const THUMBNAIL_VERTICAL_PADDING = 28; // Combined height for the image labels and gaps below the thumbnail
 
 interface ThumbnailBarProps {
   totalImages: number;
@@ -67,7 +67,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
         <For each={virtualizer.getVirtualItems()}>
           {(virtualItem) => {
             const image_number = virtualItem.index + 1;
-            const image: UserImageMeta | undefined = props.images[virtualItem.index];
+            const image = () => props.images[virtualItem.index];
             const isActive = () => props.currentImage === image_number;
             const src = () => api.getTileUrl(props.registryId, image_number, 0, 0, 0);
             const hasError = () => failedImages().has(image_number);
@@ -120,14 +120,24 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                     <span class="text-[9px] text-dim font-mono leading-none">{image_number}</span>
                   )}
                 </div>
-                <span
-                  class={[
-                    "text-[10px] tabular-nums transition-colors flex-shrink-0",
-                    isActive() ? "text-accent font-semibold" : "text-dim group-hover:text-muted",
-                  ].join(" ")}
-                >
-                  {image?.name ? `${image.name} (${image_number})` : image_number}
-                </span>
+                <div class="flex flex-col items-center min-w-0 w-full flex-shrink-0">
+                  <span
+                    class={[
+                      "text-[10px] tabular-nums transition-colors truncate w-full text-center leading-none",
+                      isActive() ? "text-accent font-semibold" : "text-dim group-hover:text-muted",
+                    ].join(" ")}
+                  >
+                    {image()?.name ? `${image()!.name} (${image_number})` : image_number}
+                  </span>
+                  <span
+                    class={[
+                      "text-[9px] tabular-nums transition-colors truncate w-full text-center mt-1 leading-none min-h-[9px]",
+                      isActive() ? "text-accent/80 font-medium" : "text-subtle-md group-hover:text-dim",
+                    ].join(" ")}
+                  >
+                    {image()?.date_range || "\u00A0"}
+                  </span>
+                </div>
               </button>
             );
           }}

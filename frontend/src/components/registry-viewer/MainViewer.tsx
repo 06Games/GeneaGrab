@@ -1,4 +1,4 @@
-import { createSignal, createEffect, onMount, onCleanup, Show, Switch, Match } from "solid-js";
+import { createSignal, createEffect, onMount, onCleanup, Show, Switch, Match, createMemo } from "solid-js";
 import OpenSeadragon from "openseadragon";
 import { IconButton, Divider } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
@@ -35,8 +35,29 @@ export const MainViewer = (props: MainViewerProps) => {
   const [gamma, setGamma] = createSignal(1.0);
   const filterId = () => `gamma-filter-${props.registryId}-${gamma().toFixed(2).replace(".", "-")}`;
 
+  const imageGeometry = createMemo(() => {
+    const meta = props.imageMeta;
+    if (!meta) return null;
+    return {
+      width: meta.width,
+      height: meta.height,
+      tile_size: meta.tile_size,
+    };
+  }, null, {
+    equals: (prev, next) => {
+      if (!prev || !next) return prev === next;
+      return (
+        prev.width === next.width &&
+        prev.height === next.height &&
+        prev.tile_size === next.tile_size
+      );
+    }
+  });
+
+  const totalImagesMemo = createMemo(() => props.totalImages);
+
   createEffect(() => {
-    const isImageNumValid = props.currentImage >= 1 && props.currentImage <= props.totalImages;
+    const isImageNumValid = props.currentImage >= 1 && props.currentImage <= totalImagesMemo();
     setImageInput(String(props.currentImage));
     setImageStatus(
       isImageNumValid ? { type: ImageStatus.Loading } : { type: ImageStatus.Error, message: t("mainViewer.invalidImage", { n: props.currentImage }) },
@@ -108,15 +129,18 @@ export const MainViewer = (props: MainViewerProps) => {
     });
 
     createEffect(() => {
-      if (props.currentImage < 1 || props.currentImage > props.totalImages) return;
+      if (props.currentImage < 1 || props.currentImage > totalImagesMemo()) return;
 
-      const tileSize = props.imageMeta?.tile_size ?? 256;
+      const geometry = imageGeometry();
+      if (!geometry) return;
+
+      const tileSize = geometry.tile_size ?? 256;
       const zoomOffset = Math.log2(tileSize);
 
       viewer!.open({
         type: "custom",
-        width: props.imageMeta?.width,
-        height: props.imageMeta?.height,
+        width: geometry.width,
+        height: geometry.height,
         tileSize: tileSize,
         minLevel: zoomOffset,
         getTileUrl: (level: number, x: number, y: number) => api.getTileUrl(props.registryId, props.currentImage, level - zoomOffset, x, y),

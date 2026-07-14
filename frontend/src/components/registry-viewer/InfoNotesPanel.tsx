@@ -119,7 +119,46 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
                 </span>
               </div>
 
-              <MetaRow label={t("infoPanel.period")} value={imgMeta().date_range} />
+              <div class="flex flex-col gap-1.5 mb-2">
+                <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
+                  <label for="image-name" class="text-[12px] text-dim truncate select-none cursor-pointer">
+                    {t("infoPanel.nameLabel")}
+                  </label>
+                  <input
+                    id="image-name"
+                    type="text"
+                    value={imgMeta().name ?? ""}
+                    onInput={(e) => saveImageMeta({ name: e.currentTarget.value })}
+                    placeholder={t("infoPanel.namePlaceholder")}
+                    class={[
+                      "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
+                      "bg-tinted border-subtle placeholder:text-subtle-md",
+                      "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                      "transition-all duration-100",
+                    ].join(" ")}
+                  />
+                </div>
+
+                <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
+                  <label for="image-period" class="text-[12px] text-dim truncate select-none cursor-pointer">
+                    {t("infoPanel.period")}
+                  </label>
+                  <input
+                    id="image-period"
+                    type="text"
+                    value={imgMeta().date_range ?? ""}
+                    onInput={(e) => saveImageMeta({ date_range: e.currentTarget.value })}
+                    placeholder={t("infoPanel.periodPlaceholder")}
+                    class={[
+                      "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
+                      "bg-tinted border-subtle placeholder:text-subtle-md",
+                      "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                      "transition-all duration-100",
+                    ].join(" ")}
+                  />
+                </div>
+              </div>
+
               <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(imgMeta().act_types.values()).reduce((a, b) => a + b, 0))} />
 
               <div class="mt-2 flex flex-wrap gap-1.5">

@@ -209,9 +209,10 @@ pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, Cor
 
     let images = image_entry::Entity::find()
         .filter(image_entry::Column::RegistryEntryId.eq(id))
+        .order_by_asc(image_entry::Column::ImageNumber)
         .select_only()
         .column(image_entry::Column::Name)
-        .column(image_entry::Column::ImageNumber)
+        .column(image_entry::Column::DateRange)
         .into_model::<PartialImageMeta>()
         .all(db)
         .await
