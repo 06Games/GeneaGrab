@@ -45,6 +45,9 @@ export const fr: RawDictionaries = {
     invalidImage: "Le numéro d'image est invalide ({{n}})",
     imageError: "Erreur lors du chargement de l'image {{n}} :\n{{e}}",
     ariaImageNumber: "Numéro d'image",
+    gamma: "Gamma : {{value}}",
+    resetGamma: "Réinitialiser le gamma",
+    reset: "Réinitialiser",
   },
   stickyPin: {
     locked: "Valeur verrouillée (cliquer pour déverrouiller)",

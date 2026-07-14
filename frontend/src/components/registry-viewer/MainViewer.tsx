@@ -32,6 +32,8 @@ export const MainViewer = (props: MainViewerProps) => {
   const [imageInput, setImageInput] = createSignal(String(props.currentImage));
   const [imageStatus, setImageStatus] = createSignal<ViewerState>({ type: ImageStatus.Loading });
   const [downloadProgress, setDownloadProgress] = createSignal<{ current: number; total: number } | null>(null);
+  const [gamma, setGamma] = createSignal(1.0);
+  const filterId = () => `gamma-filter-${props.registryId}-${gamma().toFixed(2).replace(".", "-")}`;
 
   createEffect(() => {
     const isImageNumValid = props.currentImage >= 1 && props.currentImage <= props.totalImages;
@@ -223,6 +225,32 @@ export const MainViewer = (props: MainViewerProps) => {
 
         <Divider vertical class="mx-2 h-5" />
 
+        <div class="flex items-center gap-1.5 px-1">
+          <IconButton title={t("mainViewer.resetGamma")} onClick={() => setGamma(1.0)} disabled={gamma() === 1.0}>
+            <Icon icon="lucide:sliders" class={gamma() === 1.0 ? "opacity-60" : "text-accent"}></Icon>
+          </IconButton>
+          <div class="flex items-center gap-2">
+            <input
+              type="range"
+              min="0.4"
+              max="2.5"
+              step="0.05"
+              value={gamma()}
+              onInput={(e) => setGamma(parseFloat(e.currentTarget.value))}
+              class={[
+                "w-20 h-1 bg-subtle rounded-lg appearance-none cursor-pointer accent-accent",
+                "focus:outline-none focus:ring-1 focus:ring-accent/50",
+              ].join(" ")}
+              title={t("mainViewer.gamma", { value: gamma().toFixed(2) })}
+            />
+            <span class="text-[12px] text-muted tabular-nums w-8 select-none font-mono">
+              {gamma().toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        <Divider vertical class="mx-2 h-5" />
+
         <Show
           when={downloadProgress()}
           fallback={
@@ -251,7 +279,23 @@ export const MainViewer = (props: MainViewerProps) => {
       </div>
 
       <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
-        <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" />
+        <div
+          ref={viewerContainerRef}
+          class="absolute inset-0 w-full h-full"
+          style={{ filter: gamma() === 1.0 ? "none" : `url(#${filterId()})` }}
+        />
+
+        <svg class="hidden" style={{ display: "none" }}>
+          <defs>
+            <filter id={filterId()}>
+              <feComponentTransfer>
+                <feFuncR type="gamma" exponent={1 / gamma()} />
+                <feFuncG type="gamma" exponent={1 / gamma()} />
+                <feFuncB type="gamma" exponent={1 / gamma()} />
+              </feComponentTransfer>
+            </filter>
+          </defs>
+        </svg>
 
         <Show when={imageStatus().type !== ImageStatus.Loaded && imageStatus()}>
           {(state) => (

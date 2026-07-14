@@ -43,6 +43,9 @@ export const en = {
     invalidImage: "Invalid image number ({{n}})",
     imageError: "Couldn't load image {{n}}:\n{{e}}",
     ariaImageNumber: "Image number",
+    gamma: "Gamma: {{value}}",
+    resetGamma: "Reset gamma",
+    reset: "Reset",
   },
   stickyPin: {
     locked: "Value locked (click to unlock)",
