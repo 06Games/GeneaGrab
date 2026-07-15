@@ -48,18 +48,26 @@ pub async fn download_image(
     );
     let (registry, image) =
         image::prepare_image(&state.db, registry_id, image_id).await?;
-    let filename = format!(
-        "geneagrab--{}--{}.jpg",
-        registry
-            .archive_reference
-            .clone()
-            .unwrap_or_else(|| registry.registry_id.clone()),
-        image_id
-    );
+    let reference = registry
+        .archive_reference
+        .clone()
+        .unwrap_or_else(|| registry.registry_id.clone());
+    let safe_reference = reference
+        .chars()
+        .map(|c| match c {
+            '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
+            _ => c,
+        })
+        .collect::<String>();
+    let filename = format!("geneagrab--{safe_reference}--{image_id}.jpg");
     let image =
         image::download_image(&state.db, registry, image, cb).await?;
 
-    let file_path = app_handle.path().download_dir()?.join(filename);
+    let download_dir = app_handle.path().download_dir()?;
+    if !download_dir.exists() {
+        fs::create_dir_all(&download_dir)?;
+    }
+    let file_path = download_dir.join(filename);
     fs::write(&file_path, image.data)?;
     app_handle
         .opener()
