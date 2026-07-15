@@ -81,11 +81,11 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
             Ok(data) => {
                 let html = String::from_utf8_lossy(data);
                 html.contains("captcha_audio")
+                    || html.to_ascii_lowercase().contains("forbidden")
+                    || html.to_ascii_lowercase().contains("access denied")
+                    || html.to_ascii_lowercase().contains("captcha")
             }
-            Err(ProviderError::NetworkError(msg)) => {
-                msg.contains("ERR_CONNECTION_RESET")
-                    || msg.to_ascii_lowercase().contains("connection reset")
-            }
+            Err(ProviderError::NetworkError(_)) => true,
             _ => false,
         }
     }

@@ -4,7 +4,7 @@ use std::future::Future;
 use std::pin::Pin;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, Emitter};
 use url::Url;
-use geneagrab_providers::protocols::fetchers::{Clearance, FlareSolverrCookie};
+use geneagrab_providers::protocols::fetchers::{Clearance, FlareSolverrCookie, needs_safe_request};
 use geneagrab_providers::errors::ProviderError;
 use base64::{engine::general_purpose, Engine};
 
@@ -84,9 +84,40 @@ pub async fn solve_challenge_in_webview(
     let count = WINDOW_COUNTER.fetch_add(1, Ordering::Relaxed);
     let window_label = format!("cloudflare-solver-{count}");
     
+    // If the request is for an image or binary file, load the domain root instead
+    // to ensure we load an HTML page where the initialization script can run.
+    let solver_url = if needs_safe_request(&url_str) {
+        Url::parse(&format!("{}://{}", url.scheme(), host))
+            .unwrap_or_else(|_| url.clone())
+    } else {
+        url.clone()
+    };
+
+    let init_js = r#"
+        (function() {
+            function check() {
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    var isCF = document.title.includes('Just a moment') || 
+                               document.title.includes('Cloudflare') || 
+                               (document.body && (
+                                   document.body.innerHTML.includes('Turnstile') ||
+                                   document.body.innerHTML.includes('cloudflare-static')
+                               ));
+                    if (isCF) {
+                        document.cookie = 'gg_status=challenge; path=/';
+                    } else {
+                        document.cookie = 'gg_status=success; path=/';
+                    }
+                }
+                setTimeout(check, 250);
+            }
+            check();
+        })();
+    "#;
+
     let (tx, rx) = tokio::sync::oneshot::channel();
     let handle_clone = handle.clone();
-    let url_clone = url.clone();
+    let url_clone = solver_url.clone();
     let label_clone = window_label.clone();
     
     // Create the window on the main GUI thread
@@ -100,6 +131,7 @@ pub async fn solve_challenge_in_webview(
         .inner_size(500.0, 600.0)
         .visible(false)
         .resizable(true)
+        .initialization_script(init_js)
         .build();
         let _ = tx.send(res);
     })
@@ -126,10 +158,15 @@ pub async fn solve_challenge_in_webview(
         }
 
         // Query cookies natively from Webview
-        if let Ok(cookie_list) = window.cookies_for_url(url.clone()) {
-            if cookie_list.iter().any(|c| c.name() == "cf_clearance") {
+        if let Ok(cookie_list) = window.cookies_for_url(solver_url.clone()) {
+            let has_clearance = cookie_list.iter().any(|c| c.name() == "cf_clearance");
+            let has_success = cookie_list.iter().any(|c| c.name() == "gg_status" && c.value() == "success");
+            let has_challenge = cookie_list.iter().any(|c| c.name() == "gg_status" && c.value() == "challenge");
+
+            if has_clearance || has_success {
                 cookies = cookie_list
                     .iter()
+                    .filter(|c| c.name() != "gg_status")
                     .map(|c| FlareSolverrCookie {
                         name: c.name().to_string(),
                         value: c.value().to_string(),
@@ -138,16 +175,16 @@ pub async fn solve_challenge_in_webview(
                 solved = true;
                 break;
             }
-        }
 
-        // If taking too long, show the window to let the user solve a checkbox
-        if !became_visible && start_time.elapsed() > std::time::Duration::from_secs(4) {
-            became_visible = true;
-            let w = window.clone();
-            let _ = handle.run_on_main_thread(move || {
-                let _ = w.show();
-                let _ = w.set_focus();
-            });
+            // ONLY show the window if we confirmed there is a challenge!
+            if has_challenge && !became_visible && start_time.elapsed() > std::time::Duration::from_secs(4) {
+                became_visible = true;
+                let w = window.clone();
+                let _ = handle.run_on_main_thread(move || {
+                    let _ = w.show();
+                    let _ = w.set_focus();
+                });
+            }
         }
     }
 

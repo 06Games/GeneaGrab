@@ -36,6 +36,12 @@ impl Fetcher for CoreFetcher {
         let resp = req_builder.send().await.map_err(|e| geneagrab_providers::errors::ProviderError::NetworkError(e.to_string()))?;
 
         tracing::info!("Sent request to {}, got status {}", req.url, resp.status());
+        if !resp.status().is_success() {
+            return Err(geneagrab_providers::errors::ProviderError::NetworkError(format!(
+                "HTTP status error: {}",
+                resp.status()
+            )));
+        }
         let body = resp.bytes().await.map_err(|e| geneagrab_providers::errors::ProviderError::NetworkError(e.to_string()))?;
         Ok(body.to_vec())
     }
