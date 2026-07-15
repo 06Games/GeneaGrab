@@ -197,7 +197,7 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
                 String::from("https://archives06.fr/ark:/79346/ecfe2e9e042c39520667bbe5f35f84a327");
             tracing::info!("Detected captcha challenge or connection reset. Trying to trigger a captcha by navigating to standard page: {}...", challenge_url);
             let root_req = Request {
-                url: challenge_url,
+                url: challenge_url.clone(),
                 method: FetchMethod::GET,
                 headers: vec![],
                 body: None,
@@ -211,6 +211,11 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
                         tracing::warn!(
                             "Captcha challenge image successfully extracted from root response"
                         );
+
+                        if let Some(displayer) = geneagrab_providers::protocols::fetchers::CAPTCHA_PAGE_DISPLAYER.get() {
+                            tracing::info!("Displaying captcha page for 5 seconds before solving...");
+                            (displayer)(challenge_url.clone()).await;
+                        }
 
                         let mut session_guard = OCR_SESSION.lock().await;
                         if session_guard.is_none() {

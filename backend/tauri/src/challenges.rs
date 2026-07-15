@@ -223,3 +223,55 @@ pub async fn prompt_captcha_dialog(
 
     rx.await.map_err(|_| ProviderError::NetworkError("Captcha cancelled".to_string()))
 }
+
+// Provider Callback: Opens a visible webview window for a captcha page and sleeps for 5s
+pub fn display_captcha_page_callback(
+    url: String,
+) -> Pin<Box<dyn Future<Output = ()> + Send + 'static>> {
+    Box::pin(async move {
+        if let Some(handle) = get_app_handle() {
+            show_visible_webview(handle, url).await;
+        }
+    })
+}
+
+// Spawns a visible WebView to show the captcha page to the user for 5 seconds
+pub async fn show_visible_webview(handle: AppHandle, url_str: String) {
+    let (tx, rx) = tokio::sync::oneshot::channel();
+    let handle_clone = handle.clone();
+    
+    let count = WINDOW_COUNTER.fetch_add(1, Ordering::Relaxed);
+    let window_label = format!("captcha-viewer-{count}");
+    let label_clone = window_label.clone();
+    
+    let parsed_url = match Url::parse(&url_str) {
+        Ok(u) => u,
+        Err(_) => return,
+    };
+    
+    // Create the window on the main GUI thread
+    handle.run_on_main_thread(move || {
+        let res = WebviewWindowBuilder::new(
+            &handle_clone,
+            &label_clone,
+            WebviewUrl::External(parsed_url),
+        )
+        .title("GeneaGrab - Verification Page")
+        .inner_size(600.0, 700.0)
+        .visible(true)
+        .resizable(true)
+        .build();
+        let _ = tx.send(res);
+    })
+    .unwrap_or(());
+
+    if let Ok(Ok(window)) = rx.await {
+        // Sleep 5 seconds so the user can see the captcha page
+        tokio::time::sleep(std::time::Duration::from_secs(5)).await;
+        
+        // Close the window
+        let _ = handle.run_on_main_thread(move || {
+            let _ = window.close();
+        });
+    }
+}
