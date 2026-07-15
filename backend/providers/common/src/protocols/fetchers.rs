@@ -39,6 +39,14 @@ async fn check_cooldown(cache_key: &str) -> Result<(), ProviderError> {
     Ok(())
 }
 
+pub async fn clear_error_cooldown(url_str: &str) {
+    if let Ok(host) = build_referer(url_str) {
+        let cache_key = format!("flaresolverr_{host}");
+        let mut error_guard = FLARESOLVERR_LAST_ERROR.write().await;
+        error_guard.remove(&cache_key);
+    }
+}
+
 /// Proxies requests through FlareSolverr to bypass Cloudflare protections.
 pub struct FlareSolverrFetcher<'a, F: Fetcher + ?Sized> {
     flaresolverr_url: String,

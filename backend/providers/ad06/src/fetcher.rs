@@ -167,23 +167,10 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
     async fn solve_captcha_and_retry(
         &self,
         req: Request,
-        failure_time: std::time::Instant,
+        _failure_time: std::time::Instant,
     ) -> Result<Vec<u8>, ProviderError> {
-        // Bypassing the 5-second FlareSolverr cache cooldown:
-        // If the first attempt failed, the core fetcher recorded the failure in a 5-second error cache.
-        // If we make the root request or retry before 5 seconds have elapsed, the core fetcher immediately returns the cached error.
-        // We sleep for the remaining duration of the 5 seconds since the failure before proceeding.
-        let elapsed = failure_time.elapsed();
-        if elapsed < std::time::Duration::from_secs(5) {
-            let sleep_duration = std::time::Duration::from_secs(5)
-                .checked_sub(elapsed)
-                .unwrap_or_default();
-            tracing::info!(
-                "Sleeping for {:?} to bypass FlareSolverr cooldown cache...",
-                sleep_duration
-            );
-            tokio::time::sleep(sleep_duration).await;
-        }
+        // Clear the 5-second FlareSolverr error cooldown cache for this host to retry immediately
+        geneagrab_providers::protocols::fetchers::clear_error_cooldown(&req.url).await;
 
         let mut state = CAPTCHA_STATE.lock().await;
 
