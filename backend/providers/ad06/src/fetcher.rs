@@ -212,11 +212,6 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
                             "Captcha challenge image successfully extracted from root response"
                         );
 
-                        if let Some(displayer) = geneagrab_providers::protocols::fetchers::CAPTCHA_PAGE_DISPLAYER.get() {
-                            tracing::info!("Displaying captcha page for 5 seconds before solving...");
-                            (displayer)(challenge_url.clone()).await;
-                        }
-
                         let mut session_guard = OCR_SESSION.lock().await;
                         if session_guard.is_none() {
                             let path = Self::get_onnx_path()?;

@@ -23,10 +23,6 @@ pub type CaptchaPrompterFn = fn(Vec<u8>) -> Pin<Box<dyn Future<Output = Result<S
 
 pub static CAPTCHA_PROMPTER: OnceLock<CaptchaPrompterFn> = OnceLock::new();
 
-pub type CaptchaPageDisplayerFn = fn(String) -> Pin<Box<dyn Future<Output = ()> + Send + 'static>>;
-
-pub static CAPTCHA_PAGE_DISPLAYER: OnceLock<CaptchaPageDisplayerFn> = OnceLock::new();
-
 static FLARESOLVERR_CACHE: LazyLock<RwLock<HashMap<String, Clearance>>> =
     LazyLock::new(|| RwLock::new(HashMap::new()));
 

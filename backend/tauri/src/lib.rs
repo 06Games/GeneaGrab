@@ -84,7 +84,6 @@ pub fn run() {
             challenges::set_app_handle(app.handle().clone());
             let _ = geneagrab_providers::protocols::fetchers::CHALLENGE_SOLVER.set(challenges::solve_challenge_callback);
             let _ = geneagrab_providers::protocols::fetchers::CAPTCHA_PROMPTER.set(challenges::solve_captcha_callback);
-            let _ = geneagrab_providers::protocols::fetchers::CAPTCHA_PAGE_DISPLAYER.set(challenges::display_captcha_page_callback);
 
             Ok(())
         })
