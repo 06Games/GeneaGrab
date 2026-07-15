@@ -44,20 +44,20 @@ const HomePage = () => {
     }
   });
 
-  const [plugins] = createResource(
+  const [providers] = createResource(
     () => (isUrl() ? searchQuery().trim() : null),
-    (url) => api.getPluginsForUrl(url),
+    (url) => api.getProvidersForUrl(url),
   );
 
-  const [selectedQuickPlugin, setSelectedQuickPlugin] = createSignal("");
+  const [selectedQuickProvider, setSelectedQuickProvider] = createSignal("");
   const [isAdding, setIsAdding] = createSignal(false);
 
   createEffect(() => {
-    const list = plugins();
+    const list = providers();
     if (list && list.length > 0) {
-      setSelectedQuickPlugin(list[0].id);
+      setSelectedQuickProvider(list[0].id);
     } else {
-      setSelectedQuickPlugin("");
+      setSelectedQuickProvider("");
     }
   });
 
@@ -68,10 +68,10 @@ const HomePage = () => {
   });
 
   const handleQuickAdd = async () => {
-    if (!searchQuery() || !selectedQuickPlugin() || isAdding()) return;
+    if (!searchQuery() || !selectedQuickProvider() || isAdding()) return;
     setIsAdding(true);
     try {
-      await api.addRegistry(searchQuery().trim(), selectedQuickPlugin());
+      await api.addRegistry(searchQuery().trim(), selectedQuickProvider());
       // Refresh list to instantly show the new registry
       setItems([]);
       fetchPage(null, true);
@@ -234,24 +234,24 @@ const HomePage = () => {
                 <span class="text-[13px] text-dim">
                   <Switch>
                     <Match when={isAlreadyAdded()}>{t("home.urlAlreadyAdded")}</Match>
-                    <Match when={plugins.loading}>{t("home.checkingUrl")}</Match>
-                    <Match when={!plugins.loading && plugins()?.length === 0}>
-                      <span class="text-warning">{t("home.urlNoPlugin")}</span>
+                    <Match when={providers.loading}>{t("home.checkingUrl")}</Match>
+                    <Match when={!providers.loading && providers()?.length === 0}>
+                      <span class="text-warning">{t("home.urlNoProvider")}</span>
                     </Match>
-                    <Match when={!plugins.loading && plugins() && plugins()!.length > 0}>{t("home.urlReady")}</Match>
+                    <Match when={!providers.loading && providers() && providers()!.length > 0}>{t("home.urlReady")}</Match>
                   </Switch>
                 </span>
               </div>
             </div>
 
-            <Show when={!isAlreadyAdded() && !plugins.loading && plugins() && plugins()!.length > 0}>
+            <Show when={!isAlreadyAdded() && !providers.loading && providers() && providers()!.length > 0}>
               <div class="flex items-center gap-2">
                 <select
-                  value={selectedQuickPlugin()}
-                  onChange={(e) => setSelectedQuickPlugin(e.currentTarget.value)}
+                  value={selectedQuickProvider()}
+                  onChange={(e) => setSelectedQuickProvider(e.currentTarget.value)}
                   class="px-3 py-1.5 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent outline-none appearance-none cursor-pointer"
                 >
-                  <For each={plugins()}>{(p) => <option value={p.id}>{p.name}</option>}</For>
+                  <For each={providers()}>{(p) => <option value={p.id}>{p.name}</option>}</For>
                 </select>
                 <Button variant="primary" onClick={handleQuickAdd} disabled={isAdding()}>
                   <Show

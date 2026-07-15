@@ -3,10 +3,10 @@ use sea_orm::DbConn;
 use wreq::Client;
 use wreq_util::Emulation;
 use geneagrab_providers::traits::{ArchiveProvider, Fetcher};
-use geneagrab_plugin_ad06::Ad06Provider;
-use geneagrab_plugin_geneanet::GeneanetProvider;
+use geneagrab_provider_ad06::Ad06Provider;
+use geneagrab_provider_geneanet::GeneanetProvider;
 use crate::errors::CoreError;
-use crate::services::plugin::get_plugin_config;
+use crate::services::provider::get_provider_config;
 
 pub struct CoreFetcher {
     pub client: Client,
@@ -54,19 +54,19 @@ pub fn get_providers(flaresolverr_url: &str, fetcher: Arc<dyn Fetcher>) -> Vec<A
     ]
 }
 
-pub fn get_provider_without_config(plugin_id: &str) -> Result<Arc<dyn ArchiveProvider>, CoreError> {
+pub fn get_provider_without_config(provider_id: &str) -> Result<Arc<dyn ArchiveProvider>, CoreError> {
     let fetcher = get_fetcher()?;
     get_providers("", fetcher)
         .into_iter()
-        .find(|p| p.metadata().id == plugin_id)
-        .ok_or_else(|| CoreError::NotFound(format!("Plugin {plugin_id} not found")))
+        .find(|p| p.metadata().id == provider_id)
+        .ok_or_else(|| CoreError::NotFound(format!("Provider {provider_id} not found")))
 }
 
 pub async fn get_provider(
     db: &DbConn,
-    plugin_id: &str,
+    provider_id: &str,
 ) -> Result<Arc<dyn ArchiveProvider>, CoreError> {
-    let config = get_plugin_config(db, plugin_id).await?;
+    let config = get_provider_config(db, provider_id).await?;
     let flaresolverr_url = config
         .get("flaresolverr_url")
         .cloned()
@@ -75,8 +75,8 @@ pub async fn get_provider(
     let fetcher = get_fetcher()?;
     get_providers(&flaresolverr_url, fetcher)
         .into_iter()
-        .find(|p| p.metadata().id == plugin_id)
-        .ok_or_else(|| CoreError::NotFound(format!("Plugin {plugin_id} not found")))
+        .find(|p| p.metadata().id == provider_id)
+        .ok_or_else(|| CoreError::NotFound(format!("Provider {provider_id} not found")))
 }
 
 pub fn get_fetcher() -> Result<Arc<dyn Fetcher>, CoreError> {

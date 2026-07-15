@@ -17,8 +17,8 @@ pub enum CoreError {
     #[error("Lock error: {0}")]
     LockError(String),
 
-    #[error("Plugin error: {0}")]
-    PluginError(String),
+    #[error("Provider error: {0}")]
+    ProviderError(String),
 
     #[error("Number error: {0}")]
     NumberError(#[from] std::num::TryFromIntError),
@@ -29,6 +29,6 @@ pub enum CoreError {
 
 impl From<geneagrab_providers::errors::ProviderError> for CoreError {
     fn from(err: geneagrab_providers::errors::ProviderError) -> Self {
-        CoreError::PluginError(err.to_string())
+        CoreError::ProviderError(err.to_string())
     }
 }

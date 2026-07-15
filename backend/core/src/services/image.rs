@@ -137,17 +137,17 @@ pub async fn prepare_image(
         image: image.clone().into(),
     };
 
-    let provider = crate::plugins::get_provider(db, &registry.source_id).await?;
+    let provider = crate::providers::get_provider(db, &registry.source_id).await?;
     let missing_data = provider
         .is_image_missing_data(&extract_req)
-        .map_err(|e| CoreError::PluginError(e.to_string()))?;
+        .map_err(|e| CoreError::ProviderError(e.to_string()))?;
 
     if let Some(field) = missing_data {
         tracing::info!("Image {image_id} is missing data ({field}), extracting...");
         let res = provider
             .extract_image(extract_req)
             .await
-            .map_err(|e| CoreError::PluginError(e.to_string()))?;
+            .map_err(|e| CoreError::ProviderError(e.to_string()))?;
 
         let mut image_model: image_entry::ActiveModel = image.into();
         let mut has_updates = false;
@@ -197,11 +197,11 @@ pub async fn fetch_image_tile(
         y,
     };
 
-    let provider = crate::plugins::get_provider(db, &registry.source_id).await?;
+    let provider = crate::providers::get_provider(db, &registry.source_id).await?;
     let image_data = provider
         .fetch_tile(req)
         .await
-        .map_err(|e| CoreError::PluginError(e.to_string()))?;
+        .map_err(|e| CoreError::ProviderError(e.to_string()))?;
 
     Ok(image_data)
 }
@@ -307,11 +307,11 @@ where
         image: image.clone().into(),
     };
 
-    let provider = crate::plugins::get_provider(db, &registry.source_id).await?;
+    let provider = crate::providers::get_provider(db, &registry.source_id).await?;
     let image_data = provider
         .download_image(req)
         .await
-        .map_err(|e| CoreError::PluginError(e.to_string()))?;
+        .map_err(|e| CoreError::ProviderError(e.to_string()))?;
 
     if let Some(res) = image_data {
         progress_callback(1, 1);

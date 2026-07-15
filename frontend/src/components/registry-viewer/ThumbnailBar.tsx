@@ -1,4 +1,4 @@
-import { For, createEffect, createSignal, Show } from "solid-js";
+import { For, createEffect, createSignal } from "solid-js";
 import { useI18n } from "../../ui/i18n";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import { getBackendService } from "../../services/apiFactory";

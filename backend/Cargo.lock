@@ -2353,8 +2353,8 @@ dependencies = [
  "chrono",
  "dates",
  "futures",
- "geneagrab-plugin-ad06",
- "geneagrab-plugin-geneanet",
+ "geneagrab-provider-ad06",
+ "geneagrab-provider-geneanet",
  "geneagrab-providers",
  "image",
  "sea-orm",
@@ -2368,7 +2368,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "geneagrab-plugin-ad06"
+name = "geneagrab-provider-ad06"
 version = "4.0.0"
 dependencies = [
  "async-trait",
@@ -2390,7 +2390,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "geneagrab-plugin-geneanet"
+name = "geneagrab-provider-geneanet"
 version = "4.0.0"
 dependencies = [
  "async-trait",

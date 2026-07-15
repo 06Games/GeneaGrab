@@ -6,7 +6,7 @@ use derive_builder::Builder;
 use strum::Display;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct PluginMetadata {
+pub struct ProviderMetadata {
     pub id: Cow<'static, str>,
     pub name: Cow<'static, str>,
     pub description: Option<Cow<'static, str>>,

@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 use regex::Regex;
 
 use geneagrab_providers::traits::{ArchiveProvider, Fetcher};
-use geneagrab_providers::data::PluginMetadata;
+use geneagrab_providers::data::ProviderMetadata;
 use geneagrab_providers::com_structs::{
     IdentifyRequest, IdentifyResponse, ExtractRequest, ExtractResponse,
     ExtractImageRequest, ExtractImageResponse, TileRequest, TileResponse, DownloadRequest
@@ -15,14 +15,14 @@ use geneagrab_providers::errors::ProviderError;
 pub mod extract;
 pub mod image;
 
-const PLUGIN_METADATA: PluginMetadata = PluginMetadata {
+const PROVIDER_METADATA: ProviderMetadata = ProviderMetadata {
     id: Cow::Borrowed("geneanet"),
     name: Cow::Borrowed("Geneanet"),
-    description: Some(Cow::Borrowed("A plugin for extracting data from Geneanet.")),
+    description: Some(Cow::Borrowed("A provider for extracting data from Geneanet.")),
     author: Some(Cow::Borrowed("Evan Galli")),
     version: Some(Cow::Borrowed("1.0.0")),
     source_url: Some(Cow::Borrowed(
-        "https://github.com/06Games/GeneaGrab/tree/v4/backend/plugins/geneanet",
+        "https://github.com/06Games/GeneaGrab/tree/v4/backend/providers/geneanet",
     )),
     suggested_websites: Cow::Borrowed(&[std::borrow::Cow::Borrowed("https://www.geneanet.org/")]),
 };
@@ -51,8 +51,8 @@ impl GeneanetProvider {
 
 #[async_trait::async_trait]
 impl ArchiveProvider for GeneanetProvider {
-    fn metadata(&self) -> PluginMetadata {
-        PLUGIN_METADATA.clone()
+    fn metadata(&self) -> ProviderMetadata {
+        PROVIDER_METADATA.clone()
     }
 
     fn identify(&self, req: IdentifyRequest) -> Result<IdentifyResponse, ProviderError> {

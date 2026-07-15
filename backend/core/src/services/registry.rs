@@ -10,7 +10,7 @@ use crate::{
 };
 use dates::HistoricalDate;
 use geneagrab_providers::com_structs::{IdentifyRequest, IdentifyResponse, ExtractRequest};
-use geneagrab_providers::data::PluginMetadata;
+use geneagrab_providers::data::ProviderMetadata;
 use sea_orm::QueryOrder;
 use sea_orm::{
     ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, FromQueryResult,
@@ -229,16 +229,16 @@ pub async fn get_registry_meta(db: &DbConn, id: u32) -> Result<RegistryMeta, Cor
 pub async fn add_registry(
     db: &DbConn,
     url: String,
-    plugin_id: String,
+    provider_id: String,
 ) -> Result<RegistryMeta, CoreError> {
-    tracing::info!("add_registry called with url: {url}, plugin_id: {plugin_id}");
+    tracing::info!("add_registry called with url: {url}, provider_id: {provider_id}");
 
-    let provider = crate::plugins::get_provider(db, &plugin_id).await?;
-    let identified = provider.identify(IdentifyRequest { url: url.clone() }).map_err(|e| CoreError::PluginError(e.to_string()))?;
+    let provider = crate::providers::get_provider(db, &provider_id).await?;
+    let identified = provider.identify(IdentifyRequest { url: url.clone() }).map_err(|e| CoreError::ProviderError(e.to_string()))?;
     let res = provider
         .extract_registry(ExtractRequest { url, identified })
         .await
-        .map_err(|e| CoreError::PluginError(e.to_string()))?;
+        .map_err(|e| CoreError::ProviderError(e.to_string()))?;
 
     let txn = db
         .begin()
@@ -281,24 +281,24 @@ pub async fn add_registry(
     Ok(meta)
 }
 
-pub async fn get_plugins_for_url(
+pub async fn get_providers_for_url(
     url: &str,
-) -> Result<Vec<(PluginMetadata, IdentifyResponse)>, CoreError> {
-    let fetcher = crate::plugins::get_fetcher()?;
-    let providers = crate::plugins::get_providers("", fetcher);
-    let mut compatible_plugins = Vec::new();
+) -> Result<Vec<(ProviderMetadata, IdentifyResponse)>, CoreError> {
+    let fetcher = crate::providers::get_fetcher()?;
+    let providers = crate::providers::get_providers("", fetcher);
+    let mut compatible_providers = Vec::new();
 
     for provider in providers {
         let meta = provider.metadata();
         if let Ok(identified) = provider.identify(IdentifyRequest {
             url: url.to_string(),
         }) {
-            compatible_plugins.push((meta, identified));
+            compatible_providers.push((meta, identified));
         }
     }
 
-    // Prioritize plugins that explicitly list the website as compatible
-    compatible_plugins.sort_by_key(|(meta, _)| {
+    // Prioritize providers that explicitly list the website as compatible
+    compatible_providers.sort_by_key(|(meta, _)| {
         Reverse(
             meta.suggested_websites
                 .iter()
@@ -306,5 +306,5 @@ pub async fn get_plugins_for_url(
         )
     });
 
-    Ok(compatible_plugins)
+    Ok(compatible_providers)
 }

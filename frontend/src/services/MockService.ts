@@ -2,7 +2,7 @@ import { MOCK_EVENT_ROWS, MOCK_IMAGE_META, MOCK_REGISTRY_DATA, MOCK_SELECTED_EVE
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import { PluginOption, RegistryFilters, RegistryMeta } from "../types/registry";
+import { ProviderOption, RegistryFilters, RegistryMeta } from "../types/registry";
 import type { BackendService } from "./api";
 
 export class MockService implements BackendService {
@@ -49,18 +49,18 @@ export class MockService implements BackendService {
     return MOCK_REGISTRY_DATA;
   };
 
-  addRegistry = async (url: string, pluginId: string): Promise<RegistryMeta> => {
-    console.info(`[Mock API] addRegistry: ${url}, plugin: ${pluginId}`);
+  addRegistry = async (url: string, providerId: string): Promise<RegistryMeta> => {
+    console.info(`[Mock API] addRegistry: ${url}, provider: ${providerId}`);
     await this.delay(600);
     return MOCK_REGISTRY_DATA;
   };
 
-  getPluginsForUrl = async (url: string): Promise<PluginOption[]> => {
-    console.info(`[Mock API] getPluginsForUrl: ${url}`);
+  getProvidersForUrl = async (url: string): Promise<ProviderOption[]> => {
+    console.info(`[Mock API] getProvidersForUrl: ${url}`);
     await this.delay(300);
     return [
-      { id: "fs_plugin", name: "FamilySearch Extractor" },
-      { id: "gn_plugin", name: "Geneanet Extractor" },
+      { id: "fs_provider", name: "FamilySearch Extractor" },
+      { id: "gn_provider", name: "Geneanet Extractor" },
     ];
   };
 

@@ -1,5 +1,5 @@
 [package]
-name = "geneagrab-plugin-geneanet"
+name = "geneagrab-provider-geneanet"
 version = "4.0.0"
 edition = "2021"
 

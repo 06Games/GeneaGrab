@@ -1,4 +1,4 @@
-use crate::data::{Request, PluginMetadata};
+use crate::data::{Request, ProviderMetadata};
 use crate::com_structs::{
     IdentifyRequest, IdentifyResponse, ExtractRequest, ExtractResponse,
     ExtractImageRequest, ExtractImageResponse, TileRequest, TileResponse, DownloadRequest
@@ -17,7 +17,7 @@ pub trait Fetcher: Send + Sync {
 
 #[async_trait::async_trait]
 pub trait ArchiveProvider: Send + Sync {
-    fn metadata(&self) -> PluginMetadata;
+    fn metadata(&self) -> ProviderMetadata;
     
     fn identify(&self, req: IdentifyRequest) -> Result<IdentifyResponse, ProviderError>;
     

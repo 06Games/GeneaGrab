@@ -1,7 +1,7 @@
 use std::{fs, path::Path};
 use tokio::runtime::Runtime;
 
-use geneagrab_plugin_ad06::extract::extract_registry_internal;
+use geneagrab_provider_ad06::extract::extract_registry_internal;
 use test_utils::{registry_extraction_integration_test, ExtractTestCase};
 
 mod test_utils;

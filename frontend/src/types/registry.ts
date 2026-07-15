@@ -37,7 +37,7 @@ export interface RegistryMeta {
   acts_count: number;
 }
 
-export interface PluginOption {
+export interface ProviderOption {
   id: string;
   name: string;
 }

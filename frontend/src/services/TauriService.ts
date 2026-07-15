@@ -3,7 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import { PluginOption, RegistryFilters, RegistryMeta } from "../types/registry";
+import { ProviderOption, RegistryFilters, RegistryMeta } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
@@ -35,17 +35,17 @@ export class TauriService implements BackendService {
     return res as RegistryMeta;
   }
 
-  async addRegistry(url: string, pluginId: string): Promise<RegistryMeta> {
-    const res = await invoke<any>("add_registry", { url, pluginId });
+  async addRegistry(url: string, providerId: string): Promise<RegistryMeta> {
+    const res = await invoke<any>("add_registry", { url, providerId });
     if (Array.isArray(res.source_types)) {
       res.source_types = new Set(res.source_types);
     }
     return res as RegistryMeta;
   }
 
-  async getPluginsForUrl(url: string): Promise<PluginOption[]> {
-    const res = await invoke<any>("get_plugins_for_url", { url });
-    return res.map((r: any) => r as PluginOption);
+  async getProvidersForUrl(url: string): Promise<ProviderOption[]> {
+    const res = await invoke<any>("get_providers_for_url", { url });
+    return res.map((r: any) => r as ProviderOption);
   }
 
   async getAvailablePlaces(): Promise<string[]> {

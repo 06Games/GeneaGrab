@@ -9,7 +9,7 @@ export const AddRegistryModal = (props: { onClose: () => void; onAdded: () => vo
   const api = useBackend();
   const [url, setUrl] = createSignal("");
   const [debouncedUrl, setDebouncedUrl] = createSignal("");
-  const [selectedPlugin, setSelectedPlugin] = createSignal("");
+  const [selectedProvider, setSelectedProvider] = createSignal("");
   const [isSubmitting, setIsSubmitting] = createSignal(false);
 
   let timeout: ReturnType<typeof setTimeout>;
@@ -20,25 +20,25 @@ export const AddRegistryModal = (props: { onClose: () => void; onAdded: () => vo
     timeout = setTimeout(() => setDebouncedUrl(val), 500);
   };
 
-  const [plugins] = createResource(debouncedUrl, async (u) => {
+  const [providers] = createResource(debouncedUrl, async (u) => {
     if (!u) return [];
-    return api.getPluginsForUrl(u);
+    return api.getProvidersForUrl(u);
   });
 
   createEffect(() => {
-    const list = plugins();
-    if (list && list.length > 0 && !selectedPlugin()) {
-      setSelectedPlugin(list[0].id);
+    const list = providers();
+    if (list && list.length > 0 && !selectedProvider()) {
+      setSelectedProvider(list[0].id);
     }
   });
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    if (!url() || !selectedPlugin()) return;
+    if (!url() || !selectedProvider()) return;
 
     setIsSubmitting(true);
     try {
-      await api.addRegistry(url(), selectedPlugin());
+      await api.addRegistry(url(), selectedProvider());
       props.onAdded();
     } catch (err) {
       console.error(err);
@@ -71,25 +71,25 @@ export const AddRegistryModal = (props: { onClose: () => void; onAdded: () => vo
           </div>
 
           <div class="flex flex-col gap-1.5 relative">
-            <label class="text-[13px] font-medium text-main">{t("addModal.pluginLabel")}</label>
+            <label class="text-[13px] font-medium text-main">{t("addModal.providerLabel")}</label>
             <select
               required
-              value={selectedPlugin()}
-              onChange={(e) => setSelectedPlugin(e.currentTarget.value)}
-              disabled={plugins.loading || !plugins()?.length}
+              value={selectedProvider()}
+              onChange={(e) => setSelectedProvider(e.currentTarget.value)}
+              disabled={providers.loading || !providers()?.length}
               class="w-full px-3 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/20 outline-none transition-all disabled:opacity-50 appearance-none"
             >
-              <Show when={plugins.loading}>
-                <option value="">{t("addModal.pluginLoading")}</option>
+              <Show when={providers.loading}>
+                <option value="">{t("addModal.providerLoading")}</option>
               </Show>
-              <Show when={!plugins.loading && plugins()?.length === 0}>
-                <option value="">{t("addModal.pluginNone")}</option>
+              <Show when={!providers.loading && providers()?.length === 0}>
+                <option value="">{t("addModal.providerNone")}</option>
               </Show>
-              <Show when={!plugins.loading && plugins()?.length !== 0}>
-                <option value="" disabled selected={!selectedPlugin()}>
-                  {t("addModal.pluginPlaceholder")}
+              <Show when={!providers.loading && providers()?.length !== 0}>
+                <option value="" disabled selected={!selectedProvider()}>
+                  {t("addModal.providerPlaceholder")}
                 </option>
-                {plugins()?.map((p) => (
+                {providers()?.map((p) => (
                   <option value={p.id}>{p.name}</option>
                 ))}
               </Show>
@@ -101,7 +101,7 @@ export const AddRegistryModal = (props: { onClose: () => void; onAdded: () => vo
             <Button variant="ghost" onClick={props.onClose}>
               {t("addModal.cancel")}
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting() || !url() || !selectedPlugin()}>
+            <Button type="submit" variant="primary" disabled={isSubmitting() || !url() || !selectedProvider()}>
               <Show when={isSubmitting()} fallback={t("addModal.submit")}>
                 <Icon icon="lucide:loader-2" class="animate-spin" />
               </Show>

@@ -152,7 +152,7 @@ export const DetailZone = (props: DetailZoneProps) => {
               <FieldArray name="people">
                 {(fieldArray) => (
                   <For each={fieldArray.items}>
-                    {(item, index) => (
+                    {(_, index) => (
                       <PersonBlock
                         index={index()}
                         namePrefix={`people.${index()}.`}
