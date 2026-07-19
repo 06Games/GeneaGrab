@@ -98,12 +98,16 @@ pub async fn solve_challenge_in_webview(
             function check() {
                 var bodyHTML = document.body ? document.body.innerHTML.toLowerCase() : '';
                 var docTitle = document.title.toLowerCase();
-                var isCF = docTitle.includes('just a moment') || 
-                           docTitle.includes('cloudflare') || 
-                           bodyHTML.includes('turnstile') ||
-                           bodyHTML.includes('cloudflare-static');
+                var isChallenge = docTitle.includes('just a moment') || 
+                                  docTitle.includes('cloudflare') || 
+                                  bodyHTML.includes('turnstile') ||
+                                  bodyHTML.includes('cloudflare-static') ||
+                                  bodyHTML.includes('captcha_audio') ||
+                                  bodyHTML.includes('id="ans"') ||
+                                  bodyHTML.includes('name="answer"') ||
+                                  bodyHTML.includes('id="jar"');
 
-                if (isCF) {
+                if (isChallenge) {
                     document.cookie = 'gg_status=challenge; path=/';
                 } else if (document.readyState === 'complete') {
                     document.cookie = 'gg_status=success; path=/';

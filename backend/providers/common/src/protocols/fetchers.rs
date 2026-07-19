@@ -152,6 +152,17 @@ impl<'a, F: Fetcher + ?Sized> Fetcher for FlareSolverrFetcher<'a, F> {
     }
 }
 
+fn is_response_blocked_by_challenge(data: &[u8]) -> bool {
+    let html = String::from_utf8_lossy(data);
+    let html_lower = html.to_ascii_lowercase();
+    html.contains("captcha_audio")
+        || html_lower.contains("forbidden")
+        || html_lower.contains("access denied")
+        || html_lower.contains("just a moment")
+        || html_lower.contains("turnstile")
+        || html_lower.contains("cloudflare")
+}
+
 pub struct CachedFlareSolverrFetcher<'a, F: Fetcher + ?Sized> {
     flaresolverr_fetcher: FlareSolverrFetcher<'a, F>,
 }
@@ -182,7 +193,15 @@ impl<'a, F: Fetcher + ?Sized> CachedFlareSolverrFetcher<'a, F> {
                 .safe_fetch(solution_clone, req.clone())
                 .await
             {
-                Ok(data) => Some(Ok(data)),
+                Ok(data) => {
+                    if is_response_blocked_by_challenge(&data) {
+                        let mut write_guard = FLARESOLVERR_CACHE.write().await;
+                        write_guard.remove(cache_key);
+                        None
+                    } else {
+                        Some(Ok(data))
+                    }
+                }
                 Err(_) => {
                     let mut write_guard = FLARESOLVERR_CACHE.write().await;
                     write_guard.remove(cache_key);

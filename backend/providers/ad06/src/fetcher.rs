@@ -161,6 +161,39 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
             }
         }
 
+        // If no form with "captcha_code" was found, try finding a WAF-style input named "answer" or with ID "ans"
+        let mut has_waf_captcha = false;
+        let mut form_fields = Vec::new();
+        for input in document.select(&input_selector) {
+            let name = input.value().attr("name").unwrap_or("");
+            let id = input.value().attr("id").unwrap_or("");
+            let value = input.value().attr("value").unwrap_or("");
+            let input_type = input.value().attr("type").unwrap_or("");
+
+            if name == "answer" || id == "ans" {
+                has_waf_captcha = true;
+                form_fields.push(("answer".to_string(), code.to_string()));
+            } else if input_type != "submit" && !name.is_empty() {
+                form_fields.push((name.to_string(), value.to_string()));
+            }
+        }
+
+        if has_waf_captcha {
+            let body = form_urlencoded::Serializer::new(String::new())
+                .extend_pairs(form_fields)
+                .finish();
+
+            return Ok(Some(Request {
+                url: base_url.to_string(),
+                method: FetchMethod::POST,
+                headers: vec![(
+                    "Content-Type".to_string(),
+                    "application/x-www-form-urlencoded".to_string(),
+                )],
+                body: Some(body),
+            }));
+        }
+
         Ok(None)
     }
 
@@ -224,7 +257,7 @@ impl<'a, F: Fetcher + ?Sized> AdamFetcher<'a, F> {
                                     tracing::warn!("Solved captcha: '{}'", solved_code);
                                     if let Some(submit_req) = Self::prepare_captcha_submit(
                                         &root_res_data,
-                                        &req.url,
+                                        &challenge_url,
                                         &solved_code,
                                     )? {
                                         tracing::info!(
@@ -459,7 +492,7 @@ mod tests {
             }
 
             let response_str = format!(
-                r#"{{"status":"ok","message":"success","solution":{{"url":{:?},"response":"no captcha","userAgent":"Mozilla/5.0","cookies":[]}}}}"#,
+                r#"{{"status":"ok","message":"success","solution":{{"url":{:?},"response":"success","userAgent":"Mozilla/5.0","cookies":[]}}}}"#,
                 target_url
             );
             Ok(response_str.into_bytes())
