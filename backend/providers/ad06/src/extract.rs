@@ -4,7 +4,7 @@ use geneagrab_providers::{
     errors::ProviderError,
     protocols::{
         iiif::{Canvas, Manifest, Metadata},
-        ligeo::LigeoClasseur,
+        ligeo::{LigeoCanvas, LigeoClasseur},
     },
     traits::Fetcher,
     utils::{to_title_case, validate_regex_match},
@@ -339,7 +339,10 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
                     manifest_url: res.service.as_ref().map(|s| s.id.clone()),
                     api_url: None,
                     download_url: None,
-                    ark_url: Some(canvas.id.clone()),
+                    ark_url: LigeoCanvas::try_from(canvas)
+                        .ok()
+                        .and_then(|c| c.permalink)
+                        .or_else(|| Some(canvas.id.clone())),
                     image_number: u32::try_from(i + 1).expect("Image count shouldn't be that high"),
                     name: canvas.label.clone(),
                     date_range: None,

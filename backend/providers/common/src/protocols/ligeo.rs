@@ -29,3 +29,20 @@ impl TryFrom<&super::iiif::Canvas> for LigeoClasseur {
             .map_err(|_| "Failed to deserialize LigeoClasseur from canvas data")
     }
 }
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct LigeoCanvas {
+    #[serde(rename = "ligeoPermalink")]
+    pub permalink: Option<String>,
+    #[serde(rename = "ligeoClasseur")]
+    pub classeur: Option<LigeoClasseur>,
+}
+
+impl TryFrom<&super::iiif::Canvas> for LigeoCanvas {
+    type Error = &'static str;
+
+    fn try_from(canvas: &super::iiif::Canvas) -> Result<Self, Self::Error> {
+        serde_json::from_value(canvas.extra.clone())
+            .map_err(|_| "Failed to deserialize LigeoCanvas from canvas extra data")
+    }
+}
