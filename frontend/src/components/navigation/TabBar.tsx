@@ -20,6 +20,12 @@ export const TabBar = () => {
                   : "bg-panel text-dim hover:bg-tinted hover:text-main border-t-2 border-t-transparent",
               ].join(" ")}
               onClick={() => setActiveTab(tab.id)}
+              onAuxClick={(e) => {
+                if (e.button === 1 && tab.closable) {
+                  e.preventDefault();
+                  closeTab(tab.id);
+                }
+              }}
             >
               <span class="text-[13px] truncate max-w-[300px]" title={tab.title}>
                 {tab.title}
