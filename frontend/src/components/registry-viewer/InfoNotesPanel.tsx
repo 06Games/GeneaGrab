@@ -1,4 +1,4 @@
-import { createSignal, For, onCleanup, Show } from "solid-js";
+import { createSignal, createEffect, For, onCleanup, Show } from "solid-js";
 import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
@@ -43,18 +43,41 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   let saveTimer: ReturnType<typeof setTimeout>;
   let lastMeta: Partial<ImageMeta> = {};
 
+  // Save changes immediately if image changes
+  createEffect((prevImage: string | undefined) => {
+    const currentImg = props.image;
+    if (prevImage !== undefined && prevImage !== currentImg) {
+      if (Object.keys(lastMeta).length > 0) {
+        clearTimeout(saveTimer);
+        const targetMeta = lastMeta;
+        const targetImageNum = parseInt(prevImage, 10);
+        actions.onSaveImageMeta?.(targetImageNum, targetMeta).catch((err) => {
+          console.error("Failed to save image meta on page change:", err);
+        });
+      }
+      lastMeta = {};
+      setSaveStatus("saved");
+    }
+    return currentImg;
+  });
+
   const saveImageMeta = (meta: Partial<ImageMeta>) => {
     setSaveStatus("unsaved");
     clearTimeout(saveTimer);
     lastMeta = { ...lastMeta, ...meta }; // Accumulate changes to avoid multiple rapid saves
+    const targetImageNum = parseInt(props.image, 10);
     saveTimer = setTimeout(async () => {
       setSaveStatus("saving");
+      const sendingMeta = lastMeta;
+      lastMeta = {};
       const success =
         (await actions
-          .onSaveImageMeta?.(lastMeta)
+          .onSaveImageMeta?.(targetImageNum, sendingMeta)
           .catch(() => false)
           .then(() => true)) ?? false;
-      setSaveStatus(success ? "saved" : "error");
+      if (parseInt(props.image, 10) === targetImageNum) {
+        setSaveStatus(success ? "saved" : "error");
+      }
     }, 800);
   };
   onCleanup(() => clearTimeout(saveTimer));

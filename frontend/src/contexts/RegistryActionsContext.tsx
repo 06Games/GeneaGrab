@@ -3,7 +3,7 @@ import { EventDetail } from "../types";
 import { UserImageMeta } from "../types/image";
 
 export interface RegistryActions {
-  onSaveImageMeta?: (meta: Partial<UserImageMeta>) => Promise<void>;
+  onSaveImageMeta?: (imageNumber: number, meta: Partial<UserImageMeta>) => Promise<void>;
   onSaveAct?: (event: EventDetail) => void;
   onValidateAndNext?: (event: EventDetail) => void;
   onNewAct?: () => void;

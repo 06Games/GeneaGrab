@@ -187,14 +187,16 @@ export const ViewerPage = (props: ViewerPageProps) => {
 
   // Actions
   const registryActions = {
-    onSaveImageMeta: async (meta: Partial<UserImageMeta>) => {
-      await api.saveImageMeta(registryId, currentImage(), meta);
-      mutateImageMeta((prev) => (prev ? { ...prev, ...meta } : prev));
+    onSaveImageMeta: async (imageNumber: number, meta: Partial<UserImageMeta>) => {
+      await api.saveImageMeta(registryId, imageNumber, meta);
+      if (imageNumber === currentImage()) {
+        mutateImageMeta((prev) => (prev ? { ...prev, ...meta } : prev));
+      }
       mutateRegistryMeta((prev) => {
         if (!prev) return prev;
         const images = prev.images || [];
         const nextImages = [...images];
-        const idx = currentImage() - 1;
+        const idx = imageNumber - 1;
         nextImages[idx] = { ...nextImages[idx], ...meta };
         return { ...prev, images: nextImages };
       });
