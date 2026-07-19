@@ -11,6 +11,7 @@ import { Icon } from "@iconify-icon/solid";
 import type { RegistryMeta } from "../types/registry";
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
+import { openUrl } from "@tauri-apps/plugin-opener";
 
 const HomePage = () => {
   const api = useBackend();
@@ -33,6 +34,63 @@ const HomePage = () => {
   const [isFetching, setIsFetching] = createSignal(false);
 
   const [columns, setColumns] = createSignal(1);
+
+  const [contextMenu, setContextMenu] = createSignal<{
+    x: number;
+    y: number;
+    registry: RegistryMeta;
+  } | null>(null);
+
+  const handleGlobalClick = () => {
+    setContextMenu(null);
+  };
+
+  const handleRegistryContextMenu = (e: MouseEvent, registry: RegistryMeta) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const menuWidth = 180;
+    const menuHeight = 90;
+
+    let x = e.clientX;
+    let y = e.clientY;
+
+    if (x + menuWidth > window.innerWidth) {
+      x = window.innerWidth - menuWidth - 8;
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 8;
+    }
+
+    setContextMenu({
+      x,
+      y,
+      registry,
+    });
+  };
+
+  const handleOpenInBrowser = async (url: string) => {
+    if (isTauri()) {
+      try {
+        await openUrl(url);
+      } catch (err) {
+        console.error("Failed to open URL via Tauri:", err);
+        window.open(url, "_blank");
+      }
+    } else {
+      window.open(url, "_blank");
+    }
+  };
+
+  const handleDeleteRegistry = async (id: number) => {
+    try {
+      await api.deleteRegistry(id);
+      setItems([]);
+      fetchPage(null, true);
+    } catch (err) {
+      console.error("Failed to delete registry:", err);
+    }
+  };
 
   const isUrl = createMemo(() => {
     const q = searchQuery().trim();
@@ -111,7 +169,15 @@ const HomePage = () => {
     });
 
     if (scrollRef) observer.observe(scrollRef);
-    onCleanup(() => observer.disconnect());
+
+    window.addEventListener("click", handleGlobalClick);
+    window.addEventListener("contextmenu", handleGlobalClick);
+
+    onCleanup(() => {
+      observer.disconnect();
+      window.removeEventListener("click", handleGlobalClick);
+      window.removeEventListener("contextmenu", handleGlobalClick);
+    });
   });
 
   const chunkedRows = createMemo(() => {
@@ -310,7 +376,7 @@ const HomePage = () => {
                         gap: "16px",
                       }}
                     >
-                      <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} />}</For>
+                      <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} onContextMenu={(e) => handleRegistryContextMenu(e, item)} />}</For>
                     </div>
                   </Show>
                 </div>
@@ -328,6 +394,47 @@ const HomePage = () => {
             fetchPage(null, true);
           }}
         />
+      </Show>
+
+      <Show when={contextMenu()}>
+        {(menu) => (
+          <div
+            class="fixed z-50 bg-panel border border-subtle rounded-lg shadow-xl py-1 min-w-[180px] transition-all duration-100"
+            style={{
+              left: `${menu().x}px`,
+              top: `${menu().y}px`,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => {
+                const url = menu().registry.ark_url;
+                if (url) {
+                  handleOpenInBrowser(url);
+                }
+                setContextMenu(null);
+              }}
+              disabled={!menu().registry.ark_url}
+              class="w-full text-left px-3 py-2 text-[13px] text-main hover:bg-hover disabled:opacity-40 disabled:hover:bg-transparent flex items-center gap-2 transition-colors cursor-pointer disabled:cursor-not-allowed font-medium"
+            >
+              <Icon icon="lucide:external-link" class="w-4 h-4 text-muted" />
+              {t("home.openInBrowser")}
+            </button>
+            <div class="h-px bg-subtle my-1" />
+            <button
+              onClick={() => {
+                if (window.confirm(t("home.confirmDelete"))) {
+                  handleDeleteRegistry(menu().registry.id);
+                }
+                setContextMenu(null);
+              }}
+              class="w-full text-left px-3 py-2 text-[13px] text-danger hover:bg-danger/10 flex items-center gap-2 transition-colors cursor-pointer font-medium"
+            >
+              <Icon icon="lucide:trash-2" class="w-4 h-4" />
+              {t("home.delete")}
+            </button>
+          </div>
+        )}
       </Show>
     </div>
   );

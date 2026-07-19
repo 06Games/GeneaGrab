@@ -8,6 +8,7 @@ export interface BackendService {
   getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>>;
   getRegistryMeta(id: number): Promise<RegistryMeta>;
   addRegistry(url: string, providerId: string): Promise<RegistryMeta>;
+  deleteRegistry(id: number): Promise<void>;
   getProvidersForUrl(url: string): Promise<ProviderOption[]>;
 
   // Filters metadata

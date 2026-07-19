@@ -43,6 +43,10 @@ export class TauriService implements BackendService {
     return res as RegistryMeta;
   }
 
+  async deleteRegistry(id: number): Promise<void> {
+    await invoke("delete_registry", { id });
+  }
+
   async getProvidersForUrl(url: string): Promise<ProviderOption[]> {
     const res = await invoke<any>("get_providers_for_url", { url });
     return res.map((r: any) => r as ProviderOption);

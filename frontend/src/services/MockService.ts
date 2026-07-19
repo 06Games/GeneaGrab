@@ -55,6 +55,11 @@ export class MockService implements BackendService {
     return MOCK_REGISTRY_DATA;
   };
 
+  deleteRegistry = async (id: number): Promise<void> => {
+    console.info(`[Mock API] deleteRegistry: ${id}`);
+    await this.delay(300);
+  };
+
   getProvidersForUrl = async (url: string): Promise<ProviderOption[]> => {
     console.info(`[Mock API] getProvidersForUrl: ${url}`);
     await this.delay(300);

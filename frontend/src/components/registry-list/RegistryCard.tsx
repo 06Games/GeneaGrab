@@ -17,7 +17,7 @@ const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
   unknown: "text-event-other bg-event-other-bg border-event-other-border",
 };
 
-export const RegistryCard = (props: { registry: RegistryMeta }) => {
+export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e: MouseEvent) => void }) => {
   const { t } = useI18n();
   const { openTab } = useTabs();
 
@@ -37,7 +37,12 @@ export const RegistryCard = (props: { registry: RegistryMeta }) => {
           registryId: props.registry.id,
         })
       }
-      class="text-leftflex flex-col bg-panel border border-subtle rounded-xl p-4 transition-all duration-150 hover:border-accent hover:shadow-md hover:shadow-accent/5 focus:outline-none focus:ring-2 focus:ring-accent group"
+      onContextMenu={(e) => {
+        if (props.onContextMenu) {
+          props.onContextMenu(e);
+        }
+      }}
+      class="text-left flex flex-col bg-panel border border-subtle rounded-xl p-4 transition-all duration-150 hover:border-accent hover:shadow-md hover:shadow-accent/5 focus:outline-none focus:ring-2 focus:ring-accent group"
     >
       <div class="flex items-start justify-between mb-2">
         <h3 class="text-[15px] font-bold text-main truncate group-hover:text-accent transition-colors" title={props.registry.archive_reference}>

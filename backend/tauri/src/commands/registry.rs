@@ -45,3 +45,13 @@ pub async fn get_providers_for_url(
 
     Ok(res.into_iter().map(|(meta, _)| meta).collect()) // TODO: Keep the extracted info
 }
+
+#[tauri::command]
+pub async fn delete_registry(
+    id: u32,
+    state: State<'_, AppState>,
+) -> Result<(), CommandError> {
+    geneagrab_core::services::registry::delete_registry(&state.db, id).await?;
+    Ok(())
+}
+

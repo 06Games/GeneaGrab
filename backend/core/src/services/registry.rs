@@ -308,3 +308,12 @@ pub async fn get_providers_for_url(
 
     Ok(compatible_providers)
 }
+
+pub async fn delete_registry(db: &DbConn, id: u32) -> Result<(), CoreError> {
+    registry_entry::Entity::delete_by_id(id)
+        .exec(db)
+        .await
+        .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?;
+    Ok(())
+}
+
