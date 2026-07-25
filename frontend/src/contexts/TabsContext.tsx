@@ -15,7 +15,7 @@ export interface Tab {
 interface TabsContextValue {
   tabs: Tab[];
   activeTabId: () => string;
-  openTab: (tab: Omit<Tab, "id" | "title" | "closable"> & { id?: string }) => void;
+  openTab: (tab: Omit<Tab, "id" | "title" | "closable"> & { id?: string }, activate?: boolean) => void;
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateTab: (id: string, updates: Partial<Tab>) => void;
@@ -27,17 +27,21 @@ export function TabsProvider(props: { children: JSX.Element }) {
   const [tabs, setTabs] = createStore<Tab[]>([{ id: "home", type: "home", title: "Home", closable: false }]);
   const [activeTabId, setActiveTabId] = createSignal("home");
 
-  const openTab = (newTab: Omit<Tab, "id" | "title" | "closable"> & { id?: string }) => {
-    const id = (newTab.id ?? newTab.type == "home") ? "home" : `${newTab.type}-${newTab.registryId}`;
+  const openTab = (newTab: Omit<Tab, "id" | "title" | "closable"> & { id?: string }, activate = true) => {
+    const id = newTab.id ?? (newTab.type === "home" ? "home" : `${newTab.type}-${newTab.registryId}`);
 
-    // If it already exists, just focus it
+    // If it already exists, focus it if activate is true
     if (tabs.find((t) => t.id === id)) {
-      setActiveTabId(id);
+      if (activate) {
+        setActiveTabId(id);
+      }
       return;
     }
 
     setTabs([...tabs, { ...newTab, id, title: id, closable: true }]);
-    setActiveTabId(id);
+    if (activate) {
+      setActiveTabId(id);
+    }
   };
   const closeTab = (id: string) => {
     if (id === "home") return; // Prevent closing the home tab

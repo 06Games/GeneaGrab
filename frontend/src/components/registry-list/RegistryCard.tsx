@@ -37,6 +37,23 @@ export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e
           registryId: props.registry.id,
         })
       }
+      onMouseDown={(e) => {
+        if (e.button === 1) {
+          e.preventDefault();
+        }
+      }}
+      onAuxClick={(e) => {
+        if (e.button === 1) {
+          e.preventDefault();
+          openTab(
+            {
+              type: "registry",
+              registryId: props.registry.id,
+            },
+            false
+          );
+        }
+      }}
       onContextMenu={(e) => {
         if (props.onContextMenu) {
           props.onContextMenu(e);
