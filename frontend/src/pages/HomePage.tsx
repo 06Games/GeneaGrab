@@ -246,7 +246,7 @@ const HomePage = () => {
       return hasNextPage() ? chunkedRows().length + 1 : chunkedRows().length;
     },
     getScrollElement: () => scrollRef,
-    estimateSize: () => 188,
+    estimateSize: () => 196,
     gap: 16,
     overscan: 4,
   });
@@ -338,7 +338,7 @@ const HomePage = () => {
 
         <div
           ref={scrollRef}
-          class="flex-1 overflow-y-auto -mr-4 pr-4 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
+          class="flex-1 overflow-y-auto -mr-4 pr-4 pb-4 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
         >
           <Show when={!isFetching() && items().length === 0}>
             <div class="py-16 flex flex-col items-center justify-center text-dim border-2 border-dashed border-subtle rounded-xl h-full">
@@ -351,7 +351,14 @@ const HomePage = () => {
             <For each={virtualizer.getVirtualItems()}>
               {(virtualRow) => (
                 <div
-                  ref={virtualizer.measureElement}
+                  ref={(el) => {
+                    createEffect(() => {
+                      const idx = virtualRow.index;
+                      if (el) {
+                        virtualizer.measureElement(el);
+                      }
+                    });
+                  }}
                   data-index={virtualRow.index}
                   style={{
                     position: "absolute",
@@ -364,7 +371,7 @@ const HomePage = () => {
                   <Show
                     when={virtualRow.index < chunkedRows().length}
                     fallback={
-                      <div class="w-full flex justify-center items-center h-[188px] text-dim">
+                      <div class="w-full flex justify-center items-center h-[196px] text-dim">
                         <Icon icon="lucide:loader-2" class="animate-spin" width="24" height="24" />
                       </div>
                     }

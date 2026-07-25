@@ -59,7 +59,7 @@ export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e
           props.onContextMenu(e);
         }
       }}
-      class="text-left flex flex-col bg-panel border border-subtle rounded-xl p-4 transition-all duration-150 hover:border-accent hover:shadow-md hover:shadow-accent/5 focus:outline-none focus:ring-2 focus:ring-accent group"
+      class="text-left flex flex-col h-[196px] bg-panel border border-subtle rounded-xl p-4 transition-all duration-150 hover:border-accent hover:shadow-md hover:shadow-accent/5 focus:outline-none focus:ring-2 focus:ring-accent group"
     >
       <div class="flex items-start justify-between mb-2">
         <h3 class="text-[15px] font-bold text-main truncate group-hover:text-accent transition-colors" title={props.registry.archive_reference}>
@@ -72,21 +72,23 @@ export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e
         </Show>
       </div>
 
-      <Show when={props.registry.title}>
-        <p class="text-[13px] text-main mb-3 truncate font-medium" title={props.registry.title}>
-          {props.registry.title}
-        </p>
-      </Show>
+      <div class="min-h-[20px] mb-2">
+        <Show when={props.registry.title}>
+          <p class="text-[13px] text-main truncate font-medium" title={props.registry.title}>
+            {props.registry.title}
+          </p>
+        </Show>
+      </div>
 
-      <div class="flex flex-col gap-1.5 mb-4">
-        <Show when={props.registry.places?.length > 0}>
+      <div class="flex flex-col gap-1.5 mb-3">
+        <Show when={props.registry.places?.length > 0} fallback={<div class="h-[18px]" />}>
           <div class="flex items-center gap-1.5 text-[12px] text-muted truncate" title={props.registry.places.map((p) => p.join(", ")).join(" ; ")}>
             <Icon icon="lucide:map-pin" class="w-3.5 h-3.5 flex-shrink-0 text-dim" />
             <span class="truncate">{props.registry.places.map((p) => p[p.length - 1]).join(", ")}</span>
           </div>
         </Show>
 
-        <Show when={props.registry.ark_url}>
+        <Show when={props.registry.ark_url} fallback={<div class="h-[18px]" />}>
           <div class="flex items-center gap-1.5 text-[12px] text-muted truncate">
             <Icon icon="lucide:globe" class="w-3.5 h-3.5 flex-shrink-0 text-dim" />
             <span class="truncate">{getDomain(props.registry.ark_url || "")}</span>
@@ -95,9 +97,9 @@ export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e
       </div>
 
       <div class="mt-auto pt-3 border-t border-subtle flex items-center justify-between gap-2">
-        <div class="flex flex-wrap gap-1 min-w-0">
+        <div class="flex flex-nowrap overflow-hidden gap-1 min-w-0">
           {Array.from(props.registry.source_types).map((type) => (
-            <span class={["text-[10px] font-medium px-1.5 py-0.5 rounded border truncate max-w-[160px]", ACT_TYPE_STYLES[type.category]].join(" ")}>
+            <span class={["text-[10px] font-medium px-1.5 py-0.5 rounded border truncate max-w-[120px] flex-shrink-0", ACT_TYPE_STYLES[type.category]].join(" ")}>
               {type.label as string}
             </span>
           ))}
