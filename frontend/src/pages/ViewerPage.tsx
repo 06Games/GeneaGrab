@@ -255,7 +255,7 @@ export const ViewerPage = (props: ViewerPageProps) => {
             when={isDetachedMode}
             fallback={
               <div
-                class="flex flex-col w-screen h-screen overflow-hidden bg-app text-main select-none antialiased"
+                class="flex flex-col w-full h-full overflow-hidden bg-app text-main select-none antialiased"
                 style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
               >
                 <TopBar
@@ -342,7 +342,7 @@ export const ViewerPage = (props: ViewerPageProps) => {
             }
           >
             <div
-              class="w-screen h-screen overflow-hidden flex flex-col bg-panel text-main antialiased"
+              class="w-full h-full overflow-hidden flex flex-col bg-panel text-main antialiased"
               style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
             >
               {renderIndex(registryMeta()!, true)}

@@ -263,7 +263,7 @@ const HomePage = () => {
   });
 
   return (
-    <div class="h-screen bg-app text-main flex flex-col antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
+    <div class="w-full h-full bg-app text-main flex flex-col antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
       <TopBar
         breadcrumbs={[t("home.title")]}
         right={

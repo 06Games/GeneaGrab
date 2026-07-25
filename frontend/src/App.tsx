@@ -33,7 +33,7 @@ const AppContent = () => {
   };
 
   return (
-    <div class="w-screen h-screen flex flex-col bg-app">
+    <div class="w-screen h-screen flex flex-col bg-app overflow-hidden">
       <TabBar />
       <div class="flex-1 relative overflow-hidden">
         <For each={tabs}>
