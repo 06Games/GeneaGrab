@@ -379,11 +379,35 @@ async fn enrich_from_classeur_and_html(
     (callnum, collection)
 }
 
+fn is_generic_image_name(label: &str) -> bool {
+    let lower = label.trim().to_lowercase();
+    if lower.starts_with("image ") || lower.starts_with("vue ") || lower.starts_with("page ") {
+        let rest = lower
+            .split_whitespace()
+            .skip(1)
+            .collect::<Vec<_>>()
+            .join(" ");
+        if rest.chars().all(|c| c.is_ascii_digit() || c == ' ' || c == '/') || rest.contains("sur") {
+            return true;
+        }
+    }
+    false
+}
+
 fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
     canvases
         .iter()
         .enumerate()
         .filter_map(|(i, canvas)| {
+            let name = canvas.label.as_ref().and_then(|l| {
+                let trimmed = l.trim();
+                if is_generic_image_name(trimmed) {
+                    None
+                } else {
+                    Some(trimmed.to_string())
+                }
+            });
+
             canvas.images.first().and_then(|img_anno| {
                 img_anno.resource.as_ref().map(|res| Image {
                     width: res.width,
@@ -397,7 +421,7 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
                         .and_then(|c| c.permalink)
                         .or_else(|| Some(canvas.id.clone())),
                     image_number: u32::try_from(i + 1).expect("Image count shouldn't be that high"),
-                    name: canvas.label.clone(),
+                    name,
                     date_range: None,
                     notes: None,
                 })
