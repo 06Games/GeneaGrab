@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 1,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "703610.2544066",

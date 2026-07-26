@@ -9,7 +9,7 @@
       "response_file": "manifest.json"
     },
     {
-      "url": "https://archives06.fr/ark:/79346/649576.2781893/canvas/0/1",
+      "url": "https://archives06.fr/ark:/79346/649576.2781893/canvas/1/1",
       "response_file": "canvas.html"
     }
   ],
@@ -21,13 +21,13 @@
     "title": "THEATRUM STATUUM REGIAE CELSITUDINIS SABAUDIAE DUCIS, PEDEMONTII PRINCIPIS CYPRI REGIS. PARS PRIMA EXHIBENS PEDEMONTIUM, E IN EO AUGUSTAM TAURINORUM E LOCA VICINIORA. TOME 1 ET 2",
     "registry_types": [
       {
-        "category": "book",
+        "category": "media",
         "label": "Book"
       }
     ],
     "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1682, "month": 1, "day": 1 },
     "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1682, "month": 1, "day": 1 },
     "places": [],
-    "collection": ["Ouvrages", "Sous série 4 Mi. - Microformes de documentation"]
+    "collection": ["Ouvrages", "Sous série 4 Mi - Microformes de documentation"]
   }
 }

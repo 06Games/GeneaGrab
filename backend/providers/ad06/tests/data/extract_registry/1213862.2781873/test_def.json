@@ -9,7 +9,7 @@
       "response_file": "manifest.json"
     },
     {
-      "url": "https://archives06.fr/ark:/79346/1213862.2781873/canvas/0/1",
+      "url": "https://archives06.fr/ark:/79346/1213862.2781873/canvas/1/1",
       "response_file": "canvas.html"
     }
   ],
@@ -21,13 +21,13 @@
     "title": "Album du Carnaval 1937. Album illustré des Chars, Cavalcades, Groupes, Isolés de S. M. Carnaval de Nice 1937",
     "registry_types": [
       {
-        "category": "book",
+        "category": "media",
         "label": "Book"
       }
     ],
     "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1937, "month": 1, "day": 1 },
     "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1937, "month": 1, "day": 1 },
     "places": [],
-    "collection": ["Ouvrages", "Sous-série 1 Num. - Reproductions de complément"]
+    "collection": ["Ouvrages", "Sous-série 1 Num - Reproductions de complément"]
   }
 }

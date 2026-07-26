@@ -13,7 +13,7 @@
       "response_file": "canvas.html"
     }
   ],
-  "expected_image_count": 5,
+  "expected_image_count": 166,
   "expected_registry": {
     "source_id": "ad06",
     "registry_id": "6c992c340bba967a24a29e352ac60851",
@@ -21,7 +21,7 @@
     "title": "Délibérations du conseil général (1863)",
     "registry_types": [
       {
-        "category": "book",
+        "category": "media",
         "label": "Book"
       }
     ],

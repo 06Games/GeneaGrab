@@ -389,7 +389,7 @@ fn extract_images(canvases: &[Canvas]) -> Vec<Image> {
                     width: res.width,
                     height: res.height,
                     tile_size: None,
-                    manifest_url: res.service.as_ref().map(|s| s.id.clone()),
+                    manifest_url: res.service.as_ref().and_then(|s| s.id.clone()),
                     api_url: None,
                     download_url: None,
                     ark_url: LigeoCanvas::try_from(canvas)
@@ -415,17 +415,22 @@ pub async fn extract_registry_internal(
     let ark_url = req
         .identified
         .ark_url
-        .clone()
-        .ok_or_else(|| ProviderError::MissingField("ark_url".to_string()))?;
+        .as_deref()
+        .ok_or_else(|| ProviderError::MissingField("ark_url".into()))?;
 
     let manifest_url = format!("{}/manifest", ark_url.trim_end_matches('/'));
     let manifest_json = fetcher.fetch(manifest_url.into()).await?;
     let manifest: Manifest = serde_json::from_str(&manifest_json)
         .map_err(|e| ProviderError::ParsingError(format!("Failed to parse IIIF manifest: {e}")))?;
 
+    let req_path = req.url.as_str();
+
     let sequence = manifest
         .sequences
-        .first()
+        .iter()
+        .find(|s| s.id == req_path || req_path.contains(&s.id))
+        .or_else(|| manifest.sequences.iter().find(|s| !s.canvases.is_empty()))
+        .or_else(|| manifest.sequences.first())
         .ok_or_else(|| ProviderError::ParsingError("No sequence in manifest".into()))?;
 
     // 1. Parse base metadata from the manifest

@@ -43,6 +43,24 @@ pub struct Sequence {
     pub canvases: Vec<Canvas>,
 }
 
+fn de_opt_u32_from_str_or_number<'de, D>(deserializer: D) -> Result<Option<u32>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum IntOrString {
+        Int(u32),
+        String(String),
+    }
+
+    Ok(match Option::<IntOrString>::deserialize(deserializer)? {
+        Some(IntOrString::Int(i)) => Some(i),
+        Some(IntOrString::String(s)) => s.parse().ok(),
+        None => None,
+    })
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Canvas {
     #[serde(rename = "@id")]
@@ -56,23 +74,25 @@ pub struct Canvas {
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ImageAnno {
-    #[serde(rename = "@id")]
-    pub id: String,
+    #[serde(rename = "@id", default)]
+    pub id: Option<String>,
     pub resource: Option<Resource>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Resource {
-    #[serde(rename = "@id")]
-    pub id: String,
+    #[serde(rename = "@id", default)]
+    pub id: Option<String>,
     pub format: Option<String>,
+    #[serde(default, deserialize_with = "de_opt_u32_from_str_or_number")]
     pub width: Option<u32>,
+    #[serde(default, deserialize_with = "de_opt_u32_from_str_or_number")]
     pub height: Option<u32>,
     pub service: Option<Service>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Service {
-    #[serde(rename = "@id")]
-    pub id: String,
+    #[serde(rename = "@id", default)]
+    pub id: Option<String>,
 }
