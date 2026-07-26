@@ -309,6 +309,59 @@ async fn enrich_from_classeur_and_html(
 
             if eadid == "FRAD006_ETAT_CIVIL" && !collection.is_empty() {
                 parsed.location_primary = collection.last().map(|s| vec![to_title_case(s)]);
+            } else if eadid == "FRAD006_C" {
+                let mut city_candidate = None;
+                for item in &collection {
+                    let trimmed = item.trim();
+                    if let Some(c) = trimmed.strip_prefix("Commune de ") {
+                        city_candidate = Some(c.to_string());
+                    } else if let Some(c) = trimmed.strip_prefix("Commune d'") {
+                        city_candidate = Some(c.to_string());
+                    } else if let Some(c) = trimmed.strip_prefix("Bureau de ") {
+                        city_candidate = Some(c.to_string());
+                    } else if let Some(c) = trimmed.strip_prefix("Bureau d'") {
+                        city_candidate = Some(c.to_string());
+                    } else {
+                        let lower = trimmed.to_lowercase();
+                        let is_rejected = trimmed.starts_with("Instrument")
+                            || trimmed.starts_with("Fonds")
+                            || trimmed.starts_with("Communes annexées")
+                            || trimmed.starts_with("Communes cédées")
+                            || trimmed.starts_with("Communes diverses")
+                            || trimmed.starts_with("Supplément")
+                            || trimmed.starts_with("Insinuation")
+                            || trimmed.starts_with("Tappa")
+                            || trimmed.starts_with("Mandement")
+                            || trimmed.starts_with("Livre")
+                            || trimmed.starts_with("Matricule")
+                            || trimmed.starts_with("Garnison")
+                            || trimmed.starts_with("Hôpital")
+                            || trimmed.starts_with("Port")
+                            || trimmed.starts_with("Table")
+                            || trimmed.starts_with("Actes")
+                            || trimmed.starts_with("Contrôle")
+                            || trimmed.starts_with("Délibérations")
+                            || trimmed.starts_with("Fortifications")
+                            || trimmed.starts_with("Travaux")
+                            || trimmed.starts_with("Réaffouagement")
+                            || trimmed.starts_with("Liquidation")
+                            || trimmed.starts_with("Ensaisinement")
+                            || trimmed.starts_with("Petit scel")
+                            || trimmed.starts_with("Écritures")
+                            || trimmed.contains(" - ")
+                            || trimmed.contains(" : ")
+                            || lower.contains(" insinuation")
+                            || lower.contains(" contrôle")
+                            || trimmed.chars().next().map_or(false, |c| c.is_ascii_digit());
+
+                        if !is_rejected {
+                            city_candidate = Some(trimmed.to_string());
+                        }
+                    }
+                }
+                if let Some(city) = city_candidate {
+                    parsed.location_primary = Some(vec![to_title_case(&city)]);
+                }
             } else if eadid == "FRAD006_3E" {
                 // Title override for Notarial matching from-to
                 if let (Some(t), Some(f), Some(to_d)) =

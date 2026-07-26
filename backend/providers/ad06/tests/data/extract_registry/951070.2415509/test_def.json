@@ -27,7 +27,7 @@
     ],
     "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1742, "month": 1, "day": 1 },
     "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1753, "month": 1, "day": 1 },
-    "places": [],
+    "places": [["Moulinet"]],
     "collection": [
       "Instrument de recherche des archives anciennes, série C",
       "Fonds de l'administration de l'insinuation du comté de Nice",

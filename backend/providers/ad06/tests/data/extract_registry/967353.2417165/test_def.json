@@ -1,0 +1,38 @@
+{
+  "request_url": "https://archives06.fr/ark:/79346/967353.2417165",
+  "registry_id": "967353.2417165",
+  "image_number": 1,
+  "ark_url": "https://archives06.fr/ark:/79346/967353.2417165",
+  "mocks": [
+    {
+      "url": "https://archives06.fr/ark:/79346/967353.2417165/manifest",
+      "response_file": "manifest.json"
+    },
+    {
+      "url": "https://archives06.fr/ark:/79346/967353.2417165/canvas/0/1",
+      "response_file": "canvas.html"
+    }
+  ],
+  "expected_image_count": 597,
+  "expected_registry": {
+    "source_id": "ad06",
+    "registry_id": "967353.2417165",
+    "archive_reference": "C 3250",
+    "title": "1784-1787",
+    "registry_types": [
+      {
+        "category": "legal",
+        "label": "Enrolled deeds"
+      }
+    ],
+    "date_from": { "calendar": "Gregorian", "precision": "Year", "year": 1784, "month": 1, "day": 1 },
+    "date_to": { "calendar": "Gregorian", "precision": "Year", "year": 1787, "month": 1, "day": 1 },
+    "places": [["La Brigue"]],
+    "collection": [
+      "Instrument de recherche des archives anciennes, série C",
+      "Fonds de l'administration de l'insinuation du comté de Nice",
+      "Communes annexées en 1947",
+      "Commune de La Brigue"
+    ]
+  }
+}
