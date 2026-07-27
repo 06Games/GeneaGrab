@@ -11,7 +11,6 @@
 
 ![Register Viewer](assets/screenshots/viewer.png)
 
----
 
 ## Supported Archive Services
 
@@ -23,8 +22,6 @@ UserScripts (🧰) are available for browser integration (via [Violentmonkey](ht
 
 * **Archives départementales des Alpes-Maritimes (AD06)** — [archives06.fr](https://archives06.fr/) ([🧰 UserScript](userscripts/AD06.user.js))
 * **Geneanet** — [geneanet.org](https://www.geneanet.org/) ([🧰 UserScript](userscripts/Geneanet.user.js))
-
----
 
 ### Legacy Archive Services (v1–v3)
 
@@ -44,8 +41,6 @@ UserScripts (🧰) are available for browser integration (via [Violentmonkey](ht
 #### :it: Italy
 
 * **Antenati** — [antenati.san.beniculturali.it](https://www.antenati.san.beniculturali.it/) ([🧰 UserScript](userscripts/Antenati.user.js))
-
----
 
 ## Development
 
