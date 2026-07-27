@@ -1,23 +1,67 @@
-[![GitHub release](https://img.shields.io/github/v/release/06Games/GeneaGrab?include_prereleases)](https://github.com/06Games/GeneaGrab/releases/latest)  
-**GeneaGrab** is a tool to download images of digitised registers available on the websites of various (mainly French) archive services.
+[![GitHub release](https://img.shields.io/github/v/release/06Games/GeneaGrab?include_prereleases)](https://github.com/06Games/GeneaGrab/releases/latest)
 
-## Supported archive services
+**GeneaGrab** is a desktop tool to view and download images of digitised registers available on the websites of various (mainly French) archive services.
 
-> For some services, UserScripts (🧰) are available to make GeneaGrab easier to use. To install them, you can use [Violentmonkey](https://violentmonkey.github.io/) or any other alternative.
+> [!NOTE]
+> **GeneaGrab v4** is a complete rewrite using [Tauri v2](https://tauri.app/) (Rust backend & SolidJS frontend). Following this rewrite, providers are being re-implemented. Fewer providers are available currently, and some legacy providers may not return.
 
-### :earth_africa: Worldwide
+## Screenshots
 
-* [<img src="GeneaGrab/Assets/Providers/FamilySearch.svg" width="20" height="20" /> FamilySearch](https://www.familysearch.org) ([🧰](GeneaGrab.WebScripts/FamilySearch.user.js?raw=1))
+![Registry List](assets/screenshots/list.png)
 
-### :fr: France
+![Register Viewer](assets/screenshots/viewer.png)
 
-* [<img src="GeneaGrab/Assets/Providers/Geneanet.svg" width="20" height="20" /> Geneanet](https://www.geneanet.org/) ([🧰](GeneaGrab.WebScripts/Geneanet.user.js?raw=1))
-* [<img src="GeneaGrab/Assets/Providers/AMNice.png" width="20" height="20" /> Archives Nice Côte d’Azur](https://archives.nicecotedazur.org/)
-* [<img src="GeneaGrab/Assets/Providers/NiceHistorique.svg" width="20" height="20" /> Nice Historique](http://www.nicehistorique.org/)
-* [<img src="GeneaGrab/Assets/Providers/AD06.svg" width="20" height="20" /> Archives départementales des Alpes-Maritimes](https://archives06.fr/) ([🧰](GeneaGrab.WebScripts/AD06.user.js?raw=1))
-* [<img src="GeneaGrab/Assets/Providers/AD17.svg" width="20" height="20" /> Archives départementales de la Charente-Maritime](https://www.archinoe.net/v2/ad17/registre.html) ([🧰](GeneaGrab.WebScripts/AD17.user.js?raw=1))
-* [<img src="GeneaGrab/Assets/Providers/AD79-86.png" width="20" height="20" /> Archives départementales des Deux-Sèvres et de la Vienne](https://archives-deux-sevres-vienne.fr/)
+---
 
-### :it: Italy
+## Supported Archive Services
 
-* [<img src="GeneaGrab/Assets/Providers/Antenati.svg" width="20" height="20" /> Antenati](https://www.antenati.san.beniculturali.it/) ([🧰](GeneaGrab.WebScripts/Antenati.user.js?raw=1))
+UserScripts (🧰) are available for browser integration (via [Violentmonkey](https://violentmonkey.github.io/), Tampermonkey, etc.) to open records directly in GeneaGrab using custom protocol links (`geneagrab://`).
+
+### Currently Supported (v4)
+
+#### :fr: France
+
+* **Archives départementales des Alpes-Maritimes (AD06)** — [archives06.fr](https://archives06.fr/) ([🧰 UserScript](userscripts/AD06.user.js))
+* **Geneanet** — [geneanet.org](https://www.geneanet.org/) ([🧰 UserScript](userscripts/Geneanet.user.js))
+
+---
+
+### Legacy Archive Services (v1–v3)
+
+> The following archive services were supported prior to the v4 Tauri rewrite. They are not currently supported in v4 while provider implementations are being reworked. Some may be re-added in future updates, while others may not return.
+
+#### :earth_africa: Worldwide
+
+* **FamilySearch** — [familysearch.org](https://www.familysearch.org) ([🧰 UserScript](userscripts/FamilySearch.user.js))
+
+#### :fr: France
+
+* **Archives départementales de la Charente-Maritime (AD17)** — [archinoe.net/v2/ad17](https://www.archinoe.net/v2/ad17/registre.html) ([🧰 UserScript](userscripts/AD17.user.js))
+* **Archives Nice Côte d’Azur (AMNice)** — [archives.nicecotedazur.org](https://archives.nicecotedazur.org/)
+* **Nice Historique** — [nicehistorique.org](http://www.nicehistorique.org/)
+* **Archives départementales des Deux-Sèvres et de la Vienne (AD79-86)** — [archives-deux-sevres-vienne.fr](https://archives-deux-sevres-vienne.fr/)
+
+#### :it: Italy
+
+* **Antenati** — [antenati.san.beniculturali.it](https://www.antenati.san.beniculturali.it/) ([🧰 UserScript](userscripts/Antenati.user.js))
+
+---
+
+## Development
+
+### Prerequisites
+
+* [Rust](https://www.rust-lang.org/)
+* [Bun](https://bun.sh/)
+* Tauri CLI v2 (`cargo install tauri-cli --version "^2.0.0"`)
+
+### Running locally
+
+```bash
+# Install dependencies
+make install
+
+# Start the desktop application in dev mode
+make desktop_dev
+```
+
