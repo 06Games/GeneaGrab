@@ -199,7 +199,7 @@ export const MainViewer = (props: MainViewerProps) => {
 
   const handleCopyUrl = () => {
     const url = props.imageMeta?.ark_url;
-    if (url) navigator.clipboard.writeText(url);
+    if (url) navigator.clipboard.writeText(url.replace(/ /g, "%20"));
   };
 
   return (
