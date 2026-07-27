@@ -16,14 +16,13 @@
 
 UserScripts (🧰) are available for browser integration (via [Violentmonkey](https://violentmonkey.github.io/), Tampermonkey, etc.) to open records directly in GeneaGrab using custom protocol links (`geneagrab://`).
 
-### Currently Supported (v4)
-
 #### :fr: France
 
 * **Archives départementales des Alpes-Maritimes (AD06)** — [archives06.fr](https://archives06.fr/) ([🧰 UserScript](userscripts/AD06.user.js))
 * **Geneanet** — [geneanet.org](https://www.geneanet.org/) ([🧰 UserScript](userscripts/Geneanet.user.js))
 
-### Legacy Archive Services (v1–v3)
+<details>
+<summary>Legacy Archive Services (v2–v3)</summary>
 
 > The following archive services were supported prior to the v4 Tauri rewrite. They are not currently supported in v4 while provider implementations are being reworked. Some may be re-added in future updates, while others may not return.
 
@@ -41,6 +40,8 @@ UserScripts (🧰) are available for browser integration (via [Violentmonkey](ht
 #### :it: Italy
 
 * **Antenati** — [antenati.san.beniculturali.it](https://www.antenati.san.beniculturali.it/) ([🧰 UserScript](userscripts/Antenati.user.js))
+
+</details>
 
 ## Development
 
