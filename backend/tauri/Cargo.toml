@@ -18,7 +18,7 @@ name = "geneagrab"
 path = "src/main.rs"
 
 [build-dependencies]
-tauri-build = { version = "2.5.6", features = [] }
+tauri-build = { version = "2.6.3", features = [] }
 
 [dependencies]
 geneagrab-providers = { path = "../providers/common" }
@@ -26,10 +26,10 @@ geneagrab-core = { path = "../core" }
 migration = { path = "../migration" }
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "2.10.3", features = [] }
+tauri = { version = "2.11.5", features = [] }
 url = "2.5.8"
 base64 = "0.22.1"
-tokio = "1.50.0"
+tokio = "1.53.1"
 sea-orm = { version = "2.0.0-rc", features = [
     "sqlx-sqlite",
     "runtime-tokio",
@@ -37,10 +37,10 @@ sea-orm = { version = "2.0.0-rc", features = [
     "with-chrono",
 ] }
 tracing = { version = "0.1.44", features = ["log-always"] }
-anyhow = "1.0.102"
+anyhow = "1.0.104"
 tauri-plugin-opener = "2"
 tauri-plugin-deep-link = "2"
 tauri-plugin-tracing = "0.3.4"
 
 [target."cfg(any(target_os = \"macos\", windows, target_os = \"linux\"))".dependencies]
-tauri-plugin-single-instance = { version = "2.0.0", features = ["deep-link"] }
+tauri-plugin-single-instance = { version = "2.4.3", features = ["deep-link"] }
