@@ -9,3 +9,10 @@ members = [
     "dates",
     "tauri",
 ]
+
+[profile.release]
+opt-level = 3
+codegen-units = 16
+lto = "thin"
+strip = true
+

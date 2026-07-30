@@ -10,6 +10,10 @@ on:
 
 jobs:
   build-tauri:
+    env:
+      CARGO_INCREMENTAL: "0"
+      RUSTC_WRAPPER: "sccache"
+      SCCACHE_GHA_ENABLED: "true"
     strategy:
       fail-fast: false
       matrix:
@@ -38,6 +42,8 @@ jobs:
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          cache: true
 
       - name: Install frontend dependencies
         working-directory: ./frontend
@@ -50,25 +56,22 @@ jobs:
         if: ${{ matrix.target != '' }}
         run: rustup target add ${{ matrix.target }}
 
-      - name: Download ONNX Runtime for Intel macOS cross-compilation
-        if: matrix.id == 'macos-intel'
-        run: |
-          curl -LO https://github.com/microsoft/onnxruntime/releases/download/v1.19.2/onnxruntime-osx-x86_64-1.19.2.tgz
-          tar -xzf onnxruntime-osx-x86_64-1.19.2.tgz
-          echo "ORT_STRATEGY=system" >> $GITHUB_ENV
-          echo "ORT_PREFER_DYNAMIC_LINK=true" >> $GITHUB_ENV
-          echo "ORT_LIB_LOCATION=$PWD/onnxruntime-osx-x86_64-1.19.2/lib" >> $GITHUB_ENV
+      - name: Run sccache-action
+        uses: mozilla-actions/sccache-action@v0.0.11
 
       - name: Cache Rust dependencies
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: "backend -> target"
+          workspaces: "backend"
 
       - name: Install dependencies (Linux only)
         if: matrix.platform == 'ubuntu-24.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf lld clang
+          echo "RUSTFLAGS=-C link-arg=-fuse-ld=lld" >> $GITHUB_ENV
+
+
 
       - name: Install Tauri CLI
         run: bun add -g @tauri-apps/cli@^2.0.0
