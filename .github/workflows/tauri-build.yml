@@ -56,6 +56,16 @@ jobs:
         if: ${{ matrix.target != '' }}
         run: rustup target add ${{ matrix.target }}
 
+      - name: Download ONNX Runtime for Intel macOS cross-compilation
+        if: matrix.id == 'macos-intel'
+        run: |
+          curl -LO https://github.com/microsoft/onnxruntime/releases/download/v1.19.2/onnxruntime-osx-x86_64-1.19.2.tgz
+          tar -xzf onnxruntime-osx-x86_64-1.19.2.tgz
+          echo "ORT_STRATEGY=system" >> $GITHUB_ENV
+          echo "ORT_PREFER_DYNAMIC_LINK=true" >> $GITHUB_ENV
+          echo "ORT_LIB_LOCATION=$PWD/onnxruntime-osx-x86_64-1.19.2/lib" >> $GITHUB_ENV
+
+
       - name: Run sccache-action
         uses: mozilla-actions/sccache-action@v0.0.11
 
@@ -63,6 +73,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: "backend"
+          cache-targets: false
 
       - name: Install dependencies (Linux only)
         if: matrix.platform == 'ubuntu-24.04'
