@@ -7,7 +7,12 @@ repository = ""
 edition = "2021"
 rust-version = "1.77.2"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.cargo-machete]
+ignored = [
+    "serde_json",  # Required by tauri::generate_context!() macro expansion.
+    "tauri-build", # Used in build.rs (tauri_build::build()).
+]
+
 
 [lib]
 name = "app_lib"

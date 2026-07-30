@@ -2373,7 +2373,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 2.0.19",
- "tokio",
  "tracing",
  "wreq",
  "wreq-util",
@@ -2388,7 +2387,6 @@ dependencies = [
  "datatest-stable",
  "geneagrab-providers",
  "image",
- "jsonc-parser",
  "ort",
  "regex",
  "reqwest",
@@ -2409,7 +2407,6 @@ dependencies = [
  "datatest-stable",
  "deunicode",
  "geneagrab-providers",
- "jsonc-parser",
  "regex",
  "reqwest",
  "scraper 0.22.0",
@@ -2417,7 +2414,6 @@ dependencies = [
  "serde-json-assert",
  "serde_json",
  "tokio",
- "tracing",
  "url",
 ]
 
@@ -2426,12 +2422,8 @@ name = "geneagrab-providers"
 version = "4.0.0"
 dependencies = [
  "async-trait",
- "base64 0.22.1",
- "chrono",
  "dates",
  "derive_builder",
- "deunicode",
- "futures",
  "quick-xml 0.39.4",
  "regex",
  "scraper 0.27.0",
@@ -2440,10 +2432,7 @@ dependencies = [
  "strum",
  "thiserror 2.0.19",
  "tokio",
- "tracing",
  "url",
- "wreq",
- "wreq-util",
 ]
 
 [[package]]
@@ -3388,15 +3377,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror 1.0.69",
-]
-
-[[package]]
-name = "jsonc-parser"
-version = "0.32.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "840785e1a8b4fdb27be18440a35a81af64820dc185c3973ff8b012d4c6282512"
-dependencies = [
- "serde",
 ]
 
 [[package]]
