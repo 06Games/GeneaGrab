@@ -1,6 +1,5 @@
 use crate::state::{AppState, CommandError};
 use geneagrab_core::comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta};
-use geneagrab_providers::data::ProviderMetadata;
 use tauri::State;
 
 #[tauri::command]
@@ -36,14 +35,28 @@ pub async fn add_registry(
     Ok(res)
 }
 
+#[derive(serde::Serialize)]
+pub struct ProviderOptionResponse {
+    pub id: String,
+    pub name: String,
+    pub registry_id: String,
+}
+
 #[tauri::command]
 pub async fn get_providers_for_url(
     url: String,
-) -> Result<Vec<ProviderMetadata>, CommandError> {
+) -> Result<Vec<ProviderOptionResponse>, CommandError> {
     let res = geneagrab_core::services::registry::get_providers_for_url(&url)
         .await?;
 
-    Ok(res.into_iter().map(|(meta, _)| meta).collect()) // TODO: Keep the extracted info
+    Ok(res
+        .into_iter()
+        .map(|(meta, identified)| ProviderOptionResponse {
+            id: meta.id.to_string(),
+            name: meta.name.to_string(),
+            registry_id: identified.registry_id,
+        })
+        .collect())
 }
 
 #[tauri::command]

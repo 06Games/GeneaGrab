@@ -19,6 +19,8 @@ export interface RegistryFilters {
 
 export interface RegistryMeta {
   id: number;
+  source_id: string;
+  registry_id: string;
   archive_reference: string;
   source_types: Set<ActType>;
   places: string[][];
@@ -40,4 +42,5 @@ export interface RegistryMeta {
 export interface ProviderOption {
   id: string;
   name: string;
+  registry_id?: string;
 }

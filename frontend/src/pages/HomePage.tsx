@@ -122,7 +122,15 @@ const HomePage = () => {
   const isAlreadyAdded = createMemo(() => {
     const q = searchQuery().trim();
     if (!q) return false;
-    return items().some((r) => r.ark_url && (r.ark_url === q || q.startsWith(r.ark_url)));
+    const currentProviders = providers();
+    if (isUrl() && currentProviders && currentProviders.length > 0) {
+      return items().some((r) =>
+        currentProviders.some(
+          (p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)
+        )
+      );
+    }
+    return false;
   });
 
   const handleQuickAdd = async () => {

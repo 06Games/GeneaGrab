@@ -4,6 +4,8 @@ import { ActType, RegistryMeta } from "../types/registry";
 
 export const MOCK_REGISTRY_DATA: RegistryMeta = {
   id: 123,
+  source_id: "ad06",
+  registry_id: "123",
   archive_reference: "5 Mi 1/342",
   source_types: new Set([
     { category: "vital", label: "Birth" },

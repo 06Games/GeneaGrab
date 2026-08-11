@@ -27,6 +27,8 @@ impl RegistryMeta {
     ) -> Self {
         Self {
             id: registry.id,
+            source_id: registry.source_id,
+            registry_id: registry.registry_id,
             archive_reference: registry.archive_reference,
             source_types: registry.registry_types.0,
             places: registry.places.0,
@@ -108,15 +110,29 @@ pub async fn get_all_registries(
     // Dynamically apply filters if they exist
     if let Some(filters) = payload.filters {
         if let Some(term) = filters.search_term.filter(|s| !s.trim().is_empty()) {
-            let term = format!("%{term}%");
-            query = query.filter(
-                sea_orm::Condition::any()
-                    .add(registry_entry::Column::ArchiveReference.like(&term))
-                    .add(registry_entry::Column::Title.like(&term))
-                    .add(registry_entry::Column::Author.like(&term))
-                    .add(registry_entry::Column::ArkUrl.like(&term))
-                    .add(registry_entry::Column::ManifestUrl.like(&term)),
-            );
+            let mut any_cond = sea_orm::Condition::any();
+
+            if url::Url::parse(&term).is_ok() {
+                if let Ok(providers) = get_providers_for_url(&term).await {
+                    for (meta, identified) in providers {
+                        any_cond = any_cond.add(
+                            sea_orm::Condition::all()
+                                .add(registry_entry::Column::SourceId.eq(meta.id.to_string()))
+                                .add(registry_entry::Column::RegistryId.eq(identified.registry_id)),
+                        );
+                    }
+                }
+            }
+
+            let term_like = format!("%{term}%");
+            any_cond = any_cond
+                .add(registry_entry::Column::ArchiveReference.like(&term_like))
+                .add(registry_entry::Column::Title.like(&term_like))
+                .add(registry_entry::Column::Author.like(&term_like))
+                .add(registry_entry::Column::ArkUrl.like(&term_like))
+                .add(registry_entry::Column::ManifestUrl.like(&term_like));
+
+            query = query.filter(any_cond);
         }
 
         // Use custom expressions to query the raw serialized JSON arrays gracefully
