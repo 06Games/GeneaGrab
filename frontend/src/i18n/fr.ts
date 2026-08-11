@@ -21,6 +21,7 @@ export const fr: RawDictionaries = {
     urlNoProvider: "Aucun fournisseur compatible trouvé pour cette URL.",
     urlReady: "Fournisseur compatible trouvé. Vous pouvez l'ajouter à la bibliothèque.",
     addQuick: "Ajouter",
+    open: "Ouvrir",
     openInBrowser: "Ouvrir dans le navigateur",
     delete: "Supprimer",
     confirmDelete: "Êtes-vous sûr de vouloir supprimer ce registre ? Cette action est irréversible.",

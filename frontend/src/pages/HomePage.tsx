@@ -13,9 +13,12 @@ import { isTauri } from "@tauri-apps/api/core";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
+import { useTabs } from "../contexts/TabsContext";
+
 const HomePage = () => {
   const api = useBackend();
   const { t } = useI18n();
+  const { openTab } = useTabs();
   let scrollRef!: HTMLDivElement;
 
   const [searchQuery, setSearchQuery] = createSignal("");
@@ -133,14 +136,45 @@ const HomePage = () => {
     return false;
   });
 
+  const extractedImageNumber = createMemo(() => {
+    if (!isUrl()) return undefined;
+    const currentProviders = providers();
+    if (!currentProviders || currentProviders.length === 0) return undefined;
+    return currentProviders[0].image_number;
+  });
+
+  const handleOpenExtractedUrl = () => {
+    const currentProviders = providers();
+    if (!currentProviders || currentProviders.length === 0) return;
+    const matchingProvider = currentProviders[0];
+    const reg = items().find(
+      (r) => r.source_id === matchingProvider.id && (!matchingProvider.registry_id || r.registry_id === matchingProvider.registry_id)
+    );
+    if (reg) {
+      openTab({
+        type: "registry",
+        registryId: reg.id,
+        imageId: matchingProvider.image_number || 1,
+      });
+    }
+  };
+
   const handleQuickAdd = async () => {
     if (!searchQuery() || !selectedQuickProvider() || isAdding()) return;
     setIsAdding(true);
     try {
-      await api.addRegistry(searchQuery().trim(), selectedQuickProvider());
+      const newRegistry = await api.addRegistry(searchQuery().trim(), selectedQuickProvider());
       // Refresh list to instantly show the new registry
       setItems([]);
       fetchPage(null, true);
+
+      const currentProviders = providers();
+      const selectedP = currentProviders?.find((p) => p.id === selectedQuickProvider());
+      openTab({
+        type: "registry",
+        registryId: newRegistry.id,
+        imageId: selectedP?.image_number || 1,
+      });
     } catch (err) {
       console.error(err);
     } finally {
@@ -318,6 +352,14 @@ const HomePage = () => {
               </div>
             </div>
 
+            <Show when={isAlreadyAdded()}>
+              <div class="flex items-center gap-2">
+                <Button variant="primary" onClick={handleOpenExtractedUrl}>
+                  <Icon icon="lucide:external-link" /> {t("home.open")}
+                </Button>
+              </div>
+            </Show>
+
             <Show when={!isAlreadyAdded() && !providers.loading && providers() && providers()!.length > 0}>
               <div class="flex items-center gap-2">
                 <select
@@ -391,7 +433,7 @@ const HomePage = () => {
                         gap: "16px",
                       }}
                     >
-                      <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} onContextMenu={(e) => handleRegistryContextMenu(e, item)} />}</For>
+                      <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} targetImageId={extractedImageNumber()} onContextMenu={(e) => handleRegistryContextMenu(e, item)} />}</For>
                     </div>
                   </Show>
                 </div>

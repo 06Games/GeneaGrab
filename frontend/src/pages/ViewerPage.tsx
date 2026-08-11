@@ -46,6 +46,11 @@ export const ViewerPage = (props: ViewerPageProps) => {
 
   const [tabTile, setTableTitle] = createSignal("");
   const [currentImage, setCurrentImage] = createSignal(props.initialImageId || 1);
+  createEffect(() => {
+    if (props.initialImageId !== undefined) {
+      setCurrentImage(props.initialImageId);
+    }
+  });
   const [indexVisible, setIndexVisible] = createSignal(false);
   const [indexHeight, setIndexHeight] = createSignal(DEFAULT_INDEX_HEIGHT);
   const [thumbnailHeight, setThumbnailHeight] = createSignal(DEFAULT_THUMB_HEIGHT);

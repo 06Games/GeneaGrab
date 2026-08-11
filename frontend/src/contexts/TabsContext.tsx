@@ -30,15 +30,18 @@ export function TabsProvider(props: { children: JSX.Element }) {
   const openTab = (newTab: Omit<Tab, "id" | "title" | "closable"> & { id?: string }, activate = true) => {
     const id = newTab.id ?? (newTab.type === "home" ? "home" : `${newTab.type}-${newTab.registryId}`);
 
-    // If it already exists, focus it if activate is true
-    if (tabs.find((t) => t.id === id)) {
+    const existingTab = tabs.find((t) => t.id === id);
+    if (existingTab) {
+      if (newTab.imageId !== undefined && existingTab.imageId !== newTab.imageId) {
+        setTabs((t) => t.id === id, { imageId: newTab.imageId });
+      }
       if (activate) {
         setActiveTabId(id);
       }
       return;
     }
 
-    setTabs([...tabs, { ...newTab, id, title: id, closable: true }]);
+    setTabs([...tabs, { ...newTab, id, title: id, imageId: newTab.imageId, closable: true }]);
     if (activate) {
       setActiveTabId(id);
     }

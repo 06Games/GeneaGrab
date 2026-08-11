@@ -43,4 +43,5 @@ export interface ProviderOption {
   id: string;
   name: string;
   registry_id?: string;
+  image_number?: number;
 }

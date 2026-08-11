@@ -19,6 +19,7 @@ export const en = {
     urlNoProvider: "No compatible providers found for this URL.",
     urlReady: "Compatible provider found. You can add this registry to your library.",
     addQuick: "Add to library",
+    open: "Open",
     openInBrowser: "Open in browser",
     delete: "Delete",
     confirmDelete: "Are you sure you want to delete this registry? This action cannot be undone.",

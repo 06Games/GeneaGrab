@@ -17,7 +17,7 @@ const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
   unknown: "text-event-other bg-event-other-bg border-event-other-border",
 };
 
-export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e: MouseEvent) => void }) => {
+export const RegistryCard = (props: { registry: RegistryMeta; targetImageId?: number; onContextMenu?: (e: MouseEvent) => void }) => {
   const { t } = useI18n();
   const { openTab } = useTabs();
 
@@ -35,6 +35,7 @@ export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e
         openTab({
           type: "registry",
           registryId: props.registry.id,
+          imageId: props.targetImageId,
         })
       }
       onMouseDown={(e) => {
@@ -49,6 +50,7 @@ export const RegistryCard = (props: { registry: RegistryMeta; onContextMenu?: (e
             {
               type: "registry",
               registryId: props.registry.id,
+              imageId: props.targetImageId,
             },
             false
           );

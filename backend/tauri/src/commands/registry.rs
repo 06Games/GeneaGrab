@@ -40,6 +40,7 @@ pub struct ProviderOptionResponse {
     pub id: String,
     pub name: String,
     pub registry_id: String,
+    pub image_number: Option<u32>,
 }
 
 #[tauri::command]
@@ -55,6 +56,7 @@ pub async fn get_providers_for_url(
             id: meta.id.to_string(),
             name: meta.name.to_string(),
             registry_id: identified.registry_id,
+            image_number: identified.image_number,
         })
         .collect())
 }
