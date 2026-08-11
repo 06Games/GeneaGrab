@@ -182,6 +182,68 @@ const HomePage = () => {
     }
   };
 
+  function getSearchUrlFromScheme(urlStr: string): string | null {
+    try {
+      const uri = new URL(urlStr);
+      const paramUrl = uri.searchParams.get("url");
+      if (paramUrl) return paramUrl;
+    } catch {}
+
+    const match = urlStr.match(/[?&]url=([^&]+)/);
+    if (match) {
+      try {
+        return decodeURIComponent(match[1]);
+      } catch {
+        return match[1];
+      }
+    }
+    return null;
+  }
+
+  async function handleCustomScheme(urlStr: string) {
+    console.log("Opened with custom scheme:", urlStr);
+    const search_url = getSearchUrlFromScheme(urlStr);
+    if (!search_url) return;
+
+    // 1. Switch to Home tab automatically
+    openTab({ type: "home" });
+
+    // 2. Set search query in Home page search bar
+    setSearchQuery(search_url);
+
+    // 3. Query provider identification and database registries directly
+    try {
+      const [providerList, registryRes] = await Promise.all([
+        api.getProvidersForUrl(search_url).catch(() => []),
+        api.getAllRegistries({
+          limit: 20,
+          cursor: null,
+          filters: { search_term: search_url },
+        }).catch(() => ({ data: [] })),
+      ]);
+
+      if (providerList && providerList.length > 0 && registryRes.data && registryRes.data.length > 0) {
+        const matchingProvider = providerList[0];
+        const matchedRegistry = registryRes.data.find(
+          (r) =>
+            r.source_id === matchingProvider.id &&
+            (!matchingProvider.registry_id || r.registry_id === matchingProvider.registry_id)
+        );
+
+        if (matchedRegistry) {
+          // Open or switch to the matching registry at the right page!
+          openTab({
+            type: "registry",
+            registryId: matchedRegistry.id,
+            imageId: matchingProvider.image_number || 1,
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Error handling deep link custom scheme:", err);
+    }
+  }
+
   onMount(async () => {
     const initialUrl: any = null; // FIXEME
     if (initialUrl) {
@@ -190,15 +252,6 @@ const HomePage = () => {
     if (isTauri()) {
       (await getCurrent())?.forEach(handleCustomScheme);
       await onOpenUrl((urls) => urls.forEach(handleCustomScheme));
-
-      function handleCustomScheme(url: string) {
-        console.log("Opened with custom scheme:", url);
-        const uri = new URL(url);
-        if (uri.pathname.startsWith("registry")) {
-          const search_url = uri.searchParams.get("url");
-          if (search_url) setSearchQuery(search_url);
-        }
-      }
     }
 
     const observer = new ResizeObserver((entries) => {
