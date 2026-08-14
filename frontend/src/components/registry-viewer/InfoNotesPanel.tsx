@@ -3,7 +3,7 @@ import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { useRegistryActions } from "../../contexts/RegistryActionsContext";
-import { ImageMeta } from "../../types/image";
+import { ImageMeta, UserImageMeta } from "../../types/image";
 import { ActTypeCategory, RegistryMeta } from "../../types/registry";
 
 const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
@@ -32,6 +32,10 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   const [registryExpanded, setRegistryExpanded] = createSignal(false);
   const [saveStatus, setSaveStatus] = createSignal<"saved" | "unsaved" | "saving" | "error">("saved");
 
+  const [name, setName] = createSignal("");
+  const [dateRange, setDateRange] = createSignal("");
+  const [notes, setNotes] = createSignal("");
+
   const saveInfo = () =>
     ({
       saved: { dot: "bg-success", label: t("infoPanel.saved") },
@@ -40,47 +44,122 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       error: { dot: "bg-danger", label: t("infoPanel.error") },
     })[saveStatus() ?? "saved"];
 
-  let saveTimer: ReturnType<typeof setTimeout>;
-  let lastMeta: Partial<ImageMeta> = {};
+  let saveTimer: ReturnType<typeof setTimeout> | undefined;
+  let pendingChanges: Partial<UserImageMeta> = {};
+  let lastLoadedImageId: string | undefined;
+  let isPristine = { name: true, date_range: true, notes: true };
 
-  // Save changes immediately if image changes
-  createEffect((prevImage: string | undefined) => {
+  const flushSave = async (targetImageNum: number) => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = undefined;
+    }
+    if (Object.keys(pendingChanges).length === 0) return;
+    const toSend = { ...pendingChanges };
+    pendingChanges = {};
+    setSaveStatus("saving");
+    try {
+      await actions.onSaveImageMeta?.(targetImageNum, toSend);
+      if (parseInt(props.image, 10) === targetImageNum && Object.keys(pendingChanges).length === 0) {
+        setSaveStatus("saved");
+      }
+    } catch (err) {
+      console.error("Failed to save image meta:", err);
+      if (parseInt(props.image, 10) === targetImageNum) {
+        setSaveStatus("error");
+      }
+    }
+  };
+
+  const queueSave = (meta: Partial<UserImageMeta>) => {
+    setSaveStatus("unsaved");
+    pendingChanges = { ...pendingChanges, ...meta };
+    if (saveTimer) clearTimeout(saveTimer);
+    const targetImageNum = parseInt(props.image, 10);
+    saveTimer = setTimeout(() => {
+      flushSave(targetImageNum);
+    }, 800);
+  };
+
+  const handleNameInput = (val: string) => {
+    isPristine.name = false;
+    setName(val);
+    queueSave({ name: val });
+  };
+
+  const handlePeriodInput = (val: string) => {
+    isPristine.date_range = false;
+    setDateRange(val);
+    queueSave({ date_range: val });
+  };
+
+  const handleNotesInput = (val: string) => {
+    isPristine.notes = false;
+    setNotes(val);
+    queueSave({ notes: val });
+  };
+
+  // Sync state when image changes or metadata arrives
+  createEffect(() => {
     const currentImg = props.image;
-    if (prevImage !== undefined && prevImage !== currentImg) {
-      if (Object.keys(lastMeta).length > 0) {
-        clearTimeout(saveTimer);
-        const targetMeta = lastMeta;
-        const targetImageNum = parseInt(prevImage, 10);
-        actions.onSaveImageMeta?.(targetImageNum, targetMeta).catch((err) => {
+    const meta = props.imageMeta;
+    const currentImgNum = parseInt(currentImg, 10);
+
+    if (currentImg !== lastLoadedImageId) {
+      // Flush previous pending changes if any
+      if (lastLoadedImageId !== undefined && Object.keys(pendingChanges).length > 0) {
+        const prevNum = parseInt(lastLoadedImageId, 10);
+        const sending = { ...pendingChanges };
+        pendingChanges = {};
+        actions.onSaveImageMeta?.(prevNum, sending).catch((err) => {
           console.error("Failed to save image meta on page change:", err);
         });
       }
-      lastMeta = {};
+      if (saveTimer) {
+        clearTimeout(saveTimer);
+        saveTimer = undefined;
+      }
+      lastLoadedImageId = currentImg;
+      isPristine = { name: true, date_range: true, notes: true };
       setSaveStatus("saved");
+
+      if (meta && meta.image_number === currentImgNum) {
+        setName(meta.name ?? "");
+        setDateRange(meta.date_range ?? "");
+        setNotes(meta.notes ?? "");
+      } else {
+        setName("");
+        setDateRange("");
+        setNotes("");
+      }
+    } else if (meta && meta.image_number === currentImgNum) {
+      // Image is the same, metadata updated (e.g. initial fetch resolved)
+      if (isPristine.name) {
+        setName(meta.name ?? "");
+      }
+      if (isPristine.date_range) {
+        setDateRange(meta.date_range ?? "");
+      }
+      if (isPristine.notes) {
+        setNotes(meta.notes ?? "");
+      }
     }
-    return currentImg;
   });
 
-  const saveImageMeta = (meta: Partial<ImageMeta>) => {
-    setSaveStatus("unsaved");
-    clearTimeout(saveTimer);
-    lastMeta = { ...lastMeta, ...meta }; // Accumulate changes to avoid multiple rapid saves
-    const targetImageNum = parseInt(props.image, 10);
-    saveTimer = setTimeout(async () => {
-      setSaveStatus("saving");
-      const sendingMeta = lastMeta;
-      lastMeta = {};
-      const success =
-        (await actions
-          .onSaveImageMeta?.(targetImageNum, sendingMeta)
-          .catch(() => false)
-          .then(() => true)) ?? false;
-      if (parseInt(props.image, 10) === targetImageNum) {
-        setSaveStatus(success ? "saved" : "error");
-      }
-    }, 800);
-  };
-  onCleanup(() => clearTimeout(saveTimer));
+  onCleanup(() => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = undefined;
+    }
+    if (Object.keys(pendingChanges).length > 0) {
+      const targetImageNum = parseInt(props.image, 10);
+      const sending = { ...pendingChanges };
+      pendingChanges = {};
+      actions.onSaveImageMeta?.(targetImageNum, sending).catch((err) => {
+        console.error("Failed to save image meta on unmount:", err);
+      });
+    }
+  });
 
   return (
     <aside class="flex flex-col w-72 min-w-[220px] flex-shrink-0 bg-panel border-l border-subtle overflow-hidden" aria-label={t("infoPanel.ariaLabel")}>
@@ -131,110 +210,107 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
       </div>
 
       <Show when={props.imageMeta}>
-        {(imgMeta) => (
-          <>
-            <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-[13px] font-semibold text-main">
-                  {imgMeta().name
-                    ? t("infoPanel.image.customName", { n: props.image, name: imgMeta().name })
-                    : t("infoPanel.image.default", { n: props.image })}
-                </span>
-              </div>
+        <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[13px] font-semibold text-main">
+              {name()
+                ? t("infoPanel.image.customName", { n: props.image, name: name() })
+                : t("infoPanel.image.default", { n: props.image })}
+            </span>
+          </div>
 
-              <div class="flex flex-col gap-1.5 mb-2">
-                <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
-                  <label for="image-name" class="text-[12px] text-dim truncate select-none cursor-pointer">
-                    {t("infoPanel.nameLabel")}
-                  </label>
-                  <input
-                    id="image-name"
-                    type="text"
-                    value={imgMeta().name ?? ""}
-                    onInput={(e) => saveImageMeta({ name: e.currentTarget.value })}
-                    placeholder={t("infoPanel.namePlaceholder")}
-                    class={[
-                      "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
-                      "bg-tinted border-subtle placeholder:text-subtle-md",
-                      "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
-                      "transition-all duration-100",
-                    ].join(" ")}
-                  />
-                </div>
-
-                <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
-                  <label for="image-period" class="text-[12px] text-dim truncate select-none cursor-pointer">
-                    {t("infoPanel.period")}
-                  </label>
-                  <input
-                    id="image-period"
-                    type="text"
-                    value={imgMeta().date_range ?? ""}
-                    onInput={(e) => saveImageMeta({ date_range: e.currentTarget.value })}
-                    placeholder={t("infoPanel.periodPlaceholder")}
-                    class={[
-                      "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
-                      "bg-tinted border-subtle placeholder:text-subtle-md",
-                      "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
-                      "transition-all duration-100",
-                    ].join(" ")}
-                  />
-                </div>
-              </div>
-
-              <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(imgMeta().act_types.values()).reduce((a, b) => a + b, 0))} />
-
-              <div class="mt-2 flex flex-wrap gap-1.5">
-                <For each={Array.from(imgMeta().act_types.entries())}>
-                  {([type, count]) => (
-                    <span
-                      class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border", ACT_TYPE_STYLES[type.category]].join(" ")}
-                    >
-                      {count}× {type.label}
-                    </span>
-                  )}
-                </For>
-              </div>
-            </div>
-
-            <ResizeHandle />
-
-            <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
-              <div class="flex items-center justify-between mb-2">
-                <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer">
-                  {t("infoPanel.notesLabel")}
-                </label>
-                <span class="text-[11px] text-dim tabular-nums" aria-live="polite">
-                  {imgMeta().notes?.length ?? 0} {t("infoPanel.charsShort")}
-                </span>
-              </div>
-
-              <textarea
-                id="image-notes"
-                value={imgMeta().notes ?? ""}
-                onInput={(e) => saveImageMeta({ notes: e.currentTarget.value })}
-                placeholder={t("infoPanel.notesPlaceholder")}
-                spellcheck={false}
+          <div class="flex flex-col gap-1.5 mb-2">
+            <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
+              <label for="image-name" class="text-[12px] text-dim truncate select-none cursor-pointer">
+                {t("infoPanel.nameLabel")}
+              </label>
+              <input
+                id="image-name"
+                type="text"
+                value={name()}
+                onInput={(e) => handleNameInput(e.currentTarget.value)}
+                placeholder={t("infoPanel.namePlaceholder")}
                 class={[
-                  "flex-1 resize-none rounded-lg border min-h-0",
-                  "bg-tinted px-3 py-2.5",
-                  "text-[13px] text-main leading-relaxed",
-                  "placeholder:text-subtle-md",
-                  "border-subtle focus:border-accent",
-                  "focus:ring-2 focus:ring-accent/15 focus:outline-none",
-                  "transition-all duration-150",
-                  "scrollbar-thin scrollbar-thumb-subtle",
+                  "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
+                  "bg-tinted border-subtle placeholder:text-subtle-md",
+                  "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                  "transition-all duration-100",
                 ].join(" ")}
               />
-
-              <div class="flex items-center gap-1.5 mt-2" aria-live="polite">
-                <div class={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${saveInfo().dot}`} />
-                <span class="text-[11px] text-dim">{saveInfo().label}</span>
-              </div>
             </div>
-          </>
-        )}
+
+            <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
+              <label for="image-period" class="text-[12px] text-dim truncate select-none cursor-pointer">
+                {t("infoPanel.period")}
+              </label>
+              <input
+                id="image-period"
+                type="text"
+                value={dateRange()}
+                onInput={(e) => handlePeriodInput(e.currentTarget.value)}
+                placeholder={t("infoPanel.periodPlaceholder")}
+                class={[
+                  "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
+                  "bg-tinted border-subtle placeholder:text-subtle-md",
+                  "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                  "transition-all duration-100",
+                ].join(" ")}
+              />
+            </div>
+          </div>
+
+          <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta?.act_types?.values() ?? []).reduce((a, b) => a + b, 0))} />
+
+          <div class="mt-2 flex flex-wrap gap-1.5">
+            <For each={Array.from(props.imageMeta?.act_types?.entries() ?? [])}>
+              {([type, count]) => (
+                <span
+                  class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border", ACT_TYPE_STYLES[type.category]].join(" ")}
+                >
+                  {count}× {type.label}
+                </span>
+              )}
+            </For>
+          </div>
+        </div>
+
+        <ResizeHandle />
+
+        <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
+          <div class="flex items-center justify-between mb-2">
+            <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer">
+              {t("infoPanel.notesLabel")}
+            </label>
+            <span class="text-[11px] text-dim tabular-nums" aria-live="polite">
+              {notes().length} {t("infoPanel.charsShort")}
+            </span>
+          </div>
+
+          <textarea
+            id="image-notes"
+            value={notes()}
+            onInput={(e) => handleNotesInput(e.currentTarget.value)}
+            placeholder={t("infoPanel.notesPlaceholder")}
+            spellcheck={false}
+            class={[
+              "flex-1 resize-none rounded-lg border min-h-0",
+              "bg-tinted px-3 py-2.5",
+              "text-[13px] text-main leading-relaxed",
+              "placeholder:text-subtle-md",
+              "border-subtle focus:border-accent",
+              "focus:ring-2 focus:ring-accent/15 focus:outline-none",
+              "transition-all duration-150",
+              "scrollbar-thin scrollbar-thumb-subtle",
+            ].join(" ")}
+          />
+
+          <div class="flex items-center gap-1.5 mt-2" aria-live="polite">
+            <div class={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${saveInfo().dot}`} />
+            <span class="text-[11px] text-dim">{saveInfo().label}</span>
+          </div>
+        </div>
       </Show>
     </aside>
   );
 };
+
