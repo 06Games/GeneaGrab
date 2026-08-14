@@ -87,6 +87,29 @@ pub struct RegistryMeta {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct UserRegistryMeta {
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub archive_reference: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub title: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub subtitle: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub author: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub date_from: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub date_to: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub notes: Option<Option<String>>,
+    #[serde(default, deserialize_with = "empty_string_as_none_patch")]
+    pub ark_url: Option<Option<String>>,
+    pub places: Option<HashSet<Vec<String>>>,
+    pub collection: Option<Vec<String>>,
+    pub source_types: Option<HashSet<RegistryType>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UserImageMeta {
     #[serde(default, deserialize_with = "empty_string_as_none_patch")]
     pub name: Option<Option<String>>,

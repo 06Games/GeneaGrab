@@ -49,6 +49,21 @@ export class MockService implements BackendService {
     return MOCK_REGISTRY_DATA;
   };
 
+  saveRegistryMeta = async (id: number, meta: Partial<UserRegistryMeta>): Promise<void> => {
+    console.info(`[Mock API] saveRegistryMeta: registry ${id}`, meta);
+    await this.delay(400);
+    const sourceTypes = meta.source_types
+      ? meta.source_types instanceof Set
+        ? meta.source_types
+        : new Set(meta.source_types)
+      : MOCK_REGISTRY_DATA.source_types;
+
+    Object.assign(MOCK_REGISTRY_DATA, {
+      ...meta,
+      source_types: sourceTypes,
+    });
+  };
+
   addRegistry = async (url: string, providerId: string): Promise<RegistryMeta> => {
     console.info(`[Mock API] addRegistry: ${url}, provider: ${providerId}`);
     await this.delay(600);

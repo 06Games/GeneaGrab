@@ -1,7 +1,8 @@
 use std::cmp::Reverse;
+use std::str::FromStr;
 
 use crate::{
-    comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta, UserImageMeta},
+    comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta, UserImageMeta, UserRegistryMeta},
     db_entries::{
         image_entry,
         registry_entry::{self},
@@ -13,7 +14,7 @@ use geneagrab_providers::com_structs::{IdentifyRequest, IdentifyResponse, Extrac
 use geneagrab_providers::data::ProviderMetadata;
 use sea_orm::QueryOrder;
 use sea_orm::{
-    ActiveModelTrait, ActiveValue::NotSet, ColumnTrait, DbConn, EntityTrait, FromQueryResult,
+    ActiveModelTrait, ActiveValue::{NotSet, Set}, ColumnTrait, DbConn, EntityTrait, FromQueryResult,
     QueryFilter, QuerySelect, TransactionTrait,
 };
 
@@ -330,6 +331,90 @@ pub async fn delete_registry(db: &DbConn, id: u32) -> Result<(), CoreError> {
         .exec(db)
         .await
         .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?;
+    Ok(())
+}
+
+pub async fn save_registry_meta(
+    db: &DbConn,
+    id: u32,
+    meta: UserRegistryMeta,
+) -> Result<(), CoreError> {
+    tracing::info!("save_registry_meta called for registry {id}");
+
+    let mut model: registry_entry::ActiveModel = registry_entry::Entity::find_by_id(id)
+        .one(db)
+        .await
+        .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?
+        .ok_or_else(|| CoreError::NotFound(format!("Registry {id} not found")))?
+        .into();
+
+    if let Some(archive_ref) = meta.archive_reference {
+        model.archive_reference = Set(archive_ref);
+    }
+    if let Some(title) = meta.title {
+        model.title = Set(title);
+    }
+    if let Some(subtitle) = meta.subtitle {
+        model.subtitle = Set(subtitle);
+    }
+    if let Some(author) = meta.author {
+        model.author = Set(author);
+    }
+    if let Some(notes) = meta.notes {
+        model.notes = Set(notes);
+    }
+    if let Some(ark_url) = meta.ark_url {
+        model.ark_url = Set(ark_url);
+    }
+    if let Some(date_from_opt) = meta.date_from {
+        match date_from_opt {
+            Some(s) if !s.trim().is_empty() => {
+                if let Ok(d) = HistoricalDate::from_str(&s) {
+                    model.date_from_normalized = Set(Some(d.to_jdn()));
+                    model.date_from = Set(Some(crate::db_entries::utils::JsonField(d)));
+                } else {
+                    model.date_from = Set(None);
+                    model.date_from_normalized = Set(None);
+                }
+            }
+            _ => {
+                model.date_from = Set(None);
+                model.date_from_normalized = Set(None);
+            }
+        }
+    }
+    if let Some(date_to_opt) = meta.date_to {
+        match date_to_opt {
+            Some(s) if !s.trim().is_empty() => {
+                if let Ok(d) = HistoricalDate::from_str(&s) {
+                    model.date_to_normalized = Set(Some(d.to_jdn()));
+                    model.date_to = Set(Some(crate::db_entries::utils::JsonField(d)));
+                } else {
+                    model.date_to = Set(None);
+                    model.date_to_normalized = Set(None);
+                }
+            }
+            _ => {
+                model.date_to = Set(None);
+                model.date_to_normalized = Set(None);
+            }
+        }
+    }
+    if let Some(places) = meta.places {
+        model.places = Set(crate::db_entries::utils::JsonField(places));
+    }
+    if let Some(collection) = meta.collection {
+        model.collection = Set(crate::db_entries::utils::JsonField(collection));
+    }
+    if let Some(source_types) = meta.source_types {
+        model.registry_types = Set(crate::db_entries::utils::JsonField(source_types));
+    }
+
+    model
+        .update(db)
+        .await
+        .map_err(|e| CoreError::DbError(format!("DB error updating registry: {e}")))?;
+
     Ok(())
 }
 

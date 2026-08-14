@@ -39,6 +39,20 @@ export interface RegistryMeta {
   acts_count: number;
 }
 
+export interface UserRegistryMeta {
+  archive_reference?: string;
+  title?: string;
+  subtitle?: string;
+  author?: string;
+  date_from?: string;
+  date_to?: string;
+  places?: string[][];
+  collection?: string[];
+  source_types?: Set<ActType> | ActType[];
+  ark_url?: string;
+  notes?: string;
+}
+
 export interface ProviderOption {
   id: string;
   name: string;

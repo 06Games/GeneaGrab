@@ -12,7 +12,7 @@ import { RegistryActionsProvider } from "../contexts/RegistryActionsContext";
 import { useBackend } from "../contexts/BackendContext";
 import { EventDetail } from "../types";
 import { UserImageMeta } from "../types/image";
-import { RegistryMeta } from "../types/registry";
+import { RegistryMeta, UserRegistryMeta } from "../types/registry";
 import { useCurrentTab, useTabs } from "../contexts/TabsContext";
 
 type SyncMessage =
@@ -192,6 +192,23 @@ export const ViewerPage = (props: ViewerPageProps) => {
 
   // Actions
   const registryActions = {
+    onSaveRegistryMeta: async (regId: number, meta: Partial<UserRegistryMeta>) => {
+      await api.saveRegistryMeta(regId, meta);
+      mutateRegistryMeta((prev) => {
+        if (!prev) return prev;
+        const sourceTypes = meta.source_types
+          ? meta.source_types instanceof Set
+            ? meta.source_types
+            : new Set(meta.source_types)
+          : prev.source_types;
+
+        return {
+          ...prev,
+          ...meta,
+          source_types: sourceTypes,
+        };
+      });
+    },
     onSaveImageMeta: async (imageNumber: number, meta: Partial<UserImageMeta>) => {
       await api.saveImageMeta(registryId, imageNumber, meta);
       if (imageNumber === currentImage()) {

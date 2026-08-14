@@ -93,7 +93,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
             >
               <option value="">{t("home.filterType")}</option>
               {ACT_TYPE_OPTIONS.map((opt) => (
-                <option value={opt}>{opt}</option>
+                <option value={opt}>{t(`actCategories.${opt}` as any) || opt}</option>
               ))}
             </select>
             <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />

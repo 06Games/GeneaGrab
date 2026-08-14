@@ -158,14 +158,14 @@ interface MetaRowProps {
 }
 
 export const MetaRow = (props: MetaRowProps) => (
-  <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-baseline py-1">
-    <span class="text-[12px] text-dim truncate capitalize">{props.label}</span>
+  <div class="grid grid-cols-[5.5rem_1fr] gap-x-2 items-baseline py-1 min-w-0 max-w-full overflow-hidden">
+    <span class="text-[12px] text-dim truncate capitalize min-w-0" title={props.label}>{props.label}</span>
     {props.value ? (
-      <span class="text-[13px] text-main truncate" title={props.value}>
+      <span class="text-[13px] text-main truncate min-w-0" title={props.value}>
         {props.value}
       </span>
     ) : (
-      <span class="text-[13px] text-subtle-md italic">—</span>
+      <span class="text-[13px] text-subtle-md italic min-w-0">—</span>
     )}
   </div>
 );

@@ -97,6 +97,7 @@ pub fn run() {
             commands::registry::get_registry,
             commands::registry::add_registry,
             commands::registry::delete_registry,
+            commands::registry::save_registry_meta,
             commands::registry::get_providers_for_url,
             commands::image::get_image_meta,
             commands::image::save_image_meta,

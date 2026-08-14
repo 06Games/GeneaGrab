@@ -70,3 +70,13 @@ pub async fn delete_registry(
     Ok(())
 }
 
+#[tauri::command]
+pub async fn save_registry_meta(
+    id: u32,
+    meta: geneagrab_core::comm_models::UserRegistryMeta,
+    state: State<'_, AppState>,
+) -> Result<(), CommandError> {
+    geneagrab_core::services::registry::save_registry_meta(&state.db, id, meta).await?;
+    Ok(())
+}
+

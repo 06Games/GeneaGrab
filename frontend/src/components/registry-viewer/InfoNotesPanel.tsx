@@ -1,10 +1,11 @@
 import { createSignal, createEffect, For, onCleanup, Show } from "solid-js";
-import { IconButton, MetaRow, ResizeHandle } from "../../ui/primitives";
+import { IconButton, MetaRow } from "../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { useRegistryActions } from "../../contexts/RegistryActionsContext";
 import { ImageMeta, UserImageMeta } from "../../types/image";
-import { ActTypeCategory, RegistryMeta } from "../../types/registry";
+import { ActType, ActTypeCategory, RegistryMeta } from "../../types/registry";
+import { EditRegistryModal } from "./EditRegistryModal";
 
 const ACT_TYPE_STYLES: Record<ActTypeCategory, string> = {
   vital: "text-event-vital bg-event-vital-bg border-event-vital-border",
@@ -31,6 +32,53 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   const actions = useRegistryActions();
   const [registryExpanded, setRegistryExpanded] = createSignal(false);
   const [saveStatus, setSaveStatus] = createSignal<"saved" | "unsaved" | "saving" | "error">("saved");
+  const [isEditModalOpen, setIsEditModalOpen] = createSignal(false);
+  const [copiedArk, setCopiedArk] = createSignal(false);
+
+  // Helper accessors that normalize Set | Array | undefined to always return a safe Array
+  const sourceTypesList = (): ActType[] => {
+    const st = props.registryMeta?.source_types;
+    if (!st) return [];
+    if (Array.isArray(st)) return st;
+    if (typeof (st as any)[Symbol.iterator] === "function") return Array.from(st);
+    return [];
+  };
+
+  const placesList = (): (string | string[])[] => {
+    const p = props.registryMeta?.places;
+    if (!p) return [];
+    if (Array.isArray(p)) return p;
+    if (typeof (p as any)[Symbol.iterator] === "function") return Array.from(p);
+    return [];
+  };
+
+  const collectionsList = (): string[] => {
+    const c = props.registryMeta?.collection;
+    if (!c) return [];
+    if (Array.isArray(c)) return c;
+    if (typeof (c as any)[Symbol.iterator] === "function") return Array.from(c);
+    return [];
+  };
+
+  const copyArkUrl = async () => {
+    if (props.registryMeta.ark_url) {
+      try {
+        await navigator.clipboard.writeText(props.registryMeta.ark_url);
+        setCopiedArk(true);
+        setTimeout(() => setCopiedArk(false), 2000);
+      } catch (err) {
+        console.error("Failed to copy ARK URL:", err);
+      }
+    }
+  };
+
+  const handleEditRegistry = () => {
+    if (props.onEditRegistry) {
+      props.onEditRegistry();
+    } else {
+      setIsEditModalOpen(true);
+    }
+  };
 
   const [name, setName] = createSignal("");
   const [dateRange, setDateRange] = createSignal("");
@@ -162,155 +210,328 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
   });
 
   return (
-    <aside class="flex flex-col w-72 min-w-[220px] flex-shrink-0 bg-panel border-l border-subtle overflow-hidden" aria-label={t("infoPanel.ariaLabel")}>
-      <div class="flex items-center justify-between px-4 py-3 border-b border-subtle flex-shrink-0">
-        <span class="text-[13px] font-semibold text-main">{t("infoPanel.title")}</span>
-        <IconButton title={t("infoPanel.editMeta")} onClick={props.onEditRegistry}>
+    <aside
+      class="flex flex-col w-72 min-w-[220px] max-w-full flex-shrink-0 bg-panel border-l border-subtle overflow-hidden select-text h-full"
+      aria-label={t("infoPanel.ariaLabel")}
+    >
+      {/* Header */}
+      <div class="flex items-center justify-between px-4 py-3 border-b border-subtle flex-shrink-0 min-w-0 select-none">
+        <span class="text-[13px] font-semibold text-main truncate min-w-0">{t("infoPanel.title")}</span>
+        <IconButton title={t("infoPanel.editMeta")} onClick={handleEditRegistry}>
           <Icon icon="lucide:edit-2"></Icon>
         </IconButton>
       </div>
 
-      <div class="border-b border-subtle flex-shrink-0">
-        <button
-          type="button"
-          onClick={() => setRegistryExpanded((e) => !e)}
-          aria-expanded={registryExpanded()}
-          class="w-full flex items-center justify-between px-4 py-3 hover:bg-tinted transition-colors duration-100 focus-visible:outline-none text-left"
-        >
-          <div class="overflow-hidden">
-            <p class="text-[14px] font-medium text-main truncate">{props.registryMeta.archive_reference}</p>
-            <p class="text-[12px] text-dim truncate mt-0.5">
-              {props.registryMeta.places?.[0]?.join(", ") || t("infoPanel.unknown")} ·{" "}
-              {props.registryMeta.source_types?.size > 0
-                ? Array.from(props.registryMeta.source_types)
-                    .map((source_type) => source_type.label)
-                    .join(", ")
-                : t("infoPanel.unknown")}
-            </p>
-          </div>
-          <span
-            class={[
-              "text-dim flex-shrink-0 ml-2 inline-flex items-center justify-center transition-transform duration-150 origin-center",
-              registryExpanded() ? "rotate-180" : "",
-            ].join(" ")}
+      {/* Main Scrollable Body */}
+      <div class="flex-1 overflow-y-auto overflow-x-hidden min-h-0 select-text scrollbar-thin scrollbar-thumb-subtle flex flex-col">
+        {/* Collapsible Registry Summary & Details */}
+        <div class="border-b border-subtle flex-shrink-0 min-w-0">
+          <button
+            type="button"
+            onClick={() => setRegistryExpanded((e) => !e)}
+            aria-expanded={registryExpanded()}
+            class="w-full flex items-center justify-between px-4 py-3 hover:bg-tinted transition-colors duration-100 focus-visible:outline-none text-left min-w-0 overflow-hidden cursor-pointer select-none"
           >
-            <Icon icon="lucide:chevron-down" width="16" height="16" class="block" />
-          </span>
-        </button>
+            <div class="overflow-hidden min-w-0 flex-1 pr-2">
+              <p class="text-[14px] font-semibold text-main truncate">
+                {props.registryMeta.archive_reference || props.registryMeta.title || t("infoPanel.title")}
+              </p>
+              <p class="text-[12px] text-dim truncate mt-0.5">
+                {placesList().length > 0
+                  ? (Array.isArray(placesList()[0]) ? (placesList()[0] as string[]).join(", ") : String(placesList()[0]))
+                  : t("infoPanel.unknown")}
+                {" · "}
+                {sourceTypesList().length > 0
+                  ? sourceTypesList()
+                      .map((st) => st.label || st.category)
+                      .join(", ")
+                  : t("infoPanel.unknown")}
+              </p>
+            </div>
+            <span
+              class={[
+                "text-dim flex-shrink-0 inline-flex items-center justify-center transition-transform duration-150 origin-center",
+                registryExpanded() ? "rotate-180" : "",
+              ].join(" ")}
+            >
+              <Icon icon="lucide:chevron-down" width="16" height="16" class="block" />
+            </span>
+          </button>
 
-        <Show when={registryExpanded()}>
-          <div class="px-4 pb-3 border-t border-hover">
-            <div class="h-2" />
-            {/*TODO: Rework this.*/}
-            <For each={Object.entries(props.registryMeta).filter(([_, v]) => typeof v === "string" || typeof v === "number") as [keyof RegistryMeta, string][]}>
-              {([key, value]) => <MetaRow label={key} value={value} />}
-            </For>
+          <Show when={registryExpanded()}>
+            <div class="px-4 pb-4 pt-2 border-t border-subtle bg-panel flex flex-col gap-2.5 min-w-0 max-w-full">
+              <Show when={props.registryMeta.title}>
+                <div class="flex flex-col min-w-0 max-w-full">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-dim select-none">{t("infoPanel.titleLabel")}</span>
+                  <p class="text-[13px] text-main font-medium mt-0.5 leading-snug break-words min-w-0" style={{ "overflow-wrap": "anywhere" }}>
+                    {props.registryMeta.title}
+                  </p>
+                </div>
+              </Show>
+
+              <Show when={props.registryMeta.subtitle}>
+                <div class="flex flex-col min-w-0 max-w-full">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-dim select-none">{t("infoPanel.subtitleLabel")}</span>
+                  <p class="text-[12px] text-muted mt-0.5 leading-snug break-words min-w-0" style={{ "overflow-wrap": "anywhere" }}>
+                    {props.registryMeta.subtitle}
+                  </p>
+                </div>
+              </Show>
+
+              <MetaRow label={t("infoPanel.archiveReference")} value={props.registryMeta.archive_reference} />
+
+              <Show when={props.registryMeta.date_from || props.registryMeta.date_to}>
+                <MetaRow
+                  label={t("infoPanel.periodLabel")}
+                  value={`${props.registryMeta.date_from ?? "?"} – ${props.registryMeta.date_to ?? "?"}`}
+                />
+              </Show>
+
+              <Show when={props.registryMeta.author}>
+                <MetaRow label={t("infoPanel.authorLabel")} value={props.registryMeta.author} />
+              </Show>
+
+              {/* Places */}
+              <Show when={placesList().length > 0}>
+                <div class="flex flex-col gap-1 pt-1 min-w-0 max-w-full overflow-hidden">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-dim select-none">{t("infoPanel.placesLabel")}</span>
+                  <div class="flex flex-wrap gap-1.5 min-w-0 max-w-full">
+                    <For each={placesList()}>
+                      {(place) => {
+                        const placeStr = Array.isArray(place) ? place.join(", ") : String(place);
+                        return (
+                          <span
+                            class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-tinted border border-subtle text-[11px] text-main max-w-full min-w-0 overflow-hidden"
+                            title={placeStr}
+                          >
+                            <Icon icon="lucide:map-pin" width="11" height="11" class="text-dim flex-shrink-0" />
+                            <span class="truncate min-w-0">{placeStr}</span>
+                          </span>
+                        );
+                      }}
+                    </For>
+                  </div>
+                </div>
+              </Show>
+
+              {/* Record types */}
+              <Show when={sourceTypesList().length > 0}>
+                <div class="flex flex-col gap-1 pt-1 min-w-0 max-w-full overflow-hidden">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-dim select-none">{t("infoPanel.typesLabel")}</span>
+                  <div class="flex flex-wrap gap-1.5 min-w-0 max-w-full">
+                    <For each={sourceTypesList()}>
+                      {(type) => (
+                        <span
+                          class={[
+                            "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border max-w-full min-w-0 truncate",
+                            ACT_TYPE_STYLES[type.category] || "text-dim bg-tinted border-subtle",
+                          ].join(" ")}
+                          title={type.label || type.category}
+                        >
+                          <span class="truncate min-w-0">{type.label || type.category}</span>
+                        </span>
+                      )}
+                    </For>
+                  </div>
+                </div>
+              </Show>
+
+              {/* Collection */}
+              <Show when={collectionsList().length > 0}>
+                <div class="flex flex-col gap-1 pt-1 min-w-0 max-w-full overflow-hidden">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-dim select-none">{t("infoPanel.collectionLabel")}</span>
+                  <div class="flex flex-wrap gap-1 min-w-0 max-w-full">
+                    <For each={collectionsList()}>
+                      {(col) => (
+                        <span
+                          class="inline-flex items-center px-2 py-0.5 rounded-md bg-tinted border border-subtle text-[11px] text-muted font-medium max-w-full min-w-0 truncate"
+                          title={col}
+                        >
+                          <span class="truncate min-w-0">{col}</span>
+                        </span>
+                      )}
+                    </For>
+                  </div>
+                </div>
+              </Show>
+
+              {/* Permanent Link / ARK */}
+              <Show when={props.registryMeta.ark_url}>
+                <div class="flex items-center justify-between pt-1 gap-2 min-w-0 max-w-full overflow-hidden">
+                  <span class="text-[11px] font-medium text-dim truncate min-w-0 select-none">{t("infoPanel.arkUrlLabel")}</span>
+                  <div class="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      type="button"
+                      onClick={copyArkUrl}
+                      title={t("infoPanel.copyLink")}
+                      class="px-2 py-0.5 rounded text-[11px] border border-subtle bg-tinted hover:bg-hover text-muted hover:text-main flex items-center gap-1 transition-colors cursor-pointer select-none"
+                    >
+                      <Icon icon={copiedArk() ? "lucide:check" : "lucide:copy"} width="11" height="11" />
+                      <span>{copiedArk() ? t("infoPanel.copied") : t("infoPanel.copyLink")}</span>
+                    </button>
+                    <a
+                      href={props.registryMeta.ark_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={t("infoPanel.openLink")}
+                      class="p-1 rounded text-muted hover:text-main hover:bg-hover transition-colors select-none"
+                    >
+                      <Icon icon="lucide:external-link" width="13" height="13" />
+                    </a>
+                  </div>
+                </div>
+              </Show>
+
+              {/* General notes */}
+              <Show when={props.registryMeta.notes}>
+                <div class="flex flex-col gap-1 pt-1 min-w-0 max-w-full">
+                  <span class="text-[11px] font-semibold uppercase tracking-wider text-dim select-none">{t("infoPanel.registryNotes")}</span>
+                  <div
+                    class="text-[12px] text-main bg-tinted p-2.5 rounded-lg border border-subtle whitespace-pre-wrap break-words leading-relaxed min-w-0 max-w-full cursor-text select-text"
+                    style={{ "word-break": "break-word", "overflow-wrap": "anywhere" }}
+                  >
+                    {props.registryMeta.notes}
+                  </div>
+                </div>
+              </Show>
+
+              {/* Summary statistics */}
+              <div class="flex items-center justify-between pt-2 mt-1 border-t border-subtle text-[11px] text-dim min-w-0 max-w-full select-none">
+                <span class="truncate min-w-0">
+                  {t("infoPanel.totalViews")}: <strong class="text-main font-medium">{props.registryMeta.total_images}</strong>
+                </span>
+                <span class="truncate min-w-0">
+                  {t("infoPanel.totalActs")}: <strong class="text-main font-medium">{props.registryMeta.acts_count}</strong>
+                </span>
+              </div>
+
+              {/* Edit metadata action button */}
+              <button
+                type="button"
+                onClick={handleEditRegistry}
+                class="w-full mt-1.5 py-1.5 px-3 rounded-lg border border-subtle hover:border-accent/40 bg-tinted hover:bg-accent-bg hover:text-accent-text text-muted text-[12px] font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer min-w-0 select-none"
+              >
+                <Icon icon="lucide:edit-2" width="13" height="13" />
+                <span>{t("infoPanel.editMeta")}</span>
+              </button>
+            </div>
+          </Show>
+        </div>
+
+        {/* Image Metadata & Notes */}
+        <Show when={props.imageMeta}>
+          {/* Image Identifiers & Acts */}
+          <div class="px-4 py-3 border-b border-subtle flex-shrink-0 min-w-0 max-w-full">
+            <div class="flex items-center justify-between mb-2 min-w-0">
+              <span class="text-[13px] font-semibold text-main truncate min-w-0 select-none">
+                {name()
+                  ? t("infoPanel.image.customName", { n: props.image, name: name() })
+                  : t("infoPanel.image.default", { n: props.image })}
+              </span>
+            </div>
+
+            <div class="flex flex-col gap-1.5 mb-2 min-w-0 max-w-full">
+              <div class="grid grid-cols-[5.5rem_1fr] gap-x-2 items-center min-w-0 max-w-full overflow-hidden">
+                <label for="image-name" class="text-[12px] text-dim truncate select-none cursor-pointer min-w-0">
+                  {t("infoPanel.nameLabel")}
+                </label>
+                <input
+                  id="image-name"
+                  type="text"
+                  value={name()}
+                  onInput={(e) => handleNameInput(e.currentTarget.value)}
+                  placeholder={t("infoPanel.namePlaceholder")}
+                  class={[
+                    "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
+                    "bg-tinted border-subtle placeholder:text-subtle-md",
+                    "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                    "transition-all duration-100",
+                  ].join(" ")}
+                />
+              </div>
+
+              <div class="grid grid-cols-[5.5rem_1fr] gap-x-2 items-center min-w-0 max-w-full overflow-hidden">
+                <label for="image-period" class="text-[12px] text-dim truncate select-none cursor-pointer min-w-0">
+                  {t("infoPanel.period")}
+                </label>
+                <input
+                  id="image-period"
+                  type="text"
+                  value={dateRange()}
+                  onInput={(e) => handlePeriodInput(e.currentTarget.value)}
+                  placeholder={t("infoPanel.periodPlaceholder")}
+                  class={[
+                    "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
+                    "bg-tinted border-subtle placeholder:text-subtle-md",
+                    "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                    "transition-all duration-100",
+                  ].join(" ")}
+                />
+              </div>
+            </div>
+
+            <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta?.act_types?.values() ?? []).reduce((a, b) => a + b, 0))} />
+
+            <div class="mt-2 flex flex-wrap gap-1.5 min-w-0 max-w-full">
+              <For each={Array.from(props.imageMeta?.act_types?.entries() ?? [])}>
+                {([type, count]) => (
+                  <span
+                    class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border max-w-full min-w-0 truncate", ACT_TYPE_STYLES[type.category]].join(" ")}
+                    title={`${count}× ${type.label || type.category}`}
+                  >
+                    <span class="truncate">{count}× {type.label || type.category}</span>
+                  </span>
+                )}
+              </For>
+            </div>
+          </div>
+
+          {/* Image Notes Section */}
+          <div class="flex-1 flex flex-col min-h-[180px] min-w-0 max-w-full px-4 pt-3 pb-4">
+            <div class="flex items-center justify-between mb-2 min-w-0">
+              <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer truncate min-w-0 select-none">
+                {t("infoPanel.notesLabel")}
+              </label>
+              <span class="text-[11px] text-dim tabular-nums flex-shrink-0 select-none" aria-live="polite">
+                {notes().length} {t("infoPanel.charsShort")}
+              </span>
+            </div>
+
+            <textarea
+              id="image-notes"
+              value={notes()}
+              onInput={(e) => handleNotesInput(e.currentTarget.value)}
+              placeholder={t("infoPanel.notesPlaceholder")}
+              spellcheck={false}
+              class={[
+                "flex-1 min-h-[120px] resize-y rounded-lg border min-w-0 max-w-full",
+                "bg-tinted px-3 py-2.5",
+                "text-[13px] text-main leading-relaxed select-text",
+                "placeholder:text-subtle-md",
+                "border-subtle focus:border-accent",
+                "focus:ring-2 focus:ring-accent/15 focus:outline-none",
+                "transition-all duration-150",
+                "scrollbar-thin scrollbar-thumb-subtle",
+              ].join(" ")}
+            />
+
+            <div class="flex items-center gap-1.5 mt-2 min-w-0 flex-shrink-0 select-none" aria-live="polite">
+              <div class={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${saveInfo().dot}`} />
+              <span class="text-[11px] text-dim truncate">{saveInfo().label}</span>
+            </div>
           </div>
         </Show>
       </div>
 
-      <Show when={props.imageMeta}>
-        <div class="px-4 py-3 border-b border-subtle flex-shrink-0">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[13px] font-semibold text-main">
-              {name()
-                ? t("infoPanel.image.customName", { n: props.image, name: name() })
-                : t("infoPanel.image.default", { n: props.image })}
-            </span>
-          </div>
-
-          <div class="flex flex-col gap-1.5 mb-2">
-            <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
-              <label for="image-name" class="text-[12px] text-dim truncate select-none cursor-pointer">
-                {t("infoPanel.nameLabel")}
-              </label>
-              <input
-                id="image-name"
-                type="text"
-                value={name()}
-                onInput={(e) => handleNameInput(e.currentTarget.value)}
-                placeholder={t("infoPanel.namePlaceholder")}
-                class={[
-                  "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
-                  "bg-tinted border-subtle placeholder:text-subtle-md",
-                  "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
-                  "transition-all duration-100",
-                ].join(" ")}
-              />
-            </div>
-
-            <div class="grid grid-cols-[8rem_1fr] gap-x-3 items-center">
-              <label for="image-period" class="text-[12px] text-dim truncate select-none cursor-pointer">
-                {t("infoPanel.period")}
-              </label>
-              <input
-                id="image-period"
-                type="text"
-                value={dateRange()}
-                onInput={(e) => handlePeriodInput(e.currentTarget.value)}
-                placeholder={t("infoPanel.periodPlaceholder")}
-                class={[
-                  "h-7 px-2.5 rounded-lg border text-[13px] text-main w-full min-w-0",
-                  "bg-tinted border-subtle placeholder:text-subtle-md",
-                  "focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none",
-                  "transition-all duration-100",
-                ].join(" ")}
-              />
-            </div>
-          </div>
-
-          <MetaRow label={t("infoPanel.indexedLabel")} value={String(Array.from(props.imageMeta?.act_types?.values() ?? []).reduce((a, b) => a + b, 0))} />
-
-          <div class="mt-2 flex flex-wrap gap-1.5">
-            <For each={Array.from(props.imageMeta?.act_types?.entries() ?? [])}>
-              {([type, count]) => (
-                <span
-                  class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border", ACT_TYPE_STYLES[type.category]].join(" ")}
-                >
-                  {count}× {type.label}
-                </span>
-              )}
-            </For>
-          </div>
-        </div>
-
-        <ResizeHandle />
-
-        <div class="flex-1 flex flex-col min-h-0 px-4 pt-3 pb-3">
-          <div class="flex items-center justify-between mb-2">
-            <label for="image-notes" class="text-[13px] font-semibold text-main cursor-pointer">
-              {t("infoPanel.notesLabel")}
-            </label>
-            <span class="text-[11px] text-dim tabular-nums" aria-live="polite">
-              {notes().length} {t("infoPanel.charsShort")}
-            </span>
-          </div>
-
-          <textarea
-            id="image-notes"
-            value={notes()}
-            onInput={(e) => handleNotesInput(e.currentTarget.value)}
-            placeholder={t("infoPanel.notesPlaceholder")}
-            spellcheck={false}
-            class={[
-              "flex-1 resize-none rounded-lg border min-h-0",
-              "bg-tinted px-3 py-2.5",
-              "text-[13px] text-main leading-relaxed",
-              "placeholder:text-subtle-md",
-              "border-subtle focus:border-accent",
-              "focus:ring-2 focus:ring-accent/15 focus:outline-none",
-              "transition-all duration-150",
-              "scrollbar-thin scrollbar-thumb-subtle",
-            ].join(" ")}
-          />
-
-          <div class="flex items-center gap-1.5 mt-2" aria-live="polite">
-            <div class={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${saveInfo().dot}`} />
-            <span class="text-[11px] text-dim">{saveInfo().label}</span>
-          </div>
-        </div>
+      <Show when={isEditModalOpen()}>
+        <EditRegistryModal
+          registryMeta={props.registryMeta}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={async (meta) => {
+            await actions.onSaveRegistryMeta?.(props.registryMeta.id, meta);
+          }}
+        />
       </Show>
     </aside>
   );
 };
-

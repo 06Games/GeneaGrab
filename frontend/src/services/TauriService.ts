@@ -3,7 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import { ProviderOption, RegistryFilters, RegistryMeta } from "../types/registry";
+import { ProviderOption, RegistryFilters, RegistryMeta, UserRegistryMeta } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
@@ -33,6 +33,14 @@ export class TauriService implements BackendService {
       res.source_types = new Set(res.source_types);
     }
     return res as RegistryMeta;
+  }
+
+  async saveRegistryMeta(id: number, meta: Partial<UserRegistryMeta>): Promise<void> {
+    const payload = {
+      ...meta,
+      source_types: meta.source_types ? Array.from(meta.source_types) : undefined,
+    };
+    await invoke("save_registry_meta", { id, meta: payload });
   }
 
   async addRegistry(url: string, providerId: string): Promise<RegistryMeta> {
