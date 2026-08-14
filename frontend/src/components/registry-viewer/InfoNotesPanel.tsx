@@ -336,19 +336,19 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
                 </div>
               </Show>
 
-              {/* Collection */}
+              {/* Archival Hierarchy (Collection) */}
               <Show when={collectionsList().length > 0}>
-                <div class="flex flex-col gap-1 pt-1 min-w-0 max-w-full overflow-hidden">
+                <div class="flex flex-col gap-1 pt-1 min-w-0 max-w-full">
                   <span class="text-[11px] font-semibold uppercase tracking-wider text-dim select-none">{t("infoPanel.collectionLabel")}</span>
-                  <div class="flex flex-wrap gap-1 min-w-0 max-w-full">
+                  <div class="flex flex-col gap-1.5 text-[12px] bg-tinted p-2.5 rounded-lg border border-subtle select-text">
                     <For each={collectionsList()}>
-                      {(col) => (
-                        <span
-                          class="inline-flex items-center px-2 py-0.5 rounded-md bg-tinted border border-subtle text-[11px] text-muted font-medium max-w-full min-w-0 truncate"
-                          title={col}
-                        >
-                          <span class="truncate min-w-0">{col}</span>
-                        </span>
+                      {(level, idx) => (
+                        <div class="flex items-start gap-1.5 min-w-0 max-w-full">
+                          <span class="text-[11px] text-dim font-mono flex-shrink-0 mt-0.5 select-none">{idx() + 1}.</span>
+                          <span class="text-main font-medium break-words min-w-0 leading-snug" style={{ "overflow-wrap": "anywhere" }}>
+                            {level}
+                          </span>
+                        </div>
                       )}
                     </For>
                   </div>

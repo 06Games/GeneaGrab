@@ -45,12 +45,12 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
   const [placesList, setPlacesList] = createSignal<string[]>(initialPlaces());
   const [newPlaceInput, setNewPlaceInput] = createSignal("");
 
-  // Collection extraction
+  // Collection extraction (archival hierarchy: 1. Fonds > 2. Série > 3. Sous-série)
   const initialCollections = (): string[] => {
     const c = props.registryMeta.collection;
     if (!c) return [];
     const arr = Array.isArray(c) ? c : Array.from(c);
-    return arr.map(String);
+    return arr.map(String).filter(Boolean);
   };
   const [collectionList, setCollectionList] = createSignal<string[]>(initialCollections());
   const [newCollectionInput, setNewCollectionInput] = createSignal("");
@@ -71,6 +71,20 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
 
   const [isSaving, setIsSaving] = createSignal(false);
   const [errorMsg, setErrorMsg] = createSignal<string | null>(null);
+
+  // Safe backdrop click tracking to avoid closing during text selection drag
+  let mouseDownOnBackdrop = false;
+
+  const handleBackdropMouseDown = (e: MouseEvent) => {
+    mouseDownOnBackdrop = e.target === e.currentTarget;
+  };
+
+  const handleBackdropMouseUp = (e: MouseEvent) => {
+    if (mouseDownOnBackdrop && e.target === e.currentTarget) {
+      props.onClose();
+    }
+    mouseDownOnBackdrop = false;
+  };
 
   const handleAddActType = () => {
     const cat = newTypeCategory();
@@ -107,12 +121,39 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
     setPlacesList(placesList().filter((_, i) => i !== idx));
   };
 
+  // Collection hierarchy level operations
   const handleAddCollection = () => {
     const val = newCollectionInput().trim();
-    if (val && !collectionList().includes(val)) {
-      setCollectionList([...collectionList(), val]);
+    if (!val) return;
+    const parts = val.split(/[>/]/).map((s) => s.trim()).filter(Boolean);
+    if (parts.length > 0) {
+      setCollectionList([...collectionList(), ...parts]);
       setNewCollectionInput("");
     }
+  };
+
+  const handleUpdateCollectionLevel = (idx: number, val: string) => {
+    const updated = [...collectionList()];
+    updated[idx] = val;
+    setCollectionList(updated);
+  };
+
+  const handleMoveCollectionUp = (idx: number) => {
+    if (idx <= 0) return;
+    const updated = [...collectionList()];
+    const temp = updated[idx - 1];
+    updated[idx - 1] = updated[idx];
+    updated[idx] = temp;
+    setCollectionList(updated);
+  };
+
+  const handleMoveCollectionDown = (idx: number) => {
+    if (idx >= collectionList().length - 1) return;
+    const updated = [...collectionList()];
+    const temp = updated[idx + 1];
+    updated[idx + 1] = updated[idx];
+    updated[idx] = temp;
+    setCollectionList(updated);
   };
 
   const handleRemoveCollection = (idx: number) => {
@@ -126,6 +167,7 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
 
     try {
       const formattedPlaces = placesList().map((p) => p.split(",").map((s) => s.trim()).filter(Boolean));
+      const filteredCollection = collectionList().map((s) => s.trim()).filter(Boolean);
 
       await props.onSave({
         archive_reference: archiveReference().trim() || undefined,
@@ -137,7 +179,7 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
         ark_url: arkUrl().trim() || undefined,
         notes: notes().trim() || undefined,
         places: formattedPlaces.length > 0 ? formattedPlaces : undefined,
-        collection: collectionList().length > 0 ? collectionList() : undefined,
+        collection: filteredCollection.length > 0 ? filteredCollection : undefined,
         source_types: actTypesList(),
       });
 
@@ -153,9 +195,8 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
   return (
     <div
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-150"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) props.onClose();
-      }}
+      onMouseDown={handleBackdropMouseDown}
+      onMouseUp={handleBackdropMouseUp}
       onKeyDown={(e) => {
         if (e.key === "Escape") props.onClose();
       }}
@@ -432,39 +473,98 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
             </div>
           </div>
 
-          {/* Section: Collections */}
-          <div class="flex flex-col gap-2">
-            <label class="text-[12px] font-medium text-dim select-none">{t("infoPanel.editModal.collectionLabel")}</label>
-            <div class="flex flex-wrap gap-1.5 min-h-[36px] p-2 rounded-lg border border-subtle bg-tinted">
-              <For each={collectionList()}>
-                {(col, idx) => (
-                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-panel border border-subtle text-[12px] text-main font-medium shadow-xs max-w-full min-w-0">
-                    <span class="truncate">{col}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveCollection(idx())}
-                      class="text-dim hover:text-danger ml-0.5 focus:outline-none flex-shrink-0 cursor-pointer"
-                    >
-                      <Icon icon="lucide:x" width="12" height="12" class="block" />
-                    </button>
-                  </span>
-                )}
-              </For>
-              <div class="flex-1 flex min-w-[150px] items-center">
-                <input
-                  type="text"
-                  value={newCollectionInput()}
-                  onInput={(e) => setNewCollectionInput(e.currentTarget.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      handleAddCollection();
-                    }
-                  }}
-                  placeholder={collectionList().length === 0 ? t("infoPanel.editModal.collectionPlaceholder") : "+ Collection (Entrée)..."}
-                  class="w-full bg-transparent text-[12px] text-main placeholder:text-subtle-md focus:outline-none px-1"
-                />
-              </div>
+          {/* Section: Archival Hierarchy (Collection) */}
+          <div class="flex flex-col gap-3 p-4 rounded-xl border border-subtle bg-tinted/40">
+            <label class="text-[13px] font-semibold text-main select-none">{t("infoPanel.editModal.collectionLabel")}</label>
+
+            {/* List of Existing Hierarchy Levels */}
+            <div class="flex flex-col gap-2">
+              <Show
+                when={collectionList().length > 0}
+                fallback={
+                  <div class="text-[12px] text-dim italic p-3 border border-dashed border-subtle rounded-lg text-center bg-panel/50 select-none">
+                    {t("infoPanel.editModal.noCollection")}
+                  </div>
+                }
+              >
+                <For each={collectionList()}>
+                  {(col, idx) => (
+                    <div class="flex items-center gap-2 p-2 rounded-lg border border-subtle bg-panel shadow-xs">
+                      {/* Number badge */}
+                      <span class="w-6 h-6 rounded-md bg-tinted border border-subtle flex items-center justify-center text-[11px] font-mono font-semibold text-dim flex-shrink-0 select-none">
+                        {idx() + 1}
+                      </span>
+
+                      {/* Level text input (direct inline editing) */}
+                      <input
+                        type="text"
+                        value={col}
+                        onInput={(e) => handleUpdateCollectionLevel(idx(), e.currentTarget.value)}
+                        placeholder="ex : Sous-série 1 E..."
+                        class="flex-1 h-8 px-3 rounded-lg border border-subtle bg-tinted text-[13px] text-main font-medium placeholder:text-subtle-md focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none transition-all min-w-0"
+                      />
+
+                      {/* Move Up */}
+                      <button
+                        type="button"
+                        onClick={() => handleMoveCollectionUp(idx())}
+                        disabled={idx() === 0}
+                        class="w-7 h-7 rounded-md flex items-center justify-center text-dim hover:text-main hover:bg-hover disabled:opacity-25 disabled:pointer-events-none transition-colors flex-shrink-0 cursor-pointer"
+                        title="Monter"
+                      >
+                        <Icon icon="lucide:arrow-up" width="13" height="13" />
+                      </button>
+
+                      {/* Move Down */}
+                      <button
+                        type="button"
+                        onClick={() => handleMoveCollectionDown(idx())}
+                        disabled={idx() === collectionList().length - 1}
+                        class="w-7 h-7 rounded-md flex items-center justify-center text-dim hover:text-main hover:bg-hover disabled:opacity-25 disabled:pointer-events-none transition-colors flex-shrink-0 cursor-pointer"
+                        title="Descendre"
+                      >
+                        <Icon icon="lucide:arrow-down" width="13" height="13" />
+                      </button>
+
+                      {/* Delete */}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCollection(idx())}
+                        class="w-7 h-7 rounded-md flex items-center justify-center text-dim hover:text-danger hover:bg-danger/10 transition-colors flex-shrink-0 cursor-pointer"
+                        title="Supprimer ce niveau"
+                      >
+                        <Icon icon="lucide:trash-2" width="13" height="13" />
+                      </button>
+                    </div>
+                  )}
+                </For>
+              </Show>
+            </div>
+
+            {/* Add New Hierarchy Level (Separate Row Below) */}
+            <div class="flex items-center gap-2 p-2 rounded-lg border border-dashed border-subtle bg-tinted/60">
+              <span class="w-6 h-6 rounded-md bg-panel border border-subtle flex items-center justify-center text-[11px] font-mono font-semibold text-dim flex-shrink-0 select-none">
+                {collectionList().length + 1}
+              </span>
+
+              <input
+                type="text"
+                value={newCollectionInput()}
+                onInput={(e) => setNewCollectionInput(e.currentTarget.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddCollection();
+                  }
+                }}
+                placeholder={collectionList().length === 0 ? t("infoPanel.editModal.collectionPlaceholder") : "+ Nouveau sous-niveau (Entrée)..."}
+                class="flex-1 h-8 px-3 rounded-lg border border-subtle bg-panel text-[13px] text-main placeholder:text-subtle-md focus:border-accent focus:ring-2 focus:ring-accent/15 focus:outline-none transition-all min-w-0"
+              />
+
+              <Button variant="outline" size="sm" onClick={handleAddCollection} class="flex-shrink-0 h-8 px-3 text-[12px]">
+                <Icon icon="lucide:plus" width="13" height="13" />
+                <span>{t("infoPanel.editModal.addLevel")}</span>
+              </Button>
             </div>
           </div>
 
