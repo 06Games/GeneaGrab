@@ -61,6 +61,17 @@ fn parse_geneanet_types(type_str: &str, is_civil_status: bool) -> HashSet<Regist
     types
 }
 
+fn clean_html(html: &str) -> Option<String> {
+    let fragment = Html::parse_fragment(html);
+    let text = fragment.root_element().text().collect::<String>();
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        None
+    } else {
+        Some(trimmed.to_string())
+    }
+}
+
 fn parse_viewer_page(builder: &mut RegistryBuilder, html: &str) -> Result<(), ProviderError> {
     let document = Html::parse_document(html);
 
@@ -100,7 +111,11 @@ fn parse_viewer_page(builder: &mut RegistryBuilder, html: &str) -> Result<(), Pr
     builder.date_from(validate_regex_match(caps.name("from")).and_then(|d| d.parse().ok()));
     builder.date_to(validate_regex_match(caps.name("to")).and_then(|d| d.parse().ok()));
     builder.archive_reference(validate_regex_match(caps.name("cote")));
-    builder.notes(validate_regex_match(caps.name("note")));
+    builder.notes(
+        validate_regex_match(caps.name("note"))
+            .as_deref()
+            .and_then(clean_html),
+    );
 
     let global_type = caps
         .name("globalType")
@@ -216,3 +231,52 @@ pub(crate) async fn extract_registry(
     );
     extract_registry_internal(req, &fs_fetcher).await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_clean_html() {
+        assert_eq!(clean_html(""), None);
+        assert_eq!(clean_html("   "), None);
+        assert_eq!(clean_html("<p></p>"), None);
+        assert_eq!(clean_html("<p><span>   </span></p>"), None);
+        assert_eq!(
+            clean_html("Simple note text"),
+            Some("Simple note text".to_string())
+        );
+        assert_eq!(
+            clean_html("Note avec <a href=\"https://www.example.com\">lien</a> et <b>gras</b>"),
+            Some("Note avec lien et gras".to_string())
+        );
+        assert_eq!(
+            clean_html("Remarque avec &eacute;tiquette &amp; &#039;guillemets&#039;"),
+            Some("Remarque avec étiquette & 'guillemets'".to_string())
+        );
+    }
+
+    #[test]
+    fn test_parse_viewer_page_with_html_notes() {
+        let html = r#"
+            <div id="popup-informations">
+                <p class="text-small">Information</p>
+                <p>Nice (Alpes-Maritimes, France) - État civil (Naissances) | 1850 - 1860</p>
+                <p>1 E 123</p>
+                <p class="no-margin-bottom">Naissances</p>
+                <p>Mis en ligne par <a href="https://example.com">AGAM</a>. <strong>Remarque importante</strong>.</p>
+            </div>
+        "#;
+        let mut builder = RegistryBuilder::default();
+        builder
+            .source_id("geneanet".to_string())
+            .registry_id("12345".to_string());
+        parse_viewer_page(&mut builder, html).unwrap();
+        let registry = builder.build().unwrap();
+        assert_eq!(
+            registry.notes,
+            Some("Mis en ligne par AGAM. Remarque importante.".to_string())
+        );
+    }
+}
+
