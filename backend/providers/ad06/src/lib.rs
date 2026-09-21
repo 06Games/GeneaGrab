@@ -1,16 +1,15 @@
 #![warn(clippy::pedantic)]
 
+use geneagrab_providers::protocols::ligeo;
 use std::borrow::Cow;
-use std::sync::LazyLock;
-use regex::Regex;
 
-use geneagrab_providers::traits::{ArchiveProvider, Fetcher};
-use geneagrab_providers::data::ProviderMetadata;
 use geneagrab_providers::com_structs::{
-    IdentifyRequest, IdentifyResponse, ExtractRequest, ExtractResponse,
-    ExtractImageRequest, ExtractImageResponse, TileRequest, TileResponse, DownloadRequest
+    DownloadRequest, ExtractImageRequest, ExtractImageResponse, ExtractRequest, ExtractResponse,
+    IdentifyRequest, IdentifyResponse, TileRequest, TileResponse,
 };
+use geneagrab_providers::data::ProviderMetadata;
 use geneagrab_providers::errors::ProviderError;
+use geneagrab_providers::traits::{ArchiveProvider, Fetcher};
 
 pub mod extract;
 pub mod fetcher;
@@ -60,33 +59,11 @@ impl ArchiveProvider for Ad06Provider {
         let url =
             url::Url::parse(&req.url).map_err(|e| ProviderError::InvalidField(e.to_string()))?;
 
-        let host = url.host_str();
-        if host != Some("archives06.fr") || !url.path().starts_with("/ark:/") {
+        if url.host_str() != Some("archives06.fr") || !url.path().starts_with("/ark:/") {
             return Err(ProviderError::InvalidField("Not an AD06 URL".into()));
         }
-        let host = host.unwrap();
 
-        let captures = ARK_REGEX
-            .captures(url.path())
-            .ok_or(ProviderError::InvalidField("Invalid ARK URL".into()))?;
-        let name_assigning_authority_number =
-            captures.name("naan").map_or("", |m| m.as_str()).to_string();
-        let document_id = captures
-            .name("document_id")
-            .map_or("", |m| m.as_str())
-            .to_string();
-        let image_number = captures
-            .name("image_number")
-            .and_then(|m| m.as_str().parse::<u32>().ok())
-            .unwrap_or(1);
-
-        let ark_url =
-            format!("https://{host}/ark:/{name_assigning_authority_number}/{document_id}");
-        Ok(IdentifyResponse {
-            registry_id: document_id,
-            image_number: Some(image_number),
-            ark_url: Some(ark_url),
-        })
+        ligeo::parse_url(url).ok_or(ProviderError::InvalidField("Invalid ARK URL".into()))
     }
 
     async fn extract_registry(
@@ -96,7 +73,10 @@ impl ArchiveProvider for Ad06Provider {
         extract::extract_registry(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
-    fn is_image_missing_data(&self, req: &ExtractImageRequest) -> Result<Option<String>, ProviderError> {
+    fn is_image_missing_data(
+        &self,
+        req: &ExtractImageRequest,
+    ) -> Result<Option<String>, ProviderError> {
         Ok(image::is_image_missing_data(req))
     }
 
@@ -107,10 +87,7 @@ impl ArchiveProvider for Ad06Provider {
         image::extract_image(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
-    async fn fetch_tile(
-        &self,
-        req: TileRequest,
-    ) -> Result<TileResponse, ProviderError> {
+    async fn fetch_tile(&self, req: TileRequest) -> Result<TileResponse, ProviderError> {
         image::fetch_tile(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
