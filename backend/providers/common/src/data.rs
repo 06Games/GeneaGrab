@@ -1,18 +1,16 @@
-use std::collections::{HashMap, HashSet};
-use serde::{Deserialize, Serialize};
-use std::borrow::Cow;
 use dates::HistoricalDate;
 use derive_builder::Builder;
+use serde::{Deserialize, Serialize};
+use std::borrow::Cow;
+use std::collections::{HashMap, HashSet};
 use strum::Display;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ProviderMetadata {
     pub id: Cow<'static, str>,
     pub name: Cow<'static, str>,
+    pub long_name: Option<Cow<'static, str>>,
     pub description: Option<Cow<'static, str>>,
-    pub author: Option<Cow<'static, str>>,
-    pub version: Option<Cow<'static, str>>,
-    pub source_url: Option<Cow<'static, str>>,
     pub suggested_websites: Cow<'static, [Cow<'static, str>]>,
 }
 

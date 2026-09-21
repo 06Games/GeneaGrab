@@ -1,16 +1,16 @@
 #![warn(clippy::pedantic)]
 
+use regex::Regex;
 use std::borrow::Cow;
 use std::sync::LazyLock;
-use regex::Regex;
 
-use geneagrab_providers::traits::{ArchiveProvider, Fetcher};
-use geneagrab_providers::data::ProviderMetadata;
 use geneagrab_providers::com_structs::{
-    IdentifyRequest, IdentifyResponse, ExtractRequest, ExtractResponse,
-    ExtractImageRequest, ExtractImageResponse, TileRequest, TileResponse, DownloadRequest
+    DownloadRequest, ExtractImageRequest, ExtractImageResponse, ExtractRequest, ExtractResponse,
+    IdentifyRequest, IdentifyResponse, TileRequest, TileResponse,
 };
+use geneagrab_providers::data::ProviderMetadata;
 use geneagrab_providers::errors::ProviderError;
+use geneagrab_providers::traits::{ArchiveProvider, Fetcher};
 
 pub mod extract;
 pub mod image;
@@ -18,12 +18,8 @@ pub mod image;
 const PROVIDER_METADATA: ProviderMetadata = ProviderMetadata {
     id: Cow::Borrowed("geneanet"),
     name: Cow::Borrowed("Geneanet"),
-    description: Some(Cow::Borrowed("A provider for extracting data from Geneanet.")),
-    author: Some(Cow::Borrowed("Evan Galli")),
-    version: Some(Cow::Borrowed("1.0.0")),
-    source_url: Some(Cow::Borrowed(
-        "https://github.com/06Games/GeneaGrab/tree/v4/backend/providers/geneanet",
-    )),
+    long_name: None,
+    description: None,
     suggested_websites: Cow::Borrowed(&[std::borrow::Cow::Borrowed("https://www.geneanet.org/")]),
 };
 
@@ -87,7 +83,10 @@ impl ArchiveProvider for GeneanetProvider {
         extract::extract_registry(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
-    fn is_image_missing_data(&self, req: &ExtractImageRequest) -> Result<Option<String>, ProviderError> {
+    fn is_image_missing_data(
+        &self,
+        req: &ExtractImageRequest,
+    ) -> Result<Option<String>, ProviderError> {
         image::is_image_missing_data(req)
     }
 
@@ -98,10 +97,7 @@ impl ArchiveProvider for GeneanetProvider {
         image::extract_image(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 
-    async fn fetch_tile(
-        &self,
-        req: TileRequest,
-    ) -> Result<TileResponse, ProviderError> {
+    async fn fetch_tile(&self, req: TileRequest) -> Result<TileResponse, ProviderError> {
         image::fetch_tile(&req, &self.flaresolverr_url, &*self.fetcher).await
     }
 

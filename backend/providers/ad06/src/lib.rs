@@ -18,21 +18,12 @@ pub mod image;
 const PROVIDER_METADATA: ProviderMetadata = ProviderMetadata {
     id: Cow::Borrowed("ad06"),
     name: Cow::Borrowed("AD06"),
-    description: Some(Cow::Borrowed(
-        "A provider for extracting data from Alpes-Maritimes (France) Departmental Archives.",
+    long_name: Some(Cow::Borrowed(
+        "Alpes-Maritimes (France) Departmental Archives",
     )),
-    author: Some(Cow::Borrowed("Evan Galli")),
-    version: Some(Cow::Borrowed("1.0.0")),
-    source_url: Some(Cow::Borrowed(
-        "https://github.com/06Games/GeneaGrab/tree/v4/backend/providers/ad06",
-    )),
+    description: Some(Cow::Borrowed("You might want to install the UserScript for easier use.")),
     suggested_websites: Cow::Borrowed(&[std::borrow::Cow::Borrowed("https://archives06.fr/")]),
 };
-
-static ARK_REGEX: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"/ark:/(?P<naan>[\w\.]+)(?:/(?P<document_id>[\w\.]+))?(?:/(?P<view_type>[\w\.]+))?(?:/(?P<sequence>\d+))?(?:/(?P<image_number>\d+))?")
-        .expect("Invalid regex pattern")
-});
 
 pub struct Ad06Provider {
     pub flaresolverr_url: String,
