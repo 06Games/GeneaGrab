@@ -6,7 +6,7 @@ import { RegistryCard } from "../components/registry-list/RegistryCard";
 import { RegistryFilters } from "../components/registry-list/RegistryFilters";
 import { AddRegistryModal } from "../components/registry-list/AddRegistryModal";
 import { TopBar } from "../ui/TopBar";
-import { Button } from "../ui/primitives";
+import { Button, ResizeHandle } from "../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import type { RegistryMeta } from "../types/registry";
 import { isTauri } from "@tauri-apps/api/core";
@@ -29,6 +29,27 @@ const HomePage = () => {
   const [dateTo, setDateTo] = createSignal("");
 
   const [isModalOpen, setIsModalOpen] = createSignal(false);
+
+  const DEFAULT_SIDEBAR_WIDTH = 280;
+  const MIN_SIDEBAR_WIDTH = 220;
+  const MAX_SIDEBAR_WIDTH = 480;
+
+  const [sidebarWidth, setSidebarWidth] = createSignal(DEFAULT_SIDEBAR_WIDTH);
+
+  const onSidebarResizePointerDown = (e: PointerEvent) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startW = sidebarWidth();
+    const onMove = (ev: PointerEvent) => {
+      setSidebarWidth(Math.max(MIN_SIDEBAR_WIDTH, Math.min(MAX_SIDEBAR_WIDTH, startW + (ev.clientX - startX))));
+    };
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
 
   // Data / Pagination state
   const [items, setItems] = createSignal<RegistryMeta[]>([]);
@@ -368,8 +389,9 @@ const HomePage = () => {
         }
       />
 
-      <main class="flex-1 max-w-6xl w-full mx-auto px-6 pt-8 pb-4 flex flex-col gap-6 min-h-0">
+      <div class="flex flex-1 min-h-0 overflow-hidden">
         <RegistryFilters
+          width={sidebarWidth()}
           searchQuery={searchQuery()}
           onSearchChange={setSearchQuery}
           selectedType={selectedType()}
@@ -383,118 +405,121 @@ const HomePage = () => {
           dateTo={dateTo()}
           onDateToChange={setDateTo}
         />
+        <ResizeHandle vertical={true} onPointerDown={onSidebarResizePointerDown} />
 
-        <Show when={isUrl() && !isFetching()}>
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 -mb-2 bg-panel border border-accent rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
-            <div class="flex items-start gap-3">
-              <div class="mt-0.5 text-accent">
-                <Icon icon="lucide:link" width="20" height="20" />
+        <main class="flex-1 flex flex-col gap-6 min-w-0 min-h-0 px-6 pt-6 pb-4 overflow-hidden">
+          <Show when={isUrl() && !isFetching()}>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 -mb-2 bg-panel border border-accent rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
+              <div class="flex items-start gap-3">
+                <div class="mt-0.5 text-accent">
+                  <Icon icon="lucide:link" width="20" height="20" />
+                </div>
+                <div class="flex flex-col">
+                  <span class="text-[14px] font-semibold text-main">{t("home.urlDetected")}</span>
+                  <span class="text-[13px] text-dim">
+                    <Switch>
+                      <Match when={isAlreadyAdded()}>{t("home.urlAlreadyAdded")}</Match>
+                      <Match when={providers.loading}>{t("home.checkingUrl")}</Match>
+                      <Match when={!providers.loading && providers()?.length === 0}>
+                        <span class="text-warning">{t("home.urlNoProvider")}</span>
+                      </Match>
+                      <Match when={!providers.loading && providers() && providers()!.length > 0}>{t("home.urlReady")}</Match>
+                    </Switch>
+                  </span>
+                </div>
               </div>
-              <div class="flex flex-col">
-                <span class="text-[14px] font-semibold text-main">{t("home.urlDetected")}</span>
-                <span class="text-[13px] text-dim">
-                  <Switch>
-                    <Match when={isAlreadyAdded()}>{t("home.urlAlreadyAdded")}</Match>
-                    <Match when={providers.loading}>{t("home.checkingUrl")}</Match>
-                    <Match when={!providers.loading && providers()?.length === 0}>
-                      <span class="text-warning">{t("home.urlNoProvider")}</span>
-                    </Match>
-                    <Match when={!providers.loading && providers() && providers()!.length > 0}>{t("home.urlReady")}</Match>
-                  </Switch>
-                </span>
-              </div>
-            </div>
 
-            <Show when={isAlreadyAdded()}>
-              <div class="flex items-center gap-2">
-                <Button variant="primary" onClick={handleOpenExtractedUrl}>
-                  <Icon icon="lucide:external-link" /> {t("home.open")}
-                </Button>
-              </div>
-            </Show>
+              <Show when={isAlreadyAdded()}>
+                <div class="flex items-center gap-2">
+                  <Button variant="primary" onClick={handleOpenExtractedUrl}>
+                    <Icon icon="lucide:external-link" /> {t("home.open")}
+                  </Button>
+                </div>
+              </Show>
 
-            <Show when={!isAlreadyAdded() && !providers.loading && providers() && providers()!.length > 0}>
-              <div class="flex items-center gap-2">
-                <select
-                  value={selectedQuickProvider()}
-                  onChange={(e) => setSelectedQuickProvider(e.currentTarget.value)}
-                  class="px-3 py-1.5 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent outline-none appearance-none cursor-pointer"
-                >
-                  <For each={providers()}>{(p) => <option value={p.id}>{p.name}</option>}</For>
-                </select>
-                <Button variant="primary" onClick={handleQuickAdd} disabled={isAdding()}>
-                  <Show
-                    when={isAdding()}
-                    fallback={
-                      <>
-                        <Icon icon="lucide:plus" /> {t("home.addQuick")}
-                      </>
-                    }
+              <Show when={!isAlreadyAdded() && !providers.loading && providers() && providers()!.length > 0}>
+                <div class="flex items-center gap-2">
+                  <select
+                    value={selectedQuickProvider()}
+                    onChange={(e) => setSelectedQuickProvider(e.currentTarget.value)}
+                    class="px-3 py-1.5 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent outline-none appearance-none cursor-pointer"
                   >
-                    <Icon icon="lucide:loader-2" class="animate-spin" />
-                  </Show>
-                </Button>
-              </div>
-            </Show>
-          </div>
-        </Show>
-
-        <div
-          ref={scrollRef}
-          class="flex-1 overflow-y-auto -mr-4 pr-4 pb-4 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
-        >
-          <Show when={!isFetching() && items().length === 0}>
-            <div class="py-16 flex flex-col items-center justify-center text-dim border-2 border-dashed border-subtle rounded-xl h-full">
-              <Icon icon="lucide:folder-search" class="w-12 h-12 mb-3 text-subtle-md" />
-              <p>{t("home.noResults")}</p>
+                    <For each={providers()}>{(p) => <option value={p.id}>{p.name}</option>}</For>
+                  </select>
+                  <Button variant="primary" onClick={handleQuickAdd} disabled={isAdding()}>
+                    <Show
+                      when={isAdding()}
+                      fallback={
+                        <>
+                          <Icon icon="lucide:plus" /> {t("home.addQuick")}
+                        </>
+                      }
+                    >
+                      <Icon icon="lucide:loader-2" class="animate-spin" />
+                    </Show>
+                  </Button>
+                </div>
+              </Show>
             </div>
           </Show>
 
-          <div style={{ height: `${virtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
-            <For each={virtualizer.getVirtualItems()}>
-              {(virtualRow) => (
-                <div
-                  ref={(el) => {
-                    createEffect(() => {
-                      const idx = virtualRow.index;
-                      if (el) {
-                        virtualizer.measureElement(el);
-                      }
-                    });
-                  }}
-                  data-index={virtualRow.index}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  <Show
-                    when={virtualRow.index < chunkedRows().length}
-                    fallback={
-                      <div class="w-full flex justify-center items-center h-[196px] text-dim">
-                        <Icon icon="lucide:loader-2" class="animate-spin" width="24" height="24" />
-                      </div>
-                    }
+          <div
+            ref={scrollRef}
+            class="flex-1 overflow-y-auto pr-2 pb-4 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
+          >
+            <Show when={!isFetching() && items().length === 0}>
+              <div class="py-16 flex flex-col items-center justify-center text-dim border-2 border-dashed border-subtle rounded-xl h-full">
+                <Icon icon="lucide:folder-search" class="w-12 h-12 mb-3 text-subtle-md" />
+                <p>{t("home.noResults")}</p>
+              </div>
+            </Show>
+
+            <div style={{ height: `${virtualizer.getTotalSize()}px`, width: "100%", position: "relative" }}>
+              <For each={virtualizer.getVirtualItems()}>
+                {(virtualRow) => (
+                  <div
+                    ref={(el) => {
+                      createEffect(() => {
+                        const idx = virtualRow.index;
+                        if (el) {
+                          virtualizer.measureElement(el);
+                        }
+                      });
+                    }}
+                    data-index={virtualRow.index}
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      width: "100%",
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
                   >
-                    <div
-                      class="grid"
-                      style={{
-                        "grid-template-columns": `repeat(${columns()}, minmax(0, 1fr))`,
-                        gap: "16px",
-                      }}
+                    <Show
+                      when={virtualRow.index < chunkedRows().length}
+                      fallback={
+                        <div class="w-full flex justify-center items-center h-[196px] text-dim">
+                          <Icon icon="lucide:loader-2" class="animate-spin" width="24" height="24" />
+                        </div>
+                      }
                     >
-                      <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} targetImageId={extractedImageNumber()} onContextMenu={(e) => handleRegistryContextMenu(e, item)} />}</For>
-                    </div>
-                  </Show>
-                </div>
-              )}
-            </For>
+                      <div
+                        class="grid"
+                        style={{
+                          "grid-template-columns": `repeat(${columns()}, minmax(0, 1fr))`,
+                          gap: "16px",
+                        }}
+                      >
+                        <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} targetImageId={extractedImageNumber()} onContextMenu={(e) => handleRegistryContextMenu(e, item)} />}</For>
+                      </div>
+                    </Show>
+                  </div>
+                )}
+              </For>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
 
       <Show when={isModalOpen()}>
         <AddRegistryModal
