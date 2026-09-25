@@ -15,6 +15,98 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { useTabs } from "../contexts/TabsContext";
 
+interface LocationGroup {
+  key: string;
+  label: string;
+  parts: string[];
+  registries: RegistryMeta[];
+}
+
+function parsePlaceParts(rawPlace: any): string[] {
+  if (Array.isArray(rawPlace)) {
+    const res: string[] = [];
+    for (const item of rawPlace) {
+      if (typeof item === "string" && item.includes(",")) {
+        res.push(...item.split(",").map((s) => s.trim()).filter(Boolean));
+      } else if (item) {
+        res.push(String(item).trim());
+      }
+    }
+    return res.filter(Boolean);
+  }
+  if (typeof rawPlace === "string") {
+    return rawPlace.split(",").map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+type VirtualRowItem =
+  | {
+      type: "header";
+      key: string;
+      groupKey: string;
+      label: string;
+      parts: string[];
+      count: number;
+      isCollapsed: boolean;
+    }
+  | {
+      type: "cards";
+      key: string;
+      groupKey: string;
+      items: RegistryMeta[];
+    };
+
+const LocationGroupHeader = (props: {
+  label: string;
+  parts: string[];
+  count: number;
+  isCollapsed: boolean;
+  onToggle: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={props.onToggle}
+    title={props.label}
+    class="w-full flex items-center justify-between py-2.5 px-3 rounded-lg bg-panel hover:bg-hover border border-subtle text-left group/header select-none focus:outline-none focus:ring-1 focus:ring-accent cursor-pointer transition-colors duration-100"
+  >
+    <div class="flex items-center gap-2 min-w-0 flex-1">
+      <Icon
+        icon="lucide:chevron-right"
+        class={[
+          "w-4 h-4 text-dim group-hover/header:text-main transition-transform duration-150 flex-shrink-0",
+          !props.isCollapsed ? "rotate-90" : "",
+        ].join(" ")}
+      />
+      <Icon icon="lucide:map-pin" class="w-4 h-4 text-accent flex-shrink-0" />
+      <div class="flex items-center gap-1.5 flex-wrap min-w-0 text-[13px]">
+        <For each={props.parts}>
+          {(part, index) => (
+            <>
+              <Show when={index() > 0}>
+                <span class="text-subtle-md text-[11px] font-bold select-none">&gt;</span>
+              </Show>
+              <span
+                class={[
+                  "truncate",
+                  index() === props.parts.length - 1
+                    ? "font-bold text-main group-hover/header:text-accent transition-colors"
+                    : "text-muted font-medium",
+                ].join(" ")}
+              >
+                {part}
+              </span>
+            </>
+          )}
+        </For>
+      </div>
+    </div>
+    <span class="ml-3 px-2 py-0.5 rounded-full bg-tinted border border-subtle text-dim text-[11px] tabular-nums font-semibold leading-none flex-shrink-0">
+      {props.count}
+    </span>
+  </button>
+);
+
 const HomePage = () => {
   const api = useBackend();
   const { t } = useI18n();
@@ -296,14 +388,126 @@ const HomePage = () => {
     });
   });
 
-  const chunkedRows = createMemo(() => {
-    const res: RegistryMeta[][] = [];
+  const [expandedGroups, setExpandedGroups] = createSignal<Record<string, boolean>>({});
+
+  const toggleGroup = (key: string) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const locationGroups = createMemo(() => {
     const currentItems = items();
-    const cols = columns();
-    for (let i = 0; i < currentItems.length; i += cols) {
-      res.push(currentItems.slice(i, i + cols));
+    const unknownLabel = t("home.unknownLocation");
+    const groupMap = new Map<string, LocationGroup>();
+
+    for (const item of currentItems) {
+      const rawPlaces = item.places && Array.isArray(item.places) ? item.places : [];
+      const validPlaces: { key: string; label: string; parts: string[] }[] = [];
+      const seenKeysInItem = new Set<string>();
+
+      for (const p of rawPlaces) {
+        const parsedParts = parsePlaceParts(p);
+        if (parsedParts.length > 0) {
+          const label = parsedParts.join(" > ");
+          const key = label.toLowerCase();
+          if (!seenKeysInItem.has(key)) {
+            seenKeysInItem.add(key);
+            validPlaces.push({ key, label, parts: parsedParts });
+          }
+        }
+      }
+
+      if (validPlaces.length === 0) {
+        const unknownKey = "__unknown__";
+        let group = groupMap.get(unknownKey);
+        if (!group) {
+          group = {
+            key: unknownKey,
+            label: unknownLabel,
+            parts: [unknownLabel],
+            registries: [],
+          };
+          groupMap.set(unknownKey, group);
+        }
+        group.registries.push(item);
+      } else {
+        for (const loc of validPlaces) {
+          let group = groupMap.get(loc.key);
+          if (!group) {
+            group = {
+              key: loc.key,
+              label: loc.label,
+              parts: loc.parts,
+              registries: [],
+            };
+            groupMap.set(loc.key, group);
+          }
+          group.registries.push(item);
+        }
+      }
     }
-    return res;
+
+    const sortedGroups = Array.from(groupMap.values()).sort((a, b) => {
+      if (a.key === "__unknown__") return 1;
+      if (b.key === "__unknown__") return -1;
+      return a.label.localeCompare(b.label, undefined, { sensitivity: "base" });
+    });
+
+    return sortedGroups;
+  });
+
+  const allExpanded = createMemo(() => {
+    const groups = locationGroups();
+    if (groups.length === 0) return false;
+    const exp = expandedGroups();
+    return groups.every((g) => Boolean(exp[g.key]));
+  });
+
+  const toggleAllGroups = () => {
+    if (allExpanded()) {
+      setExpandedGroups({});
+    } else {
+      const all: Record<string, boolean> = {};
+      for (const g of locationGroups()) {
+        all[g.key] = true;
+      }
+      setExpandedGroups(all);
+    }
+  };
+
+  const virtualRowItems = createMemo(() => {
+    const groups = locationGroups();
+    const cols = columns();
+    const expanded = expandedGroups();
+    const rows: VirtualRowItem[] = [];
+
+    for (const group of groups) {
+      const isExpanded = Boolean(expanded[group.key]);
+      rows.push({
+        type: "header",
+        key: `header-${group.key}`,
+        groupKey: group.key,
+        label: group.label,
+        parts: group.parts,
+        count: group.registries.length,
+        isCollapsed: !isExpanded,
+      });
+
+      if (isExpanded) {
+        for (let i = 0; i < group.registries.length; i += cols) {
+          rows.push({
+            type: "cards",
+            key: `cards-${group.key}-${i}`,
+            groupKey: group.key,
+            items: group.registries.slice(i, i + cols),
+          });
+        }
+      }
+    }
+
+    return rows;
   });
 
   let lastFetchId = 0;
@@ -359,10 +563,14 @@ const HomePage = () => {
 
   const virtualizer = createVirtualizer({
     get count() {
-      return hasNextPage() ? chunkedRows().length + 1 : chunkedRows().length;
+      return hasNextPage() ? virtualRowItems().length + 1 : virtualRowItems().length;
     },
     getScrollElement: () => scrollRef,
-    estimateSize: () => 196,
+    estimateSize: (index) => {
+      const row = virtualRowItems()[index];
+      if (!row) return 196;
+      return row.type === "header" ? 44 : 196;
+    },
     gap: 16,
     overscan: 4,
   });
@@ -373,7 +581,7 @@ const HomePage = () => {
 
     const lastRenderedItem = virtualItems[virtualItems.length - 1];
 
-    if (lastRenderedItem.index >= chunkedRows().length - 1 && hasNextPage() && !isFetching()) {
+    if (lastRenderedItem.index >= virtualRowItems().length - 1 && hasNextPage() && !isFetching()) {
       fetchPage(untrack(nextCursor), false);
     }
   });
@@ -463,6 +671,21 @@ const HomePage = () => {
             </div>
           </Show>
 
+          <Show when={!isFetching() && items().length > 0 && locationGroups().length > 0}>
+            <div class="flex items-center justify-between text-[12px] text-dim select-none -mb-3 px-1">
+              <span>
+                {locationGroups().length} {locationGroups().length === 1 ? t("home.placesLabel") : t("infoPanel.placesLabel")}
+              </span>
+              <button
+                type="button"
+                onClick={toggleAllGroups}
+                class="text-[12px] text-accent hover:text-accent-hover font-medium transition-colors cursor-pointer"
+              >
+                {allExpanded() ? t("home.collapseAll") : t("home.expandAll")}
+              </button>
+            </div>
+          </Show>
+
           <div
             ref={scrollRef}
             class="flex-1 overflow-y-auto pr-2 pb-4 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
@@ -496,22 +719,48 @@ const HomePage = () => {
                     }}
                   >
                     <Show
-                      when={virtualRow.index < chunkedRows().length}
+                      when={virtualRow.index < virtualRowItems().length}
                       fallback={
                         <div class="w-full flex justify-center items-center h-[196px] text-dim">
                           <Icon icon="lucide:loader-2" class="animate-spin" width="24" height="24" />
                         </div>
                       }
                     >
-                      <div
-                        class="grid"
-                        style={{
-                          "grid-template-columns": `repeat(${columns()}, minmax(0, 1fr))`,
-                          gap: "16px",
-                        }}
-                      >
-                        <For each={chunkedRows()[virtualRow.index]}>{(item) => <RegistryCard registry={item} targetImageId={extractedImageNumber()} onContextMenu={(e) => handleRegistryContextMenu(e, item)} />}</For>
-                      </div>
+                      {(() => {
+                        const row = () => virtualRowItems()[virtualRow.index];
+                        return (
+                          <Show
+                            when={row()?.type === "header"}
+                            fallback={
+                              <div
+                                class="grid"
+                                style={{
+                                  "grid-template-columns": `repeat(${columns()}, minmax(0, 1fr))`,
+                                  gap: "16px",
+                                }}
+                              >
+                                <For each={(row() as { type: "cards"; items: RegistryMeta[] })?.items}>
+                                  {(item) => (
+                                    <RegistryCard
+                                      registry={item}
+                                      targetImageId={extractedImageNumber()}
+                                      onContextMenu={(e) => handleRegistryContextMenu(e, item)}
+                                    />
+                                  )}
+                                </For>
+                              </div>
+                            }
+                          >
+                            <LocationGroupHeader
+                              label={(row() as any).label}
+                              parts={(row() as any).parts}
+                              count={(row() as any).count}
+                              isCollapsed={(row() as any).isCollapsed}
+                              onToggle={() => toggleGroup((row() as any).groupKey)}
+                            />
+                          </Show>
+                        );
+                      })()}
                     </Show>
                   </div>
                 )}
