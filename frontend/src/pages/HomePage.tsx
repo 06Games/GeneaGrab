@@ -762,7 +762,7 @@ const HomePage = () => {
                   <div
                     ref={(el) => {
                       createEffect(() => {
-                        const idx = virtualRow.index;
+                        void virtualRow.index;
                         if (el) {
                           virtualizer.measureElement(el);
                         }

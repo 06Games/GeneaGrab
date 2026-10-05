@@ -146,6 +146,17 @@ pub fn normalize_place_hierarchy(raw_parts: &[String]) -> Vec<String> {
     parts
 }
 
+pub fn normalize_collection_hierarchy(raw_parts: &[String]) -> Vec<String> {
+    let mut parts = Vec::new();
+    for part in raw_parts {
+        let trimmed = part.trim();
+        if !trimmed.is_empty() {
+            parts.push(trimmed.to_string());
+        }
+    }
+    parts
+}
+
 pub fn place_matches_filter(normalized: &[String], filter: &str) -> bool {
     let filter = filter.trim();
     if filter.is_empty() {
@@ -240,10 +251,19 @@ async fn apply_registry_filters(
             }
         }
         if let Some(c) = filters.collection.as_deref().filter(|s| !s.trim().is_empty()) {
-            query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
-                "collection LIKE ?",
-                vec![format!("%\"{c}\"%")],
-            ));
+            let c_trimmed = c.trim();
+            let parts: Vec<&str> = if c_trimmed.contains(" > ") {
+                c_trimmed.split(" > ").map(str::trim).filter(|s| !s.is_empty()).collect()
+            } else {
+                vec![c_trimmed]
+            };
+
+            for part in parts {
+                query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
+                    "collection LIKE ?",
+                    vec![format!("%\"{part}\"%")],
+                ));
+            }
         }
 
         if let Some(s) = filters.date_from.as_deref().filter(|s| !s.trim().is_empty()) {
@@ -487,26 +507,44 @@ pub async fn get_available_collections(
         .await
         .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
 
-    let mut counts: std::collections::BTreeMap<String, u32> = std::collections::BTreeMap::new();
+    let mut group_map: std::collections::HashMap<String, (Vec<String>, String, u32)> =
+        std::collections::HashMap::new();
+
     for row in rows {
-        let mut seen = std::collections::HashSet::new();
-        for col in row.collection.0 {
-            let trimmed = col.trim();
-            if !trimmed.is_empty() && seen.insert(trimmed.to_string()) {
-                *counts.entry(trimmed.to_string()).or_default() += 1;
-            }
+        let parts = normalize_collection_hierarchy(&row.collection.0);
+
+        if !parts.is_empty() {
+            let display_name = parts.join(" > ");
+            let key = display_name.clone();
+            let entry = group_map
+                .entry(key)
+                .or_insert_with(|| (parts, display_name, 0));
+            entry.2 += 1;
         }
     }
 
-    let options = counts
+    let mut options: Vec<AvailableOption> = group_map
         .into_iter()
-        .map(|(name, count)| AvailableOption {
-            key: name.clone(),
-            label: name,
+        .map(|(key, (parts, label, count))| AvailableOption {
+            key,
+            label,
             count,
-            parts: Vec::new(),
+            parts,
         })
         .collect();
+
+    options.sort_by(|a, b| {
+        let len = a.parts.len().min(b.parts.len());
+        for i in 0..len {
+            let cmp = a.parts[i]
+                .to_lowercase()
+                .cmp(&b.parts[i].to_lowercase());
+            if cmp != std::cmp::Ordering::Equal {
+                return cmp;
+            }
+        }
+        a.parts.len().cmp(&b.parts.len())
+    });
 
     Ok(options)
 }
@@ -912,6 +950,68 @@ mod tests {
         // Unknown and empty filters
         assert!(place_matches_filter(&place, "__unknown__") == false);
         assert!(place_matches_filter(&place, ""));
+    }
+
+    #[test]
+    fn test_normalize_collection_hierarchy() {
+        let raw = vec![
+            "  Etat civil (parcours de recherche)  ".to_string(),
+            "".to_string(),
+            "   NICE   ".to_string(),
+            "   ".to_string(),
+        ];
+        let normalized = normalize_collection_hierarchy(&raw);
+        assert_eq!(
+            normalized,
+            vec!["Etat civil (parcours de recherche)", "NICE"]
+        );
+    }
+
+    #[test]
+    fn test_collection_hierarchical_sorting() {
+        let mut collections = vec![
+            AvailableOption {
+                key: "Recensement de la population > Lucéram".to_string(),
+                label: "Recensement de la population > Lucéram".to_string(),
+                count: 1,
+                parts: vec!["Recensement de la population".to_string(), "Lucéram".to_string()],
+            },
+            AvailableOption {
+                key: "Etat civil (parcours de recherche) > SOSPEL".to_string(),
+                label: "Etat civil (parcours de recherche) > SOSPEL".to_string(),
+                count: 18,
+                parts: vec!["Etat civil (parcours de recherche)".to_string(), "SOSPEL".to_string()],
+            },
+            AvailableOption {
+                key: "Etat civil (parcours de recherche) > NICE".to_string(),
+                label: "Etat civil (parcours de recherche) > NICE".to_string(),
+                count: 4,
+                parts: vec!["Etat civil (parcours de recherche)".to_string(), "NICE".to_string()],
+            },
+        ];
+
+        collections.sort_by(|a, b| {
+            let len = a.parts.len().min(b.parts.len());
+            for i in 0..len {
+                let cmp = a.parts[i]
+                    .to_lowercase()
+                    .cmp(&b.parts[i].to_lowercase());
+                if cmp != std::cmp::Ordering::Equal {
+                    return cmp;
+                }
+            }
+            a.parts.len().cmp(&b.parts.len())
+        });
+
+        let labels: Vec<&str> = collections.iter().map(|c| c.label.as_str()).collect();
+        assert_eq!(
+            labels,
+            vec![
+                "Etat civil (parcours de recherche) > NICE",
+                "Etat civil (parcours de recherche) > SOSPEL",
+                "Recensement de la population > Lucéram",
+            ]
+        );
     }
 }
 

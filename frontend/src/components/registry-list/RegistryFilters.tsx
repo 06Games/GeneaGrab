@@ -4,6 +4,7 @@ import { useI18n } from "../../ui/i18n";
 import { useBackend } from "../../contexts/BackendContext";
 import { ACT_CATEGORY_META, ActTypeCategory } from "../../types/registry";
 import { FilterCombobox } from "./FilterCombobox";
+import { HierarchicalFilterCombobox } from "./HierarchicalFilterCombobox";
 
 interface RegistryFiltersProps {
   width?: number;
@@ -72,8 +73,17 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
     const selected = props.selectedPlace;
     const list = places();
     if (!selected || places.loading || !list) return;
-    const isValid = list.some((opt) => (opt.key === "__unknown__" ? "__unknown__" : (opt.label || opt.key)) === selected);
-    if (!isValid) {
+    const isPlaceValid = (val: string, items: typeof list) => {
+      if (val === "__unknown__") {
+        return items.some((opt) => opt.key === "__unknown__");
+      }
+      const valLower = val.toLowerCase();
+      return items.some((opt) => {
+        const optKey = (opt.label || opt.key).toLowerCase();
+        return optKey === valLower || optKey.startsWith(valLower + " > ");
+      });
+    };
+    if (!isPlaceValid(selected, list)) {
       props.onPlaceChange("");
     }
   });
@@ -82,8 +92,14 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
     const selected = props.selectedCollection;
     const list = collections();
     if (!selected || collections.loading || !list) return;
-    const isValid = list.some((opt) => opt.key === selected);
-    if (!isValid) {
+    const isCollectionValid = (val: string, items: typeof list) => {
+      const valLower = val.toLowerCase();
+      return items.some((opt) => {
+        const optKey = (opt.label || opt.key).toLowerCase();
+        return optKey === valLower || optKey.startsWith(valLower + " > ");
+      });
+    };
+    if (!isCollectionValid(selected, list)) {
       props.onCollectionChange("");
     }
   });
@@ -164,9 +180,10 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
         </div>
 
         {/* Place */}
-        <FilterCombobox
+        <HierarchicalFilterCombobox
           label={t("home.placesLabel")}
           placeholder={t("home.filterPlace")}
+          searchPlaceholder={t("home.searchPlace")}
           options={places() || []}
           loading={places.loading}
           value={props.selectedPlace}
@@ -175,59 +192,14 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
           values={props.selectedPlaces}
           onMultipleChange={props.onPlacesChange}
           icon="lucide:map-pin"
-          getOptionKey={(opt) => (opt.key === "__unknown__" ? "__unknown__" : (opt.label || opt.key))}
-          getOptionLabel={(opt) => (opt.key === "__unknown__" ? t("home.unknownLocation") : opt.label)}
-          getSelectedIcon={(opt) =>
-            opt.key === "__unknown__"
-              ? { icon: "lucide:help-circle", class: "text-muted" }
-              : { icon: "lucide:map-pin", class: "text-accent" }
-          }
-          customFilter={(opt, query) => {
-            const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-            if (!q) return true;
-            if (opt.key === "__unknown__") {
-              return t("home.unknownLocation").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q);
-            }
-            if (opt.label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q)) return true;
-            if (opt.parts?.some((p) => p.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q))) return true;
-            return false;
-          }}
-          renderOption={(opt) => {
-            if (opt.key === "__unknown__") {
-              return (
-                <div class="flex items-center gap-2 min-w-0">
-                  <Icon icon="lucide:help-circle" class="w-3.5 h-3.5 text-muted flex-shrink-0" />
-                  <span class="text-[13px] italic text-muted truncate">
-                    {t("home.unknownLocation")}
-                  </span>
-                </div>
-              );
-            }
-            const parts = opt.parts && opt.parts.length > 0 ? opt.parts : opt.label.split(" > ");
-            const leaf = parts[parts.length - 1];
-            const hierarchy = parts.slice(0, parts.length - 1);
-            return (
-              <div class="flex flex-col min-w-0 py-0.5">
-                <div class="flex items-center gap-1.5 min-w-0">
-                  <Icon icon="lucide:map-pin" class="w-3.5 h-3.5 text-accent flex-shrink-0" />
-                  <span class="text-[13px] font-medium text-main truncate">
-                    {leaf}
-                  </span>
-                </div>
-                <Show when={hierarchy.length > 0}>
-                  <div class="flex items-center gap-1 text-[11px] text-dim truncate pl-5">
-                    <span>{hierarchy.join(" › ")}</span>
-                  </div>
-                </Show>
-              </div>
-            );
-          }}
+          isPlace={true}
         />
 
         {/* Collection */}
-        <FilterCombobox
+        <HierarchicalFilterCombobox
           label={t("home.collectionsLabel")}
           placeholder={t("home.filterCollection")}
+          searchPlaceholder={t("home.searchCollection")}
           options={collections() || []}
           loading={collections.loading}
           value={props.selectedCollection}
@@ -236,17 +208,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
           values={props.selectedCollections}
           onMultipleChange={props.onCollectionsChange}
           icon="lucide:archive"
-          getOptionKey={(opt) => opt.key}
-          getOptionLabel={(opt) => opt.label}
-          getSelectedIcon={() => ({ icon: "lucide:archive", class: "text-accent" })}
-          renderOption={(opt) => (
-            <div class="flex items-center gap-2 min-w-0">
-              <Icon icon="lucide:archive" class="w-3.5 h-3.5 text-accent flex-shrink-0" />
-              <span class="text-[13px] font-medium text-main truncate" title={opt.label}>
-                {opt.label}
-              </span>
-            </div>
-          )}
+          isPlace={false}
         />
 
         {/* Record Type */}

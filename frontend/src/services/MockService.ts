@@ -7,6 +7,7 @@ import {
   ProviderOption,
   RegistryFilters,
   RegistryMeta,
+  UserRegistryMeta,
 } from "../types/registry";
 import type { BackendService } from "./api";
 

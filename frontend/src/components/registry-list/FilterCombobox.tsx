@@ -1,6 +1,7 @@
-import { createMemo, createSignal, For, JSX, Show } from "solid-js";
+import { createMemo, For, JSX, Show } from "solid-js";
 import { Combobox, useComboboxContext } from "@kobalte/core/combobox";
 import { Icon } from "@iconify-icon/solid";
+import { useI18n } from "../../ui/i18n";
 import type { AvailableOption } from "../../types/registry";
 
 export interface FilterComboboxProps<T = AvailableOption> {
@@ -22,6 +23,7 @@ export interface FilterComboboxProps<T = AvailableOption> {
   icon?: string;
   getOptionKey?: (opt: T) => string;
   getOptionLabel?: (opt: T) => string;
+  getSelectedIcon?: (opt: T) => string | { icon: string; class?: string };
   customFilter?: (opt: T, query: string) => boolean;
   renderOption?: (opt: T, isSelected: boolean) => JSX.Element;
   emptyMessage?: string;
@@ -30,6 +32,7 @@ export interface FilterComboboxProps<T = AvailableOption> {
 
 function ComboboxEmptyState(props: { emptyMessage?: string; loading?: boolean; optionsCount: number }) {
   const context = useComboboxContext();
+  const { t } = useI18n();
   const isEmpty = createMemo(() => {
     if (props.loading) return false;
     if (props.optionsCount === 0) return true;
@@ -41,16 +44,16 @@ function ComboboxEmptyState(props: { emptyMessage?: string; loading?: boolean; o
       <Show when={props.loading}>
         <div class="flex items-center justify-center p-3 text-dim text-[12px] gap-2">
           <Icon icon="lucide:loader-2" class="w-3.5 h-3.5 animate-spin text-accent" />
-          <span>Loading...</span>
+          <span>{t("home.loading")}</span>
         </div>
       </Show>
       <Show when={isEmpty()}>
         <div class="px-3 py-4 text-center text-dim text-[12px]">
           <Show
             when={Boolean(context.inputValue())}
-            fallback={props.emptyMessage ?? "No options available"}
+            fallback={props.emptyMessage ?? t("home.noOptions")}
           >
-            No options match "{context.inputValue()}"
+            {t("home.noMatches", { query: context.inputValue() })}
           </Show>
         </div>
       </Show>
@@ -59,6 +62,7 @@ function ComboboxEmptyState(props: { emptyMessage?: string; loading?: boolean; o
 }
 
 function SingleFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>) {
+  const { t } = useI18n();
   const getKey = (opt: T): string => {
     if (!opt) return "";
     if (props.getOptionKey) return props.getOptionKey(opt);
@@ -181,7 +185,7 @@ function SingleFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>
                   props.onChange?.("");
                 }}
                 class="p-1 rounded text-subtle-md hover:text-main transition-colors cursor-pointer"
-                title="Clear"
+                title={t("home.clear")}
               >
                 <Icon icon="lucide:x" class="w-3.5 h-3.5" />
               </button>
@@ -313,14 +317,14 @@ function MultiFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>)
             <>
               <For each={state.selectedOptions()}>
                 {(opt) => {
-                  const iconRes = props.getSelectedIcon ? props.getSelectedIcon(opt) : null;
+                  const iconRes = props.getSelectedIcon ? props.getSelectedIcon(opt as T) : null;
                   const iconName = typeof iconRes === "string" ? iconRes : iconRes?.icon;
                   return (
                     <span class="inline-flex items-center gap-1.5 pl-2 pr-1 py-0.5 rounded-md bg-accent-bg border border-accent-border text-accent-text text-[11px] font-medium animate-in fade-in">
                       <Show when={iconName}>
                         <Icon icon={iconName!} class="w-3 h-3 flex-shrink-0" />
                       </Show>
-                      <span class="truncate max-w-[140px]">{getLabel(opt)}</span>
+                      <span class="truncate max-w-[140px]">{getLabel(opt as T)}</span>
                       <button
                         type="button"
                         onClick={(e) => {
