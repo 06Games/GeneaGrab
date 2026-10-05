@@ -95,11 +95,62 @@ const HomePage = () => {
   let scrollRef!: HTMLDivElement;
 
   const [searchQuery, setSearchQuery] = createSignal("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = createSignal("");
+  let searchTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  const handleSearchChange = (val: string, immediate = false) => {
+    setSearchQuery(val);
+    if (searchTimeout) clearTimeout(searchTimeout);
+    if (immediate || !val.trim()) {
+      setDebouncedSearchQuery(val);
+    } else {
+      searchTimeout = setTimeout(() => {
+        setDebouncedSearchQuery(val);
+      }, 300);
+    }
+  };
+
   const [selectedType, setSelectedType] = createSignal("");
   const [selectedPlace, setSelectedPlace] = createSignal("");
   const [selectedCollection, setSelectedCollection] = createSignal("");
+
   const [dateFrom, setDateFrom] = createSignal("");
+  const [debouncedDateFrom, setDebouncedDateFrom] = createSignal("");
+  let dateFromTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  const handleDateFromChange = (val: string, immediate = false) => {
+    setDateFrom(val);
+    if (dateFromTimeout) clearTimeout(dateFromTimeout);
+    if (immediate || !val.trim()) {
+      setDebouncedDateFrom(val);
+    } else {
+      dateFromTimeout = setTimeout(() => {
+        setDebouncedDateFrom(val);
+      }, 300);
+    }
+  };
+
   const [dateTo, setDateTo] = createSignal("");
+  const [debouncedDateTo, setDebouncedDateTo] = createSignal("");
+  let dateToTimeout: ReturnType<typeof setTimeout> | undefined;
+
+  const handleDateToChange = (val: string, immediate = false) => {
+    setDateTo(val);
+    if (dateToTimeout) clearTimeout(dateToTimeout);
+    if (immediate || !val.trim()) {
+      setDebouncedDateTo(val);
+    } else {
+      dateToTimeout = setTimeout(() => {
+        setDebouncedDateTo(val);
+      }, 300);
+    }
+  };
+
+  onCleanup(() => {
+    if (searchTimeout) clearTimeout(searchTimeout);
+    if (dateFromTimeout) clearTimeout(dateFromTimeout);
+    if (dateToTimeout) clearTimeout(dateToTimeout);
+  });
 
   const [isModalOpen, setIsModalOpen] = createSignal(false);
 
@@ -304,7 +355,7 @@ const HomePage = () => {
     openTab({ type: "home" });
 
     // 2. Set search query in Home page search bar
-    setSearchQuery(search_url);
+    handleSearchChange(search_url, true);
 
     // 3. Query provider identification and database registries directly
     try {
@@ -342,7 +393,7 @@ const HomePage = () => {
   onMount(async () => {
     const initialUrl: any = null; // FIXEME
     if (initialUrl) {
-      setSearchQuery(decodeURIComponent(initialUrl instanceof Array ? initialUrl[0] : initialUrl));
+      handleSearchChange(decodeURIComponent(initialUrl instanceof Array ? initialUrl[0] : initialUrl), true);
     }
     if (isTauri()) {
       (await getCurrent())?.forEach(handleCustomScheme);
@@ -371,18 +422,18 @@ const HomePage = () => {
   });
 
   const currentFilters = () => ({
-    search_term: searchQuery(),
+    search_term: debouncedSearchQuery(),
     source_type: selectedType(),
     place: selectedPlace(),
     collection: selectedCollection(),
-    date_from: dateFrom(),
-    date_to: dateTo(),
+    date_from: debouncedDateFrom(),
+    date_to: debouncedDateTo(),
   });
 
   const [expandedGroups, setExpandedGroups] = createSignal<Record<string, boolean>>({});
 
-  const loadRegistriesForGroup = async (group: AvailableOption) => {
-    if (loadingGroups()[group.key] || groupRegistries()[group.key]) return;
+  const loadRegistriesForGroup = async (group: AvailableOption, force = false, fetchId = lastFetchId) => {
+    if (!force && (loadingGroups()[group.key] || groupRegistries()[group.key])) return;
 
     setLoadingGroups((prev) => ({ ...prev, [group.key]: true }));
     try {
@@ -396,9 +447,14 @@ const HomePage = () => {
           is_unknown_location: isUnknown,
         },
       });
+
+      if (fetchId !== lastFetchId) return;
+
       setGroupRegistries((prev) => ({ ...prev, [group.key]: res.data }));
     } catch (err) {
-      console.error(`Failed to load registries for group ${group.key}:`, err);
+      if (fetchId === lastFetchId) {
+        console.error(`Failed to load registries for group ${group.key}:`, err);
+      }
     } finally {
       setLoadingGroups((prev) => ({ ...prev, [group.key]: false }));
     }
@@ -500,9 +556,36 @@ const HomePage = () => {
 
       if (currentFetchId !== lastFetchId) return;
 
+      const newKeys = new Set(res.map((g) => g.key));
+      const currentExpanded = expandedGroups();
+      const nextExpanded: Record<string, boolean> = {};
+      const groupsToRefresh: AvailableOption[] = [];
+
+      for (const g of res) {
+        if (currentExpanded[g.key]) {
+          nextExpanded[g.key] = true;
+          groupsToRefresh.push(g);
+        }
+      }
+
+      // Preserve existing registry records for groups that still exist to prevent layout flash
+      setGroupRegistries((prev) => {
+        const next: Record<string, RegistryMeta[]> = {};
+        for (const k of Object.keys(prev)) {
+          if (newKeys.has(k)) {
+            next[k] = prev[k];
+          }
+        }
+        return next;
+      });
+
+      setExpandedGroups(nextExpanded);
       setGroups(res);
-      setGroupRegistries({});
-      setLoadingGroups({});
+
+      // Re-fetch registries for currently expanded groups in background
+      for (const g of groupsToRefresh) {
+        loadRegistriesForGroup(g, true, currentFetchId);
+      }
     } catch (err) {
       if (currentFetchId === lastFetchId) {
         console.error("Failed to fetch location groups:", err);
@@ -515,9 +598,15 @@ const HomePage = () => {
   };
 
   createEffect((prevDeps) => {
-    const currentDeps = [searchQuery(), selectedType(), selectedPlace(), selectedCollection(), dateFrom(), dateTo()].join("|");
+    const currentDeps = [
+      debouncedSearchQuery(),
+      selectedType(),
+      selectedPlace(),
+      selectedCollection(),
+      debouncedDateFrom(),
+      debouncedDateTo(),
+    ].join("|");
     if (prevDeps !== currentDeps) {
-      setExpandedGroups({});
       untrack(() => loadLocationGroups());
     }
     return currentDeps;
@@ -534,6 +623,9 @@ const HomePage = () => {
       if (row.type === "header") return 44;
       if (row.type === "loading") return 64;
       return 196;
+    },
+    getItemKey: (index) => {
+      return virtualRowItems()[index]?.key ?? index;
     },
     gap: 16,
     overscan: 4,
@@ -554,7 +646,8 @@ const HomePage = () => {
         <RegistryFilters
           width={sidebarWidth()}
           searchQuery={searchQuery()}
-          onSearchChange={setSearchQuery}
+          onSearchChange={handleSearchChange}
+          effectiveSearchQuery={debouncedSearchQuery()}
           selectedType={selectedType()}
           onTypeChange={setSelectedType}
           selectedPlace={selectedPlace()}
@@ -562,9 +655,11 @@ const HomePage = () => {
           selectedCollection={selectedCollection()}
           onCollectionChange={setSelectedCollection}
           dateFrom={dateFrom()}
-          onDateFromChange={setDateFrom}
+          onDateFromChange={handleDateFromChange}
+          effectiveDateFrom={debouncedDateFrom()}
           dateTo={dateTo()}
-          onDateToChange={setDateTo}
+          onDateToChange={handleDateToChange}
+          effectiveDateTo={debouncedDateTo()}
         />
         <ResizeHandle vertical={true} onPointerDown={onSidebarResizePointerDown} />
 
@@ -624,11 +719,16 @@ const HomePage = () => {
             </div>
           </Show>
 
-          <Show when={!isFetching() && groups().length > 0}>
+          <Show when={groups().length > 0}>
             <div class="flex items-center justify-between text-[12px] text-dim select-none -mb-3 px-1">
-              <span>
-                {groups().length} {groups().length === 1 ? t("home.placesLabel") : t("infoPanel.placesLabel")}
-              </span>
+              <div class="flex items-center gap-2">
+                <span>
+                  {groups().length} {groups().length === 1 ? t("home.placesLabel") : t("infoPanel.placesLabel")}
+                </span>
+                <Show when={isFetching()}>
+                  <Icon icon="lucide:loader-2" class="w-3.5 h-3.5 animate-spin text-accent" />
+                </Show>
+              </div>
               <button
                 type="button"
                 onClick={toggleAllGroups}

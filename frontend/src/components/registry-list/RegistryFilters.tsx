@@ -8,6 +8,7 @@ interface RegistryFiltersProps {
   width?: number;
   searchQuery: string;
   onSearchChange: (val: string) => void;
+  effectiveSearchQuery?: string;
   selectedType: string;
   onTypeChange: (val: string) => void;
   selectedPlace: string;
@@ -16,8 +17,10 @@ interface RegistryFiltersProps {
   onCollectionChange: (val: string) => void;
   dateFrom: string;
   onDateFromChange: (val: string) => void;
+  effectiveDateFrom?: string;
   dateTo: string;
   onDateToChange: (val: string) => void;
+  effectiveDateTo?: string;
 }
 
 export const RegistryFilters = (props: RegistryFiltersProps) => {
@@ -25,27 +28,27 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
   const api = useBackend();
 
   const placesFilters = () => ({
-    search_term: props.searchQuery,
+    search_term: props.effectiveSearchQuery ?? props.searchQuery,
     source_type: props.selectedType,
     collection: props.selectedCollection,
-    date_from: props.dateFrom,
-    date_to: props.dateTo,
+    date_from: props.effectiveDateFrom ?? props.dateFrom,
+    date_to: props.effectiveDateTo ?? props.dateTo,
   });
 
   const collectionsFilters = () => ({
-    search_term: props.searchQuery,
+    search_term: props.effectiveSearchQuery ?? props.searchQuery,
     source_type: props.selectedType,
     place: props.selectedPlace,
-    date_from: props.dateFrom,
-    date_to: props.dateTo,
+    date_from: props.effectiveDateFrom ?? props.dateFrom,
+    date_to: props.effectiveDateTo ?? props.dateTo,
   });
 
   const typesFilters = () => ({
-    search_term: props.searchQuery,
+    search_term: props.effectiveSearchQuery ?? props.searchQuery,
     place: props.selectedPlace,
     collection: props.selectedCollection,
-    date_from: props.dateFrom,
-    date_to: props.dateTo,
+    date_from: props.effectiveDateFrom ?? props.dateFrom,
+    date_to: props.effectiveDateTo ?? props.dateTo,
   });
 
   const [places] = createResource(placesFilters, (f) => api.getAvailablePlaces(f));
@@ -166,8 +169,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
               prop:value={props.selectedPlace}
               value={props.selectedPlace}
               onChange={(e) => props.onPlaceChange(e.currentTarget.value)}
-              disabled={places.loading}
-              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
+              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer"
             >
               <option value="">{t("home.filterPlace")}</option>
               <For each={places()}>
@@ -181,7 +183,14 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
                 }}
               </For>
             </select>
-            <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
+            <Show
+              when={places.loading}
+              fallback={
+                <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
+              }
+            >
+              <Icon icon="lucide:loader-2" class="absolute right-3 top-1/2 -translate-y-1/2 text-accent w-4 h-4 pointer-events-none animate-spin" />
+            </Show>
           </div>
         </div>
 
@@ -206,8 +215,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
               prop:value={props.selectedCollection}
               value={props.selectedCollection}
               onChange={(e) => props.onCollectionChange(e.currentTarget.value)}
-              disabled={collections.loading}
-              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
+              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer"
             >
               <option value="">{t("home.filterCollection")}</option>
               <For each={collections()}>
@@ -218,7 +226,14 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
                 )}
               </For>
             </select>
-            <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
+            <Show
+              when={collections.loading}
+              fallback={
+                <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
+              }
+            >
+              <Icon icon="lucide:loader-2" class="absolute right-3 top-1/2 -translate-y-1/2 text-accent w-4 h-4 pointer-events-none animate-spin" />
+            </Show>
           </div>
         </div>
 
@@ -243,8 +258,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
               prop:value={props.selectedType}
               value={props.selectedType}
               onChange={(e) => props.onTypeChange(e.currentTarget.value)}
-              disabled={types.loading}
-              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
+              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer"
             >
               <option value="">{t("home.filterType")}</option>
               <For each={types()}>
@@ -255,7 +269,14 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
                 )}
               </For>
             </select>
-            <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
+            <Show
+              when={types.loading}
+              fallback={
+                <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
+              }
+            >
+              <Icon icon="lucide:loader-2" class="absolute right-3 top-1/2 -translate-y-1/2 text-accent w-4 h-4 pointer-events-none animate-spin" />
+            </Show>
           </div>
         </div>
 
