@@ -32,7 +32,7 @@ where
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegistryFilters {
     #[serde(default, deserialize_with = "empty_string_as_none")]
     pub search_term: Option<String>,
@@ -46,6 +46,10 @@ pub struct RegistryFilters {
     pub date_from: Option<DateTime<Utc>>,
     #[serde(default, deserialize_with = "empty_string_as_none")]
     pub date_to: Option<DateTime<Utc>>,
+    #[serde(default)]
+    pub location: Option<Vec<String>>,
+    #[serde(default)]
+    pub is_unknown_location: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -61,7 +65,7 @@ pub struct CursorResponse<T> {
     pub next_cursor: Option<u32>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RegistryMeta {
     pub id: u32,
     pub source_id: String,
@@ -86,6 +90,15 @@ pub struct RegistryMeta {
     pub acts_count: u32,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct LocationGroupMeta {
+    pub key: String,
+    pub location: Vec<String>,
+    pub display_name: String,
+    pub count: u32,
+}
+
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserRegistryMeta {
     #[serde(default, deserialize_with = "empty_string_as_none_patch")]
@@ -109,7 +122,7 @@ pub struct UserRegistryMeta {
     pub source_types: Option<HashSet<RegistryType>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserImageMeta {
     #[serde(default, deserialize_with = "empty_string_as_none_patch")]
     pub name: Option<Option<String>>,

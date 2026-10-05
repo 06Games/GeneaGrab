@@ -15,6 +15,8 @@ export interface RegistryFilters {
   collection?: string | null;
   date_from?: string | null;
   date_to?: string | null;
+  location?: string[] | null;
+  is_unknown_location?: boolean | null;
 }
 
 export interface RegistryMeta {
@@ -59,3 +61,11 @@ export interface ProviderOption {
   registry_id?: string;
   image_number?: number;
 }
+
+export interface LocationGroupMeta {
+  key: string;
+  location: string[];
+  display_name: string;
+  count: number;
+}
+

@@ -2,46 +2,154 @@ import { MOCK_EVENT_ROWS, MOCK_IMAGE_META, MOCK_REGISTRY_DATA, MOCK_SELECTED_EVE
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import { ProviderOption, RegistryFilters, RegistryMeta } from "../types/registry";
+import {
+  LocationGroupMeta,
+  ProviderOption,
+  RegistryFilters,
+  RegistryMeta,
+} from "../types/registry";
 import type { BackendService } from "./api";
 
 export class MockService implements BackendService {
   private delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
-  getAllRegistries = async (payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> => {
-    console.info(`[Mock API] getAllRegistries`, payload);
-    await this.delay(600);
-
-    // Generate mock data for pagination
-    let data: RegistryMeta[] = [MOCK_REGISTRY_DATA];
-    for (let i = 1; i <= 60; i++) {
-      data.push({
+  private getMockRegistries(): RegistryMeta[] {
+    return [
+      {
         ...MOCK_REGISTRY_DATA,
-        id: i,
-        archive_reference: `5 Mi 1/${100 + i}`,
-        title: `Mock Registry Part ${i}`,
-      });
-    }
+        id: 1,
+        title: "Registres de Brignoles",
+        places: [["France", "Var", "Brignoles"]],
+      },
+      {
+        ...MOCK_REGISTRY_DATA,
+        id: 2,
+        title: "Registres de Lantosque (Loda)",
+        places: [["France", "Alpes-Maritimes", "Lantosque", "Loda"]],
+      },
+      {
+        ...MOCK_REGISTRY_DATA,
+        id: 3,
+        title: "Registres paroissiaux de Nice",
+        places: [["France", "Alpes-Maritimes", "Nice"]],
+      },
+      {
+        ...MOCK_REGISTRY_DATA,
+        id: 4,
+        title: "Registres de Lantosque & Nice",
+        places: [
+          ["France", "Alpes-Maritimes", "Lantosque"],
+          ["France", "Alpes-Maritimes", "Nice"],
+        ],
+      },
+      {
+        ...MOCK_REGISTRY_DATA,
+        id: 5,
+        title: "Registres sans lieu",
+        places: [],
+      },
+    ];
+  }
 
-    // Apply simple filters for mock
-    if (payload.filters) {
-      if (payload.filters.search_term) {
-        const term = payload.filters.search_term.toLowerCase();
-        data = data.filter((d) => d.archive_reference.toLowerCase().includes(term) || (d.title && d.title.toLowerCase().includes(term)));
-      }
+  private filterRegistries(data: RegistryMeta[], filters?: RegistryFilters): RegistryMeta[] {
+    let filtered = data;
+    if (filters?.search_term) {
+      const term = filters.search_term.toLowerCase();
+      filtered = filtered.filter(
+        (d) =>
+          d.archive_reference.toLowerCase().includes(term) ||
+          (d.title && d.title.toLowerCase().includes(term))
+      );
     }
+    if (filters?.place) {
+      const p = filters.place.toLowerCase();
+      filtered = filtered.filter((d) =>
+        d.places.some((parts) => parts.some((part) => part.toLowerCase().includes(p)))
+      );
+    }
+    if (filters?.is_unknown_location || (filters?.location && filters.location.length === 0)) {
+      filtered = filtered.filter((d) => !d.places || d.places.length === 0);
+    } else if (filters?.location && filters.location.length > 0) {
+      const locKey = filters.location.join(" > ").toLowerCase();
+      filtered = filtered.filter((d) =>
+        d.places?.some((p) => p.join(" > ").toLowerCase() === locKey)
+      );
+    }
+    return filtered;
+  }
 
-    // Perform offset logic to simulate cursor
-    const cursorIndex = payload.cursor ? data.findIndex((d) => d.id === payload.cursor) : -1;
+  getRegistries = async (payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> => {
+    console.info(`[Mock API] getRegistries`, payload);
+    await this.delay(300);
+
+    const mockData = this.getMockRegistries();
+    const filtered = this.filterRegistries(mockData, payload.filters ?? undefined);
+
+    const cursorIndex = payload.cursor ? filtered.findIndex((d) => d.id === payload.cursor) : -1;
     const start = cursorIndex >= 0 ? cursorIndex + 1 : 0;
-    const paginated = data.slice(start, start + payload.limit);
+    const paginated = filtered.slice(start, start + payload.limit);
 
-    // Resolve next cursor
-    const hasMore = start + payload.limit < data.length;
+    const hasMore = start + payload.limit < filtered.length;
     const nextCursor = hasMore ? paginated[paginated.length - 1]?.id : null;
 
     return { data: paginated, next_cursor: nextCursor ?? null };
   };
+
+  getLocationGroups = async (filters?: RegistryFilters): Promise<LocationGroupMeta[]> => {
+    console.info(`[Mock API] getLocationGroups`, filters);
+    await this.delay(200);
+
+    const mockData = this.getMockRegistries();
+    const filtered = this.filterRegistries(mockData, filters);
+
+    const groupMap = new Map<string, { location: string[]; displayName: string; count: number }>();
+
+    for (const item of filtered) {
+      if (!item.places || item.places.length === 0) {
+        let g = groupMap.get("__unknown__");
+        if (!g) {
+          g = { location: [], displayName: "", count: 0 };
+          groupMap.set("__unknown__", g);
+        }
+        g.count += 1;
+      } else {
+        for (const place of item.places) {
+          const key = place.join(" > ").toLowerCase();
+          let g = groupMap.get(key);
+          if (!g) {
+            g = { location: place, displayName: place.join(" > "), count: 0 };
+            groupMap.set(key, g);
+          }
+          g.count += 1;
+        }
+      }
+    }
+
+    const groups: LocationGroupMeta[] = Array.from(groupMap.entries()).map(([key, val]) => ({
+      key,
+      location: val.location,
+      display_name: val.displayName,
+      count: val.count,
+    }));
+
+    groups.sort((a, b) => {
+      const aUnknown = a.location.length === 0 || a.key === "__unknown__";
+      const bUnknown = b.location.length === 0 || b.key === "__unknown__";
+      if (aUnknown && bUnknown) return 0;
+      if (aUnknown) return 1;
+      if (bUnknown) return -1;
+
+      const len = Math.min(a.location.length, b.location.length);
+      for (let i = 0; i < len; i++) {
+        const cmp = a.location[i].localeCompare(b.location[i], undefined, { sensitivity: "base" });
+        if (cmp !== 0) return cmp;
+      }
+      return a.location.length - b.location.length;
+    });
+
+    return groups;
+  };
+
 
   getRegistryMeta = async (id: number): Promise<RegistryMeta> => {
     console.info(`[Mock API] getRegistryMeta: ${id}`);

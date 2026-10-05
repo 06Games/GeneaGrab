@@ -1,11 +1,18 @@
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import { ProviderOption, RegistryFilters, RegistryMeta, UserRegistryMeta } from "../types/registry";
+import {
+  LocationGroupMeta,
+  ProviderOption,
+  RegistryFilters,
+  RegistryMeta,
+  UserRegistryMeta,
+} from "../types/registry";
 
 export interface BackendService {
   // Registry
-  getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>>;
+  getRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>>;
+  getLocationGroups(filters?: RegistryFilters): Promise<LocationGroupMeta[]>;
   getRegistryMeta(id: number): Promise<RegistryMeta>;
   saveRegistryMeta(id: number, meta: Partial<UserRegistryMeta>): Promise<void>;
   addRegistry(url: string, providerId: string): Promise<RegistryMeta>;

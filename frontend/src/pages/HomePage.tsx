@@ -8,37 +8,12 @@ import { AddRegistryModal } from "../components/registry-list/AddRegistryModal";
 import { TopBar } from "../ui/TopBar";
 import { Button, ResizeHandle } from "../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
-import type { RegistryMeta } from "../types/registry";
+import type { LocationGroupMeta, RegistryMeta } from "../types/registry";
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 import { useTabs } from "../contexts/TabsContext";
-
-interface LocationGroup {
-  key: string;
-  label: string;
-  parts: string[];
-  registries: RegistryMeta[];
-}
-
-function parsePlaceParts(rawPlace: any): string[] {
-  if (Array.isArray(rawPlace)) {
-    const res: string[] = [];
-    for (const item of rawPlace) {
-      if (typeof item === "string" && item.includes(",")) {
-        res.push(...item.split(",").map((s) => s.trim()).filter(Boolean));
-      } else if (item) {
-        res.push(String(item).trim());
-      }
-    }
-    return res.filter(Boolean);
-  }
-  if (typeof rawPlace === "string") {
-    return rawPlace.split(",").map((s) => s.trim()).filter(Boolean);
-  }
-  return [];
-}
 
 type VirtualRowItem =
   | {
@@ -49,6 +24,12 @@ type VirtualRowItem =
       parts: string[];
       count: number;
       isCollapsed: boolean;
+      group: LocationGroupMeta;
+    }
+  | {
+      type: "loading";
+      key: string;
+      groupKey: string;
     }
   | {
       type: "cards";
@@ -143,11 +124,15 @@ const HomePage = () => {
     window.addEventListener("pointerup", onUp);
   };
 
-  // Data / Pagination state
-  const [items, setItems] = createSignal<RegistryMeta[]>([]);
-  const [nextCursor, setNextCursor] = createSignal<number | null>(null);
-  const [hasNextPage, setHasNextPage] = createSignal(true);
+  // Data state
+  const [groups, setGroups] = createSignal<LocationGroupMeta[]>([]);
+  const [groupRegistries, setGroupRegistries] = createSignal<Record<string, RegistryMeta[]>>({});
+  const [loadingGroups, setLoadingGroups] = createSignal<Record<string, boolean>>({});
   const [isFetching, setIsFetching] = createSignal(false);
+
+  const allRegistries = createMemo(() => {
+    return Object.values(groupRegistries()).flat();
+  });
 
   const [columns, setColumns] = createSignal(1);
 
@@ -201,8 +186,7 @@ const HomePage = () => {
   const handleDeleteRegistry = async (id: number) => {
     try {
       await api.deleteRegistry(id);
-      setItems([]);
-      fetchPage(null, true);
+      loadLocationGroups();
     } catch (err) {
       console.error("Failed to delete registry:", err);
     }
@@ -240,7 +224,7 @@ const HomePage = () => {
     if (!q) return false;
     const currentProviders = providers();
     if (isUrl() && currentProviders && currentProviders.length > 0) {
-      return items().some((r) =>
+      return allRegistries().some((r) =>
         currentProviders.some(
           (p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)
         )
@@ -260,7 +244,7 @@ const HomePage = () => {
     const currentProviders = providers();
     if (!currentProviders || currentProviders.length === 0) return;
     const matchingProvider = currentProviders[0];
-    const reg = items().find(
+    const reg = allRegistries().find(
       (r) => r.source_id === matchingProvider.id && (!matchingProvider.registry_id || r.registry_id === matchingProvider.registry_id)
     );
     if (reg) {
@@ -277,9 +261,7 @@ const HomePage = () => {
     setIsAdding(true);
     try {
       const newRegistry = await api.addRegistry(searchQuery().trim(), selectedQuickProvider());
-      // Refresh list to instantly show the new registry
-      setItems([]);
-      fetchPage(null, true);
+      await loadLocationGroups();
 
       const currentProviders = providers();
       const selectedP = currentProviders?.find((p) => p.id === selectedQuickProvider());
@@ -328,7 +310,7 @@ const HomePage = () => {
     try {
       const [providerList, registryRes] = await Promise.all([
         api.getProvidersForUrl(search_url).catch(() => []),
-        api.getAllRegistries({
+        api.getRegistries({
           limit: 20,
           cursor: null,
           filters: { search_term: search_url },
@@ -388,81 +370,56 @@ const HomePage = () => {
     });
   });
 
-  const [expandedGroups, setExpandedGroups] = createSignal<Record<string, boolean>>({});
-
-  const toggleGroup = (key: string) => {
-    setExpandedGroups((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
-  const locationGroups = createMemo(() => {
-    const currentItems = items();
-    const unknownLabel = t("home.unknownLocation");
-    const groupMap = new Map<string, LocationGroup>();
-
-    for (const item of currentItems) {
-      const rawPlaces = item.places && Array.isArray(item.places) ? item.places : [];
-      const validPlaces: { key: string; label: string; parts: string[] }[] = [];
-      const seenKeysInItem = new Set<string>();
-
-      for (const p of rawPlaces) {
-        const parsedParts = parsePlaceParts(p);
-        if (parsedParts.length > 0) {
-          const label = parsedParts.join(" > ");
-          const key = label.toLowerCase();
-          if (!seenKeysInItem.has(key)) {
-            seenKeysInItem.add(key);
-            validPlaces.push({ key, label, parts: parsedParts });
-          }
-        }
-      }
-
-      if (validPlaces.length === 0) {
-        const unknownKey = "__unknown__";
-        let group = groupMap.get(unknownKey);
-        if (!group) {
-          group = {
-            key: unknownKey,
-            label: unknownLabel,
-            parts: [unknownLabel],
-            registries: [],
-          };
-          groupMap.set(unknownKey, group);
-        }
-        group.registries.push(item);
-      } else {
-        for (const loc of validPlaces) {
-          let group = groupMap.get(loc.key);
-          if (!group) {
-            group = {
-              key: loc.key,
-              label: loc.label,
-              parts: loc.parts,
-              registries: [],
-            };
-            groupMap.set(loc.key, group);
-          }
-          group.registries.push(item);
-        }
-      }
-    }
-
-    const sortedGroups = Array.from(groupMap.values()).sort((a, b) => {
-      if (a.key === "__unknown__") return 1;
-      if (b.key === "__unknown__") return -1;
-      return a.label.localeCompare(b.label, undefined, { sensitivity: "base" });
-    });
-
-    return sortedGroups;
+  const currentFilters = () => ({
+    search_term: searchQuery(),
+    source_type: selectedType(),
+    place: selectedPlace(),
+    collection: selectedCollection(),
+    date_from: dateFrom(),
+    date_to: dateTo(),
   });
 
+  const [expandedGroups, setExpandedGroups] = createSignal<Record<string, boolean>>({});
+
+  const loadRegistriesForGroup = async (group: LocationGroupMeta) => {
+    if (loadingGroups()[group.key] || groupRegistries()[group.key]) return;
+
+    setLoadingGroups((prev) => ({ ...prev, [group.key]: true }));
+    try {
+      const isUnknown = group.key === "__unknown__" || group.location.length === 0;
+      const res = await api.getRegistries({
+        cursor: null,
+        limit: 100,
+        filters: {
+          ...currentFilters(),
+          location: isUnknown ? null : group.location,
+          is_unknown_location: isUnknown,
+        },
+      });
+      setGroupRegistries((prev) => ({ ...prev, [group.key]: res.data }));
+    } catch (err) {
+      console.error(`Failed to load registries for group ${group.key}:`, err);
+    } finally {
+      setLoadingGroups((prev) => ({ ...prev, [group.key]: false }));
+    }
+  };
+
+  const toggleGroup = (group: LocationGroupMeta) => {
+    const willExpand = !expandedGroups()[group.key];
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [group.key]: willExpand,
+    }));
+    if (willExpand && !groupRegistries()[group.key]) {
+      loadRegistriesForGroup(group);
+    }
+  };
+
   const allExpanded = createMemo(() => {
-    const groups = locationGroups();
-    if (groups.length === 0) return false;
+    const currentGroups = groups();
+    if (currentGroups.length === 0) return false;
     const exp = expandedGroups();
-    return groups.every((g) => Boolean(exp[g.key]));
+    return currentGroups.every((g) => Boolean(exp[g.key]));
   });
 
   const toggleAllGroups = () => {
@@ -470,39 +427,61 @@ const HomePage = () => {
       setExpandedGroups({});
     } else {
       const all: Record<string, boolean> = {};
-      for (const g of locationGroups()) {
+      const grps = groups();
+      for (const g of grps) {
         all[g.key] = true;
+        if (!groupRegistries()[g.key]) {
+          loadRegistriesForGroup(g);
+        }
       }
       setExpandedGroups(all);
     }
   };
 
   const virtualRowItems = createMemo(() => {
-    const groups = locationGroups();
+    const currentGroups = groups();
     const cols = columns();
     const expanded = expandedGroups();
+    const regMap = groupRegistries();
+    const loadingMap = loadingGroups();
     const rows: VirtualRowItem[] = [];
 
-    for (const group of groups) {
+    for (const group of currentGroups) {
       const isExpanded = Boolean(expanded[group.key]);
+      const isUnknown = group.key === "__unknown__" || group.location.length === 0;
+      const parts = isUnknown ? [t("home.unknownLocation")] : group.location;
+      const label = isUnknown ? t("home.unknownLocation") : group.display_name;
+
       rows.push({
         type: "header",
         key: `header-${group.key}`,
         groupKey: group.key,
-        label: group.label,
-        parts: group.parts,
-        count: group.registries.length,
+        label,
+        parts,
+        count: group.count,
         isCollapsed: !isExpanded,
+        group,
       });
 
       if (isExpanded) {
-        for (let i = 0; i < group.registries.length; i += cols) {
+        const items = regMap[group.key];
+        const isLoading = loadingMap[group.key];
+
+        if (isLoading && (!items || items.length === 0)) {
           rows.push({
-            type: "cards",
-            key: `cards-${group.key}-${i}`,
+            type: "loading",
+            key: `loading-${group.key}`,
             groupKey: group.key,
-            items: group.registries.slice(i, i + cols),
           });
+        } else if (items && items.length > 0) {
+          for (let i = 0; i < items.length; i += cols) {
+            rows.push({
+              type: "cards",
+              key: `cards-${group.key}-${i}`,
+              groupKey: group.key,
+              items: items.slice(i, i + cols),
+            });
+          }
         }
       }
     }
@@ -511,39 +490,22 @@ const HomePage = () => {
   });
 
   let lastFetchId = 0;
-  const fetchPage = async (cursor: number | null, isInitial: boolean) => {
-    if (isFetching() && !isInitial) return;
-
+  const loadLocationGroups = async () => {
     const currentFetchId = ++lastFetchId;
     setIsFetching(true);
 
     try {
-      const payload = {
-        limit: 20,
-        cursor: cursor,
-        filters: {
-          search_term: searchQuery(),
-          source_type: selectedType(),
-          place: selectedPlace(),
-          collection: selectedCollection(),
-          date_from: dateFrom(),
-          date_to: dateTo(),
-        },
-      };
+      const filters = currentFilters();
+      const res = await api.getLocationGroups(filters);
 
-      const res = await api.getAllRegistries(payload);
-
-      // If a newer fetch has started since this one, ignore these results
       if (currentFetchId !== lastFetchId) return;
 
-      if (isInitial) setItems(res.data);
-      else setItems((prev) => [...prev, ...res.data]);
-
-      setNextCursor(res.next_cursor);
-      setHasNextPage(res.next_cursor !== null);
+      setGroups(res);
+      setGroupRegistries({});
+      setLoadingGroups({});
     } catch (err) {
       if (currentFetchId === lastFetchId) {
-        console.error("Failed to fetch registries:", err);
+        console.error("Failed to fetch location groups:", err);
       }
     } finally {
       if (currentFetchId === lastFetchId) {
@@ -555,35 +517,26 @@ const HomePage = () => {
   createEffect((prevDeps) => {
     const currentDeps = [searchQuery(), selectedType(), selectedPlace(), selectedCollection(), dateFrom(), dateTo()].join("|");
     if (prevDeps !== currentDeps) {
-      setItems([]);
-      untrack(() => fetchPage(null, true));
+      setExpandedGroups({});
+      untrack(() => loadLocationGroups());
     }
     return currentDeps;
   }, "");
 
   const virtualizer = createVirtualizer({
     get count() {
-      return hasNextPage() ? virtualRowItems().length + 1 : virtualRowItems().length;
+      return virtualRowItems().length;
     },
     getScrollElement: () => scrollRef,
     estimateSize: (index) => {
       const row = virtualRowItems()[index];
       if (!row) return 196;
-      return row.type === "header" ? 44 : 196;
+      if (row.type === "header") return 44;
+      if (row.type === "loading") return 64;
+      return 196;
     },
     gap: 16,
     overscan: 4,
-  });
-
-  createEffect(() => {
-    const virtualItems = virtualizer.getVirtualItems();
-    if (!virtualItems.length) return;
-
-    const lastRenderedItem = virtualItems[virtualItems.length - 1];
-
-    if (lastRenderedItem.index >= virtualRowItems().length - 1 && hasNextPage() && !isFetching()) {
-      fetchPage(untrack(nextCursor), false);
-    }
   });
 
   return (
@@ -671,10 +624,10 @@ const HomePage = () => {
             </div>
           </Show>
 
-          <Show when={!isFetching() && items().length > 0 && locationGroups().length > 0}>
+          <Show when={!isFetching() && groups().length > 0}>
             <div class="flex items-center justify-between text-[12px] text-dim select-none -mb-3 px-1">
               <span>
-                {locationGroups().length} {locationGroups().length === 1 ? t("home.placesLabel") : t("infoPanel.placesLabel")}
+                {groups().length} {groups().length === 1 ? t("home.placesLabel") : t("infoPanel.placesLabel")}
               </span>
               <button
                 type="button"
@@ -690,10 +643,16 @@ const HomePage = () => {
             ref={scrollRef}
             class="flex-1 overflow-y-auto pr-2 pb-4 min-h-0 scrollbar-thin scrollbar-thumb-subtle hover:scrollbar-thumb-subtle-md focus-visible:outline-none"
           >
-            <Show when={!isFetching() && items().length === 0}>
+            <Show when={!isFetching() && groups().length === 0}>
               <div class="py-16 flex flex-col items-center justify-center text-dim border-2 border-dashed border-subtle rounded-xl h-full">
                 <Icon icon="lucide:folder-search" class="w-12 h-12 mb-3 text-subtle-md" />
                 <p>{t("home.noResults")}</p>
+              </div>
+            </Show>
+
+            <Show when={isFetching() && groups().length === 0}>
+              <div class="py-16 flex flex-col items-center justify-center text-dim h-full">
+                <Icon icon="lucide:loader-2" class="w-8 h-8 animate-spin text-accent mb-3" />
               </div>
             </Show>
 
@@ -718,50 +677,46 @@ const HomePage = () => {
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
                   >
-                    <Show
-                      when={virtualRow.index < virtualRowItems().length}
-                      fallback={
-                        <div class="w-full flex justify-center items-center h-[196px] text-dim">
-                          <Icon icon="lucide:loader-2" class="animate-spin" width="24" height="24" />
-                        </div>
-                      }
-                    >
-                      {(() => {
-                        const row = () => virtualRowItems()[virtualRow.index];
-                        return (
-                          <Show
-                            when={row()?.type === "header"}
-                            fallback={
-                              <div
-                                class="grid"
-                                style={{
-                                  "grid-template-columns": `repeat(${columns()}, minmax(0, 1fr))`,
-                                  gap: "16px",
-                                }}
-                              >
-                                <For each={(row() as { type: "cards"; items: RegistryMeta[] })?.items}>
-                                  {(item) => (
-                                    <RegistryCard
-                                      registry={item}
-                                      targetImageId={extractedImageNumber()}
-                                      onContextMenu={(e) => handleRegistryContextMenu(e, item)}
-                                    />
-                                  )}
-                                </For>
-                              </div>
-                            }
-                          >
+                    {(() => {
+                      const row = () => virtualRowItems()[virtualRow.index];
+                      return (
+                        <Switch>
+                          <Match when={row()?.type === "header"}>
                             <LocationGroupHeader
                               label={(row() as any).label}
                               parts={(row() as any).parts}
                               count={(row() as any).count}
                               isCollapsed={(row() as any).isCollapsed}
-                              onToggle={() => toggleGroup((row() as any).groupKey)}
+                              onToggle={() => toggleGroup((row() as any).group)}
                             />
-                          </Show>
-                        );
-                      })()}
-                    </Show>
+                          </Match>
+                          <Match when={row()?.type === "loading"}>
+                            <div class="flex items-center justify-center py-6 text-dim">
+                              <Icon icon="lucide:loader-2" class="w-5 h-5 animate-spin text-accent" />
+                            </div>
+                          </Match>
+                          <Match when={row()?.type === "cards"}>
+                            <div
+                              class="grid"
+                              style={{
+                                "grid-template-columns": `repeat(${columns()}, minmax(0, 1fr))`,
+                                gap: "16px",
+                              }}
+                            >
+                              <For each={(row() as { type: "cards"; items: RegistryMeta[] })?.items}>
+                                {(item) => (
+                                  <RegistryCard
+                                    registry={item}
+                                    targetImageId={extractedImageNumber()}
+                                    onContextMenu={(e) => handleRegistryContextMenu(e, item)}
+                                  />
+                                )}
+                              </For>
+                            </div>
+                          </Match>
+                        </Switch>
+                      );
+                    })()}
                   </div>
                 )}
               </For>
@@ -775,7 +730,7 @@ const HomePage = () => {
           onClose={() => setIsModalOpen(false)}
           onAdded={() => {
             setIsModalOpen(false);
-            fetchPage(null, true);
+            loadLocationGroups();
           }}
         />
       </Show>

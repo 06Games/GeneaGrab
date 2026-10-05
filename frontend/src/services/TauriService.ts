@@ -3,7 +3,13 @@ import { listen } from "@tauri-apps/api/event";
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import { ProviderOption, RegistryFilters, RegistryMeta, UserRegistryMeta } from "../types/registry";
+import {
+  LocationGroupMeta,
+  ProviderOption,
+  RegistryFilters,
+  RegistryMeta,
+  UserRegistryMeta,
+} from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {
@@ -13,8 +19,8 @@ export class TauriService implements BackendService {
     });
   }
 
-  async getAllRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> {
-    const res = await invoke<any>("get_all_registries", { payload });
+  async getRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>> {
+    const res = await invoke<any>("get_registries", { payload });
     return {
       data: res.data.map((r: any) => {
         if (Array.isArray(r.source_types)) {
@@ -24,6 +30,10 @@ export class TauriService implements BackendService {
       }),
       next_cursor: res.next_cursor,
     };
+  }
+
+  async getLocationGroups(filters?: RegistryFilters): Promise<LocationGroupMeta[]> {
+    return await invoke<LocationGroupMeta[]>("get_location_groups", { filters: filters ?? null });
   }
 
   async getRegistryMeta(id: number): Promise<RegistryMeta> {
@@ -61,15 +71,11 @@ export class TauriService implements BackendService {
   }
 
   async getAvailablePlaces(): Promise<string[]> {
-    // TODO: Implement backend extraction of unique places
-    console.warn("getAvailablePlaces not implemented");
-    return [];
+    return await invoke<string[]>("get_available_places");
   }
 
   async getAvailableCollections(): Promise<string[]> {
-    // TODO: Implement backend extraction of unique collections
-    console.warn("getAvailableCollections not implemented");
-    return [];
+    return await invoke<string[]>("get_available_collections");
   }
 
   async getImageMeta(registryId: number, imageId: number): Promise<ImageMeta> {

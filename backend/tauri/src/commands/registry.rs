@@ -1,13 +1,41 @@
 use crate::state::{AppState, CommandError};
-use geneagrab_core::comm_models::{CursorPayload, CursorResponse, RegistryFilters, RegistryMeta};
+use geneagrab_core::comm_models::{
+    CursorPayload, CursorResponse, LocationGroupMeta,
+    RegistryFilters, RegistryMeta,
+};
 use tauri::State;
 
 #[tauri::command]
-pub async fn get_all_registries(
+pub async fn get_registries(
     payload: CursorPayload<RegistryFilters>,
     state: State<'_, AppState>,
 ) -> Result<CursorResponse<RegistryMeta>, CommandError> {
-    let res = geneagrab_core::services::registry::get_all_registries(&state.db, payload).await?;
+    let res = geneagrab_core::services::registry::get_registries(&state.db, payload).await?;
+    Ok(res)
+}
+
+#[tauri::command]
+pub async fn get_location_groups(
+    filters: Option<RegistryFilters>,
+    state: State<'_, AppState>,
+) -> Result<Vec<LocationGroupMeta>, CommandError> {
+    let res = geneagrab_core::services::registry::get_location_groups(&state.db, filters).await?;
+    Ok(res)
+}
+
+#[tauri::command]
+pub async fn get_available_places(
+    state: State<'_, AppState>,
+) -> Result<Vec<String>, CommandError> {
+    let res = geneagrab_core::services::registry::get_available_places(&state.db).await?;
+    Ok(res)
+}
+
+#[tauri::command]
+pub async fn get_available_collections(
+    state: State<'_, AppState>,
+) -> Result<Vec<String>, CommandError> {
+    let res = geneagrab_core::services::registry::get_available_collections(&state.db).await?;
     Ok(res)
 }
 
