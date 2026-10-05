@@ -4,7 +4,7 @@ export const fr: RawDictionaries = {
   home: {
     title: "Registres",
     addRegistry: "Ajouter un registre",
-    searchPlaceholder: "Rechercher une cote, une URL, un titre ou un auteur...",
+    searchPlaceholder: "Cote, titre, auteur, URL...",
     filters: "Filtres",
     clearFilters: "Réinitialiser",
     searchLabel: "Recherche",

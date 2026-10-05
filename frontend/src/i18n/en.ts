@@ -2,7 +2,7 @@ export const en = {
   home: {
     title: "Registries",
     addRegistry: "Add Registry",
-    searchPlaceholder: "Search reference, URL, title or author...",
+    searchPlaceholder: "Reference, title, author, URL...",
     filters: "Filters",
     clearFilters: "Reset",
     searchLabel: "Search",
