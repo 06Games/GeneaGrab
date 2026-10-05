@@ -3756,7 +3756,9 @@ dependencies = [
 name = "migration"
 version = "4.0.0"
 dependencies = [
+ "dates",
  "sea-orm-migration",
+ "serde_json",
  "tokio",
 ]
 

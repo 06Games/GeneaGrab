@@ -48,7 +48,25 @@ impl Related<super::image_entry::Entity> for Entity {
     }
 }
 
-impl ActiveModelBehavior for ActiveModel {}
+#[async_trait::async_trait]
+impl ActiveModelBehavior for ActiveModel {
+    async fn before_save<C>(mut self, _db: &C, _insert: bool) -> Result<Self, DbErr>
+    where
+        C: ConnectionTrait,
+    {
+        if let sea_orm::ActiveValue::Set(Some(ref date_from)) = self.date_from {
+            if !self.date_from_normalized.is_set() || self.date_from_normalized.as_ref().is_none() {
+                self.date_from_normalized = sea_orm::ActiveValue::Set(Some(date_from.0.to_jdn()));
+            }
+        }
+        if let sea_orm::ActiveValue::Set(Some(ref date_to)) = self.date_to {
+            if !self.date_to_normalized.is_set() || self.date_to_normalized.as_ref().is_none() {
+                self.date_to_normalized = sea_orm::ActiveValue::Set(Some(date_to.0.to_jdn()));
+            }
+        }
+        Ok(self)
+    }
+}
 
 impl From<Model> for Registry {
     fn from(model: Model) -> Self {
@@ -77,6 +95,13 @@ impl From<Model> for Registry {
 impl Model {
     #[must_use]
     pub fn from_registry(registry: Registry, id: u32) -> Self {
+        let date_from_normalized = registry
+            .date_from_normalized
+            .or_else(|| registry.date_from.as_ref().map(|d| d.to_jdn()));
+        let date_to_normalized = registry
+            .date_to_normalized
+            .or_else(|| registry.date_to.as_ref().map(|d| d.to_jdn()));
+
         Self {
             id,
             source_id: registry.source_id,
@@ -90,9 +115,9 @@ impl Model {
             subtitle: registry.subtitle,
             author: registry.author,
             date_from: registry.date_from.map(JsonField),
-            date_from_normalized: registry.date_from_normalized,
+            date_from_normalized,
             date_to: registry.date_to.map(JsonField),
-            date_to_normalized: registry.date_to_normalized,
+            date_to_normalized,
             places: JsonField(registry.places),
             notes: registry.notes,
             extra: JsonField(registry.extra),

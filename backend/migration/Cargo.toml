@@ -10,6 +10,8 @@ name = "migration"
 path = "src/lib.rs"
 
 [dependencies]
+dates = { path = "../dates" }
+serde_json = "1.0"
 tokio = { version = "1", features = ["macros", "rt", "rt-multi-thread"] }
 
 [dependencies.sea-orm-migration]
