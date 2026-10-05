@@ -1,4 +1,4 @@
-import { createResource, Show } from "solid-js";
+import { createEffect, createResource, For, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../ui/i18n";
 import { useBackend } from "../../contexts/BackendContext";
@@ -24,8 +24,64 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
   const { t } = useI18n();
   const api = useBackend();
 
-  const [places] = createResource(() => api.getAvailablePlaces());
-  const [collections] = createResource(() => api.getAvailableCollections());
+  const placesFilters = () => ({
+    search_term: props.searchQuery,
+    source_type: props.selectedType,
+    collection: props.selectedCollection,
+    date_from: props.dateFrom,
+    date_to: props.dateTo,
+  });
+
+  const collectionsFilters = () => ({
+    search_term: props.searchQuery,
+    source_type: props.selectedType,
+    place: props.selectedPlace,
+    date_from: props.dateFrom,
+    date_to: props.dateTo,
+  });
+
+  const typesFilters = () => ({
+    search_term: props.searchQuery,
+    place: props.selectedPlace,
+    collection: props.selectedCollection,
+    date_from: props.dateFrom,
+    date_to: props.dateTo,
+  });
+
+  const [places] = createResource(placesFilters, (f) => api.getAvailablePlaces(f));
+  const [collections] = createResource(collectionsFilters, (f) => api.getAvailableCollections(f));
+  const [types] = createResource(typesFilters, (f) => api.getAvailableTypes(f));
+
+  // Auto-reset selected values if they are no longer available in the updated options
+  createEffect(() => {
+    const selected = props.selectedPlace;
+    const list = places();
+    if (!selected || places.loading || !list) return;
+    const isValid = list.some((opt) => (opt.key === "__unknown__" ? "__unknown__" : (opt.label || opt.key)) === selected);
+    if (!isValid) {
+      props.onPlaceChange("");
+    }
+  });
+
+  createEffect(() => {
+    const selected = props.selectedCollection;
+    const list = collections();
+    if (!selected || collections.loading || !list) return;
+    const isValid = list.some((opt) => opt.key === selected);
+    if (!isValid) {
+      props.onCollectionChange("");
+    }
+  });
+
+  createEffect(() => {
+    const selected = props.selectedType;
+    const list = types();
+    if (!selected || types.loading || !list) return;
+    const isValid = list.some((opt) => opt.key === selected);
+    if (!isValid) {
+      props.onTypeChange("");
+    }
+  });
 
   const activeFiltersCount = () => {
     return [props.selectedType, props.selectedPlace, props.selectedCollection, props.dateFrom, props.dateTo].filter(Boolean).length;
@@ -107,13 +163,23 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
           </div>
           <div class="relative">
             <select
+              prop:value={props.selectedPlace}
               value={props.selectedPlace}
               onChange={(e) => props.onPlaceChange(e.currentTarget.value)}
               disabled={places.loading}
               class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
             >
               <option value="">{t("home.filterPlace")}</option>
-              <Show when={places()}>{(list) => list().map((opt) => <option value={opt}>{opt}</option>)}</Show>
+              <For each={places()}>
+                {(opt) => {
+                  const val = opt.key === "__unknown__" ? "__unknown__" : (opt.label || opt.key);
+                  return (
+                    <option value={val} selected={props.selectedPlace === val}>
+                      {opt.key === "__unknown__" ? t("home.unknownLocation") : opt.label} ({opt.count})
+                    </option>
+                  );
+                }}
+              </For>
             </select>
             <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
           </div>
@@ -137,13 +203,20 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
           </div>
           <div class="relative">
             <select
+              prop:value={props.selectedCollection}
               value={props.selectedCollection}
               onChange={(e) => props.onCollectionChange(e.currentTarget.value)}
               disabled={collections.loading}
               class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
             >
               <option value="">{t("home.filterCollection")}</option>
-              <Show when={collections()}>{(list) => list().map((opt) => <option value={opt}>{opt}</option>)}</Show>
+              <For each={collections()}>
+                {(opt) => (
+                  <option value={opt.key} selected={props.selectedCollection === opt.key}>
+                    {opt.label} ({opt.count})
+                  </option>
+                )}
+              </For>
             </select>
             <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
           </div>
@@ -167,14 +240,20 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
           </div>
           <div class="relative">
             <select
+              prop:value={props.selectedType}
               value={props.selectedType}
               onChange={(e) => props.onTypeChange(e.currentTarget.value)}
-              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer"
+              disabled={types.loading}
+              class="w-full pl-3 pr-8 py-2 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent focus:ring-2 focus:ring-accent/15 outline-none transition-all appearance-none cursor-pointer disabled:opacity-50"
             >
               <option value="">{t("home.filterType")}</option>
-              {ACT_TYPE_OPTIONS.map((opt) => (
-                <option value={opt}>{t(`actCategories.${opt}` as any) || opt}</option>
-              ))}
+              <For each={types()}>
+                {(opt) => (
+                  <option value={opt.key} selected={props.selectedType === opt.key}>
+                    {(t(`actCategories.${opt.key}` as any) || opt.label)} ({opt.count})
+                  </option>
+                )}
+              </For>
             </select>
             <Icon icon="lucide:chevron-down" class="absolute right-3 top-1/2 -translate-y-1/2 text-subtle-md w-4 h-4 pointer-events-none" />
           </div>

@@ -62,10 +62,10 @@ export interface ProviderOption {
   image_number?: number;
 }
 
-export interface LocationGroupMeta {
+export interface AvailableOption {
   key: string;
-  location: string[];
-  display_name: string;
+  label: string;
   count: number;
+  parts?: string[];
 }
 

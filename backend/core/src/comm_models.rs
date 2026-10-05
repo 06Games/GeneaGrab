@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use geneagrab_providers::data::RegistryType;
 use serde::{Deserialize, Deserializer, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -43,9 +42,9 @@ pub struct RegistryFilters {
     #[serde(default, deserialize_with = "empty_string_as_none")]
     pub collection: Option<String>,
     #[serde(default, deserialize_with = "empty_string_as_none")]
-    pub date_from: Option<DateTime<Utc>>,
+    pub date_from: Option<String>,
     #[serde(default, deserialize_with = "empty_string_as_none")]
-    pub date_to: Option<DateTime<Utc>>,
+    pub date_to: Option<String>,
     #[serde(default)]
     pub location: Option<Vec<String>>,
     #[serde(default)]
@@ -91,11 +90,12 @@ pub struct RegistryMeta {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LocationGroupMeta {
+pub struct AvailableOption {
     pub key: String,
-    pub location: Vec<String>,
-    pub display_name: String,
+    pub label: String,
     pub count: u32,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub parts: Vec<String>,
 }
 
 

@@ -3,7 +3,7 @@ import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
 import {
-  LocationGroupMeta,
+  AvailableOption,
   ProviderOption,
   RegistryFilters,
   RegistryMeta,
@@ -20,18 +20,32 @@ export class MockService implements BackendService {
         id: 1,
         title: "Registres de Brignoles",
         places: [["France", "Var", "Brignoles"]],
+        collection: ["État civil", "Archives du Var"],
+        source_types: new Set([
+          { category: "vital", label: "Birth" },
+          { category: "union", label: "Marriage" },
+        ]),
       },
       {
         ...MOCK_REGISTRY_DATA,
         id: 2,
         title: "Registres de Lantosque (Loda)",
         places: [["France", "Alpes-Maritimes", "Lantosque", "Loda"]],
+        collection: ["Registres paroissiaux"],
+        source_types: new Set([
+          { category: "vital", label: "Baptism" },
+          { category: "mortality", label: "Burial" },
+        ]),
       },
       {
         ...MOCK_REGISTRY_DATA,
         id: 3,
         title: "Registres paroissiaux de Nice",
         places: [["France", "Alpes-Maritimes", "Nice"]],
+        collection: ["État civil", "Archives de Nice"],
+        source_types: new Set([
+          { category: "census", label: "Census" },
+        ]),
       },
       {
         ...MOCK_REGISTRY_DATA,
@@ -41,14 +55,37 @@ export class MockService implements BackendService {
           ["France", "Alpes-Maritimes", "Lantosque"],
           ["France", "Alpes-Maritimes", "Nice"],
         ],
+        collection: ["Notariat"],
+        source_types: new Set([
+          { category: "legal", label: "Notary" },
+        ]),
       },
       {
         ...MOCK_REGISTRY_DATA,
         id: 5,
         title: "Registres sans lieu",
         places: [],
+        collection: ["Divers"],
+        source_types: new Set([
+          { category: "other", label: "Misc" },
+        ]),
       },
     ];
+  }
+
+  private placeMatchesFilter(placeParts: string[], filter: string): boolean {
+    const f = filter.trim();
+    if (!f) return true;
+    if (f === "__unknown__") return false;
+    const fLower = f.toLowerCase();
+    const key = placeParts.join(" > ").toLowerCase();
+    if (key === fLower || key.includes(fLower)) return true;
+    const parts = fLower.includes(" > ")
+      ? fLower.split(" > ").map((s) => s.trim()).filter(Boolean)
+      : fLower.includes(",")
+      ? fLower.split(",").map((s) => s.trim()).filter(Boolean)
+      : [fLower];
+    return parts.every((sub) => placeParts.some((part) => part.toLowerCase().includes(sub)));
   }
 
   private filterRegistries(data: RegistryMeta[], filters?: RegistryFilters): RegistryMeta[] {
@@ -61,11 +98,27 @@ export class MockService implements BackendService {
           (d.title && d.title.toLowerCase().includes(term))
       );
     }
-    if (filters?.place) {
-      const p = filters.place.toLowerCase();
+    if (filters?.source_type) {
+      const st = filters.source_type.toLowerCase();
       filtered = filtered.filter((d) =>
-        d.places.some((parts) => parts.some((part) => part.toLowerCase().includes(p)))
+        Array.from(d.source_types || []).some((t) => (t.category || "").toLowerCase() === st)
       );
+    }
+    if (filters?.collection) {
+      const col = filters.collection.toLowerCase();
+      filtered = filtered.filter((d) =>
+        d.collection?.some((c) => c.toLowerCase() === col || c.toLowerCase().includes(col))
+      );
+    }
+    if (filters?.place) {
+      const p = filters.place.trim();
+      if (p === "__unknown__") {
+        filtered = filtered.filter((d) => !d.places || d.places.length === 0);
+      } else {
+        filtered = filtered.filter((d) =>
+          d.places?.some((placeParts) => this.placeMatchesFilter(placeParts, p))
+        );
+      }
     }
     if (filters?.is_unknown_location || (filters?.location && filters.location.length === 0)) {
       filtered = filtered.filter((d) => !d.places || d.places.length === 0);
@@ -95,60 +148,6 @@ export class MockService implements BackendService {
     return { data: paginated, next_cursor: nextCursor ?? null };
   };
 
-  getLocationGroups = async (filters?: RegistryFilters): Promise<LocationGroupMeta[]> => {
-    console.info(`[Mock API] getLocationGroups`, filters);
-    await this.delay(200);
-
-    const mockData = this.getMockRegistries();
-    const filtered = this.filterRegistries(mockData, filters);
-
-    const groupMap = new Map<string, { location: string[]; displayName: string; count: number }>();
-
-    for (const item of filtered) {
-      if (!item.places || item.places.length === 0) {
-        let g = groupMap.get("__unknown__");
-        if (!g) {
-          g = { location: [], displayName: "", count: 0 };
-          groupMap.set("__unknown__", g);
-        }
-        g.count += 1;
-      } else {
-        for (const place of item.places) {
-          const key = place.join(" > ").toLowerCase();
-          let g = groupMap.get(key);
-          if (!g) {
-            g = { location: place, displayName: place.join(" > "), count: 0 };
-            groupMap.set(key, g);
-          }
-          g.count += 1;
-        }
-      }
-    }
-
-    const groups: LocationGroupMeta[] = Array.from(groupMap.entries()).map(([key, val]) => ({
-      key,
-      location: val.location,
-      display_name: val.displayName,
-      count: val.count,
-    }));
-
-    groups.sort((a, b) => {
-      const aUnknown = a.location.length === 0 || a.key === "__unknown__";
-      const bUnknown = b.location.length === 0 || b.key === "__unknown__";
-      if (aUnknown && bUnknown) return 0;
-      if (aUnknown) return 1;
-      if (bUnknown) return -1;
-
-      const len = Math.min(a.location.length, b.location.length);
-      for (let i = 0; i < len; i++) {
-        const cmp = a.location[i].localeCompare(b.location[i], undefined, { sensitivity: "base" });
-        if (cmp !== 0) return cmp;
-      }
-      return a.location.length - b.location.length;
-    });
-
-    return groups;
-  };
 
 
   getRegistryMeta = async (id: number): Promise<RegistryMeta> => {
@@ -192,14 +191,103 @@ export class MockService implements BackendService {
     ];
   };
 
-  getAvailablePlaces = async (): Promise<string[]> => {
+  getAvailablePlaces = async (filters?: RegistryFilters | null): Promise<AvailableOption[]> => {
+    console.info(`[Mock API] getAvailablePlaces`, filters);
     await this.delay(200);
-    return ["Brignoles", "Toulon", "Draguignan", "Nice", "Antibes", "Cannes"];
+
+    const mockData = this.getMockRegistries();
+    const filtered = this.filterRegistries(mockData, filters ?? undefined);
+
+    const groupMap = new Map<string, { parts: string[]; label: string; count: number }>();
+
+    for (const item of filtered) {
+      if (!item.places || item.places.length === 0) {
+        if (!filters?.place || filters.place === "__unknown__" || filters.is_unknown_location) {
+          let g = groupMap.get("__unknown__");
+          if (!g) {
+            g = { parts: [], label: "", count: 0 };
+            groupMap.set("__unknown__", g);
+          }
+          g.count += 1;
+        }
+      } else {
+        for (const place of item.places) {
+          if (filters?.place && !this.placeMatchesFilter(place, filters.place)) {
+            continue;
+          }
+          const key = place.join(" > ").toLowerCase();
+          let g = groupMap.get(key);
+          if (!g) {
+            g = { parts: place, label: place.join(" > "), count: 0 };
+            groupMap.set(key, g);
+          }
+          g.count += 1;
+        }
+      }
+    }
+
+    const groups: AvailableOption[] = Array.from(groupMap.entries()).map(([key, val]) => ({
+      key,
+      parts: val.parts,
+      label: val.label,
+      count: val.count,
+    }));
+
+    groups.sort((a, b) => {
+      const aParts = a.parts ?? [];
+      const bParts = b.parts ?? [];
+      const aUnknown = aParts.length === 0 || a.key === "__unknown__";
+      const bUnknown = bParts.length === 0 || b.key === "__unknown__";
+      if (aUnknown && bUnknown) return 0;
+      if (aUnknown) return 1;
+      if (bUnknown) return -1;
+
+      const len = Math.min(aParts.length, bParts.length);
+      for (let i = 0; i < len; i++) {
+        const cmp = aParts[i].localeCompare(bParts[i], undefined, { sensitivity: "base" });
+        if (cmp !== 0) return cmp;
+      }
+      return aParts.length - bParts.length;
+    });
+
+    return groups;
   };
 
-  getAvailableCollections = async (): Promise<string[]> => {
+  getAvailableCollections = async (filters?: RegistryFilters | null): Promise<AvailableOption[]> => {
     await this.delay(200);
-    return ["État civil", "Registres paroissiaux", "Recensements", "Minutes notariales", "Registres matricules"];
+    const mockData = this.getMockRegistries();
+    const filtered = this.filterRegistries(mockData, filters ?? undefined);
+    const counts = new Map<string, number>();
+    for (const item of filtered) {
+      for (const col of item.collection || []) {
+        counts.set(col, (counts.get(col) || 0) + 1);
+      }
+    }
+    return Array.from(counts.entries()).map(([name, count]) => ({
+      key: name,
+      label: name,
+      count,
+    }));
+  };
+
+  getAvailableTypes = async (filters?: RegistryFilters | null): Promise<AvailableOption[]> => {
+    await this.delay(200);
+    const mockData = this.getMockRegistries();
+    const filtered = this.filterRegistries(mockData, filters ?? undefined);
+    const counts = new Map<string, number>();
+    for (const item of filtered) {
+      if (item.source_types) {
+        for (const t of item.source_types) {
+          const cat = t.category || "unknown";
+          counts.set(cat, (counts.get(cat) || 0) + 1);
+        }
+      }
+    }
+    return Array.from(counts.entries()).map(([cat, count]) => ({
+      key: cat,
+      label: cat,
+      count,
+    }));
   };
 
   getImageMeta = async (registryId: number, imageId: number): Promise<ImageMeta> => {

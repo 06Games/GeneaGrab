@@ -4,7 +4,7 @@ import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
 import {
-  LocationGroupMeta,
+  AvailableOption,
   ProviderOption,
   RegistryFilters,
   RegistryMeta,
@@ -30,10 +30,6 @@ export class TauriService implements BackendService {
       }),
       next_cursor: res.next_cursor,
     };
-  }
-
-  async getLocationGroups(filters?: RegistryFilters): Promise<LocationGroupMeta[]> {
-    return await invoke<LocationGroupMeta[]>("get_location_groups", { filters: filters ?? null });
   }
 
   async getRegistryMeta(id: number): Promise<RegistryMeta> {
@@ -70,12 +66,16 @@ export class TauriService implements BackendService {
     return res.map((r: any) => r as ProviderOption);
   }
 
-  async getAvailablePlaces(): Promise<string[]> {
-    return await invoke<string[]>("get_available_places");
+  async getAvailablePlaces(filters?: RegistryFilters | null): Promise<AvailableOption[]> {
+    return await invoke<AvailableOption[]>("get_available_places", { filters: filters ?? null });
   }
 
-  async getAvailableCollections(): Promise<string[]> {
-    return await invoke<string[]>("get_available_collections");
+  async getAvailableCollections(filters?: RegistryFilters | null): Promise<AvailableOption[]> {
+    return await invoke<AvailableOption[]>("get_available_collections", { filters: filters ?? null });
+  }
+
+  async getAvailableTypes(filters?: RegistryFilters | null): Promise<AvailableOption[]> {
+    return await invoke<AvailableOption[]>("get_available_types", { filters: filters ?? null });
   }
 
   async getImageMeta(registryId: number, imageId: number): Promise<ImageMeta> {

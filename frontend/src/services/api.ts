@@ -2,7 +2,7 @@ import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
 import {
-  LocationGroupMeta,
+  AvailableOption,
   ProviderOption,
   RegistryFilters,
   RegistryMeta,
@@ -12,16 +12,16 @@ import {
 export interface BackendService {
   // Registry
   getRegistries(payload: CursorPayload<RegistryFilters>): Promise<CursorResponse<RegistryMeta>>;
-  getLocationGroups(filters?: RegistryFilters): Promise<LocationGroupMeta[]>;
   getRegistryMeta(id: number): Promise<RegistryMeta>;
   saveRegistryMeta(id: number, meta: Partial<UserRegistryMeta>): Promise<void>;
   addRegistry(url: string, providerId: string): Promise<RegistryMeta>;
   deleteRegistry(id: number): Promise<void>;
   getProvidersForUrl(url: string): Promise<ProviderOption[]>;
 
-  // Filters metadata
-  getAvailablePlaces(): Promise<string[]>;
-  getAvailableCollections(): Promise<string[]>;
+  // Filters metadata / Facets
+  getAvailablePlaces(filters?: RegistryFilters | null): Promise<AvailableOption[]>;
+  getAvailableCollections(filters?: RegistryFilters | null): Promise<AvailableOption[]>;
+  getAvailableTypes(filters?: RegistryFilters | null): Promise<AvailableOption[]>;
 
   // Images
   getImageMeta(registryId: number, imageId: number): Promise<ImageMeta>;

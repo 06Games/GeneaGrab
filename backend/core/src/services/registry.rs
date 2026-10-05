@@ -3,7 +3,7 @@ use std::str::FromStr;
 
 use crate::{
     comm_models::{
-        CursorPayload, CursorResponse, LocationGroupMeta,
+        AvailableOption, CursorPayload, CursorResponse,
         RegistryFilters, RegistryMeta, UserImageMeta, UserRegistryMeta,
     },
     db_entries::{
@@ -22,20 +22,24 @@ use sea_orm::{
 };
 
 #[derive(FromQueryResult)]
-struct PlacesOnly {
-    places: crate::db_entries::utils::JsonField<std::collections::HashSet<Vec<String>>>,
-}
-
-#[derive(FromQueryResult)]
-struct CollectionOnly {
-    collection: crate::db_entries::utils::JsonField<Vec<String>>,
-}
-
-#[derive(FromQueryResult)]
 struct RegistryPlaceSummary {
     #[allow(dead_code)]
     id: u32,
     places: crate::db_entries::utils::JsonField<std::collections::HashSet<Vec<String>>>,
+}
+
+#[derive(FromQueryResult)]
+struct RegistryCollectionSummary {
+    #[allow(dead_code)]
+    id: u32,
+    collection: crate::db_entries::utils::JsonField<Vec<String>>,
+}
+
+#[derive(FromQueryResult)]
+struct RegistryTypeSummary {
+    #[allow(dead_code)]
+    id: u32,
+    registry_types: crate::db_entries::utils::JsonField<std::collections::HashSet<geneagrab_providers::data::RegistryType>>,
 }
 
 impl RegistryMeta {
@@ -142,6 +146,38 @@ pub fn normalize_place_hierarchy(raw_parts: &[String]) -> Vec<String> {
     parts
 }
 
+pub fn place_matches_filter(normalized: &[String], filter: &str) -> bool {
+    let filter = filter.trim();
+    if filter.is_empty() {
+        return true;
+    }
+    if filter == "__unknown__" {
+        return false;
+    }
+    let filter_lower = filter.to_lowercase();
+    let key = normalized
+        .iter()
+        .map(|s| s.to_lowercase())
+        .collect::<Vec<_>>()
+        .join(" > ");
+
+    if key == filter_lower || key.contains(&filter_lower) {
+        return true;
+    }
+
+    let filter_parts: Vec<&str> = if filter_lower.contains(" > ") {
+        filter_lower.split(" > ").map(str::trim).filter(|s| !s.is_empty()).collect()
+    } else if filter_lower.contains(',') {
+        filter_lower.split(',').map(str::trim).filter(|s| !s.is_empty()).collect()
+    } else {
+        vec![filter_lower.as_str()]
+    };
+
+    filter_parts.iter().all(|fp| {
+        normalized.iter().any(|part| part.to_lowercase().contains(fp))
+    })
+}
+
 async fn apply_registry_filters(
     mut query: sea_orm::Select<registry_entry::Entity>,
     filters: Option<&RegistryFilters>,
@@ -181,10 +217,27 @@ async fn apply_registry_filters(
             ));
         }
         if let Some(p) = filters.place.as_deref().filter(|s| !s.trim().is_empty()) {
-            query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
-                "places LIKE ?",
-                vec![format!("%\"{p}\"%")],
-            ));
+            let p_trimmed = p.trim();
+            if p_trimmed == "__unknown__" {
+                query = query.filter(sea_orm::sea_query::Expr::cust(
+                    "places = '[]' OR places = '[\"\"]' OR places = '[[]]' OR places = ''",
+                ));
+            } else {
+                let parts: Vec<&str> = if p_trimmed.contains(" > ") {
+                    p_trimmed.split(" > ").map(str::trim).filter(|s| !s.is_empty()).collect()
+                } else if p_trimmed.contains(',') {
+                    p_trimmed.split(',').map(str::trim).filter(|s| !s.is_empty()).collect()
+                } else {
+                    vec![p_trimmed]
+                };
+
+                for part in parts {
+                    query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
+                        "places LIKE ?",
+                        vec![format!("%{part}%")],
+                    ));
+                }
+            }
         }
         if let Some(c) = filters.collection.as_deref().filter(|s| !s.trim().is_empty()) {
             query = query.filter(sea_orm::sea_query::Expr::cust_with_values(
@@ -193,11 +246,15 @@ async fn apply_registry_filters(
             ));
         }
 
-        if let Some(d) = filters.date_from {
-            query = query.filter(registry_entry::Column::DateTo.gte(d));
+        if let Some(s) = filters.date_from.as_deref().filter(|s| !s.trim().is_empty()) {
+            if let Ok(d) = dates::HistoricalDate::from_str(s) {
+                query = query.filter(registry_entry::Column::DateToNormalized.gte(d.to_jdn()));
+            }
         }
-        if let Some(d) = filters.date_to {
-            query = query.filter(registry_entry::Column::DateFrom.lte(d));
+        if let Some(s) = filters.date_to.as_deref().filter(|s| !s.trim().is_empty()) {
+            if let Ok(d) = dates::HistoricalDate::from_str(s) {
+                query = query.filter(registry_entry::Column::DateFromNormalized.lte(d.to_jdn()));
+            }
         }
 
         let is_unknown = filters.is_unknown_location == Some(true)
@@ -256,6 +313,23 @@ pub async fn get_registries(
                 })
             });
         }
+
+        if let Some(p) = filters.place.as_deref().filter(|s| !s.trim().is_empty()) {
+            let p_trimmed = p.trim();
+            if p_trimmed == "__unknown__" {
+                data.retain(|row| {
+                    row.registry.places.0.is_empty()
+                        || row.registry.places.0.iter().all(|p| normalize_place_hierarchy(p).is_empty())
+                });
+            } else if filters.location.is_none() {
+                data.retain(|row| {
+                    row.registry.places.0.iter().any(|raw_p| {
+                        let normalized = normalize_place_hierarchy(raw_p);
+                        place_matches_filter(&normalized, p_trimmed)
+                    })
+                });
+            }
+        }
     }
 
     let next_cursor = if data.len() > usize::try_from(limit).unwrap_or(usize::MAX) {
@@ -283,10 +357,10 @@ pub async fn get_registries(
     })
 }
 
-pub async fn get_location_groups(
+pub async fn get_available_places(
     db: &DbConn,
     filters: Option<RegistryFilters>,
-) -> Result<Vec<LocationGroupMeta>, CoreError> {
+) -> Result<Vec<AvailableOption>, CoreError> {
     let query = registry_entry::Entity::find();
     let query = apply_registry_filters(query, filters.as_ref()).await?;
     let rows = query
@@ -298,12 +372,11 @@ pub async fn get_location_groups(
         .await
         .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
 
-    let filter_place_lower = filters
+    let filter_place = filters
         .as_ref()
         .and_then(|f| f.place.as_deref())
         .map(str::trim)
-        .filter(|s| !s.is_empty())
-        .map(str::to_lowercase);
+        .filter(|s| !s.is_empty());
 
     // Map: key -> (location, display_name, count)
     let mut group_map: std::collections::HashMap<String, (Vec<String>, String, u32)> =
@@ -316,8 +389,8 @@ pub async fn get_location_groups(
         for raw_place in &row.places.0 {
             let normalized = normalize_place_hierarchy(raw_place);
             if !normalized.is_empty() {
-                if let Some(ref fp) = filter_place_lower {
-                    if !normalized.iter().any(|p| p.to_lowercase().contains(fp)) {
+                if let Some(fp) = filter_place {
+                    if !place_matches_filter(&normalized, fp) {
                         continue;
                     }
                 }
@@ -334,7 +407,9 @@ pub async fn get_location_groups(
         }
 
         if unique_places.is_empty() {
-            if filter_place_lower.is_none() {
+            let is_filter_unknown = filter_place == Some("__unknown__")
+                || filters.as_ref().and_then(|f| f.is_unknown_location).unwrap_or(false);
+            if filter_place.is_none() || is_filter_unknown {
                 let entry = group_map
                     .entry("__unknown__".to_string())
                     .or_insert_with(|| (Vec::new(), String::new(), 0));
@@ -357,21 +432,21 @@ pub async fn get_location_groups(
         }
     }
 
-    let mut groups: Vec<LocationGroupMeta> = group_map
+    let mut groups: Vec<AvailableOption> = group_map
         .into_iter()
-        .map(|(key, (location, display_name, count))| LocationGroupMeta {
+        .map(|(key, (location, display_name, count))| AvailableOption {
             key,
-            location,
-            display_name,
+            label: display_name,
             count,
+            parts: location,
         })
         .collect();
 
     // Sort by biggest entity first (e.g. France > Alpes-Maritimes > Lantosque > Loda)
     // with unknown/empty location at the end.
     groups.sort_by(|a, b| {
-        let a_unknown = a.location.is_empty() || a.key == "__unknown__";
-        let b_unknown = b.location.is_empty() || b.key == "__unknown__";
+        let a_unknown = a.parts.is_empty() || a.key == "__unknown__";
+        let b_unknown = b.parts.is_empty() || b.key == "__unknown__";
         if a_unknown && b_unknown {
             return std::cmp::Ordering::Equal;
         }
@@ -382,62 +457,108 @@ pub async fn get_location_groups(
             return std::cmp::Ordering::Less;
         }
 
-        let len = a.location.len().min(b.location.len());
+        let len = a.parts.len().min(b.parts.len());
         for i in 0..len {
-            let cmp = a.location[i]
+            let cmp = a.parts[i]
                 .to_lowercase()
-                .cmp(&b.location[i].to_lowercase());
+                .cmp(&b.parts[i].to_lowercase());
             if cmp != std::cmp::Ordering::Equal {
                 return cmp;
             }
         }
-        a.location.len().cmp(&b.location.len())
+        a.parts.len().cmp(&b.parts.len())
     });
 
     Ok(groups)
 }
 
-
-pub async fn get_available_places(db: &DbConn) -> Result<Vec<String>, CoreError> {
-    let entries = registry_entry::Entity::find()
+pub async fn get_available_collections(
+    db: &DbConn,
+    filters: Option<RegistryFilters>,
+) -> Result<Vec<AvailableOption>, CoreError> {
+    let query = registry_entry::Entity::find();
+    let query = apply_registry_filters(query, filters.as_ref()).await?;
+    let rows = query
         .select_only()
-        .column(registry_entry::Column::Places)
-        .into_model::<PlacesOnly>()
+        .column(registry_entry::Column::Id)
+        .column(registry_entry::Column::Collection)
+        .into_model::<RegistryCollectionSummary>()
         .all(db)
         .await
-        .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?;
+        .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
 
-    let mut set = std::collections::BTreeSet::new();
-    for entry in entries {
-        for place in entry.places.0 {
-            let normalized = normalize_place_hierarchy(&place);
-            if !normalized.is_empty() {
-                set.insert(normalized.join(" > "));
+    let mut counts: std::collections::BTreeMap<String, u32> = std::collections::BTreeMap::new();
+    for row in rows {
+        let mut seen = std::collections::HashSet::new();
+        for col in row.collection.0 {
+            let trimmed = col.trim();
+            if !trimmed.is_empty() && seen.insert(trimmed.to_string()) {
+                *counts.entry(trimmed.to_string()).or_default() += 1;
             }
         }
     }
-    Ok(set.into_iter().collect())
+
+    let options = counts
+        .into_iter()
+        .map(|(name, count)| AvailableOption {
+            key: name.clone(),
+            label: name,
+            count,
+            parts: Vec::new(),
+        })
+        .collect();
+
+    Ok(options)
 }
 
-pub async fn get_available_collections(db: &DbConn) -> Result<Vec<String>, CoreError> {
-    let entries = registry_entry::Entity::find()
+pub async fn get_available_types(
+    db: &DbConn,
+    filters: Option<RegistryFilters>,
+) -> Result<Vec<AvailableOption>, CoreError> {
+    let query = registry_entry::Entity::find();
+    let query = apply_registry_filters(query, filters.as_ref()).await?;
+    let rows = query
         .select_only()
-        .column(registry_entry::Column::Collection)
-        .into_model::<CollectionOnly>()
+        .column(registry_entry::Column::Id)
+        .column(registry_entry::Column::RegistryTypes)
+        .into_model::<RegistryTypeSummary>()
         .all(db)
         .await
-        .map_err(|e| CoreError::DbError(format!("DB error: {e}")))?;
+        .map_err(|e| CoreError::Other(format!("DB error: {e}")))?;
 
-    let mut set = std::collections::BTreeSet::new();
-    for entry in entries {
-        for col in entry.collection.0 {
-            let trimmed = col.trim();
-            if !trimmed.is_empty() {
-                set.insert(trimmed.to_string());
+    let mut counts: std::collections::BTreeMap<String, u32> = std::collections::BTreeMap::new();
+    for row in rows {
+        let mut seen = std::collections::HashSet::new();
+        for t in row.registry_types.0 {
+            let cat = match t {
+                geneagrab_providers::data::RegistryType::Vital(_) => "vital",
+                geneagrab_providers::data::RegistryType::Union(_) => "union",
+                geneagrab_providers::data::RegistryType::Mortality(_) => "mortality",
+                geneagrab_providers::data::RegistryType::Census(_) => "census",
+                geneagrab_providers::data::RegistryType::Legal(_) => "legal",
+                geneagrab_providers::data::RegistryType::Land(_) => "land",
+                geneagrab_providers::data::RegistryType::Media(_) => "media",
+                geneagrab_providers::data::RegistryType::Military(_) => "military",
+                geneagrab_providers::data::RegistryType::Other(_) => "other",
+                geneagrab_providers::data::RegistryType::Unknown => "unknown",
+            };
+            if seen.insert(cat) {
+                *counts.entry(cat.to_string()).or_default() += 1;
             }
         }
     }
-    Ok(set.into_iter().collect())
+
+    let options = counts
+        .into_iter()
+        .map(|(cat, count)| AvailableOption {
+            key: cat.clone(),
+            label: cat,
+            count,
+            parts: Vec::new(),
+        })
+        .collect();
+
+    Ok(options)
 }
 
 pub(crate) async fn get_registry(db: &DbConn, id: u32) -> Result<registry_entry::Model, CoreError> {
@@ -676,56 +797,56 @@ mod tests {
     #[test]
     fn test_location_groups_sorting_biggest_entity_first() {
         let mut groups = vec![
-            LocationGroupMeta {
+            AvailableOption {
                 key: "__unknown__".to_string(),
-                location: vec![],
-                display_name: String::new(),
+                label: String::new(),
                 count: 1,
+                parts: vec![],
             },
-            LocationGroupMeta {
+            AvailableOption {
                 key: "france > var > brignoles".to_string(),
-                location: vec!["France".to_string(), "Var".to_string(), "Brignoles".to_string()],
-                display_name: "France > Var > Brignoles".to_string(),
+                label: "France > Var > Brignoles".to_string(),
                 count: 1,
+                parts: vec!["France".to_string(), "Var".to_string(), "Brignoles".to_string()],
             },
-            LocationGroupMeta {
+            AvailableOption {
                 key: "france > alpes-maritimes > nice".to_string(),
-                location: vec!["France".to_string(), "Alpes-Maritimes".to_string(), "Nice".to_string()],
-                display_name: "France > Alpes-Maritimes > Nice".to_string(),
+                label: "France > Alpes-Maritimes > Nice".to_string(),
                 count: 1,
+                parts: vec!["France".to_string(), "Alpes-Maritimes".to_string(), "Nice".to_string()],
             },
-            LocationGroupMeta {
+            AvailableOption {
                 key: "france > alpes-maritimes > lantosque > loda".to_string(),
-                location: vec![
+                label: "France > Alpes-Maritimes > Lantosque > Loda".to_string(),
+                count: 1,
+                parts: vec![
                     "France".to_string(),
                     "Alpes-Maritimes".to_string(),
                     "Lantosque".to_string(),
                     "Loda".to_string(),
                 ],
-                display_name: "France > Alpes-Maritimes > Lantosque > Loda".to_string(),
-                count: 1,
             },
-            LocationGroupMeta {
+            AvailableOption {
                 key: "italie > piémont > turin".to_string(),
-                location: vec!["Italie".to_string(), "Piémont".to_string(), "Turin".to_string()],
-                display_name: "Italie > Piémont > Turin".to_string(),
+                label: "Italie > Piémont > Turin".to_string(),
                 count: 1,
+                parts: vec!["Italie".to_string(), "Piémont".to_string(), "Turin".to_string()],
             },
-            LocationGroupMeta {
+            AvailableOption {
                 key: "france > alpes-maritimes > lantosque".to_string(),
-                location: vec![
+                label: "France > Alpes-Maritimes > Lantosque".to_string(),
+                count: 1,
+                parts: vec![
                     "France".to_string(),
                     "Alpes-Maritimes".to_string(),
                     "Lantosque".to_string(),
                 ],
-                display_name: "France > Alpes-Maritimes > Lantosque".to_string(),
-                count: 1,
             },
         ];
 
         groups.sort_by(|a, b| {
-            let a_unknown = a.location.is_empty() || a.key == "__unknown__";
-            let b_unknown = b.location.is_empty() || b.key == "__unknown__";
+            let a_unknown = a.parts.is_empty() || a.key == "__unknown__";
+            let b_unknown = b.parts.is_empty() || b.key == "__unknown__";
             if a_unknown && b_unknown {
                 return std::cmp::Ordering::Equal;
             }
@@ -736,16 +857,16 @@ mod tests {
                 return std::cmp::Ordering::Less;
             }
 
-            let len = a.location.len().min(b.location.len());
+            let len = a.parts.len().min(b.parts.len());
             for i in 0..len {
-                let cmp = a.location[i]
+                let cmp = a.parts[i]
                     .to_lowercase()
-                    .cmp(&b.location[i].to_lowercase());
+                    .cmp(&b.parts[i].to_lowercase());
                 if cmp != std::cmp::Ordering::Equal {
                     return cmp;
                 }
             }
-            a.location.len().cmp(&b.location.len())
+            a.parts.len().cmp(&b.parts.len())
         });
 
         let keys: Vec<&str> = groups.iter().map(|g| g.key.as_str()).collect();
@@ -761,5 +882,37 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn test_place_matches_filter() {
+        let place = vec![
+            "France".to_string(),
+            "Alpes-Maritimes".to_string(),
+            "Lantosque".to_string(),
+            "Loda".to_string(),
+        ];
+
+        // Exact match with different cases
+        assert!(place_matches_filter(&place, "France > Alpes-Maritimes > Lantosque > Loda"));
+        assert!(place_matches_filter(&place, "france > alpes-maritimes > lantosque > loda"));
+
+        // Single part match
+        assert!(place_matches_filter(&place, "Brignoles") == false);
+        assert!(place_matches_filter(&place, "Lantosque"));
+        assert!(place_matches_filter(&place, "France"));
+
+        // Sub-hierarchy match
+        assert!(place_matches_filter(&place, "Alpes-Maritimes > Lantosque"));
+        assert!(place_matches_filter(&place, "Lantosque > Loda"));
+
+        // Comma separated multi-part match
+        assert!(place_matches_filter(&place, "France, Loda"));
+        assert!(place_matches_filter(&place, "France, Var") == false);
+
+        // Unknown and empty filters
+        assert!(place_matches_filter(&place, "__unknown__") == false);
+        assert!(place_matches_filter(&place, ""));
+    }
 }
+
 

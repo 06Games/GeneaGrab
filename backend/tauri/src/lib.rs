@@ -94,9 +94,9 @@ pub fn run() {
         // Register all IPC commands
         .invoke_handler(tauri::generate_handler![
             commands::registry::get_registries,
-            commands::registry::get_location_groups,
             commands::registry::get_available_places,
             commands::registry::get_available_collections,
+            commands::registry::get_available_types,
             commands::registry::get_registry,
             commands::registry::add_registry,
             commands::registry::delete_registry,

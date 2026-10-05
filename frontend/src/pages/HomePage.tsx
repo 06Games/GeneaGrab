@@ -8,7 +8,7 @@ import { AddRegistryModal } from "../components/registry-list/AddRegistryModal";
 import { TopBar } from "../ui/TopBar";
 import { Button, ResizeHandle } from "../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
-import type { LocationGroupMeta, RegistryMeta } from "../types/registry";
+import type { AvailableOption, RegistryMeta } from "../types/registry";
 import { isTauri } from "@tauri-apps/api/core";
 import { getCurrent, onOpenUrl } from "@tauri-apps/plugin-deep-link";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -24,7 +24,7 @@ type VirtualRowItem =
       parts: string[];
       count: number;
       isCollapsed: boolean;
-      group: LocationGroupMeta;
+      group: AvailableOption;
     }
   | {
       type: "loading";
@@ -125,7 +125,7 @@ const HomePage = () => {
   };
 
   // Data state
-  const [groups, setGroups] = createSignal<LocationGroupMeta[]>([]);
+  const [groups, setGroups] = createSignal<AvailableOption[]>([]);
   const [groupRegistries, setGroupRegistries] = createSignal<Record<string, RegistryMeta[]>>({});
   const [loadingGroups, setLoadingGroups] = createSignal<Record<string, boolean>>({});
   const [isFetching, setIsFetching] = createSignal(false);
@@ -381,18 +381,18 @@ const HomePage = () => {
 
   const [expandedGroups, setExpandedGroups] = createSignal<Record<string, boolean>>({});
 
-  const loadRegistriesForGroup = async (group: LocationGroupMeta) => {
+  const loadRegistriesForGroup = async (group: AvailableOption) => {
     if (loadingGroups()[group.key] || groupRegistries()[group.key]) return;
 
     setLoadingGroups((prev) => ({ ...prev, [group.key]: true }));
     try {
-      const isUnknown = group.key === "__unknown__" || group.location.length === 0;
+      const isUnknown = group.key === "__unknown__" || !group.parts || group.parts.length === 0;
       const res = await api.getRegistries({
         cursor: null,
         limit: 100,
         filters: {
           ...currentFilters(),
-          location: isUnknown ? null : group.location,
+          location: isUnknown ? null : group.parts,
           is_unknown_location: isUnknown,
         },
       });
@@ -404,7 +404,7 @@ const HomePage = () => {
     }
   };
 
-  const toggleGroup = (group: LocationGroupMeta) => {
+  const toggleGroup = (group: AvailableOption) => {
     const willExpand = !expandedGroups()[group.key];
     setExpandedGroups((prev) => ({
       ...prev,
@@ -448,9 +448,9 @@ const HomePage = () => {
 
     for (const group of currentGroups) {
       const isExpanded = Boolean(expanded[group.key]);
-      const isUnknown = group.key === "__unknown__" || group.location.length === 0;
-      const parts = isUnknown ? [t("home.unknownLocation")] : group.location;
-      const label = isUnknown ? t("home.unknownLocation") : group.display_name;
+      const isUnknown = group.key === "__unknown__" || !group.parts || group.parts.length === 0;
+      const parts = isUnknown ? [t("home.unknownLocation")] : (group.parts ?? []);
+      const label = isUnknown ? t("home.unknownLocation") : group.label;
 
       rows.push({
         type: "header",
@@ -496,7 +496,7 @@ const HomePage = () => {
 
     try {
       const filters = currentFilters();
-      const res = await api.getLocationGroups(filters);
+      const res = await api.getAvailablePlaces(filters);
 
       if (currentFetchId !== lastFetchId) return;
 
