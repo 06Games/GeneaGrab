@@ -238,6 +238,7 @@ const HomePage = () => {
     try {
       await api.deleteRegistry(id);
       loadLocationGroups();
+      refetchMatchedRegistries();
     } catch (err) {
       console.error("Failed to delete registry:", err);
     }
@@ -258,6 +259,23 @@ const HomePage = () => {
     (url) => api.getProvidersForUrl(url),
   );
 
+  const [urlMatchedRegistries, { refetch: refetchMatchedRegistries }] = createResource(
+    () => (isUrl() ? searchQuery().trim() : null),
+    async (url) => {
+      try {
+        const res = await api.getRegistries({
+          limit: 10,
+          cursor: null,
+          filters: { search_term: url },
+        });
+        return res.data;
+      } catch (err) {
+        console.error("Failed to query registries for URL:", err);
+        return [];
+      }
+    }
+  );
+
   const [selectedQuickProvider, setSelectedQuickProvider] = createSignal("");
   const [isAdding, setIsAdding] = createSignal(false);
 
@@ -270,41 +288,59 @@ const HomePage = () => {
     }
   });
 
-  const isAlreadyAdded = createMemo(() => {
-    const q = searchQuery().trim();
-    if (!q) return false;
+  const matchedRegistry = createMemo(() => {
+    const list = urlMatchedRegistries();
     const currentProviders = providers();
+
+    // 1. Direct query matching from DB
+    if (list && list.length > 0) {
+      if (currentProviders && currentProviders.length > 0) {
+        const found = list.find((r) =>
+          currentProviders.some(
+            (p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)
+          )
+        );
+        if (found) return found;
+      }
+      return list[0];
+    }
+
+    // 2. Fallback to allRegistries from expanded location groups
     if (isUrl() && currentProviders && currentProviders.length > 0) {
-      return allRegistries().some((r) =>
-        currentProviders.some(
-          (p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)
-        )
+      return (
+        allRegistries().find((r) =>
+          currentProviders.some(
+            (p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)
+          )
+        ) ?? null
       );
     }
-    return false;
+
+    return null;
   });
+
+  const isAlreadyAdded = createMemo(() => Boolean(matchedRegistry()));
 
   const extractedImageNumber = createMemo(() => {
     if (!isUrl()) return undefined;
     const currentProviders = providers();
     if (!currentProviders || currentProviders.length === 0) return undefined;
+    const reg = matchedRegistry();
+    if (reg) {
+      const p = currentProviders.find((prov) => prov.id === reg.source_id);
+      if (p?.image_number !== undefined) return p.image_number;
+    }
     return currentProviders[0].image_number;
   });
 
   const handleOpenExtractedUrl = () => {
-    const currentProviders = providers();
-    if (!currentProviders || currentProviders.length === 0) return;
-    const matchingProvider = currentProviders[0];
-    const reg = allRegistries().find(
-      (r) => r.source_id === matchingProvider.id && (!matchingProvider.registry_id || r.registry_id === matchingProvider.registry_id)
-    );
-    if (reg) {
-      openTab({
-        type: "registry",
-        registryId: reg.id,
-        imageId: matchingProvider.image_number || 1,
-      });
-    }
+    const reg = matchedRegistry();
+    if (!reg) return;
+    openTab({
+      type: "registry",
+      registryId: reg.id,
+      imageId: extractedImageNumber() || 1,
+    });
   };
 
   const handleQuickAdd = async () => {
@@ -313,6 +349,7 @@ const HomePage = () => {
     try {
       const newRegistry = await api.addRegistry(searchQuery().trim(), selectedQuickProvider());
       await loadLocationGroups();
+      refetchMatchedRegistries();
 
       const currentProviders = providers();
       const selectedP = currentProviders?.find((p) => p.id === selectedQuickProvider());
@@ -561,8 +598,12 @@ const HomePage = () => {
       const nextExpanded: Record<string, boolean> = {};
       const groupsToRefresh: AvailableOption[] = [];
 
+      // Auto-expand if searching with a URL or if search query produces a single group
+      const hasSearch = Boolean(debouncedSearchQuery());
+      const shouldAutoExpand = isUrl() || (hasSearch && res.length === 1);
+
       for (const g of res) {
-        if (currentExpanded[g.key]) {
+        if (currentExpanded[g.key] || shouldAutoExpand) {
           nextExpanded[g.key] = true;
           groupsToRefresh.push(g);
         }
@@ -664,7 +705,7 @@ const HomePage = () => {
         <ResizeHandle vertical={true} onPointerDown={onSidebarResizePointerDown} />
 
         <main class="flex-1 flex flex-col gap-6 min-w-0 min-h-0 px-6 pt-6 pb-4 overflow-hidden">
-          <Show when={isUrl() && !isFetching()}>
+          <Show when={isUrl()}>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 -mb-2 bg-panel border border-accent rounded-xl shadow-sm animate-in fade-in slide-in-from-top-2">
               <div class="flex items-start gap-3">
                 <div class="mt-0.5 text-accent">
@@ -674,8 +715,8 @@ const HomePage = () => {
                   <span class="text-[14px] font-semibold text-main">{t("home.urlDetected")}</span>
                   <span class="text-[13px] text-dim">
                     <Switch>
+                      <Match when={providers.loading || urlMatchedRegistries.loading}>{t("home.checkingUrl")}</Match>
                       <Match when={isAlreadyAdded()}>{t("home.urlAlreadyAdded")}</Match>
-                      <Match when={providers.loading}>{t("home.checkingUrl")}</Match>
                       <Match when={!providers.loading && providers()?.length === 0}>
                         <span class="text-warning">{t("home.urlNoProvider")}</span>
                       </Match>
@@ -685,36 +726,38 @@ const HomePage = () => {
                 </div>
               </div>
 
-              <Show when={isAlreadyAdded()}>
-                <div class="flex items-center gap-2">
-                  <Button variant="primary" onClick={handleOpenExtractedUrl}>
-                    <Icon icon="lucide:external-link" /> {t("home.open")}
-                  </Button>
-                </div>
-              </Show>
+              <Show when={!providers.loading && !urlMatchedRegistries.loading}>
+                <Show when={isAlreadyAdded()}>
+                  <div class="flex items-center gap-2">
+                    <Button variant="primary" onClick={handleOpenExtractedUrl}>
+                      <Icon icon="lucide:external-link" /> {t("home.open")}
+                    </Button>
+                  </div>
+                </Show>
 
-              <Show when={!isAlreadyAdded() && !providers.loading && providers() && providers()!.length > 0}>
-                <div class="flex items-center gap-2">
-                  <select
-                    value={selectedQuickProvider()}
-                    onChange={(e) => setSelectedQuickProvider(e.currentTarget.value)}
-                    class="px-3 py-1.5 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent outline-none appearance-none cursor-pointer"
-                  >
-                    <For each={providers()}>{(p) => <option value={p.id}>{p.name}</option>}</For>
-                  </select>
-                  <Button variant="primary" onClick={handleQuickAdd} disabled={isAdding()}>
-                    <Show
-                      when={isAdding()}
-                      fallback={
-                        <>
-                          <Icon icon="lucide:plus" /> {t("home.addQuick")}
-                        </>
-                      }
+                <Show when={!isAlreadyAdded() && providers() && providers()!.length > 0}>
+                  <div class="flex items-center gap-2">
+                    <select
+                      value={selectedQuickProvider()}
+                      onChange={(e) => setSelectedQuickProvider(e.currentTarget.value)}
+                      class="px-3 py-1.5 rounded-lg border border-subtle bg-tinted text-[13px] text-main focus:border-accent outline-none appearance-none cursor-pointer"
                     >
-                      <Icon icon="lucide:loader-2" class="animate-spin" />
-                    </Show>
-                  </Button>
-                </div>
+                      <For each={providers()}>{(p) => <option value={p.id}>{p.name}</option>}</For>
+                    </select>
+                    <Button variant="primary" onClick={handleQuickAdd} disabled={isAdding()}>
+                      <Show
+                        when={isAdding()}
+                        fallback={
+                          <>
+                            <Icon icon="lucide:plus" /> {t("home.addQuick")}
+                          </>
+                        }
+                      >
+                        <Icon icon="lucide:loader-2" class="animate-spin" />
+                      </Show>
+                    </Button>
+                  </div>
+                </Show>
               </Show>
             </div>
           </Show>
