@@ -1,7 +1,7 @@
 import { createEffect, Show, For } from "solid-js";
 import { createForm, reset, insert, remove, SubmitHandler } from "@modular-forms/solid";
 import { ACT_TYPE_OPTIONS } from "../../../types/registry";
-import { Button, Kbd, SectionLabel } from "../../../ui/primitives";
+import { Button, SectionLabel, Tooltip } from "../../../ui/primitives";
 import { IndexField } from "./IndexField";
 import { PersonBlock } from "./PersonBlock";
 import { Icon } from "@iconify-icon/solid";
@@ -63,9 +63,18 @@ export const DetailZone = (props: DetailZoneProps) => {
             <span class="text-[12px] text-dim truncate">{props.event!.title || props.event!.date}</span>
           </Show>
         </div>
-        <div class="flex items-center gap-1.5 flex-shrink-0 text-[11px] text-dim">
-          <Kbd>←</Kbd> {t("detail.actions.list")} <span class="mx-1">·</span> <Kbd>Ctrl S</Kbd> {t("detail.actions.save")}
-        </div>
+        <Show when={props.event}>
+          <Tooltip content={`${t("detail.actions.list")}: ←`}>
+            <button
+              type="button"
+              onClick={() => props.onFocusGrid?.()}
+              class="text-dim hover:text-main p-1 rounded transition-colors cursor-pointer flex items-center gap-1 text-[12px]"
+            >
+              <Icon icon="lucide:arrow-left" class="w-3.5 h-3.5" />
+              <span class="hidden sm:inline">{t("detail.actions.list")}</span>
+            </button>
+          </Tooltip>
+        </Show>
       </div>
 
       <div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-subtle">
@@ -73,10 +82,6 @@ export const DetailZone = (props: DetailZoneProps) => {
           <div class="flex-1 flex items-center justify-center py-12">
             <p class="text-[14px] text-dim text-center">
               {t("detail.emptyPrompt.text")}
-              <br />
-              <span class="text-[12px]">
-                <span>{t("detail.emptyPrompt.prefix")}</span> <Kbd>N</Kbd> <span>{t("detail.emptyPrompt.suffix")}</span>
-              </span>
             </p>
           </div>
         </Show>
@@ -236,12 +241,16 @@ export const DetailZone = (props: DetailZoneProps) => {
           {t("detail.reset")}
         </Button>
         <div class="flex gap-2">
-          <Button type="submit" variant="outline" size="sm" onClick={() => (submitAction = "save")} disabled={!props.event}>
-            {t("detail.save")} <Kbd>Ctrl S</Kbd>
-          </Button>
-          <Button type="submit" variant="primary" size="sm" onClick={() => (submitAction = "validate")} disabled={!props.event}>
-            {t("detail.validateAndNext")} <Kbd>↵</Kbd>
-          </Button>
+          <Tooltip content={`${t("detail.save")} (Ctrl+S)`}>
+            <Button type="submit" variant="outline" size="sm" onClick={() => (submitAction = "save")} disabled={!props.event}>
+              {t("detail.save")}
+            </Button>
+          </Tooltip>
+          <Tooltip content={`${t("detail.validateAndNext")} (Enter)`}>
+            <Button type="submit" variant="primary" size="sm" onClick={() => (submitAction = "validate")} disabled={!props.event}>
+              {t("detail.validateAndNext")}
+            </Button>
+          </Tooltip>
         </div>
       </div>
     </Form>

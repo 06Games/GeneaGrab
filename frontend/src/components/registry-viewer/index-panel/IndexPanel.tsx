@@ -1,5 +1,5 @@
 import { Show, createSignal } from "solid-js";
-import { Badge, IconButton, Kbd } from "../../../ui/primitives";
+import { Badge, IconButton, Tooltip } from "../../../ui/primitives";
 import { GlobalGrid } from "./GlobalGrid";
 import { DetailZone } from "./DetailZone";
 import { Icon } from "@iconify-icon/solid";
@@ -56,9 +56,11 @@ export const IndexPanel = (props: IndexPanelProps) => {
             <Badge>{t("indexPanel.badgeActs", { count: props.rows?.length ?? 0 })}</Badge>
           </div>
           <div class="flex items-center gap-1">
-            <span class="text-[11px] text-dim mr-1 hidden sm:flex items-center gap-1">
-              <Kbd>→</Kbd> {t("detail.help.detail")} <span class="mx-1">·</span> <Kbd>←</Kbd> {t("detail.help.list")}
-            </span>
+            <Tooltip content={`${t("detail.help.detail")}: → · ${t("detail.help.list")}: ←`}>
+              <div class="p-1 rounded text-dim hover:text-main cursor-help flex items-center justify-center">
+                <Icon icon="lucide:keyboard" class="w-4 h-4" />
+              </div>
+            </Tooltip>
             <Show when={!props.isDetached}>
               <IconButton onClick={props.onDetach}>
                 <Icon icon="lucide:picture-in-picture"></Icon>

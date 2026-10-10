@@ -1,5 +1,5 @@
 import { createSignal, createEffect, onCleanup, onMount, createResource, Show } from "solid-js";
-import { Kbd } from "../ui/primitives";
+import { Tooltip } from "../ui/primitives";
 import { MainViewer } from "../components/registry-viewer/MainViewer";
 import { ThumbnailBar } from "../components/registry-viewer/ThumbnailBar";
 import { InfoNotesPanel } from "../components/registry-viewer/InfoNotesPanel";
@@ -290,18 +290,19 @@ export const ViewerPage = (props: ViewerPageProps) => {
                 style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
               >
                 <TabBarAction>
-                  <button
-                    type="button"
-                    onClick={() => setIndexVisible((v) => !v)}
-                    class={[
-                      "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer",
-                      indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted hover:text-main",
-                    ].join(" ")}
-                  >
-                    <Icon icon="lucide:list" class="w-3.5 h-3.5" />
-                    <span>{t("registryViewer.index")}</span>
-                    <Kbd>Ctrl I</Kbd>
-                  </button>
+                  <Tooltip content={`${t("registryViewer.index")} (Ctrl+I)`}>
+                    <button
+                      type="button"
+                      onClick={() => setIndexVisible((v) => !v)}
+                      class={[
+                        "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer",
+                        indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted hover:text-main",
+                      ].join(" ")}
+                    >
+                      <Icon icon="lucide:list" class="w-3.5 h-3.5" />
+                      <span>{t("registryViewer.index")}</span>
+                    </button>
+                  </Tooltip>
                 </TabBarAction>
 
                 <div class="flex flex-1 min-h-0 overflow-hidden">

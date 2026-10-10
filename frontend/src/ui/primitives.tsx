@@ -1,4 +1,5 @@
 import { JSX } from "solid-js";
+import { Tooltip as KobalteTooltip } from "@kobalte/core/tooltip";
 
 // ─── Divider ─────────────────────────────────────────────────────────────────
 
@@ -133,21 +134,32 @@ export const IconButton = (props: IconButtonProps) => (
   </button>
 );
 
-// ─── Kbd ──────────────────────────────────────────────────────────────────────
+// ─── Tooltip ──────────────────────────────────────────────────────────────────
 
-interface KbdProps {
-  class?: string;
+interface TooltipProps {
+  content: JSX.Element;
   children: JSX.Element;
+  class?: string;
+  placement?: "top" | "bottom" | "left" | "right";
+  openDelay?: number;
 }
 
-export const Kbd = (props: KbdProps) => (
-  <kbd
-    class={["px-1.5 py-0.5 rounded text-[10px] font-mono", "bg-hover border border-subtle-md text-muted", "shadow-[0_1px_0_var(--subtle-md)]", props.class]
-      .filter(Boolean)
-      .join(" ")}
-  >
-    {props.children}
-  </kbd>
+export const Tooltip = (props: TooltipProps) => (
+  <KobalteTooltip openDelay={props.openDelay ?? 250} closeDelay={100} placement={props.placement ?? "top"}>
+    <KobalteTooltip.Trigger as="div" class="inline-flex">
+      {props.children}
+    </KobalteTooltip.Trigger>
+    <KobalteTooltip.Portal>
+      <KobalteTooltip.Content
+        class={["z-50 px-2.5 py-1 text-[11px] font-medium rounded-md bg-panel border border-subtle text-main shadow-lg select-none outline-none", props.class]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <KobalteTooltip.Arrow class="text-panel fill-current" />
+        {props.content}
+      </KobalteTooltip.Content>
+    </KobalteTooltip.Portal>
+  </KobalteTooltip>
 );
 
 // ─── MetaRow ──────────────────────────────────────────────────────────────────
@@ -159,7 +171,9 @@ interface MetaRowProps {
 
 export const MetaRow = (props: MetaRowProps) => (
   <div class="grid grid-cols-[5.5rem_1fr] gap-x-2 items-baseline py-1 min-w-0 max-w-full overflow-hidden">
-    <span class="text-[12px] text-dim truncate capitalize min-w-0" title={props.label}>{props.label}</span>
+    <span class="text-[12px] text-dim truncate capitalize min-w-0" title={props.label}>
+      {props.label}
+    </span>
     {props.value ? (
       <span class="text-[13px] text-main truncate min-w-0" title={props.value}>
         {props.value}
