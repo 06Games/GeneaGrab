@@ -1,4 +1,4 @@
-import { createEffect, Show, For } from "solid-js";
+import { createEffect, Show, For, onMount, onCleanup } from "solid-js";
 import { createForm, reset, insert, remove, SubmitHandler } from "@modular-forms/solid";
 import { ACT_TYPE_OPTIONS } from "../../../types/registry";
 import { Button, SectionLabel, Tooltip } from "../../../ui/primitives";
@@ -46,6 +46,19 @@ export const DetailZone = (props: DetailZoneProps) => {
     }
   };
 
+  onMount(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const inInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA";
+      if (!inInput && !props.event && (e.key === "n" || e.key === "N")) {
+        e.preventDefault();
+        actions.onNewAct?.();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    onCleanup(() => window.removeEventListener("keydown", handleKeyDown));
+  });
+
   return (
     <Form onSubmit={handleSubmit} ref={props.onRef} class="flex-1 flex flex-col min-w-0 overflow-hidden bg-tinted">
       <div class="flex-shrink-0 flex items-center justify-between px-4 py-2.5 border-b border-subtle bg-panel">
@@ -79,10 +92,15 @@ export const DetailZone = (props: DetailZoneProps) => {
 
       <div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-subtle">
         <Show when={!props.event}>
-          <div class="flex-1 flex items-center justify-center py-12">
+          <div class="flex-1 flex flex-col items-center justify-center py-12 gap-3">
             <p class="text-[14px] text-dim text-center">
               {t("detail.emptyPrompt.text")}
             </p>
+            <Tooltip content={`${t("grid.newAct")} (N)`}>
+              <Button variant="outline" size="sm" onClick={actions.onNewAct}>
+                <Icon icon="lucide:plus" width="16" height="16" /> {t("grid.newAct")}
+              </Button>
+            </Tooltip>
           </div>
         </Show>
 

@@ -3,7 +3,7 @@ import { createVirtualizer } from "@tanstack/solid-virtual";
 import { createSolidTable, getCoreRowModel, getSortedRowModel, flexRender, ColumnDef, SortingState } from "@tanstack/solid-table";
 
 import type { EventRow } from "../../../types/index";
-import { Button } from "../../../ui/primitives";
+import { Button, Tooltip } from "../../../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import { useI18n } from "../../../ui/i18n";
 import { useRegistryActions } from "../../../contexts/RegistryActionsContext";
@@ -85,6 +85,9 @@ export const GlobalGrid = (props: GlobalGridProps) => {
       if (e.key === "Tab" && e.shiftKey) return;
       e.preventDefault();
       props.onFocusDetail?.();
+    } else if (e.key === "n" || e.key === "N") {
+      e.preventDefault();
+      actions.onNewAct?.();
     }
   };
 
@@ -160,9 +163,11 @@ export const GlobalGrid = (props: GlobalGridProps) => {
       {/* Footer */}
       <div class="flex-shrink-0 flex items-center justify-between px-3 py-2 border-t border-subtle bg-tinted">
         <span class="text-[12px] text-dim">{t("grid.actsCount", { count: props.rows.length })}</span>
-        <Button variant="outline" size="sm" onClick={actions.onNewAct}>
-          <Icon icon="lucide:plus" width="16" height="16" /> {t("grid.newAct")}
-        </Button>
+        <Tooltip content={`${t("grid.newAct")} (N)`}>
+          <Button variant="outline" size="sm" onClick={actions.onNewAct}>
+            <Icon icon="lucide:plus" width="16" height="16" /> {t("grid.newAct")}
+          </Button>
+        </Tooltip>
       </div>
     </div>
   );
