@@ -355,20 +355,6 @@ export const ViewerPage = (props: ViewerPageProps) => {
                 )}
 
                 {indexVisible() && !isDetached() && renderIndex(registryMeta()!, false)}
-
-                <footer class="flex-shrink-0 flex items-center justify-between px-4 h-6 bg-panel border-t border-subtle" role="status">
-                  <div class="flex items-center gap-4">
-                    <span class="text-[11px] text-dim">
-                      {currentImage()} / {registryMeta()!.total_images}
-                    </span>
-                    <span class="text-[11px] text-dim">
-                      {t("registryViewer.viewsAndActs", { views: registryMeta()!.total_images, acts: eventRows()?.length || 0 })}
-                    </span>
-                  </div>
-                  <div class="flex items-center gap-3">
-                    <span class="text-[11px] text-dim tabular-nums">{new Date().toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
-                  </div>
-                </footer>
               </div>
             }
           >
