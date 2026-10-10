@@ -73,8 +73,41 @@ export const MainViewer = (props: MainViewerProps) => {
     }
   };
 
+  const handleZoomIn = () => viewer?.viewport.zoomBy(1.3);
+  const handleZoomOut = () => viewer?.viewport.zoomBy(0.77);
+  const handleFit = () => viewer?.viewport.goHome();
+  const handleRotate = (counterClockwise = false) => {
+    if (!viewer) return;
+    const currentRot = viewer.viewport.getRotation();
+    const diff = counterClockwise === true ? -90 : 90;
+    viewer.viewport.setRotation((currentRot + diff + 360) % 360);
+  };
+
   onMount(() => {
     if (props.viewerRef) props.viewerRef(viewerContainerRef);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const inInput = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable;
+      if (inInput) return;
+
+      if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+      if (e.key === "r" || e.key === "R") {
+        e.preventDefault();
+        handleRotate(e.shiftKey);
+      } else if (e.key === "f" || e.key === "F" || e.key === "0") {
+        e.preventDefault();
+        handleFit();
+      } else if (e.key === "+" || e.key === "=" || e.code === "NumpadAdd") {
+        e.preventDefault();
+        handleZoomIn();
+      } else if (e.key === "-" || e.code === "NumpadSubtract") {
+        e.preventDefault();
+        handleZoomOut();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
 
     viewer = OpenSeadragon({
       element: viewerContainerRef,
@@ -161,6 +194,7 @@ export const MainViewer = (props: MainViewerProps) => {
     viewerContainerRef.addEventListener("contextmenu", handleContextMenu);
 
     onCleanup(() => {
+      window.removeEventListener("keydown", handleKeyDown);
       resizeObserver.disconnect();
       if (viewerContainerRef) {
         viewerContainerRef.removeEventListener("contextmenu", handleContextMenu);
@@ -168,15 +202,6 @@ export const MainViewer = (props: MainViewerProps) => {
       viewer?.destroy();
     });
   });
-
-  const handleZoomIn = () => viewer?.viewport.zoomBy(1.3);
-  const handleZoomOut = () => viewer?.viewport.zoomBy(0.77);
-  const handleFit = () => viewer?.viewport.goHome();
-  const handleRotate = () => {
-    if (!viewer) return;
-    const currentRot = viewer.viewport.getRotation();
-    viewer.viewport.setRotation((currentRot + 90) % 360);
-  };
 
   const handleDownloadImage = async () => {
     if (downloadProgress()) return;

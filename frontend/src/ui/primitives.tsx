@@ -1,4 +1,4 @@
-import { JSX } from "solid-js";
+import { JSX, Show } from "solid-js";
 import { Tooltip as KobalteTooltip } from "@kobalte/core/tooltip";
 
 // ─── Divider ─────────────────────────────────────────────────────────────────
@@ -113,26 +113,34 @@ interface IconButtonProps {
   children: JSX.Element;
 }
 
-export const IconButton = (props: IconButtonProps) => (
-  <button
-    type="button"
-    title={props.title}
-    onClick={props.onClick}
-    disabled={props.disabled}
-    class={[
-      "flex items-center justify-center w-8 h-8 rounded-md",
-      "transition-colors duration-100",
-      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
-      "disabled:opacity-40 disabled:cursor-not-allowed",
-      props.active ? "text-accent bg-accent-bg" : "text-muted enabled:hover:text-main enabled:hover:bg-hover",
-      props.class,
-    ]
-      .filter(Boolean)
-      .join(" ")}
-  >
-    {props.children}
-  </button>
-);
+export const IconButton = (props: IconButtonProps) => {
+  const btn = () => (
+    <button
+      type="button"
+      aria-label={props.title}
+      onClick={props.onClick}
+      disabled={props.disabled}
+      class={[
+        "flex items-center justify-center w-8 h-8 rounded-md",
+        "transition-colors duration-100",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+        "disabled:opacity-40 disabled:cursor-not-allowed",
+        props.active ? "text-accent bg-accent-bg" : "text-muted enabled:hover:text-main enabled:hover:bg-hover",
+        props.class,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {props.children}
+    </button>
+  );
+
+  return (
+    <Show when={props.title} fallback={btn()}>
+      <Tooltip content={props.title!}>{btn()}</Tooltip>
+    </Show>
+  );
+};
 
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
