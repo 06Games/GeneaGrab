@@ -5,7 +5,7 @@ import { useI18n } from "../ui/i18n";
 import { RegistryCard } from "../components/registry-list/RegistryCard";
 import { RegistryFilters } from "../components/registry-list/RegistryFilters";
 import { AddRegistryModal } from "../components/registry-list/AddRegistryModal";
-import { TopBar } from "../ui/TopBar";
+import { TabBarAction } from "../contexts/TabsContext";
 import { Button, ResizeHandle } from "../ui/primitives";
 import { Icon } from "@iconify-icon/solid";
 import type { AvailableOption, RegistryMeta } from "../types/registry";
@@ -674,14 +674,11 @@ const HomePage = () => {
 
   return (
     <div class="w-full h-full bg-app text-main flex flex-col antialiased" style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}>
-      <TopBar
-        breadcrumbs={[t("home.title")]}
-        right={
-          <Button variant="primary" onClick={() => setIsModalOpen(true)}>
-            <Icon icon="lucide:plus" class="w-4 h-4" /> {t("home.addRegistry")}
-          </Button>
-        }
-      />
+      <TabBarAction>
+        <Button variant="primary" size="sm" onClick={() => setIsModalOpen(true)}>
+          <Icon icon="lucide:plus" class="w-4 h-4" /> {t("home.addRegistry")}
+        </Button>
+      </TabBarAction>
 
       <div class="flex flex-1 min-h-0 overflow-hidden">
         <RegistryFilters

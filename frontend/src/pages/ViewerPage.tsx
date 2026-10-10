@@ -1,6 +1,5 @@
 import { createSignal, createEffect, onCleanup, onMount, createResource, Show } from "solid-js";
 import { Kbd } from "../ui/primitives";
-import { TopBar } from "../ui/TopBar";
 import { MainViewer } from "../components/registry-viewer/MainViewer";
 import { ThumbnailBar } from "../components/registry-viewer/ThumbnailBar";
 import { InfoNotesPanel } from "../components/registry-viewer/InfoNotesPanel";
@@ -13,7 +12,7 @@ import { useBackend } from "../contexts/BackendContext";
 import { EventDetail } from "../types";
 import { UserImageMeta } from "../types/image";
 import { RegistryMeta, UserRegistryMeta } from "../types/registry";
-import { useCurrentTab, useTabs } from "../contexts/TabsContext";
+import { useCurrentTab, TabBarAction } from "../contexts/TabsContext";
 
 type SyncMessage =
   | { type: "READY" }
@@ -36,7 +35,6 @@ interface ViewerPageProps {
 }
 export const ViewerPage = (props: ViewerPageProps) => {
   const { t } = useI18n();
-  const { openTab } = useTabs();
   const { updateThisTab } = useCurrentTab();
   const api = useBackend();
 
@@ -280,21 +278,20 @@ export const ViewerPage = (props: ViewerPageProps) => {
                 class="flex flex-col w-full h-full overflow-hidden bg-app text-main select-none antialiased"
                 style={{ "font-family": "'Outfit', 'Helvetica Neue', system-ui, sans-serif" }}
               >
-                <TopBar
-                  breadcrumbs={[<button onClick={() => openTab({ type: "home" })}>{t("home.title")}</button>, tabTile()]}
-                  right={
-                    <button
-                      type="button"
-                      onClick={() => setIndexVisible((v) => !v)}
-                      class={[
-                        "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
-                        indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted",
-                      ].join(" ")}
-                    >
-                      <Icon icon="lucide:list" /> {t("registryViewer.index")} <Kbd>Ctrl I</Kbd>
-                    </button>
-                  }
-                />
+                <TabBarAction>
+                  <button
+                    type="button"
+                    onClick={() => setIndexVisible((v) => !v)}
+                    class={[
+                      "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer",
+                      indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted hover:text-main",
+                    ].join(" ")}
+                  >
+                    <Icon icon="lucide:list" class="w-3.5 h-3.5" />
+                    <span>{t("registryViewer.index")}</span>
+                    <Kbd>Ctrl I</Kbd>
+                  </button>
+                </TabBarAction>
 
                 <div class="flex flex-1 min-h-0 overflow-hidden">
                   <main class="flex-1 flex flex-col min-w-0 overflow-hidden">

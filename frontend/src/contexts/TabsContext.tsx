@@ -1,4 +1,5 @@
-import { createContext, useContext, JSX, createSignal } from "solid-js";
+import { createContext, useContext, JSX, createSignal, Show } from "solid-js";
+import { Portal } from "solid-js/web";
 import { createStore } from "solid-js/store";
 
 export type TabType = "home" | "registry";
@@ -19,6 +20,8 @@ interface TabsContextValue {
   closeTab: (id: string) => void;
   setActiveTab: (id: string) => void;
   updateTab: (id: string, updates: Partial<Tab>) => void;
+  actionsContainer: () => HTMLDivElement | null;
+  setActionsContainer: (el: HTMLDivElement | null) => void;
 }
 
 const TabsContext = createContext<TabsContextValue>();
@@ -26,6 +29,7 @@ const TabsContext = createContext<TabsContextValue>();
 export function TabsProvider(props: { children: JSX.Element }) {
   const [tabs, setTabs] = createStore<Tab[]>([{ id: "home", type: "home", title: "Home", closable: false }]);
   const [activeTabId, setActiveTabId] = createSignal("home");
+  const [actionsContainer, setActionsContainer] = createSignal<HTMLDivElement | null>(null);
 
   const openTab = (newTab: Omit<Tab, "id" | "title" | "closable"> & { id?: string }, activate = true) => {
     const id = newTab.id ?? (newTab.type === "home" ? "home" : `${newTab.type}-${newTab.registryId}`);
@@ -66,7 +70,20 @@ export function TabsProvider(props: { children: JSX.Element }) {
   };
 
   return (
-    <TabsContext.Provider value={{ tabs, activeTabId, openTab, closeTab, setActiveTab: setActiveTabId, updateTab }}>{props.children}</TabsContext.Provider>
+    <TabsContext.Provider
+      value={{
+        tabs,
+        activeTabId,
+        openTab,
+        closeTab,
+        setActiveTab: setActiveTabId,
+        updateTab,
+        actionsContainer,
+        setActionsContainer,
+      }}
+    >
+      {props.children}
+    </TabsContext.Provider>
   );
 }
 
@@ -98,4 +115,15 @@ export function useCurrentTab() {
   const context = useContext(TabInstanceContext);
   if (!context) throw new Error("useCurrentTab must be used inside a TabInstanceProvider");
   return context;
+}
+
+export function TabBarAction(props: { children: JSX.Element }) {
+  const { actionsContainer, activeTabId } = useTabs();
+  const { tabId } = useCurrentTab();
+
+  return (
+    <Show when={actionsContainer() && activeTabId() === tabId}>
+      <Portal mount={actionsContainer()!}>{props.children}</Portal>
+    </Show>
+  );
 }
