@@ -86,6 +86,7 @@ export const MainViewer = (props: MainViewerProps) => {
       animationTime: 0.3,
       zoomPerScroll: 1.5,
       springStiffness: 10,
+      crossOriginPolicy: "Anonymous",
     });
 
     const resizeObserver = new ResizeObserver(() => {

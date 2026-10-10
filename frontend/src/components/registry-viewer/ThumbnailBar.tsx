@@ -110,6 +110,7 @@ export const ThumbnailBar = (props: ThumbnailBarProps) => {
                       alt=""
                       class="w-full h-full object-contain"
                       loading="lazy"
+                      crossOrigin="anonymous"
                       onError={() => {
                         const next = new Set(failedImages());
                         next.add(image_number);
