@@ -3,13 +3,7 @@ import { listen } from "@tauri-apps/api/event";
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import {
-  AvailableOption,
-  ProviderOption,
-  RegistryFilters,
-  RegistryMeta,
-  UserRegistryMeta,
-} from "../types/registry";
+import { AvailableOption, ProviderOption, RegistryFilters, RegistryMeta, UserRegistryMeta } from "../types/registry";
 import { BackendService } from "./api";
 
 export class TauriService implements BackendService {

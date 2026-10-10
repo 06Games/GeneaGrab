@@ -21,7 +21,7 @@ export const fr: RawDictionaries = {
     searchPlace: "Rechercher un lieu...",
     searchCollection: "Rechercher une collection...",
     noOptions: "Aucune option disponible",
-    noMatches: "Aucun résultat pour \"{{query}}\"",
+    noMatches: 'Aucun résultat pour "{{query}}"',
     loading: "Chargement...",
     clear: "Effacer",
     locationsCount: "lieux",

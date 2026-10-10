@@ -19,7 +19,7 @@ export const en = {
     searchPlace: "Search places...",
     searchCollection: "Search collections...",
     noOptions: "No options available",
-    noMatches: "No options match \"{{query}}\"",
+    noMatches: 'No options match "{{query}}"',
     loading: "Loading...",
     clear: "Clear",
     locationsCount: "locations",

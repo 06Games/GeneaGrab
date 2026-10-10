@@ -35,24 +35,24 @@ export const MainViewer = (props: MainViewerProps) => {
   const [gamma, setGamma] = createSignal(1.0);
   const filterId = () => `gamma-filter-${props.registryId}-${gamma().toFixed(2).replace(".", "-")}`;
 
-  const imageGeometry = createMemo(() => {
-    const meta = props.imageMeta;
-    if (!meta) return null;
-    return {
-      width: meta.width,
-      height: meta.height,
-      tile_size: meta.tile_size,
-    };
-  }, null, {
-    equals: (prev, next) => {
-      if (!prev || !next) return prev === next;
-      return (
-        prev.width === next.width &&
-        prev.height === next.height &&
-        prev.tile_size === next.tile_size
-      );
-    }
-  });
+  const imageGeometry = createMemo(
+    () => {
+      const meta = props.imageMeta;
+      if (!meta) return null;
+      return {
+        width: meta.width,
+        height: meta.height,
+        tile_size: meta.tile_size,
+      };
+    },
+    null,
+    {
+      equals: (prev, next) => {
+        if (!prev || !next) return prev === next;
+        return prev.width === next.width && prev.height === next.height && prev.tile_size === next.tile_size;
+      },
+    },
+  );
 
   const totalImagesMemo = createMemo(() => props.totalImages);
 
@@ -269,7 +269,7 @@ export const MainViewer = (props: MainViewerProps) => {
         <IconButton title={t("mainViewer.fit", { key: "F" })} onClick={handleFit}>
           <Icon icon="lucide:maximize-2"></Icon>
         </IconButton>
-        <IconButton title={t("mainViewer.rotate", { key: "R" })} onClick={handleRotate}>
+        <IconButton title={t("mainViewer.rotate", { key: "R" })} onClick={() => handleRotate()}>
           <Icon icon="lucide:rotate-ccw"></Icon>
         </IconButton>
 
@@ -293,9 +293,7 @@ export const MainViewer = (props: MainViewerProps) => {
               ].join(" ")}
               title={t("mainViewer.gamma", { value: gamma().toFixed(2) })}
             />
-            <span class="text-[12px] text-muted tabular-nums w-8 select-none font-mono">
-              {gamma().toFixed(2)}
-            </span>
+            <span class="text-[12px] text-muted tabular-nums w-8 select-none font-mono">{gamma().toFixed(2)}</span>
           </div>
         </div>
 
@@ -329,11 +327,7 @@ export const MainViewer = (props: MainViewerProps) => {
       </div>
 
       <div class="relative flex-1 min-h-0 bg-viewer-dark overflow-hidden">
-        <div
-          ref={viewerContainerRef}
-          class="absolute inset-0 w-full h-full"
-          style={{ filter: gamma() === 1.0 ? "none" : `url(#${filterId()})` }}
-        />
+        <div ref={viewerContainerRef} class="absolute inset-0 w-full h-full" style={{ filter: gamma() === 1.0 ? "none" : `url(#${filterId()})` }} />
 
         <svg class="hidden" style={{ display: "none" }}>
           <defs>

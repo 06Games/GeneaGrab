@@ -1,13 +1,7 @@
 import { EventDetail, EventRow } from "../types";
 import { CursorPayload, CursorResponse } from "../types/cursor_requests";
 import { ImageMeta, UserImageMeta } from "../types/image";
-import {
-  AvailableOption,
-  ProviderOption,
-  RegistryFilters,
-  RegistryMeta,
-  UserRegistryMeta,
-} from "../types/registry";
+import { AvailableOption, ProviderOption, RegistryFilters, RegistryMeta, UserRegistryMeta } from "../types/registry";
 
 export interface BackendService {
   // Registry

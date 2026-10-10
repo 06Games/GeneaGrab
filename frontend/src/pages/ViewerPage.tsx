@@ -197,11 +197,7 @@ export const ViewerPage = (props: ViewerPageProps) => {
       await api.saveRegistryMeta(regId, meta);
       mutateRegistryMeta((prev) => {
         if (!prev) return prev;
-        const sourceTypes = meta.source_types
-          ? meta.source_types instanceof Set
-            ? meta.source_types
-            : new Set(meta.source_types)
-          : prev.source_types;
+        const sourceTypes = meta.source_types ? (meta.source_types instanceof Set ? meta.source_types : new Set(meta.source_types)) : prev.source_types;
 
         return {
           ...prev,
@@ -296,7 +292,9 @@ export const ViewerPage = (props: ViewerPageProps) => {
                       onClick={() => setIndexVisible((v) => !v)}
                       class={[
                         "flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[13px] font-medium border transition-colors duration-100 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent cursor-pointer",
-                        indexVisible() ? "bg-accent-bg border-accent-border text-accent-text" : "bg-panel border-subtle text-muted hover:bg-tinted hover:text-main",
+                        indexVisible()
+                          ? "bg-accent-bg border-accent-border text-accent-text"
+                          : "bg-panel border-subtle text-muted hover:bg-tinted hover:text-main",
                       ].join(" ")}
                     >
                       <Icon icon="lucide:list" class="w-3.5 h-3.5" />

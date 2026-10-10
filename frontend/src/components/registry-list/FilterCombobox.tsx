@@ -49,10 +49,7 @@ function ComboboxEmptyState(props: { emptyMessage?: string; loading?: boolean; o
       </Show>
       <Show when={isEmpty()}>
         <div class="px-3 py-4 text-center text-dim text-[12px]">
-          <Show
-            when={Boolean(context.inputValue())}
-            fallback={props.emptyMessage ?? t("home.noOptions")}
-          >
+          <Show when={Boolean(context.inputValue())} fallback={props.emptyMessage ?? t("home.noOptions")}>
             {t("home.noMatches", { query: context.inputValue() })}
           </Show>
         </div>
@@ -106,10 +103,20 @@ function SingleFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>
       triggerMode="focus"
       defaultFilter={(opt, query) => {
         if (props.customFilter) return props.customFilter(opt, query);
-        const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const q = query
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
         if (!q) return true;
-        const lbl = getLabel(opt).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const key = getKey(opt).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const lbl = getLabel(opt)
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+        const key = getKey(opt)
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
         return lbl.includes(q) || key.includes(q);
       }}
       allowsEmptyCollection={true}
@@ -124,9 +131,7 @@ function SingleFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>
             class="px-2.5 py-2 rounded-lg text-[13px] flex items-center justify-between cursor-pointer data-highlighted:bg-hover data-selected:bg-accent-bg data-selected:text-accent-text transition-colors select-none group"
           >
             <Combobox.ItemLabel class="flex-1 min-w-0 pr-2">
-              {props.renderOption
-                ? props.renderOption(itemProps.item.rawValue, isSelected())
-                : getLabel(itemProps.item.rawValue)}
+              {props.renderOption ? props.renderOption(itemProps.item.rawValue, isSelected()) : getLabel(itemProps.item.rawValue)}
             </Combobox.ItemLabel>
             <div class="flex items-center gap-1.5 flex-shrink-0">
               <Show when={(itemProps.item.rawValue as any).count !== undefined}>
@@ -144,15 +149,9 @@ function SingleFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>
     >
       <div class={["flex flex-col gap-1.5", props.class].filter(Boolean).join(" ")}>
         <div class="flex items-center justify-between">
-          <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">
-            {props.label}
-          </label>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">{props.label}</label>
           <Show when={props.value}>
-            <button
-              type="button"
-              onClick={() => props.onChange?.("")}
-              class="text-[11px] text-muted hover:text-main cursor-pointer"
-            >
+            <button type="button" onClick={() => props.onChange?.("")} class="text-[11px] text-muted hover:text-main cursor-pointer">
               <Icon icon="lucide:x" class="w-3 h-3" />
             </button>
           </Show>
@@ -252,10 +251,20 @@ function MultiFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>)
       triggerMode="focus"
       defaultFilter={(opt, query) => {
         if (props.customFilter) return props.customFilter(opt, query);
-        const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+        const q = query
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
         if (!q) return true;
-        const lbl = getLabel(opt).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const key = getKey(opt).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const lbl = getLabel(opt)
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+        const key = getKey(opt)
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
         return lbl.includes(q) || key.includes(q);
       }}
       allowsEmptyCollection={true}
@@ -276,9 +285,7 @@ function MultiFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>)
                 </Combobox.ItemIndicator>
               </div>
               <Combobox.ItemLabel class="flex-1 min-w-0">
-                {props.renderOption
-                  ? props.renderOption(itemProps.item.rawValue, isSelected())
-                  : getLabel(itemProps.item.rawValue)}
+                {props.renderOption ? props.renderOption(itemProps.item.rawValue, isSelected()) : getLabel(itemProps.item.rawValue)}
               </Combobox.ItemLabel>
             </div>
             <Show when={(itemProps.item.rawValue as any).count !== undefined}>
@@ -292,9 +299,7 @@ function MultiFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>)
     >
       <div class={["flex flex-col gap-1.5", props.class].filter(Boolean).join(" ")}>
         <div class="flex items-center justify-between">
-          <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">
-            {props.label}
-          </label>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">{props.label}</label>
           <Show when={selectedValues().length > 0}>
             <button
               type="button"
@@ -391,10 +396,7 @@ function MultiFilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>)
 
 export function FilterCombobox<T = AvailableOption>(props: FilterComboboxProps<T>) {
   return (
-    <Show
-      when={props.multiple}
-      fallback={<SingleFilterCombobox {...props} />}
-    >
+    <Show when={props.multiple} fallback={<SingleFilterCombobox {...props} />}>
       <MultiFilterCombobox {...props} />
     </Show>
   );

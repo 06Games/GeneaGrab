@@ -45,9 +45,7 @@ function normalizeStr(str: string): string {
     .trim();
 }
 
-export function buildFilterTree(
-  options: AvailableOption[]
-): {
+export function buildFilterTree(options: AvailableOption[]): {
   roots: FilterTreeNode[];
   allNodes: FilterTreeNode[];
   nodeMap: Map<string, FilterTreeNode>;
@@ -80,8 +78,11 @@ export function buildFilterTree(
       opt.parts && opt.parts.length > 0
         ? opt.parts
         : opt.label.includes(" > ")
-        ? opt.label.split(" > ").map((s) => s.trim()).filter(Boolean)
-        : [opt.label || opt.key];
+          ? opt.label
+              .split(" > ")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : [opt.label || opt.key];
 
     if (parts.length === 0) continue;
 
@@ -114,9 +115,7 @@ export function buildFilterTree(
           nodeMap.set(pathKey.toLowerCase(), node);
         }
       } else {
-        node = parentNode!.children.find(
-          (c) => c.name.toLowerCase() === partName.toLowerCase()
-        );
+        node = parentNode!.children.find((c) => c.name.toLowerCase() === partName.toLowerCase());
         if (!node) {
           node = {
             id: pathKey,
@@ -145,9 +144,7 @@ export function buildFilterTree(
 
   // Sort nodes alphabetically
   const sortNodes = (nodes: FilterTreeNode[]) => {
-    nodes.sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
-    );
+    nodes.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
     for (const n of nodes) {
       if (n.children.length > 0) {
         sortNodes(n.children);
@@ -161,9 +158,7 @@ export function buildFilterTree(
   return { roots, allNodes, nodeMap, unknownNode };
 }
 
-export const HierarchicalFilterCombobox = (
-  props: HierarchicalFilterComboboxProps
-) => {
+export const HierarchicalFilterCombobox = (props: HierarchicalFilterComboboxProps) => {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = createSignal(false);
   const [searchQuery, setSearchQuery] = createSignal("");
@@ -171,9 +166,7 @@ export const HierarchicalFilterCombobox = (
 
   let searchInputRef: HTMLInputElement | undefined;
 
-  const tree = createMemo(() =>
-    buildFilterTree(props.options)
-  );
+  const tree = createMemo(() => buildFilterTree(props.options));
 
   const selectedKeysSet = createMemo(() => {
     if (props.multiple) {
@@ -252,9 +245,7 @@ export const HierarchicalFilterCombobox = (
   };
 
   const areAllExpanded = createMemo(() => {
-    const nodesWithChildren = tree().allNodes.filter(
-      (n) => n.children.length > 0
-    );
+    const nodesWithChildren = tree().allNodes.filter((n) => n.children.length > 0);
     if (nodesWithChildren.length === 0) return false;
     return nodesWithChildren.every((n) => expandedIds().has(n.id));
   });
@@ -396,21 +387,14 @@ export const HierarchicalFilterCombobox = (
           onClick={() => handleSelect(node())}
         >
           {/* Chevron expand/collapse toggle */}
-          <Show
-            when={hasChildren()}
-            fallback={<span class="w-4 h-4 flex-shrink-0" />}
-          >
+          <Show when={hasChildren()} fallback={<span class="w-4 h-4 flex-shrink-0" />}>
             <button
               type="button"
               onClick={(e) => toggleExpand(node().id, e)}
               class="w-4 h-4 flex items-center justify-center rounded hover:bg-black/10 dark:hover:bg-white/10 text-subtle-md hover:text-main transition-transform cursor-pointer flex-shrink-0"
               title={expanded() ? t("home.collapseAll") : t("home.expandAll")}
             >
-              <Icon
-                icon="lucide:chevron-right"
-                class="w-3.5 h-3.5 transition-transform duration-150"
-                classList={{ "rotate-90": expanded() }}
-              />
+              <Icon icon="lucide:chevron-right" class="w-3.5 h-3.5 transition-transform duration-150" classList={{ "rotate-90": expanded() }} />
             </button>
           </Show>
 
@@ -419,28 +403,19 @@ export const HierarchicalFilterCombobox = (
             <div class="flex items-center justify-center flex-shrink-0">
               <Icon
                 icon={selected() ? "lucide:check-square" : "lucide:square"}
-                class={
-                  selected()
-                    ? "w-3.5 h-3.5 text-accent"
-                    : "w-3.5 h-3.5 text-subtle-md group-hover:text-dim"
-                }
+                class={selected() ? "w-3.5 h-3.5 text-accent" : "w-3.5 h-3.5 text-subtle-md group-hover:text-dim"}
               />
             </div>
           </Show>
 
           {/* Node Icon */}
           <Icon
-            icon={
-              node().isUnknown
-                ? "lucide:help-circle"
-                : props.icon ?? "lucide:map-pin"
-            }
+            icon={node().isUnknown ? "lucide:help-circle" : (props.icon ?? "lucide:map-pin")}
             class="w-3.5 h-3.5 flex-shrink-0"
             classList={{
               "text-accent": selected(),
               "text-muted": node().isUnknown,
-              "text-dim group-hover:text-main":
-                !selected() && !node().isUnknown,
+              "text-dim group-hover:text-main": !selected() && !node().isUnknown,
             }}
           />
 
@@ -471,19 +446,14 @@ export const HierarchicalFilterCombobox = (
 
           {/* Checkmark in single select mode */}
           <Show when={!props.multiple && selected()}>
-            <Icon
-              icon="lucide:check"
-              class="w-3.5 h-3.5 text-accent flex-shrink-0 ml-0.5"
-            />
+            <Icon icon="lucide:check" class="w-3.5 h-3.5 text-accent flex-shrink-0 ml-0.5" />
           </Show>
         </div>
 
         {/* Recursive Children with indent guideline */}
         <Show when={hasChildren() && expanded()}>
           <div class="flex flex-col relative border-l border-subtle/50 ml-4 pl-0.5">
-            <For each={node().children}>
-              {(child) => <TreeNodeRow node={child} />}
-            </For>
+            <For each={node().children}>{(child) => <TreeNodeRow node={child} />}</For>
           </div>
         </Show>
       </div>
@@ -498,29 +468,13 @@ export const HierarchicalFilterCombobox = (
   });
 
   return (
-    <Popover
-      open={isOpen()}
-      onOpenChange={setIsOpen}
-      placement="bottom-start"
-      gutter={4}
-      sameWidth={true}
-    >
-      <div
-        class={["flex flex-col gap-1.5", props.class]
-          .filter(Boolean)
-          .join(" ")}
-      >
+    <Popover open={isOpen()} onOpenChange={setIsOpen} placement="bottom-start" gutter={4} sameWidth={true}>
+      <div class={["flex flex-col gap-1.5", props.class].filter(Boolean).join(" ")}>
         {/* Label and Clear Header */}
         <div class="flex items-center justify-between">
-          <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">
-            {props.label}
-          </label>
+          <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">{props.label}</label>
           <Show when={hasSelection()}>
-            <button
-              type="button"
-              onClick={() => handleClear()}
-              class="text-[11px] text-muted hover:text-main cursor-pointer"
-            >
+            <button type="button" onClick={() => handleClear()} class="text-[11px] text-muted hover:text-main cursor-pointer">
               <Icon icon="lucide:x" class="w-3 h-3" />
             </button>
           </Show>
@@ -542,11 +496,7 @@ export const HierarchicalFilterCombobox = (
               {/* Left icon */}
               <div class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
                 <Icon
-                  icon={
-                    selectedNodeInfo()?.isUnknown
-                      ? "lucide:help-circle"
-                      : props.icon ?? "lucide:map-pin"
-                  }
+                  icon={selectedNodeInfo()?.isUnknown ? "lucide:help-circle" : (props.icon ?? "lucide:map-pin")}
                   class="w-4 h-4 transition-colors"
                   classList={{
                     "text-accent": hasSelection(),
@@ -557,14 +507,7 @@ export const HierarchicalFilterCombobox = (
 
               {/* Display text */}
               <div class="flex items-center gap-1.5 min-w-0 pr-1 truncate">
-                <Show
-                  when={hasSelection()}
-                  fallback={
-                    <span class="text-subtle-md truncate">
-                      {props.placeholder ?? props.label}
-                    </span>
-                  }
-                >
+                <Show when={hasSelection()} fallback={<span class="text-subtle-md truncate">{props.placeholder ?? props.label}</span>}>
                   <Show
                     when={!props.multiple}
                     fallback={
@@ -584,15 +527,11 @@ export const HierarchicalFilterCombobox = (
                           {selectedNodeInfo()?.name}
                         </span>
                         <Show when={selectedNodeInfo()?.count !== undefined}>
-                          <span class="text-[10px] text-dim tabular-nums">
-                            ({selectedNodeInfo()?.count})
-                          </span>
+                          <span class="text-[10px] text-dim tabular-nums">({selectedNodeInfo()?.count})</span>
                         </Show>
                       </div>
                       <Show when={selectedNodeInfo()?.parentPath}>
-                        <span class="text-[10px] text-dim truncate max-w-[160px]">
-                          {selectedNodeInfo()?.parentPath}
-                        </span>
+                        <span class="text-[10px] text-dim truncate max-w-[160px]">{selectedNodeInfo()?.parentPath}</span>
                       </Show>
                     </div>
                   </Show>
@@ -602,10 +541,7 @@ export const HierarchicalFilterCombobox = (
               {/* Right indicators & buttons */}
               <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
                 <Show when={props.loading}>
-                  <Icon
-                    icon="lucide:loader-2"
-                    class="w-4 h-4 text-accent animate-spin mr-1"
-                  />
+                  <Icon icon="lucide:loader-2" class="w-4 h-4 text-accent animate-spin mr-1" />
                 </Show>
 
                 <Show when={!props.loading && hasSelection()}>
@@ -633,21 +569,13 @@ export const HierarchicalFilterCombobox = (
             {/* Search Input Header */}
             <div class="p-2 border-b border-subtle flex flex-col gap-1.5 bg-tinted/50">
               <div class="relative w-full">
-                <Icon
-                  icon="lucide:search"
-                  class="absolute left-2.5 top-1/2 -translate-y-1/2 text-subtle-md w-3.5 h-3.5 pointer-events-none"
-                />
+                <Icon icon="lucide:search" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-subtle-md w-3.5 h-3.5 pointer-events-none" />
                 <input
                   ref={searchInputRef}
                   type="text"
                   value={searchQuery()}
                   onInput={(e) => setSearchQuery(e.currentTarget.value)}
-                  placeholder={
-                    props.searchPlaceholder ??
-                    (props.isPlace
-                      ? t("home.searchPlace")
-                      : t("home.searchCollection"))
-                  }
+                  placeholder={props.searchPlaceholder ?? (props.isPlace ? t("home.searchPlace") : t("home.searchCollection"))}
                   class="w-full pl-8 pr-7 py-1.5 rounded-lg border border-subtle bg-panel text-[12px] text-main placeholder:text-subtle-md focus:border-accent focus:ring-1 focus:ring-accent/15 outline-none transition-all"
                 />
                 <Show when={searchQuery()}>
@@ -667,40 +595,21 @@ export const HierarchicalFilterCombobox = (
                   when={!searchQuery().trim()}
                   fallback={
                     <span>
-                      {searchResults().length}{" "}
-                      {searchResults().length === 1
-                        ? t("home.match")
-                        : t("home.matches")}
+                      {searchResults().length} {searchResults().length === 1 ? t("home.match") : t("home.matches")}
                     </span>
                   }
                 >
                   <span>
-                    {tree().allNodes.length}{" "}
-                    {props.isPlace
-                      ? t("home.locationsCount")
-                      : t("home.collectionsCount")}
+                    {tree().allNodes.length} {props.isPlace ? t("home.locationsCount") : t("home.collectionsCount")}
                   </span>
                   <div class="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() =>
-                        areAllExpanded() ? collapseAll() : expandAll()
-                      }
+                      onClick={() => (areAllExpanded() ? collapseAll() : expandAll())}
                       class="flex items-center gap-1 hover:text-main text-muted cursor-pointer transition-colors"
                     >
-                      <Icon
-                        icon={
-                          areAllExpanded()
-                            ? "lucide:fold-vertical"
-                            : "lucide:unfold-vertical"
-                        }
-                        class="w-3 h-3"
-                      />
-                      <span>
-                        {areAllExpanded()
-                          ? t("home.collapseAll")
-                          : t("home.expandAll")}
-                      </span>
+                      <Icon icon={areAllExpanded() ? "lucide:fold-vertical" : "lucide:unfold-vertical"} class="w-3 h-3" />
+                      <span>{areAllExpanded() ? t("home.collapseAll") : t("home.expandAll")}</span>
                     </button>
                   </div>
                 </Show>
@@ -711,10 +620,7 @@ export const HierarchicalFilterCombobox = (
             <div class="max-h-64 overflow-y-auto p-1.5 flex flex-col gap-0.5 scrollbar-thin scrollbar-thumb-subtle">
               <Show when={props.loading}>
                 <div class="flex items-center justify-center p-4 text-dim text-[12px] gap-2">
-                  <Icon
-                    icon="lucide:loader-2"
-                    class="w-3.5 h-3.5 animate-spin text-accent"
-                  />
+                  <Icon icon="lucide:loader-2" class="w-3.5 h-3.5 animate-spin text-accent" />
                   <span>{t("home.loading")}</span>
                 </div>
               </Show>
@@ -723,15 +629,9 @@ export const HierarchicalFilterCombobox = (
               <Show when={!props.loading && !searchQuery().trim()}>
                 <Show
                   when={tree().roots.length > 0 || tree().unknownNode}
-                  fallback={
-                    <div class="px-3 py-6 text-center text-dim text-[12px]">
-                      {t("home.noOptions")}
-                    </div>
-                  }
+                  fallback={<div class="px-3 py-6 text-center text-dim text-[12px]">{t("home.noOptions")}</div>}
                 >
-                  <For each={tree().roots}>
-                    {(rootNode) => <TreeNodeRow node={rootNode} />}
-                  </For>
+                  <For each={tree().roots}>{(rootNode) => <TreeNodeRow node={rootNode} />}</For>
 
                   {/* Unknown location row at bottom */}
                   <Show when={tree().unknownNode}>
@@ -746,11 +646,7 @@ export const HierarchicalFilterCombobox = (
               <Show when={!props.loading && searchQuery().trim()}>
                 <Show
                   when={searchResults().length > 0}
-                  fallback={
-                    <div class="px-3 py-6 text-center text-dim text-[12px]">
-                      {t("home.noMatches", { query: searchQuery() })}
-                    </div>
-                  }
+                  fallback={<div class="px-3 py-6 text-center text-dim text-[12px]">{t("home.noMatches", { query: searchQuery() })}</div>}
                 >
                   <For each={searchResults()}>
                     {(node) => {
@@ -767,45 +663,25 @@ export const HierarchicalFilterCombobox = (
                           <div class="flex items-center gap-2 min-w-0 pr-2">
                             <Show when={props.multiple}>
                               <Icon
-                                icon={
-                                  selected()
-                                    ? "lucide:check-square"
-                                    : "lucide:square"
-                                }
-                                class={
-                                  selected()
-                                    ? "w-3.5 h-3.5 text-accent"
-                                    : "w-3.5 h-3.5 text-subtle-md"
-                                }
+                                icon={selected() ? "lucide:check-square" : "lucide:square"}
+                                class={selected() ? "w-3.5 h-3.5 text-accent" : "w-3.5 h-3.5 text-subtle-md"}
                               />
                             </Show>
                             <Icon
-                              icon={
-                                node.isUnknown
-                                  ? "lucide:help-circle"
-                                  : props.icon ?? "lucide:map-pin"
-                              }
+                              icon={node.isUnknown ? "lucide:help-circle" : (props.icon ?? "lucide:map-pin")}
                               class="w-3.5 h-3.5 flex-shrink-0"
                               classList={{
                                 "text-accent": selected(),
                                 "text-muted": node.isUnknown,
-                                "text-dim group-hover:text-main":
-                                  !selected() && !node.isUnknown,
+                                "text-dim group-hover:text-main": !selected() && !node.isUnknown,
                               }}
                             />
                             <div class="flex flex-col min-w-0">
-                              <span
-                                class="truncate font-medium leading-tight"
-                                classList={{ "italic text-muted": node.isUnknown }}
-                              >
-                                {node.isUnknown
-                                  ? t("home.unknownLocation")
-                                  : renderHighlight(node.name, searchQuery())}
+                              <span class="truncate font-medium leading-tight" classList={{ "italic text-muted": node.isUnknown }}>
+                                {node.isUnknown ? t("home.unknownLocation") : renderHighlight(node.name, searchQuery())}
                               </span>
                               <Show when={node.path.length > 1}>
-                                <span class="text-[10px] text-dim truncate">
-                                  {node.path.slice(0, -1).join(" › ")}
-                                </span>
+                                <span class="text-[10px] text-dim truncate">{node.path.slice(0, -1).join(" › ")}</span>
                               </Show>
                             </div>
                           </div>
@@ -821,10 +697,7 @@ export const HierarchicalFilterCombobox = (
                               {node.totalCount}
                             </span>
                             <Show when={!props.multiple && selected()}>
-                              <Icon
-                                icon="lucide:check"
-                                class="w-3.5 h-3.5 text-accent"
-                              />
+                              <Icon icon="lucide:check" class="w-3.5 h-3.5 text-accent" />
                             </Show>
                           </div>
                         </div>

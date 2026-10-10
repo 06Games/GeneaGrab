@@ -24,9 +24,9 @@ export const MOCK_REGISTRY_DATA: RegistryMeta = {
       ? {
           name: "Births 1793",
           date_range: "1793-11-01 to 1793-11-30",
-          notes: "Image in good condition, but handwriting is difficult to read in some areas."
+          notes: "Image in good condition, but handwriting is difficult to read in some areas.",
         }
-      : {}
+      : {},
   ),
   acts_count: 42,
 };

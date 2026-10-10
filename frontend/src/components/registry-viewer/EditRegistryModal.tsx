@@ -125,7 +125,10 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
   const handleAddCollection = () => {
     const val = newCollectionInput().trim();
     if (!val) return;
-    const parts = val.split(/[>/]/).map((s) => s.trim()).filter(Boolean);
+    const parts = val
+      .split(/[>/]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
     if (parts.length > 0) {
       setCollectionList([...collectionList(), ...parts]);
       setNewCollectionInput("");
@@ -166,8 +169,15 @@ export const EditRegistryModal = (props: EditRegistryModalProps) => {
     setErrorMsg(null);
 
     try {
-      const formattedPlaces = placesList().map((p) => p.split(",").map((s) => s.trim()).filter(Boolean));
-      const filteredCollection = collectionList().map((s) => s.trim()).filter(Boolean);
+      const formattedPlaces = placesList().map((p) =>
+        p
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
+      const filteredCollection = collectionList()
+        .map((s) => s.trim())
+        .filter(Boolean);
 
       await props.onSave({
         archive_reference: archiveReference().trim() || undefined,

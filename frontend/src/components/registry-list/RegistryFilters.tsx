@@ -145,9 +145,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
         {/* Search */}
         <div class="flex flex-col gap-1.5">
           <div class="flex items-center justify-between">
-            <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">
-              {t("home.searchLabel")}
-            </label>
+            <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">{t("home.searchLabel")}</label>
             <Show when={hasAnyFilter()}>
               <button
                 type="button"
@@ -224,16 +222,26 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
           onMultipleChange={props.onTypesChange}
           icon="lucide:tag"
           getOptionKey={(opt) => opt.key}
-          getOptionLabel={(opt) => (t(`actCategories.${opt.key}` as any) || opt.label)}
+          getOptionLabel={(opt) => t(`actCategories.${opt.key}` as any) || opt.label}
           getSelectedIcon={(opt) => {
             const meta = ACT_CATEGORY_META[opt.key as ActTypeCategory];
             return meta ? { icon: meta.icon, class: "text-accent" } : { icon: "lucide:tag", class: "text-accent" };
           }}
           customFilter={(opt, query) => {
-            const q = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+            const q = query
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .trim();
             if (!q) return true;
-            const label = (t(`actCategories.${opt.key}` as any) || opt.label).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-            const key = opt.key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const label = (t(`actCategories.${opt.key}` as any) || opt.label)
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "");
+            const key = opt.key
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "");
             return label.includes(q) || key.includes(q);
           }}
           renderOption={(opt) => {
@@ -247,9 +255,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
                 <span class={["inline-flex items-center justify-center w-5 h-5 rounded border flex-shrink-0 text-xs", meta.style].join(" ")}>
                   <Icon icon={meta.icon} class="w-3 h-3" />
                 </span>
-                <span class="text-[13px] font-medium text-main truncate">
-                  {label}
-                </span>
+                <span class="text-[13px] font-medium text-main truncate">{label}</span>
               </div>
             );
           }}
@@ -260,9 +266,7 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-1.5">
               <Icon icon="lucide:calendar" class="w-3.5 h-3.5 text-dim" />
-              <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">
-                {t("home.datesLabel")}
-              </label>
+              <label class="text-[11px] font-semibold uppercase tracking-wider text-dim">{t("home.datesLabel")}</label>
             </div>
             <Show when={props.dateFrom || props.dateTo}>
               <button
@@ -305,4 +309,3 @@ export const RegistryFilters = (props: RegistryFiltersProps) => {
     </aside>
   );
 };
-

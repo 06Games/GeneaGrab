@@ -93,9 +93,7 @@ export const DetailZone = (props: DetailZoneProps) => {
       <div class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-5 scrollbar-thin scrollbar-thumb-subtle">
         <Show when={!props.event}>
           <div class="flex-1 flex flex-col items-center justify-center py-12 gap-3">
-            <p class="text-[14px] text-dim text-center">
-              {t("detail.emptyPrompt.text")}
-            </p>
+            <p class="text-[14px] text-dim text-center">{t("detail.emptyPrompt.text")}</p>
             <Tooltip content={`${t("grid.newAct")} (N)`}>
               <Button variant="outline" size="sm" onClick={actions.onNewAct}>
                 <Icon icon="lucide:plus" width="16" height="16" /> {t("grid.newAct")}

@@ -8,10 +8,7 @@ export const TabBar = () => {
   const { t } = useI18n();
 
   return (
-    <header
-      data-tauri-drag-region
-      class="flex items-center justify-between w-full h-10 bg-panel border-b border-subtle select-none flex-shrink-0 z-20"
-    >
+    <header data-tauri-drag-region class="flex items-center justify-between w-full h-10 bg-panel border-b border-subtle select-none flex-shrink-0 z-20">
       <div class="flex items-center h-full overflow-x-auto min-w-0 flex-1 scrollbar-none">
         <For each={tabs}>
           {(tab) => {

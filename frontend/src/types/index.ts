@@ -5,7 +5,7 @@ export type EventRow = {
   date: string;
   event_type: ActType;
   title: string;
-}
+};
 
 export type PersonEntry = {
   person_id: string;
@@ -23,7 +23,7 @@ export type PersonEntry = {
   notes: string;
   relationship_type: string;
   relationship_to: string;
-}
+};
 
 export type EventDetail = {
   event_id: number;
@@ -40,20 +40,12 @@ export type EventDetail = {
   transcription_text: string;
   notes: string;
   people: PersonEntry[];
-}
-
+};
 
 // TODO: Use previously written values for suggestions
 
-export const ROLE_SUGGESTIONS = [
-  "Sujet principal", "Époux", "Épouse", "Père", "Mère", "Témoin", "Déclarant", "Parrain", "Marraine"
-];
+export const ROLE_SUGGESTIONS = ["Sujet principal", "Époux", "Épouse", "Père", "Mère", "Témoin", "Déclarant", "Parrain", "Marraine"];
 
-export const RELATION_SUGGESTIONS = [
-  "Époux de", "Épouse de", "Fils de", "Fille de", "Frère de", "Sœur de", "Veuve de", "Veuf de"
-];
+export const RELATION_SUGGESTIONS = ["Époux de", "Épouse de", "Fils de", "Fille de", "Frère de", "Sœur de", "Veuve de", "Veuf de"];
 
-export const PROFESSION_OPTIONS = [
-  "Laboureur", "Tisserand", "Notaire", "Charpentier", "Cordonnier", "Cultivateur", "Ménagère", "Journalier", "Propriétaire"
-];
-
+export const PROFESSION_OPTIONS = ["Laboureur", "Tisserand", "Notaire", "Charpentier", "Cordonnier", "Cultivateur", "Ménagère", "Journalier", "Propriétaire"];

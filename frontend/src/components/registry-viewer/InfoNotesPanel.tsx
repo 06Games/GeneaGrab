@@ -238,7 +238,9 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
               </p>
               <p class="text-[12px] text-dim truncate mt-0.5">
                 {placesList().length > 0
-                  ? (Array.isArray(placesList()[0]) ? (placesList()[0] as string[]).join(", ") : String(placesList()[0]))
+                  ? Array.isArray(placesList()[0])
+                    ? (placesList()[0] as string[]).join(", ")
+                    : String(placesList()[0])
                   : t("infoPanel.unknown")}
                 {" · "}
                 {sourceTypesList().length > 0
@@ -281,10 +283,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
               <MetaRow label={t("infoPanel.archiveReference")} value={props.registryMeta.archive_reference} />
 
               <Show when={props.registryMeta.date_from || props.registryMeta.date_to}>
-                <MetaRow
-                  label={t("infoPanel.periodLabel")}
-                  value={`${props.registryMeta.date_from ?? "?"} – ${props.registryMeta.date_to ?? "?"}`}
-                />
+                <MetaRow label={t("infoPanel.periodLabel")} value={`${props.registryMeta.date_from ?? "?"} – ${props.registryMeta.date_to ?? "?"}`} />
               </Show>
 
               <Show when={props.registryMeta.author}>
@@ -424,9 +423,7 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
           <div class="px-4 py-3 border-b border-subtle flex-shrink-0 min-w-0 max-w-full">
             <div class="flex items-center justify-between mb-2 min-w-0">
               <span class="text-[13px] font-semibold text-main truncate min-w-0 select-none">
-                {name()
-                  ? t("infoPanel.image.customName", { n: props.image, name: name() })
-                  : t("infoPanel.image.default", { n: props.image })}
+                {name() ? t("infoPanel.image.customName", { n: props.image, name: name() }) : t("infoPanel.image.default", { n: props.image })}
               </span>
             </div>
 
@@ -476,10 +473,15 @@ export const InfoNotesPanel = (props: InfoNotesPanelProps) => {
               <For each={Array.from(props.imageMeta?.act_types?.entries() ?? [])}>
                 {([type, count]) => (
                   <span
-                    class={["inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border max-w-full min-w-0 truncate", ACT_TYPE_STYLES[type.category]].join(" ")}
+                    class={[
+                      "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border max-w-full min-w-0 truncate",
+                      ACT_TYPE_STYLES[type.category],
+                    ].join(" ")}
                     title={`${count}× ${type.label || type.category}`}
                   >
-                    <span class="truncate">{count}× {type.label || type.category}</span>
+                    <span class="truncate">
+                      {count}× {type.label || type.category}
+                    </span>
                   </span>
                 )}
               </For>

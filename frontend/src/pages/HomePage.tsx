@@ -38,13 +38,7 @@ type VirtualRowItem =
       items: RegistryMeta[];
     };
 
-const LocationGroupHeader = (props: {
-  label: string;
-  parts: string[];
-  count: number;
-  isCollapsed: boolean;
-  onToggle: () => void;
-}) => (
+const LocationGroupHeader = (props: { label: string; parts: string[]; count: number; isCollapsed: boolean; onToggle: () => void }) => (
   <button
     type="button"
     onClick={props.onToggle}
@@ -54,10 +48,9 @@ const LocationGroupHeader = (props: {
     <div class="flex items-center gap-2 min-w-0 flex-1">
       <Icon
         icon="lucide:chevron-right"
-        class={[
-          "w-4 h-4 text-dim group-hover/header:text-main transition-transform duration-150 flex-shrink-0",
-          !props.isCollapsed ? "rotate-90" : "",
-        ].join(" ")}
+        class={["w-4 h-4 text-dim group-hover/header:text-main transition-transform duration-150 flex-shrink-0", !props.isCollapsed ? "rotate-90" : ""].join(
+          " ",
+        )}
       />
       <Icon icon="lucide:map-pin" class="w-4 h-4 text-accent flex-shrink-0" />
       <div class="flex items-center gap-1.5 flex-wrap min-w-0 text-[13px]">
@@ -70,9 +63,7 @@ const LocationGroupHeader = (props: {
               <span
                 class={[
                   "truncate",
-                  index() === props.parts.length - 1
-                    ? "font-bold text-main group-hover/header:text-accent transition-colors"
-                    : "text-muted font-medium",
+                  index() === props.parts.length - 1 ? "font-bold text-main group-hover/header:text-accent transition-colors" : "text-muted font-medium",
                 ].join(" ")}
               >
                 {part}
@@ -273,7 +264,7 @@ const HomePage = () => {
         console.error("Failed to query registries for URL:", err);
         return [];
       }
-    }
+    },
   );
 
   const [selectedQuickProvider, setSelectedQuickProvider] = createSignal("");
@@ -295,11 +286,7 @@ const HomePage = () => {
     // 1. Direct query matching from DB
     if (list && list.length > 0) {
       if (currentProviders && currentProviders.length > 0) {
-        const found = list.find((r) =>
-          currentProviders.some(
-            (p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)
-          )
-        );
+        const found = list.find((r) => currentProviders.some((p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)));
         if (found) return found;
       }
       return list[0];
@@ -307,13 +294,7 @@ const HomePage = () => {
 
     // 2. Fallback to allRegistries from expanded location groups
     if (isUrl() && currentProviders && currentProviders.length > 0) {
-      return (
-        allRegistries().find((r) =>
-          currentProviders.some(
-            (p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id)
-          )
-        ) ?? null
-      );
+      return allRegistries().find((r) => currentProviders.some((p) => r.source_id === p.id && (!p.registry_id || r.registry_id === p.registry_id))) ?? null;
     }
 
     return null;
@@ -398,19 +379,19 @@ const HomePage = () => {
     try {
       const [providerList, registryRes] = await Promise.all([
         api.getProvidersForUrl(search_url).catch(() => []),
-        api.getRegistries({
-          limit: 20,
-          cursor: null,
-          filters: { search_term: search_url },
-        }).catch(() => ({ data: [] })),
+        api
+          .getRegistries({
+            limit: 20,
+            cursor: null,
+            filters: { search_term: search_url },
+          })
+          .catch(() => ({ data: [] })),
       ]);
 
       if (providerList && providerList.length > 0 && registryRes.data && registryRes.data.length > 0) {
         const matchingProvider = providerList[0];
         const matchedRegistry = registryRes.data.find(
-          (r) =>
-            r.source_id === matchingProvider.id &&
-            (!matchingProvider.registry_id || r.registry_id === matchingProvider.registry_id)
+          (r) => r.source_id === matchingProvider.id && (!matchingProvider.registry_id || r.registry_id === matchingProvider.registry_id),
         );
 
         if (matchedRegistry) {
@@ -639,14 +620,7 @@ const HomePage = () => {
   };
 
   createEffect((prevDeps) => {
-    const currentDeps = [
-      debouncedSearchQuery(),
-      selectedType(),
-      selectedPlace(),
-      selectedCollection(),
-      debouncedDateFrom(),
-      debouncedDateTo(),
-    ].join("|");
+    const currentDeps = [debouncedSearchQuery(), selectedType(), selectedPlace(), selectedCollection(), debouncedDateFrom(), debouncedDateTo()].join("|");
     if (prevDeps !== currentDeps) {
       untrack(() => loadLocationGroups());
     }
