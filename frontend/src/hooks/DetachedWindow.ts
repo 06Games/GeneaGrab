@@ -81,6 +81,7 @@ export function useDetachedWindow<T = any>(defaultOptions: DetachedWindowOptions
     let targetUrl = opts.path;
     if (!targetUrl) {
       const urlObj = new URL(window.location.href);
+      urlObj.search = "";
       if (opts.queryParams) {
         Object.entries(opts.queryParams).forEach(([key, value]) => {
           urlObj.searchParams.set(key, value);
@@ -145,11 +146,17 @@ export function useDetachedWindow<T = any>(defaultOptions: DetachedWindowOptions
   const closeSelf = async () => {
     if (isTauri()) {
       try {
-        const { getCurrentWindow } = await import("@tauri-apps/api/window");
-        await getCurrentWindow().close();
+        const { getCurrentWebviewWindow } = await import("@tauri-apps/api/webviewWindow");
+        await getCurrentWebviewWindow().close();
         return;
       } catch (e) {
-        console.warn("Tauri close API not available, falling back to window.close", e);
+        try {
+          const { getCurrentWindow } = await import("@tauri-apps/api/window");
+          await getCurrentWindow().close();
+          return;
+        } catch (e2) {
+          console.warn("Tauri close API not available, falling back to window.close", e2);
+        }
       }
     }
     window.close();

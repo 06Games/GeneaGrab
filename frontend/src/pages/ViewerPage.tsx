@@ -30,17 +30,17 @@ const MAX_THUMB_HEIGHT = 200;
 const DEFAULT_THUMB_HEIGHT = 125;
 
 interface ViewerPageProps {
-  registryId: number;
+  registryId?: number;
   initialImageId?: number;
 }
 export const ViewerPage = (props: ViewerPageProps) => {
   const { t } = useI18n();
-  const { updateThisTab } = useCurrentTab();
+  const currentTab = useCurrentTab();
   const api = useBackend();
 
-  const registryId = props.registryId;
   const urlParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
   const isDetachedMode = urlParams.get("mode") === "index";
+  const registryId = props.registryId ?? (urlParams.get("registryId") ? parseInt(urlParams.get("registryId")!, 10) : 0);
 
   const [tabTile, setTableTitle] = createSignal("");
   const [currentImage, setCurrentImage] = createSignal(props.initialImageId || 1);
@@ -75,8 +75,8 @@ export const ViewerPage = (props: ViewerPageProps) => {
       } (${regMeta.date_from ?? "?"}-${regMeta.date_to ?? "?"})`,
     );
 
-    if (!isDetachedMode) {
-      updateThisTab({
+    if (!isDetachedMode && currentTab) {
+      currentTab.updateThisTab({
         title: tabTile(),
         imageId: currentImage(),
       });
@@ -109,7 +109,7 @@ export const ViewerPage = (props: ViewerPageProps) => {
   const { isDetached, setIsDetached, detach, closeSelf, sendMessage } = useDetachedWindow<SyncMessage>({
     id: `index-${registryId}`,
     title: `Index - ${registryId}`,
-    queryParams: { mode: "index" },
+    queryParams: { mode: "index", registryId: registryId.toString() },
     width: 1400,
     height: 600,
     onMessage: (msg) => {
@@ -134,7 +134,10 @@ export const ViewerPage = (props: ViewerPageProps) => {
       sendMessage({ type: "READY" });
       const handleUnload = () => sendMessage({ type: "DETACHED_CLOSED" });
       window.addEventListener("beforeunload", handleUnload);
-      onCleanup(() => window.removeEventListener("beforeunload", handleUnload));
+      onCleanup(() => {
+        window.removeEventListener("beforeunload", handleUnload);
+        sendMessage({ type: "DETACHED_CLOSED" });
+      });
     } else {
       window.addEventListener("keydown", onKeyDown);
       onCleanup(() => window.removeEventListener("keydown", onKeyDown));
@@ -233,12 +236,20 @@ export const ViewerPage = (props: ViewerPageProps) => {
   };
 
   const renderIndex = (meta: RegistryMeta, isDetachedPanel: boolean) => (
-    <Show when={!eventRows.error}>
+    <Show
+      when={!eventRows.error && eventRows()}
+      fallback={
+        <div class="flex-1 flex flex-col items-center justify-center w-full h-full text-dim bg-panel gap-2">
+          <Icon icon="lucide:loader-2" class="animate-spin block text-accent" />
+          <span class="text-[13px]">{t("registryViewer.loading")}</span>
+        </div>
+      }
+    >
       <IndexPanel
         visible={true}
         isDetached={isDetachedPanel}
         height={isDetachedPanel ? 0 : indexHeight()}
-        rows={eventRows()!}
+        rows={eventRows() || []}
         selectedEventId={selectedEventId()}
         selectedEvent={selectedEventId() !== null ? getEventDetail(selectedEventId()!) : null}
         onToggle={isDetachedPanel ? handleCloseDetachedWindow : () => setIndexVisible(false)}

@@ -112,18 +112,16 @@ export function TabInstanceProvider(props: { tabId: string; children: JSX.Elemen
 }
 
 export function useCurrentTab() {
-  const context = useContext(TabInstanceContext);
-  if (!context) throw new Error("useCurrentTab must be used inside a TabInstanceProvider");
-  return context;
+  return useContext(TabInstanceContext);
 }
 
 export function TabBarAction(props: { children: JSX.Element }) {
-  const { actionsContainer, activeTabId } = useTabs();
-  const { tabId } = useCurrentTab();
+  const tabs = useContext(TabsContext);
+  const currentTab = useCurrentTab();
 
   return (
-    <Show when={actionsContainer() && activeTabId() === tabId}>
-      <Portal mount={actionsContainer()!}>{props.children}</Portal>
+    <Show when={tabs?.actionsContainer() && currentTab && tabs.activeTabId() === currentTab.tabId}>
+      <Portal mount={tabs!.actionsContainer()!}>{props.children}</Portal>
     </Show>
   );
 }

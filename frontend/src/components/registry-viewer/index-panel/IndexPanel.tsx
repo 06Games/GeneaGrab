@@ -50,10 +50,10 @@ export const IndexPanel = (props: IndexPanelProps) => {
         class={props.isDetached ? "flex-1 flex flex-col bg-panel w-full h-full" : "flex-shrink-0 flex flex-col border-t border-subtle bg-panel"}
         style={props.isDetached ? {} : { height: `${props.height}px` }}
       >
-        <div class="flex-shrink-0 flex items-center justify-between px-4 h-10 border-b border-subtle bg-tinted">
-          <div class="flex items-center gap-2">
+        <div class="flex-shrink-0 flex items-center justify-between px-4 h-10 border-b border-subtle bg-tinted" data-tauri-drag-region>
+          <div class="flex items-center gap-2 pointer-events-none select-none">
             <span class="text-[13px] font-semibold text-main">{t("indexPanel.title")}</span>
-            <Badge>{t("indexPanel.badgeActs", { count: props.rows.length })}</Badge>
+            <Badge>{t("indexPanel.badgeActs", { count: props.rows?.length ?? 0 })}</Badge>
           </div>
           <div class="flex items-center gap-1">
             <span class="text-[11px] text-dim mr-1 hidden sm:flex items-center gap-1">
@@ -63,17 +63,17 @@ export const IndexPanel = (props: IndexPanelProps) => {
               <IconButton onClick={props.onDetach}>
                 <Icon icon="lucide:picture-in-picture"></Icon>
               </IconButton>
+              <IconButton onClick={props.onToggle}>
+                <Icon icon="lucide:x"></Icon>
+              </IconButton>
             </Show>
-            <IconButton onClick={props.onToggle}>
-              <Icon icon="lucide:x"></Icon>
-            </IconButton>
           </div>
         </div>
 
         <div class="flex-1 flex min-h-0 overflow-hidden">
           <div class="flex-shrink-0 h-full overflow-hidden" style={{ width: `${gridWidth()}px` }}>
             <GlobalGrid
-              rows={props.rows}
+              rows={props.rows || []}
               selectedId={props.selectedEventId}
               onSelect={props.onSelectRow}
               onRef={(el) => {
