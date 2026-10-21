@@ -2359,7 +2359,7 @@ dependencies = [
 
 [[package]]
 name = "geneagrab-core"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "async-trait",
  "chrono",
@@ -2381,7 +2381,7 @@ dependencies = [
 
 [[package]]
 name = "geneagrab-provider-ad06"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "async-trait",
  "base64 0.22.1",
@@ -2402,7 +2402,7 @@ dependencies = [
 
 [[package]]
 name = "geneagrab-provider-geneanet"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "async-trait",
  "datatest-stable",
@@ -2420,7 +2420,7 @@ dependencies = [
 
 [[package]]
 name = "geneagrab-providers"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "async-trait",
  "dates",
@@ -2438,7 +2438,7 @@ dependencies = [
 
 [[package]]
 name = "geneagrab-tauri"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
@@ -3754,7 +3754,7 @@ dependencies = [
 
 [[package]]
 name = "migration"
-version = "4.0.0"
+version = "4.0.1"
 dependencies = [
  "dates",
  "sea-orm-migration",
