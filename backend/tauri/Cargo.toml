@@ -1,6 +1,6 @@
 [package]
 name = "geneagrab-tauri"
-version = "4.0.1"
+version.workspace = true
 description = "A tool to download images of digitised registers"
 license = "GPL"
 repository = ""

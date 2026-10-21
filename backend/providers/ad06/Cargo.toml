@@ -1,6 +1,6 @@
 [package]
 name = "geneagrab-provider-ad06"
-version = "4.0.1"
+version.workspace = true
 edition = "2021"
 
 [dependencies]

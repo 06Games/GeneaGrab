@@ -1,4 +1,4 @@
-.PHONY: all install web_dev web_build desktop_dev desktop_build ingest
+.PHONY: all install web_dev web_build desktop_dev desktop_build ingest bump
 
 all: desktop_dev
 
@@ -22,3 +22,7 @@ desktop_build:
 
 ingest:
 	code2prompt -O ingest.txt -e ingest.txt
+
+bump:
+	bunx bumpp
+
